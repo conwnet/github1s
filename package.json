@@ -1,36 +1,26 @@
 {
-  "name": "gstemp",
-  "version": "0.0.1",
-  "private": true,
+  "name": "github1s",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
-  "license": "MIT",
-  "scripts": {
-    "start": "webpack-dev-server",
-    "build": "NODE_ENV=production webpack"
+  "directories": {
+    "lib": "lib"
   },
+  "dependencies": {},
   "devDependencies": {
-    "cache-loader": "^4.0.0",
-    "clean-webpack-plugin": "^3.0.0",
-    "css-loader": "^3.0.0",
-    "file-loader": "^4.0.0",
-    "happypack": "^5.0.1",
-    "html-webpack-plugin": "^3.2.0",
-    "img-loader": "^3.0.1",
-    "merge": "^1.2.1",
-    "mini-css-extract-plugin": "^0.7.0",
-    "node-loader": "^0.6.0",
-    "node-sass": "^4.12.0",
-    "sass-loader": "^7.1.0",
-    "string-replace-loader": "^2.2.0",
-    "ts-loader": "^6.0.2",
-    "typescript": "^3.5.2",
-    "url-loader": "^2.0.0",
-    "webpack": "^4.34.0",
-    "webpack-cli": "^3.3.4",
-    "webpack-dev-server": "^3.7.1",
-    "webpack-merge": "^4.2.1"
+    "chokidar": "^3.5.1",
+    "fs-extra": "^9.1.0"
   },
-  "dependencies": {
-    "onigasm-umd": "^2.2.2"
-  }
+  "scripts": {
+    "postinstall": "./scripts/postinstall.sh",
+    "clean-build": "./scripts/clean-build.sh",
+    "clean": "./scripts/clean.sh",
+    "build": "./scripts/build.sh",
+    "package": "./scripts/package.sh",
+    "watch": "./scripts/watch.sh",
+    "dev": "cd dist && python -mSimpleHTTPServer"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

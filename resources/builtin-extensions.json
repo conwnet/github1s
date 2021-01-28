@@ -1,0 +1,266 @@
+[
+  {
+    "name": "bat",
+    "path": "extensions/bat"
+  },
+  {
+    "name": "clojure",
+    "path": "extensions/clojure"
+  },
+  {
+    "name": "coffeescript",
+    "path": "extensions/coffeescript"
+  },
+  {
+    "name": "configuration-editing",
+    "path": "extensions/configuration-editing"
+  },
+  {
+    "name": "cpp",
+    "path": "extensions/cpp"
+  },
+  {
+    "name": "csharp",
+    "path": "extensions/csharp"
+  },
+  {
+    "name": "css",
+    "path": "extensions/css"
+  },
+  {
+    "name": "css-language-features",
+    "path": "extensions/css-language-features"
+  },
+  {
+    "name": "docker",
+    "path": "extensions/docker"
+  },
+  {
+    "name": "emmet",
+    "path": "extensions/emmet"
+  },
+  {
+    "name": "extension-editing",
+    "path": "extensions/extension-editing"
+  },
+  {
+    "name": "fsharp",
+    "path": "extensions/fsharp"
+  },
+  {
+    "name": "github-authentication",
+    "path": "extensions/github-authentication"
+  },
+  {
+    "name": "go",
+    "path": "extensions/go"
+  },
+  {
+    "name": "groovy",
+    "path": "extensions/groovy"
+  },
+  {
+    "name": "handlebars",
+    "path": "extensions/handlebars"
+  },
+  {
+    "name": "hlsl",
+    "path": "extensions/hlsl"
+  },
+  {
+    "name": "html",
+    "path": "extensions/html"
+  },
+  {
+    "name": "html-language-features",
+    "path": "extensions/html-language-features"
+  },
+  {
+    "name": "image-preview",
+    "path": "extensions/image-preview"
+  },
+  {
+    "name": "ini",
+    "path": "extensions/ini"
+  },
+  {
+    "name": "java",
+    "path": "extensions/java"
+  },
+  {
+    "name": "javascript",
+    "path": "extensions/javascript"
+  },
+  {
+    "name": "json",
+    "path": "extensions/json"
+  },
+  {
+    "name": "json-language-features",
+    "path": "extensions/json-language-features"
+  },
+  {
+    "name": "less",
+    "path": "extensions/less"
+  },
+  {
+    "name": "log",
+    "path": "extensions/log"
+  },
+  {
+    "name": "lua",
+    "path": "extensions/lua"
+  },
+  {
+    "name": "make",
+    "path": "extensions/make"
+  },
+  {
+    "name": "markdown-basics",
+    "path": "extensions/markdown-basics"
+  },
+  {
+    "name": "markdown-language-features",
+    "path": "extensions/markdown-language-features"
+  },
+  {
+    "name": "merge-conflict",
+    "path": "extensions/merge-conflict"
+  },
+  {
+    "name": "microsoft-authentication",
+    "path": "extensions/microsoft-authentication"
+  },
+  {
+    "name": "npm",
+    "path": "extensions/npm"
+  },
+  {
+    "name": "objective-c",
+    "path": "extensions/objective-c"
+  },
+  {
+    "name": "perl",
+    "path": "extensions/perl"
+  },
+  {
+    "name": "php",
+    "path": "extensions/php"
+  },
+  {
+    "name": "powershell",
+    "path": "extensions/powershell"
+  },
+  {
+    "name": "pug",
+    "path": "extensions/pug"
+  },
+  {
+    "name": "python",
+    "path": "extensions/python"
+  },
+  {
+    "name": "r",
+    "path": "extensions/r"
+  },
+  {
+    "name": "razor",
+    "path": "extensions/razor"
+  },
+  {
+    "name": "ruby",
+    "path": "extensions/ruby"
+  },
+  {
+    "name": "rust",
+    "path": "extensions/rust"
+  },
+  {
+    "name": "scss",
+    "path": "extensions/scss"
+  },
+  {
+    "name": "search-result",
+    "path": "extensions/search-result"
+  },
+  {
+    "name": "shaderlab",
+    "path": "extensions/shaderlab"
+  },
+  {
+    "name": "shellscript",
+    "path": "extensions/shellscript"
+  },
+  {
+    "name": "sql",
+    "path": "extensions/sql"
+  },
+  {
+    "name": "swift",
+    "path": "extensions/swift"
+  },
+  {
+    "name": "theme-abyss",
+    "path": "extensions/theme-abyss"
+  },
+  {
+    "name": "theme-defaults",
+    "path": "extensions/theme-defaults"
+  },
+  {
+    "name": "theme-kimbie-dark",
+    "path": "extensions/theme-kimbie-dark"
+  },
+  {
+    "name": "theme-monokai",
+    "path": "extensions/theme-monokai"
+  },
+  {
+    "name": "theme-monokai-dimmed",
+    "path": "extensions/theme-monokai-dimmed"
+  },
+  {
+    "name": "theme-quietlight",
+    "path": "extensions/theme-quietlight"
+  },
+  {
+    "name": "theme-red",
+    "path": "extensions/theme-red"
+  },
+  {
+    "name": "theme-seti",
+    "path": "extensions/theme-seti"
+  },
+  {
+    "name": "theme-solarized-dark",
+    "path": "extensions/theme-solarized-dark"
+  },
+  {
+    "name": "theme-solarized-light",
+    "path": "extensions/theme-solarized-light"
+  },
+  {
+    "name": "theme-tomorrow-night-blue",
+    "path": "extensions/theme-tomorrow-night-blue"
+  },
+  {
+    "name": "typescript-basics",
+    "path": "extensions/typescript-basics"
+  },
+  {
+    "name": "typescript-language-features",
+    "path": "extensions/typescript-language-features"
+  },
+  {
+    "name": "vb",
+    "path": "extensions/vb"
+  },
+  {
+    "name": "xml",
+    "path": "extensions/xml"
+  },
+  {
+    "name": "yaml",
+    "path": "extensions/yaml"
+  }
+]

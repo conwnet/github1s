@@ -1,0 +1,39 @@
+{
+  "name": "github1s-vscode-extension",
+  "version": "0.0.0",
+  "publisher": "github1s",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "activationEvents": [
+    "onFileSystem:github1s",
+    "onDebug"
+  ],
+  "browser": "./dist/extension",
+  "engines": {
+    "vscode": "^1.48.0"
+  },
+  "contributes": {},
+  "scripts": {
+    "clean": "rm -rf dist out",
+    "build": "webpack --config extension.webpack.config.js --mode production",
+    "dev": "webpack --config extension.webpack.config.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "object-hash": "^2.1.1",
+    "p-finally": "^2.0.1",
+    "webpack-cli": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.52.0",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.3",
+    "webpack": "^4.46.0"
+  }
+}
