@@ -64,63 +64,6 @@ button.secondary:hover {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 
-.loading-page {
-  width: 50px;
-  height: 40px;
-  margin: 60px auto;
-  text-align: center;
-}
-
-.loading-page span {
-  width: 5px;
-  height: 100%;
-  margin-right: 4px;
-  display: inline-block;
-  background:#2b6298;
-  animation: loading 1.2s infinite ease-in-out;
-  -webkit-animation: loading 1.2s infinite ease-in-out;
-}
-
-.loading-page >span:nth-child(2) {
-  -webkit-animation-delay: -1.0s;
-  animation-delay: -1.0s;
-}
-
-.loading-page >span:nth-child(3) {
-  -webkit-animation-delay: -0.9s;
-  animation-delay: -0.9s;
-}
-
-.loading-page >span:nth-child(4) {
-  -webkit-animation-delay: -0.8s;
-  animation-delay: -0.8s;
-}
-
-.loading-page >span:nth-child(5) {
-  -webkit-animation-delay: -0.7s;
-  animation-delay: -0.7s;
-}
-
-@keyframes loading {
-  0% { transform: scaleY(0.4); }
-  25% { transform: scaleY(1.0); }
-  50% { transform: scaleY(0.4); }
-  75% { transform: scaleY(0.4); }
-  100% { transform: scaleY(0.4); }
-}
-
-@-webkit-keyframes loading {
-  0% { transform: scaleY(0.4); }
-  25% { transform: scaleY(1.0); }
-  50% { transform: scaleY(0.4); }
-  75% { transform: scaleY(0.4); }
-  100% { transform: scaleY(0.4); }
-}
-
-.preview-page, .edit-page {
-  display: none;
-}
-
 .container {
   padding: 10px;
 }

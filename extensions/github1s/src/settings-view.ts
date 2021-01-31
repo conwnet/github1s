@@ -44,11 +44,11 @@ export class SettingsView implements vscode.WebviewViewProvider {
           this.handleUpdateToken(data.payload);
           break;
         case 'clear-token':
-          this._extensionContext.workspaceState.update('github-oauth-token', '');
+          this._extensionContext.globalState.update('github-oauth-token', '');
           this.updateWebviewState({token: '', pageType: 'EDIT', valid: false, validating: false });
           break;
         default:
-          const oauthToken = this._extensionContext.workspaceState.get('github-oauth-token') as string|| '';
+          const oauthToken = this._extensionContext.globalState.get('github-oauth-token') as string|| '';
           (oauthToken ? validateToken(oauthToken) : Promise.resolve(false)).then(isValid => {
             this.updateWebviewState({token: oauthToken, pageType: oauthToken ? 'PREVIEW' : 'EDIT', valid: isValid, validating: false });
           });
@@ -78,7 +78,7 @@ export class SettingsView implements vscode.WebviewViewProvider {
         this.updateWebviewState({ token, valid: false, pageType: 'EDIT', validating: false });
         return;
       }
-      this._extensionContext.workspaceState.update('github-oauth-token', token || '');
+      this._extensionContext.globalState.update('github-oauth-token', token || '');
       this.updateWebviewState({ token, valid: true, pageType: 'PREVIEW', validating: false });
     }).catch(() => this.updateWebviewState({ token, valid: false, validating: false }));
   }
@@ -94,10 +94,53 @@ export class SettingsView implements vscode.WebviewViewProvider {
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="${stylesUri}" rel="stylesheet">
         <title>GitHub1s Settings</title>
+        <style nonce="${nonce}">
+          .loading-page {
+            width: 50px;
+            height: 40px;
+            margin: 60px auto;
+            text-align: center;
+          }
+          .loading-page span {
+            width: 5px;
+            height: 100%;
+            margin-right: 4px;
+            display: inline-block;
+            background:#2b6298;
+            animation: loading 1.2s infinite ease-in-out;
+            -webkit-animation: loading 1.2s infinite ease-in-out;
+          }
+          .loading-page >span:nth-child(2) {
+            -webkit-animation-delay: -1.0s;
+            animation-delay: -1.0s;
+          }
+          .loading-page >span:nth-child(3) {
+            -webkit-animation-delay: -0.9s;
+            animation-delay: -0.9s;
+          }
+          .loading-page >span:nth-child(4) {
+            -webkit-animation-delay: -0.8s;
+            animation-delay: -0.8s;
+          }
+          .loading-page >span:nth-child(5) {
+            -webkit-animation-delay: -0.7s;
+            animation-delay: -0.7s;
+          }
+          @keyframes loading {
+            0% { transform: scaleY(0.4); }
+            25% { transform: scaleY(1.0); }
+            50% { transform: scaleY(0.4); }
+            75% { transform: scaleY(0.4); }
+            100% { transform: scaleY(0.4); }
+          }
+          .preview-page, .edit-page {
+            display: none;
+          }
+        </style>
       </head>
       <body>
         <div class="loading-page">

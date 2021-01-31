@@ -8,7 +8,7 @@ import { getExtensionContext } from './context';
 
 const getGitHubAuthToken = (): string => {
   const context = getExtensionContext();
-  return context?.workspaceState.get('github-oauth-token') || '';
+  return context?.globalState.get('github-oauth-token') || '';
 };
 
 const quickSetGitHubOAuthToken = (() => {
@@ -23,7 +23,7 @@ const quickSetGitHubOAuthToken = (() => {
     }).then(token => {
       hasInputBox = false;
       if (!token) return;
-      getExtensionContext()!.workspaceState.update('github-oauth-token', token || '');
+      getExtensionContext()!.globalState.update('github-oauth-token', token || '');
       vscode.window.showInformationMessage('GitHub OAuth Token have saved, please reload the page');
     });
   };
