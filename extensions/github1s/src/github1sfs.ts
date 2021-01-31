@@ -1,5 +1,5 @@
 /**
- * @file VSCode Providers
+ * @file VSCode GitHub1sFs Provider
  * @author netcon
  */
 
@@ -15,8 +15,8 @@ import {
   FileType,
   Uri,
 } from 'vscode';
-import { noop, fetch, dirname, lruCache } from './util';
-import { RepoState } from './types';
+import { noop, dirname, lruCache } from './util';
+import { readGitHubDirectory, readGitHubFile } from './api';
 
 export class File implements FileStat {
 	type: FileType;
@@ -61,19 +61,17 @@ export class Directory implements FileStat {
 
 export type Entry = File | Directory;
 
-export class Github1sFS implements FileSystemProvider, Disposable {
+export class GitHub1sFS implements FileSystemProvider, Disposable {
   static scheme = 'github1s';
-	private readonly repoState: RepoState;
   private readonly disposable: Disposable;
   private _emitter = new EventEmitter<FileChangeEvent[]>();
   private root = new Directory(Uri.parse('github1s:/'), '');
 
   onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
-  constructor(repoState: RepoState) {
-		this.repoState = repoState;
+  constructor() {
     this.disposable = Disposable.from(
-			workspace.registerFileSystemProvider(Github1sFS.scheme, this, { isCaseSensitive: true, isReadonly: true }),
+			workspace.registerFileSystemProvider(GitHub1sFS.scheme, this, { isCaseSensitive: true, isReadonly: true }),
 		);
   }
 
@@ -141,6 +139,7 @@ export class Github1sFS implements FileSystemProvider, Disposable {
   }
 
   readDirectory = lruCache((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
+    if (!uri.authority) throw FileSystemError.FileNotFound(uri);
 		return this._lookupAsDirectory(uri, false).then(parent => {
 			if (parent.entries !== null) {
 				const res = Array.from(parent.entries.values())
@@ -148,37 +147,34 @@ export class Github1sFS implements FileSystemProvider, Disposable {
 				return Promise.resolve(res);
 			}
 
-			return fetch(`https://api.github.com/repos/${this.repoState.owner}/${this.repoState.repo}/git/trees/${this.repoState.branch}${uri.path.replace(/^\//, ':')}`)
-				.then(response => response.json())
-				.then(data => {
-					parent.entries = new Map<string, Entry>();
-					return data.tree.map((item: any) => {
-						const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
-						parent.entries.set(
-							item.path, fileType === FileType.Directory
-							? new Directory(uri, item.path, { sha: item.sha })
-							: new File(uri, item.path, { sha: item.sha, size: item.size })
-						);
-	
-						return [item.path, fileType];
-					});
+			return readGitHubDirectory(uri).then(data => {
+				parent.entries = new Map<string, Entry>();
+				return data.tree.map((item: any) => {
+					const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
+					parent.entries.set(
+						item.path, fileType === FileType.Directory
+						? new Directory(uri, item.path, { sha: item.sha })
+						: new File(uri, item.path, { sha: item.sha, size: item.size })
+					);
+
+					return [item.path, fileType];
 				});
+			});
 		});
   });
 
 	readFile = lruCache((uri: Uri): Uint8Array | Thenable<Uint8Array> => {
+    if (!uri.authority) throw FileSystemError.FileNotFound(uri);
 		return this._lookupAsFile(uri, false).then(file => {
 			if (file.data !== null) {
 				return file.data;
 			}
 
 			const encoder = new TextEncoder();
-			return fetch(`https://api.github.com/repos/${this.repoState.owner}/${this.repoState.repo}/git/blobs/${file.sha}`)
-				.then(response => response.json())
-				.then(blob => {
-					file.data = encoder.encode(atob(blob.content));
-					return file.data;
-				});
+			return readGitHubFile(uri, file.sha).then(blob => {
+				file.data = encoder.encode(atob(blob.content));
+				return file.data;
+			});
 		})
   });
 

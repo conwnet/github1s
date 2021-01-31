@@ -4,13 +4,14 @@
  */
 
 import * as vscode from 'vscode';
-import { Github1sFS } from './githubfs';
-import { prop } from './util';
-import { RepoState } from './types';
+import { GitHub1sFS } from './github1sfs';
+import { SettingsView } from './settings-view';
+import { setExtensionContext } from './util';
 
 export function activate(context: vscode.ExtensionContext) {
-  const authority = prop(vscode.workspace, ['workspaceFolders', 0, 'uri', 'authority']) as string || '';
-  const [owner, repo, branch] = authority.split('/');
-  const repoState: RepoState = { owner, repo, branch };
-  context.subscriptions.push(new Github1sFS(repoState));
+  setExtensionContext(context);
+  context.subscriptions.push(new GitHub1sFS());
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(SettingsView.viewType, new SettingsView())
+  );
 };

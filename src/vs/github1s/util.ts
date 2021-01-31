@@ -3,7 +3,7 @@
  * @autor fezhang
  */
 
-interface GithubRouteState {
+interface GitHubRouteState {
   owner: string;
   repo: string;
   type: string;
@@ -11,7 +11,7 @@ interface GithubRouteState {
   path: string;
 };
 
-export const parseGithubUrl = (url: string): GithubRouteState => {
+export const parseGitHubUrl = (url: string): GitHubRouteState => {
   const urlObj = new window.URL(url);
   const parts = urlObj.pathname.split('/').filter(Boolean);
   const hasFileType = ['tree', 'blob'].includes(parts[2]);

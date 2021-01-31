@@ -1,5 +1,5 @@
 {
-  "name": "github1s-vscode-extension",
+  "name": "github1s",
   "version": "0.0.0",
   "publisher": "github1s",
   "description": "",
@@ -16,7 +16,26 @@
   "engines": {
     "vscode": "^1.48.0"
   },
-  "contributes": {},
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "github1s",
+          "title": "GitHub1s",
+          "icon": "assets/github1s.svg"
+        }
+      ]
+    },
+    "views": {
+      "github1s": [
+          {
+              "id": "github1s-settings",
+              "name": "Settings",
+              "type": "webview"
+          }
+      ]
+    }
+  },
   "scripts": {
     "clean": "rm -rf dist out",
     "build": "webpack --config extension.webpack.config.js --mode production",

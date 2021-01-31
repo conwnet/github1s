@@ -18,7 +18,7 @@ import { localize } from 'vs/nls';
 import { Schemas } from 'vs/base/common/network';
 import product from 'vs/platform/product/common/product';
 import { parseLogLevel } from 'vs/platform/log/common/log';
-import { parseGithubUrl } from 'vs/github1s/util';
+import { parseGitHubUrl } from 'vs/github1s/util';
 
 function doCreateUri(path: string, queryValues: Map<string, string>): URI {
 	let query: string | undefined = undefined;
@@ -379,7 +379,7 @@ class WindowIndicator implements IWindowIndicator {
 			}
 
 			if (uri?.scheme === 'github1s') {
-				[repositoryOwner, repositoryName] = uri.authority.split('/');
+				[repositoryOwner, repositoryName] = uri.authority.split('+');
 			}
 		}
 
@@ -391,16 +391,16 @@ class WindowIndicator implements IWindowIndicator {
 
 		// No Repo
 		else {
-			this.label = localize('playgroundLabel', "$(remote) Github1s");
-			this.tooltip = localize('playgroundTooltip', "Github1s");
+			this.label = localize('playgroundLabel', "$(remote) GitHub1s");
+			this.tooltip = localize('playgroundTooltip', "GitHub1s");
 		}
 	}
 }
 
 (function () {
-  const route = parseGithubUrl(window.location.href);
+  const route = parseGitHubUrl(window.location.href);
   const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
-    folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}/${route.repo}/${route.branch}` }),
+    folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
     staticExtensions: [],
     enableSyncByDefault: false,
     webWorkerExtensionHostIframeSrc: "/static/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html",

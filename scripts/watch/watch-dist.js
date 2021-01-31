@@ -34,7 +34,7 @@ const autoSyncVscodeOut = async () => {
   }, 300));
 };
 
-const autoSyncGithub1sExtension = async () => {
+const autoSyncGitHub1sExtension = async () => {
   const SOURCE = path.join(APP_ROOT, 'extensions/github1s');
   const TARGET = path.join(APP_ROOT, 'dist/static/extensions/github1s');
 
@@ -50,7 +50,7 @@ const main = () => {
   fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'))
 
   autoSyncVscodeOut();
-  autoSyncGithub1sExtension();
+  autoSyncGitHub1sExtension();
 };
 
 main();
