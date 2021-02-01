@@ -55,8 +55,8 @@ export const fetch = (url: string, options?: RequestInit) => {
     })
     .catch(e => {
       if ((e.message.includes('rate limit exceeded'))) {
-        vscode.window.showErrorMessage(e.message, 'I Have Github OAuth Token')
-          .then((button) => { (button === 'I Have Github OAuth Token') && quickSetGitHubOAuthToken(); });
+        vscode.window.showErrorMessage(e.message, 'I Have GitHub OAuth Token')
+          .then((button) => { (button === 'I Have GitHub OAuth Token') && quickSetGitHubOAuthToken(); });
       } else if (e.message.includes('Bad credentials')) {
         vscode.window.showErrorMessage(e.message, 'Change Another Token')
           .then((button) => { (button === 'Change Another Token') && quickSetGitHubOAuthToken({ prompt: '' }); });
