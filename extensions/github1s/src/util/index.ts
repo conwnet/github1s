@@ -4,7 +4,7 @@
  */
 
 export { fetch } from './fetch';
-export { lruCache } from './func';
+export { reuseable } from './func';
 export { getExtensionContext, setExtensionContext } from './context';
 
 export const noop = () => { };

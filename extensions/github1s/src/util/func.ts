@@ -3,23 +3,24 @@
  * @author netcon
  */
 
-import * as hash from 'object-hash/dist/object_hash';
+import * as jsonStableStringify from 'json-stable-stringify';
 import * as pFinally from 'p-finally';
 
-// TODO: implement real lru
-export const lruCache = (func) => {
+const defaultComputeCacheKey = (...args) => jsonStableStringify([...args]);
+
+// reuse previous promise when a request call
+// and previous request not completed
+export const reuseable = (func, computeCacheKey = defaultComputeCacheKey) => {
   const cache = new Map<string, Promise<any>>();
 
-	return function (...args) {
-    const key = hash(args);
+  return function (...args: any[]): Promise<any> {
+    const key = computeCacheKey(...args);
     if (cache.has(key)) {
       return cache.get(key);
     }
 
-		const promise = func.call(this, ...args);
+    const promise = func.call(this, ...args);
     cache.set(key, promise);
-    return pFinally(promise, () => {
-      cache.delete(key);
-    });
-	};
+    return pFinally(promise, () => cache.delete(key));
+  };
 };

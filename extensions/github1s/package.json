@@ -28,11 +28,11 @@
     },
     "views": {
       "github1s": [
-          {
-              "id": "github1s-settings",
-              "name": "Settings",
-              "type": "webview"
-          }
+        {
+          "id": "github1s-settings",
+          "name": "Settings",
+          "type": "webview"
+        }
       ]
     }
   },
@@ -45,7 +45,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "object-hash": "^2.1.1",
+    "json-stable-stringify": "^1.0.1",
     "p-finally": "^2.0.1",
     "webpack-cli": "^4.4.0"
   },

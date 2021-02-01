@@ -15,7 +15,7 @@ import {
   FileType,
   Uri,
 } from 'vscode';
-import { noop, dirname, lruCache } from './util';
+import { noop, dirname, reuseable } from './util';
 import { readGitHubDirectory, readGitHubFile } from './api';
 
 export class File implements FileStat {
@@ -65,7 +65,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
   static scheme = 'github1s';
   private readonly disposable: Disposable;
   private _emitter = new EventEmitter<FileChangeEvent[]>();
-  private root = new Directory(Uri.parse('github1s:/'), '');
+  private root: Directory = null;
 
   onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
@@ -84,7 +84,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined>;
 	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined> {
 		let parts = uri.path.split('/').filter(Boolean);
-		let entry: Entry = this.root;
+		let entry: Entry = this.root || (this.root = new Directory(uri.with({ path: '/' }), ''));
 		for (const part of parts) {
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
@@ -138,7 +138,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
     return this._lookup(uri, false);
   }
 
-  readDirectory = lruCache((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
+  readDirectory = reuseable((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
     if (!uri.authority) throw FileSystemError.FileNotFound(uri);
 		return this._lookupAsDirectory(uri, false).then(parent => {
 			if (parent.entries !== null) {
@@ -161,9 +161,9 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				});
 			});
 		});
-  });
+  }, (uri: Uri) => uri.toString());
 
-	readFile = lruCache((uri: Uri): Uint8Array | Thenable<Uint8Array> => {
+	readFile = reuseable((uri: Uri): Uint8Array | Thenable<Uint8Array> => {
     if (!uri.authority) throw FileSystemError.FileNotFound(uri);
 		return this._lookupAsFile(uri, false).then(file => {
 			if (file.data !== null) {
@@ -176,7 +176,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return file.data;
 			});
 		})
-  });
+  }, (uri: Uri) => uri.toString());
 
   createDirectory(uri: Uri): void | Thenable<void> {
     return Promise.resolve();
