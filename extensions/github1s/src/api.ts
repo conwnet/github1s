@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fetch } from './util';
+import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError } from './util/fetch';
 
 interface UriState {
   owner: string;
@@ -23,14 +23,35 @@ const parseUri = (uri: vscode.Uri): UriState => {
   };
 };
 
+const handleRequestError = (error: RequestError) => {
+  if (error instanceof RequestRateLimitError) {
+    if (!error.token) {
+      throw vscode.FileSystemError.NoPermissions('API Rate Limit Exceeded, Please Offer an OAuth Token.');
+    }
+    throw vscode.FileSystemError.NoPermissions('API Rate Limit Exceeded, Please Change Another OAuth Token.');
+  }
+  if (error instanceof RequestInvalidTokenError) {
+    throw vscode.FileSystemError.NoPermissions('Current OAuth Token Is Invalid, Please Change Another One.');
+  }
+  if (error instanceof RequestNotFoundError) {
+    throw vscode.FileSystemError.NoPermissions('Current OAuth Token Is Invalid, Please Change Another One.');
+  }
+  if (error instanceof RequestNotFoundError) {
+    throw vscode.FileSystemError.FileNotFound('GitHub Resource Not Found');
+  }
+  throw vscode.FileSystemError.Unavailable(error.message || 'Unknown Error Occurred When Request To GitHub');
+};
+
 export const readGitHubDirectory = (uri: vscode.Uri) => {
   const state: UriState = parseUri(uri);
-  return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/trees/${state.branch}${state.path.replace(/^\//, ':')}`);
+  return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/trees/${state.branch}${state.path.replace(/^\//, ':')}`)
+    .catch(handleRequestError)
 };
 
 export const readGitHubFile = (uri: vscode.Uri, fileSha: string) => {
   const state: UriState = parseUri(uri);
-  return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/blobs/${fileSha}`);
+  return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/blobs/${fileSha}`)
+    .catch(handleRequestError);
 };
 
 export const validateToken = (token) => {

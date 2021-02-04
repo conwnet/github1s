@@ -29,38 +29,62 @@ const quickSetGitHubOAuthToken = (() => {
   };
 })();
 
+export class RequestError extends Error {
+  constructor(message: string, public token: string) {
+    super(message);
+    if (typeof (<any>Object).setPrototypeOf === 'function') {
+			(<any>Object).setPrototypeOf(this, RequestError.prototype);
+		}
+  }
+};
+
+export class RequestNotFoundError extends RequestError {
+  constructor(message: string, token: string) {
+    super(message, token);
+    if (typeof (<any>Object).setPrototypeOf === 'function') {
+			(<any>Object).setPrototypeOf(this, RequestNotFoundError.prototype);
+		}
+  }
+};
+
+export class RequestRateLimitError extends RequestError {
+  constructor(message: string, token: string) {
+    super(message, token);
+    if (typeof (<any>Object).setPrototypeOf === 'function') {
+			(<any>Object).setPrototypeOf(this, RequestRateLimitError.prototype);
+		}
+  }
+};
+
+export class RequestInvalidTokenError extends RequestError {
+  constructor(message: string, token: string) {
+    super(message, token);
+    if (typeof (<any>Object).setPrototypeOf === 'function') {
+			(<any>Object).setPrototypeOf(this, RequestInvalidTokenError.prototype);
+		}RequestInvalidTokenError
+  }
+};
+
 export const fetch = (url: string, options?: RequestInit) => {
   const token = getGitHubAuthToken();
   const authHeaders = token ? { Authorization: `token ${token}` } : {};
   const customHeaders = (options && 'headers' in options ? options.headers : {})
 
-  return self.fetch(url, { ...options, headers: { ...authHeaders, ...customHeaders } })
+  return self.fetch(url, { mode: 'cors', ...options, headers: { ...authHeaders, ...customHeaders } })
+    .catch(() => { throw new RequestError('Request Failed, Maybe an Network Error', token); })
     .then(response => {
-      if (+response.status < 400) {
-        return response.json()
+      if (response.status < 400) {
+        return response.json();
       }
-      if (+response.status >= 400 && +response.status < 500) {
-        return response.json().then(data => {
-          if (+response.status === 403 && (data.message || '').includes('rate limit exceeded')) {
-            quickSetGitHubOAuthToken();
-          }
-          if (+response.status === 401 && (data.message || '').includes('Bad credentials')) {
-            quickSetGitHubOAuthToken({ prompt: 'Invalid GitHub OAuth Token' });
-            throw new Error(data.message + ' (Maybe the GitHub OAuth Token you saved is invalid)');
-          }
-          throw new Error(data.message);
-        });
+      if (response.status === 403) {
+        return response.json().then(data => { throw new RequestRateLimitError(data.message, token); });
       }
-      throw new Error(`GitHub1s: Request got HTTP ${response.status} response`);
-    })
-    .catch(e => {
-      if ((e.message.includes('rate limit exceeded'))) {
-        vscode.window.showErrorMessage(e.message, 'I Have GitHub OAuth Token')
-          .then((button) => { (button === 'I Have GitHub OAuth Token') && quickSetGitHubOAuthToken(); });
-      } else if (e.message.includes('Bad credentials')) {
-        vscode.window.showErrorMessage(e.message, 'Change Another Token')
-          .then((button) => { (button === 'Change Another Token') && quickSetGitHubOAuthToken({ prompt: '' }); });
-      } else vscode.window.showErrorMessage(e.message || 'GitHub1s: Unknown Error')
-      throw e;
+      if (response.status === 401) {
+        return response.json().then(data => { throw new RequestInvalidTokenError(data.message, token); });
+      }
+      if (response.status === 404) {
+        throw new RequestNotFoundError('Not Found', token);
+      }
+      throw new RequestError(`GitHub1s: Request got HTTP ${response.status} response`, token);
     });
 };

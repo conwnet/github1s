@@ -117,7 +117,7 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 	}
 
 
-	private getGithubFilePathOrEmpty(uri?: URI): string {
+	private getGitHubFilePathOrEmpty(uri?: URI): string {
 		if (!uri || !uri.path || uri.scheme !== 'github1s') {
 			return '';
 		}
@@ -127,7 +127,7 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 	private doUpdateWindowUrl(): void {
 		const state = parseGitHubUrl(window.location.href);
 		const editor = this.editorService.activeEditor;
-		const filePath = this.getGithubFilePathOrEmpty(editor?.resource);
+		const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
 		const windowUrl = `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
 		if (window.history.replaceState) {
 			window.history.replaceState(null, '', windowUrl);
