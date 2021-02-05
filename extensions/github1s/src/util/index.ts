@@ -3,8 +3,9 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 export { fetch } from './fetch';
-export { reuseable } from './func';
+export { reuseable, throttle } from './func';
 export { getExtensionContext, setExtensionContext } from './context';
 
 export const noop = () => { };
@@ -55,4 +56,13 @@ export const getNonce = (): string => {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+};
+
+export const getWebviewOptions = (extensionUri: vscode.Uri): vscode.WebviewOptions => {
+	return {
+		// Enable javascript in the webview
+		enableScripts: true,
+		// And restrict the webview to only loading content from our extension's `assets` directory.
+		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')]
+	};
 };

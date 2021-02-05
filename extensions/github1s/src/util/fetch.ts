@@ -4,30 +4,13 @@
  */
 
 import * as vscode from 'vscode';
+import { throttle } from './func';
 import { getExtensionContext } from './context';
 
 const getGitHubAuthToken = (): string => {
   const context = getExtensionContext();
   return context?.globalState.get('github-oauth-token') || '';
 };
-
-const quickSetGitHubOAuthToken = (() => {
-  let hasInputBox = false;
-  return (options?: object) => {
-    if (hasInputBox) return;
-    hasInputBox = true;
-    vscode.window.showInputBox({
-      placeHolder: 'Please Input GitHub OAuth Token',
-      prompt: 'GitHub API rate limit exceeded',
-      ...options,
-    }).then(token => {
-      hasInputBox = false;
-      if (!token) return;
-      getExtensionContext()!.globalState.update('github-oauth-token', token || '');
-      vscode.window.showInformationMessage('GitHub OAuth Token have saved, please reload the page');
-    });
-  };
-})();
 
 export class RequestError extends Error {
   constructor(message: string, public token: string) {
@@ -65,13 +48,19 @@ export class RequestInvalidTokenError extends RequestError {
   }
 };
 
+// only report network error once in 5 seconds
+export const throttledReportNetworkError = throttle(() => vscode.window.showErrorMessage('Request Failed, Maybe an Network Error'), 5000);
+
 export const fetch = (url: string, options?: RequestInit) => {
   const token = getGitHubAuthToken();
   const authHeaders = token ? { Authorization: `token ${token}` } : {};
   const customHeaders = (options && 'headers' in options ? options.headers : {})
 
   return self.fetch(url, { mode: 'cors', ...options, headers: { ...authHeaders, ...customHeaders } })
-    .catch(() => { throw new RequestError('Request Failed, Maybe an Network Error', token); })
+    .catch(() => {
+      throttledReportNetworkError();
+      throw new RequestError('Request Failed, Maybe an Network Error', token);
+    })
     .then(response => {
       if (response.status < 400) {
         return response.json();

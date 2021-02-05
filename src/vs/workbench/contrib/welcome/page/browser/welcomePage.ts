@@ -309,11 +309,12 @@ class WelcomePage extends Disposable {
 		@ITelemetryService private readonly telemetryService: ITelemetryService,
 		@IHostService private readonly hostService: IHostService,
 		@IProductService private readonly productService: IProductService,
-
+		@ICommandService private readonly commandService: ICommandService,
 	) {
 		super();
 		this._register(lifecycleService.onShutdown(() => this.dispose()));
 
+		const gitHubTokenStatus = this.getGitHubTokenStatus();
 		const recentlyOpened = this.workspacesService.getRecentlyOpened();
 		const installedExtensions = this.instantiationService.invokeFunction(getInstalledExtensions);
 		const resource = FileAccess.asBrowserUri('./vs_code_welcome_page', require)
@@ -326,7 +327,7 @@ class WelcomePage extends Disposable {
 			name: localize('welcome.title', "Welcome"),
 			resource,
 			telemetryFrom,
-			onReady: (container: HTMLElement) => this.onReady(container, recentlyOpened, installedExtensions)
+			onReady: (container: HTMLElement) => this.onReady(container, recentlyOpened, installedExtensions, gitHubTokenStatus)
 		});
 	}
 
@@ -334,7 +335,7 @@ class WelcomePage extends Disposable {
 		return this.editorService.openEditor(this.editorInput, options);
 	}
 
-	private onReady(container: HTMLElement, recentlyOpened: Promise<IRecentlyOpened>, installedExtensions: Promise<IExtensionStatus[]>): void {
+	private onReady(container: HTMLElement, recentlyOpened: Promise<IRecentlyOpened>, installedExtensions: Promise<IExtensionStatus[]>, gitHubTokenStatus: Promise<any>): void {
 		const enabled = isWelcomePageEnabled(this.configurationService, this.contextService);
 		const showOnStartup = <HTMLInputElement>container.querySelector('#showOnStartup');
 		if (enabled) {
@@ -348,6 +349,9 @@ class WelcomePage extends Disposable {
 		if (prodName) {
 			prodName.textContent = this.productService.nameLong;
 		}
+
+		gitHubTokenStatus.then(tokenStatus => this.doUpdateGitHubTokenStatus(container, tokenStatus));
+		this.registerGithub1sListeners(container);
 
 		recentlyOpened.then(({ workspaces }) => {
 			// Filter out the current workspace
@@ -387,6 +391,75 @@ class WelcomePage extends Disposable {
 				}
 			}
 		}));
+	}
+
+	registerGithub1sListeners(container: HTMLElement) {
+		container.querySelector('.refresh-button')?.addEventListener('click', () => this.refreshGitHubTokenStatus(container));
+		container.querySelector('.create-new-token')?.addEventListener('click', () => window?.open('https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s'));
+		container.querySelector('.update-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.update-token').then(() => this.refreshGitHubTokenStatus(container)));
+		container.querySelector('.clear-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.clear-token').then(() => this.refreshGitHubTokenStatus(container)));
+	};
+
+	updateElementText(element: HTMLElement, text: string | number, type?: 'SUCCESS' | 'WARNING' | 'ERROR') {
+		if (!element) return;
+		element.innerText = `${text}`;
+		element.classList.remove('text-warning', 'text-error', 'text-success');
+		if (type === 'SUCCESS') {
+			element.classList.add('text-success');
+		} else if (type === 'WARNING') {
+			element.classList.add('text-warning');
+		} else if (type === 'ERROR') {
+			element.classList.add('text-error');
+		}
+	}
+
+	getGitHubTokenStatus() {
+		return this.commandService.executeCommand('github1s.validate-token', true);	
+	}
+
+	refreshGitHubTokenStatus(container: HTMLElement) {
+		const statusElement = <HTMLDivElement>container.querySelector('.rate-limit-status');
+		this.updateElementText(statusElement, '');
+		this.getGitHubTokenStatus().then(tokenStatus => {
+			this.doUpdateGitHubTokenStatus(container, tokenStatus);
+		});
+	}
+
+	doUpdateGitHubTokenStatus(container: HTMLElement, tokenStatus?: any) {
+		const statusElement = <HTMLDivElement>container.querySelector('.rate-limit-status');
+		const limitElement = <HTMLDivElement>container.querySelector('.x-rate-limit-limit');
+		const remainingElement = <HTMLDivElement>container.querySelector('.x-rate-limit-remaining');
+		const resetElement = <HTMLDivElement>container.querySelector('.x-rate-limit-reset');
+		const timerElement = <HTMLDivElement>container.querySelector('.rate-limit-reset-seconds');
+
+		if (!tokenStatus) {
+			this.updateElementText(statusElement, 'Unknown', 'WARNING');
+			this.updateElementText(limitElement, 'Unknown', 'WARNING');
+			this.updateElementText(remainingElement, 'Unknown', 'WARNING');
+			this.updateElementText(resetElement, 'Unknown');
+			this.updateElementText(timerElement, 'Unknown', 'WARNING');
+			return;
+		}
+
+		const textType = (value: number) => {
+			if (value <= 0) return 'ERROR';
+			if (value > 99) return 'SUCCESS';
+			return 'WARNING'; 
+		}
+		this.updateElementText(limitElement, tokenStatus.limit, textType(+tokenStatus.limit));
+		this.updateElementText(remainingElement, tokenStatus.remaining, textType(+tokenStatus.remaining));
+		this.updateElementText(resetElement, tokenStatus.reset);
+		this.updateElementText(timerElement, Math.max(tokenStatus.reset - Math.ceil(Date.now() / 1000), 0));
+	
+		if (!tokenStatus.token) {
+			this.updateElementText(statusElement, 'Unauthorized', 'WARNING');
+			return;
+		}
+		if (tokenStatus.valid) {
+			this.updateElementText(statusElement, 'Authorized', 'SUCCESS');
+			return;
+		}
+		this.updateElementText(statusElement, 'Invalid Token', 'ERROR');
 	}
 
 	private createListEntries(recents: (IRecentWorkspace | IRecentFolder)[]) {

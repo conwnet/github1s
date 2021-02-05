@@ -24,3 +24,12 @@ export const reuseable = (func, computeCacheKey = defaultComputeCacheKey) => {
     return pFinally(promise, () => cache.delete(key));
   };
 };
+
+export const throttle = (func: Function, interval: number) => {
+  let timer = null;
+  return function(...args: any[]): any {
+    if (timer) return;
+    func.call(this, ...args);
+    timer = setTimeout(() => (timer = null), interval);
+  }
+};

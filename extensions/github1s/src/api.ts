@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError } from './util/fetch';
+import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError, throttledReportNetworkError } from './util/fetch';
 
 interface UriState {
   owner: string;
@@ -54,7 +54,16 @@ export const readGitHubFile = (uri: vscode.Uri, fileSha: string) => {
     .catch(handleRequestError);
 };
 
-export const validateToken = (token) => {
-  return self.fetch(`https://api.github.com`, { headers: { Authorization: `token ${token}` } })
-    .then(response => (+response.status < 400));
+export const validateToken = (token: string) => {
+  const authHeaders = token ? { Authorization: `token ${token}` } : {};
+  return self.fetch(`https://api.github.com`, { headers: { ...authHeaders } }).then(response => ({
+    token: !!token, // if the token is not empty
+    valid: response.status < 400 ? true : false, // if the request is valid
+    limit: +response.headers.get('X-RateLimit-Limit') || 0, // limit count
+    remaining: +response.headers.get('X-RateLimit-Remaining') || 0, // remains request count
+    reset: +response.headers.get('X-RateLimit-Reset') || 0, // reset time
+  })).catch(() => {
+    throttledReportNetworkError();
+    throw new RequestError('Request Failed, Maybe an Network Error', token);
+  });
 };
