@@ -128,7 +128,10 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 		const state = parseGitHubUrl(window.location.href);
 		const editor = this.editorService.activeEditor;
 		const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
-		const windowUrl = `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
+		// if no file opened and the branch is HEAD current, only retain owner and repo in url
+		const windowUrl = !filePath && state.branch === 'HEAD'
+			? `/${state.owner}/${state.repo}`
+			: `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
 		if (window.history.replaceState) {
 			window.history.replaceState(null, '', windowUrl);
 		}
