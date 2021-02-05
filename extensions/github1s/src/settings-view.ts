@@ -59,23 +59,30 @@ export class SettingsView implements vscode.WebviewViewProvider {
 
   handleValidateToken(token: string) {
     this.updateWebviewState({ validating: true });
-    (token ? validateToken(token).then(data => (data.valid && data.remaining > 0)) : Promise.resolve(false)).then(isValid => {
-      if (!isValid) vscode.window.showErrorMessage('This GitHub OAuth Token is INVALID!');
-      else vscode.window.showInformationMessage('This GitHub OAuth Token is VALID!');
-      this.updateWebviewState({ valid: isValid, validating: false });
+    validateToken(token).then(tokenStatus => {
+      if (!tokenStatus.valid) vscode.window.showErrorMessage('This GitHub OAuth Token is invalid.');
+      else if (tokenStatus.remaining <= 0) vscode.window.showWarningMessage('This GitHub OAuth Token is valid, but the rate limit is exceeded.');
+      else vscode.window.showInformationMessage('This GitHub OAuth Token is OK.');
+      this.updateWebviewState({ valid: tokenStatus.valid && tokenStatus.remaining > 0, validating: false });
     }).catch(() => this.updateWebviewState({ valid: false, validating: false }));
   }
 
   handleUpdateToken(token: string) {
+    if (!token) return;
     this.updateWebviewState({ validating: true });
-    (token ? validateToken(token).then(data => (data.valid && data.remaining > 0)) : Promise.resolve(false)).then(isValid => {
-      if (!isValid) {
-        vscode.window.showErrorMessage('This GitHub OAuth Token is INVALID!');
+    validateToken(token).then(tokenStatus => {
+      if (!tokenStatus.valid) {
         this.updateWebviewState({ pageType: 'EDIT', validating: false });
-        return;
+        vscode.window.showErrorMessage('This GitHub OAuth Token is invalid.');
+      } else if (tokenStatus.remaining <= 0) {
+        this.updateWebviewState({ pageType: 'EDIT', validating: false });
+        vscode.window.showWarningMessage('This GitHub OAuth Token is valid, but the rate limit is exceeded.');
+      } else {
+        this.updateWebviewState({ token, valid: true, pageType: 'PREVIEW', validating: false })
+        this._extensionContext.globalState.update('github-oauth-token', token || '').then(() => {
+          vscode.commands.executeCommand('workbench.files.action.refreshFilesExplorer');
+        });
       }
-      this._extensionContext.globalState.update('github-oauth-token', token || '');
-      this.updateWebviewState({ token, valid: true, pageType: 'PREVIEW', validating: false });
     }).catch(() => this.updateWebviewState({ token, validating: false }));
   }
 

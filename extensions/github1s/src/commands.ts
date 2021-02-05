@@ -19,11 +19,11 @@ export const commandValidateToken = (silent: boolean = false) => {
         } else {
           vscode.window.showWarningMessage('You haven\'t set a GitHub OAuth Token yet, and the rate limit is exceeded.');
         }
-      } if (!tokenStatus.valid) {
+      } else if (!tokenStatus.valid) {
         vscode.window.showErrorMessage('Current GitHub OAuth Token is invalid.');
       } else if (tokenStatus.valid && tokenStatus.remaining > 0) {
         vscode.window.showInformationMessage(`Current GitHub OAuth Token is OK, and you can have ${remaining} requests in the current rate limit window.`);
-      } else if (tokenStatus && tokenStatus.remaining <= 0) {
+      } else if (tokenStatus.valid && tokenStatus.remaining <= 0) {
         vscode.window.showWarningMessage('Current GitHub OAuth Token is Valid, but the rate limit is exceeded.');
       }
     }
@@ -36,12 +36,22 @@ export const commandUpdateToken = (silent: boolean = false) => {
     placeHolder: 'Please input the GitHub OAuth Token',
   }).then(token => {
     if (!token) return;
-    getExtensionContext()!.globalState.update('github-oauth-token', token || '');
-    !silent && vscode.window.showInformationMessage('GitHub OAuth Token have saved, please reload the page');
+    return getExtensionContext()!.globalState.update('github-oauth-token', token || '').then(() => {
+      // we don't need wait validate, so we don't `return`
+      validateToken(token).then(tokenStatus => {
+        if (!silent) {
+          if (!tokenStatus.valid) vscode.window.showErrorMessage('GitHub OAuth Token have updated, but it is invalid.')
+          else if (tokenStatus.remaining <= 0) vscode.window.showWarningMessage('GitHub OAuth Token have updated, but the rate limit is exceeded.');
+          else vscode.window.showInformationMessage('GitHub OAuth Token have updated.');
+        }
+        tokenStatus.valid && tokenStatus.remaining > 0 && vscode.commands.executeCommand('workbench.files.action.refreshFilesExplorer');
+      });
+    });
   });
 };
 
 export const commandClearToken = (silent: boolean = false) => {
-  !silent && vscode.window.showInformationMessage('You have cleared the GitHb OAuth Token');
-  return getExtensionContext()!.globalState.update('github-oauth-token', '');
+  return getExtensionContext()!.globalState.update('github-oauth-token', '').then(() => {
+    !silent && vscode.window.showInformationMessage('You have cleared the GitHb OAuth Token.');
+  });
 };
