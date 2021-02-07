@@ -354,7 +354,7 @@ class WelcomePage extends Disposable {
 		}
 
 		gitHubTokenStatus.then(tokenStatus => this.doUpdateGitHubTokenStatus(container, tokenStatus));
-		this.registerGithub1sListeners(container);
+		this.registerGitHub1sListeners(container);
 
 		recentlyOpened.then(({ workspaces }) => {
 			// Filter out the current workspace
@@ -396,7 +396,7 @@ class WelcomePage extends Disposable {
 		}));
 	}
 
-	registerGithub1sListeners(container: HTMLElement) {
+	registerGitHub1sListeners(container: HTMLElement) {
 		container.querySelector('.refresh-button')?.addEventListener('click', () => this.refreshGitHubTokenStatus(container));
 		container.querySelector('.create-new-token')?.addEventListener('click', () => window?.open('https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s'));
 		container.querySelector('.update-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.update-token').then(() => this.refreshGitHubTokenStatus(container)));

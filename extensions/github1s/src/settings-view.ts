@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { getNonce, getExtensionContext, getWebviewOptions } from './util';
+import { commandClearToken } from './commands';
 import { validateToken } from './api';
 
 interface WebviewState {
@@ -41,8 +42,12 @@ export class SettingsView implements vscode.WebviewViewProvider {
           this.handleUpdateToken(data.payload);
           break;
         case 'clear-token':
-          this._extensionContext.globalState.update('github-oauth-token', '');
-          this.updateWebviewState({token: '', pageType: 'EDIT', valid: false, validating: false });
+          commandClearToken().then(cleared => {
+            cleared && this.updateWebviewState({token: '', pageType: 'EDIT', valid: false, validating: false });
+          })
+          break;
+        case 'welcome-page':
+          vscode.commands.executeCommand('workbench.action.showWelcomePage');
           break;
         default:
           const oauthToken = this._extensionContext.globalState.get('github-oauth-token') as string|| '';
@@ -271,6 +276,7 @@ button.secondary:hover {
       </div>
       <div id="token-text"></div>
     </div>
+    <div><button id="welcome-button">Detail</button></div>
     <div><button id="validate-button">Validate</button></div>
     <div><button id="edit-button">Edit</button></div>
     <div><button id="clear-button">Clear</button></div>
@@ -324,6 +330,10 @@ button.secondary:hover {
 
   delegate(document.body, '#clear-button', 'click', () => {
     vscode.postMessage({ type: 'clear-token' });
+  });
+
+  delegate(document.body, '#welcome-button', 'click', () => {
+    vscode.postMessage({ type: 'welcome-page' });
   });
 
   const updatePage = () => {

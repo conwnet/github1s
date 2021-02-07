@@ -51,7 +51,12 @@ export const commandUpdateToken = (silent: boolean = false) => {
 };
 
 export const commandClearToken = (silent: boolean = false) => {
-  return getExtensionContext()!.globalState.update('github-oauth-token', '').then(() => {
-    !silent && vscode.window.showInformationMessage('You have cleared the GitHb OAuth Token.');
+  return vscode.window.showWarningMessage('Would you want to clear the saved GitHub OAuth Token?', { modal: true }, 'Confirm').then(choose => {
+    if (choose === 'Confirm') {
+      return getExtensionContext()!.globalState.update('github-oauth-token', '').then(() => {
+        !silent && vscode.window.showInformationMessage('You have cleared the saved GitHb OAuth Token.');
+      }).then(() => true);
+    }
+    return false;
   });
 };
