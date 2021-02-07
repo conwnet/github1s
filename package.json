@@ -17,6 +17,7 @@
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
     "build": "./scripts/build.sh",
+    "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "./scripts/watch.sh",
     "serve": "node ./scripts/serve-dist.js"

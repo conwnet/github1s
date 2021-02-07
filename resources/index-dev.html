@@ -8,10 +8,10 @@
 		<meta charset="utf-8" />
 		<!-- Disable pinch zooming -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-		<!-- Workbench Configuration -->
-		<meta id="vscode-workbench-web-configuration" data-settings="{}">
+		<!-- VS Code Extensions Configuration -->
 		<meta id="vscode-workbench-builtin-extensions" data-settings="[]">
-	
+		<!-- VS Code Web Worker Extension Host Configuration -->
+		<meta id="vscode-extension-host-iframe-src" data-settings="">
 		<!-- Workbench Icon/Manifest/CSS -->
 		<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 		<link rel="manifest" href="/manifest.json">
@@ -53,6 +53,7 @@
 	<script>
 		fetch('/static/configure/extensions.json').then(response => response.text()).then(extensionsJson => {
 			document.getElementById('vscode-workbench-builtin-extensions').setAttribute('data-settings', extensionsJson);
+			document.getElementById('vscode-extension-host-iframe-src').setAttribute('data-settings', '/static/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html');
 			require(['vs/code/browser/workbench/workbench'], function() {});
 		}); 
 	</script>

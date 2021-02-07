@@ -403,7 +403,7 @@ class WindowIndicator implements IWindowIndicator {
     folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
     staticExtensions: [],
     enableSyncByDefault: false,
-    webWorkerExtensionHostIframeSrc: "/static/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html",
+    webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
 };
 
 	// Revive static extension locations
@@ -473,7 +473,7 @@ class WindowIndicator implements IWindowIndicator {
 
 	// Home Indicator
 	const homeIndicator: IHomeIndicator = {
-		href: 'https://github.com/conwnet/github1s',
+		href: `https://github.com/${route.owner}/${route.repo}`,
 		icon: 'code',
 		title: localize('home', "Home")
 	};

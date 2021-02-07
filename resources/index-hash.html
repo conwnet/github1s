@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			globalThis.MonacoPerformanceMarks = globalThis.MonacoPerformanceMarks || [];
+			globalThis.MonacoPerformanceMarks.push('renderer/started', Date.now());
+		</script>
+		<meta charset="utf-8" />
+		<!-- Disable pinch zooming -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+		<!-- VS Code Extensions Configuration -->
+		<meta id="vscode-workbench-builtin-extensions" data-settings="[]">
+		<!-- VS Code Web Worker Extension Host Configuration -->
+		<meta id="vscode-extension-host-iframe-src" data-settings="">
+		<!-- Workbench Icon/Manifest/CSS -->
+		<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+		<link rel="manifest" href="/manifest.json">
+		<title>GitHub1s</title>
+	</head>
+
+	<body aria-label="">
+	</body>
+
+	<script>
+		self.require = {
+			baseUrl: `${window.location.origin}/{STATIC_FOLDER}/vscode`,
+			recordStats: true,
+			trustedTypesPolicy: window.trustedTypes?.createPolicy('amdLoader', {
+				createScriptURL(value) {
+					if(value.startsWith(window.location.origin)) {
+						return value;
+					}
+					throw new Error(`Invalid script url: ${value}`)
+				}
+			}),
+			paths: {
+				'vscode-textmate': `${window.location.origin}/{STATIC_FOLDER}/node_modules/vscode-textmate/release/main`,
+				'vscode-oniguruma': `${window.location.origin}/{STATIC_FOLDER}/node_modules/vscode-oniguruma/release/main`,
+				'xterm': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm/lib/xterm.js`,
+				'xterm-addon-search': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-search/lib/xterm-addon-search.js`,
+				'xterm-addon-unicode11': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-unicode11/lib/xterm-addon-unicode11.js`,
+				'xterm-addon-webgl': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-webgl/lib/xterm-addon-webgl.js`,
+				'tas-client-umd': `${window.location.origin}/{STATIC_FOLDER}/node_modules/tas-client-umd/lib/tas-client-umd.js`,
+				'iconv-lite-umd': `${window.location.origin}/{STATIC_FOLDER}/node_modules/iconv-lite-umd/lib/iconv-lite-umd.js`,
+				'jschardet': `${window.location.origin}/{STATIC_FOLDER}/node_modules/jschardet/dist/jschardet.min.js`,
+			}
+		};
+	</script>
+	<script src="/{STATIC_FOLDER}/vscode/vs/loader.js"></script>
+	<script src="/{STATIC_FOLDER}/vscode/vs/workbench/workbench.web.api.js"></script>
+	<script>
+		globalThis.MonacoPerformanceMarks.push('willLoadWorkbenchMain', Date.now());
+	</script>
+	<script>
+		fetch('/{STATIC_FOLDER}/configure/extensions.json').then(response => response.text()).then(extensionsJson => {
+			document.getElementById('vscode-workbench-builtin-extensions').setAttribute('data-settings', extensionsJson);
+      document.getElementById('vscode-extension-host-iframe-src').setAttribute('data-settings', '/{STATIC_FOLDER}/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html');
+			require(['vs/code/browser/workbench/workbench'], function() {});
+		}); 
+	</script>
+</html>
