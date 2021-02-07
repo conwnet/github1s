@@ -474,7 +474,7 @@ class WindowIndicator implements IWindowIndicator {
 	// Home Indicator
 	const homeIndicator: IHomeIndicator = {
 		href: `https://github.com/${route.owner}/${route.repo}`,
-		icon: 'code',
+		icon: 'github',
 		title: localize('home', "Home")
 	};
 

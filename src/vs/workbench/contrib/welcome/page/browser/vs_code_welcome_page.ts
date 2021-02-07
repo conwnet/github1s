@@ -12,7 +12,7 @@ export default () => `
 		<div class="title">
 			<h1 class="caption">${escape(localize('welcomePage.vscode', "Visual Studio Code"))}</h1>
 			<p class="subtitle detail">
-				One second to view GitHub code in VS Code
+				One second to read GitHub code with VS Code
 			</p>
 		</div>
 		<div class="row">
