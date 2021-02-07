@@ -336,7 +336,7 @@ import { isStandalone } from 'vs/base/browser/browser';
 						return '${activeEditorShort}${separator}${rootName}'; // macOS has native dirty indicator
 					}
 
-					// modify-by-github1s change page title
+					// modify-by-github1s, change page title
 					const base = '${dirty}${activeEditorShort}${separator}${owner}/${repo}${separator}${appName}';
 					// if (isWeb) {
 					// 	return base + '${separator}${remoteName}'; // Web: always show remote name

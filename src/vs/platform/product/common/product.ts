@@ -21,7 +21,7 @@ if (isWeb || typeof require === 'undefined' || typeof require.__$__nodeRequire !
 	if (Object.keys(product).length === 0) {
 		Object.assign(product, {
 			version: '1.52.0-dev',
-			// modify-by-github1s change window title
+			// modify-by-github1s, change window title
 			// nameShort: isWeb ? 'Code Web - OSS Dev' : 'Code - OSS Dev',
 			// nameLong: isWeb ? 'Code Web - OSS Dev' : 'Code - OSS Dev',
 			nameShort: 'GitHub1s',
