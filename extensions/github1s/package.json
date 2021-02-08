@@ -40,21 +40,21 @@
     },
     "commands": [
       {
-				"command": "github1s.update-token",
-				"title": "Update GitHub OAuth Token",
-				"category": "GitHub1s"
-			},
+        "command": "github1s.update-token",
+        "title": "Update GitHub OAuth Token",
+        "category": "GitHub1s"
+      },
       {
-				"command": "github1s.validate-token",
-				"title": "Validate Current GitHub OAuth Token",
-				"category": "GitHub1s"
-			},
+        "command": "github1s.validate-token",
+        "title": "Validate Current GitHub OAuth Token",
+        "category": "GitHub1s"
+      },
       {
-				"command": "github1s.clear-token",
-				"title": "Clear Current GitHub OAuth Token",
-				"category": "GitHub1s"
-			}
-		]
+        "command": "github1s.clear-token",
+        "title": "Clear Current GitHub OAuth Token",
+        "category": "GitHub1s"
+      }
+    ]
   },
   "scripts": {
     "clean": "rm -rf dist out",
