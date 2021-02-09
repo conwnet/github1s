@@ -5,9 +5,15 @@ cd "$(dirname "${0}")/.."
 APP_ROOT=$(pwd)
 
 function main() {
-	# install github1s extension dependencies
-	cd ${APP_ROOT}/extensions/github1s
-	yarn ${CI+--frozen-lockfile}
+	# install github1s extensions dependencies
+	for entry in "${APP_ROOT}/extensions"/*
+	do
+		if [ -d "$entry" ]
+		then
+			cd $entry
+			yarn --frozen-lockfile
+		fi
+	done
 
 	# clone vscode and install dependencies
 	cd ${APP_ROOT}
@@ -15,7 +21,7 @@ function main() {
 	cd lib
 	git clone --depth 1 -b 1.52.1 https://github.com/microsoft/vscode.git vscode
 	cd vscode
-	yarn ${CI+--frozen-lockfile}
+	yarn --frozen-lockfile
 }
 
 main "$@"

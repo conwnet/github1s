@@ -59,6 +59,7 @@
   "scripts": {
     "clean": "rm -rf dist out",
     "build": "webpack --config extension.webpack.config.js --mode production",
+    "compile": "webpack --config extension.webpack.config.js --mode production",
     "dev": "webpack --config extension.webpack.config.js --watch"
   },
   "keywords": [],

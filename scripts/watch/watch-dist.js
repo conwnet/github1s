@@ -35,8 +35,8 @@ const autoSyncVscodeOut = async () => {
 };
 
 const autoSyncGitHub1sExtension = async () => {
-	const SOURCE = path.join(APP_ROOT, 'extensions/github1s');
-	const TARGET = path.join(APP_ROOT, 'dist/static/extensions/github1s');
+	const SOURCE = path.join(APP_ROOT, 'extensions');
+	const TARGET = path.join(APP_ROOT, 'dist/static/extensions');
 
 	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
 
@@ -47,7 +47,7 @@ const autoSyncGitHub1sExtension = async () => {
 };
 
 const main = () => {
-	fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'))
+	fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'));
 
 	autoSyncVscodeOut();
 	autoSyncGitHub1sExtension();

@@ -51,9 +51,14 @@ const scanBuiltinExtensions = () => {
 	return enableExtensions.map(item => getExtensionData(path.join(VSCODE_PATH, item.path))).filter(Boolean);
 };
 
+const scanGithub1sExtensions = () => {
+	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
+	return extensions.map(item => getExtensionData(path.join(APP_ROOT, 'extensions', item)));
+};
+
 const main = () => {
 	const CONFIGURE_PATH = path.join(APP_ROOT, 'dist/static/configure');
-	const extensions = [...scanBuiltinExtensions(), getExtensionData(path.join(APP_ROOT, 'extensions/github1s'))];
+	const extensions = [...scanBuiltinExtensions(), ...scanGithub1sExtensions()];
 
 	fs.ensureDirSync(CONFIGURE_PATH);
 	fs.writeFileSync(path.join(CONFIGURE_PATH, 'extensions.json'), JSON.stringify(extensions));

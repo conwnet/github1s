@@ -18,11 +18,14 @@ const main = () => {
 		);
 	});
 
-	fs.copySync(
-		path.join(APP_ROOT, 'extensions/github1s'),
-		path.join(TARGET_DIR, 'github1s'),
-		{ filter: src => !src.includes('node_modules') }
-	);
+	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
+	extensions.forEach(extension => {
+		fs.copySync(
+			path.join(APP_ROOT, 'extensions', extension),
+			path.join(TARGET_DIR, extension),
+			{ filter: src => !src.includes('node_modules') }
+		);
+	});
 };
 
 main();
