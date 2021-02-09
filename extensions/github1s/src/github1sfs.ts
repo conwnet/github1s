@@ -15,8 +15,9 @@ import {
 	FileType,
 	Uri,
 } from 'vscode';
-import { noop, dirname, reuseable,  b64DecodeUnicode} from './util';
+import { noop, dirname, reuseable } from './util';
 import { readGitHubDirectory, readGitHubFile } from './api';
+import { toUint8Array as decodeBase64 } from 'js-base64';
 
 export class File implements FileStat {
 	type: FileType;
@@ -174,9 +175,8 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return file.data;
 			}
 
-			const encoder = new TextEncoder();
 			return readGitHubFile(uri, file.sha).then(blob => {
-				file.data = encoder.encode(b64DecodeUnicode(blob.content));
+				file.data = decodeBase64(blob.content);
 				return file.data;
 			});
 		});

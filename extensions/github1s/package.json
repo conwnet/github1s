@@ -66,6 +66,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
     "p-finally": "^2.0.1",
     "webpack-cli": "^4.4.0"
