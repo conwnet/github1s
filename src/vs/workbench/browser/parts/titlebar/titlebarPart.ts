@@ -229,23 +229,23 @@ export class TitlebarPart extends Part implements ITitleService {
 	}
 
 	/**
-	 * Possible template values:
-	 *
-	 * {activeEditorLong}: e.g. /Users/Development/myFolder/myFileFolder/myFile.txt
-	 * {activeEditorMedium}: e.g. myFolder/myFileFolder/myFile.txt
-	 * {activeEditorShort}: e.g. myFile.txt
-	 * {activeFolderLong}: e.g. /Users/Development/myFolder/myFileFolder
-	 * {activeFolderMedium}: e.g. myFolder/myFileFolder
-	 * {activeFolderShort}: e.g. myFileFolder
-	 * {rootName}: e.g. myFolder1, myFolder2, myFolder3
-	 * {rootPath}: e.g. /Users/Development
-	 * {folderName}: e.g. myFolder
-	 * {folderPath}: e.g. /Users/Development/myFolder
-	 * {appName}: e.g. VS Code
-	 * {remoteName}: e.g. SSH
-	 * {dirty}: indicator
-	 * {separator}: conditional separator
-	 */
+	* Possible template values:
+	*
+	* {activeEditorLong}: e.g. /Users/Development/myFolder/myFileFolder/myFile.txt
+	* {activeEditorMedium}: e.g. myFolder/myFileFolder/myFile.txt
+	* {activeEditorShort}: e.g. myFile.txt
+	* {activeFolderLong}: e.g. /Users/Development/myFolder/myFileFolder
+	* {activeFolderMedium}: e.g. myFolder/myFileFolder
+	* {activeFolderShort}: e.g. myFileFolder
+	* {rootName}: e.g. myFolder1, myFolder2, myFolder3
+	* {rootPath}: e.g. /Users/Development
+	* {folderName}: e.g. myFolder
+	* {folderPath}: e.g. /Users/Development/myFolder
+	* {appName}: e.g. VS Code
+	* {remoteName}: e.g. SSH
+	* {dirty}: indicator
+	* {separator}: conditional separator
+	*/
 	private doGetWindowTitle(): string {
 		const editor = this.editorService.activeEditor;
 		const workspace = this.contextService.getWorkspace();
@@ -291,7 +291,7 @@ export class TitlebarPart extends Part implements ITitleService {
 		const remoteName = this.labelService.getHostLabel(Schemas.vscodeRemote, this.environmentService.remoteAuthority);
 		const separator = this.configurationService.getValue<string>('window.titleSeparator');
 		const titleTemplate = this.configurationService.getValue<string>('window.title');
-    const [owner, repo] = (folderName || '').split('+');
+	const [owner, repo] = (folderName || '').split('+');
 
 		return template(titleTemplate, {
 			activeEditorShort,

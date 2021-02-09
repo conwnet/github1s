@@ -398,12 +398,12 @@ class WindowIndicator implements IWindowIndicator {
 }
 
 (function () {
-  const route = parseGitHubUrl(window.location.href);
-  const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
-    folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
-    staticExtensions: [],
-    enableSyncByDefault: false,
-    webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
+	const route = parseGitHubUrl(window.location.href);
+	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
+		folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
+		staticExtensions: [],
+		enableSyncByDefault: false,
+		webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
 };
 
 	// Revive static extension locations

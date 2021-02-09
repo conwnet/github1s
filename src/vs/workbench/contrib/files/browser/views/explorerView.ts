@@ -233,7 +233,7 @@ export class ExplorerView extends ViewPane {
 			const currentFolderUri = workspace.folders?.[0].uri;
 			const textContent = (currentFolderUri && currentFolderUri.scheme === 'github1s' && currentFolderUri.authority)
 				? currentFolderUri.authority.split('+').slice(0, 2).join('/')
-        : this.name;
+	: this.name;
 			titleElement.textContent = textContent;
 			titleElement.title = title;
 			titleElement.setAttribute('aria-label', nls.localize('explorerSection', "Explorer Section: {0}", this.name));
@@ -583,9 +583,9 @@ export class ExplorerView extends ViewPane {
 	// General methods
 
 	/**
-	 * Refresh the contents of the explorer to get up to date data from the disk about the file structure.
-	 * If the item is passed we refresh only that level of the tree, otherwise we do a full refresh.
-	 */
+	* Refresh the contents of the explorer to get up to date data from the disk about the file structure.
+	* If the item is passed we refresh only that level of the tree, otherwise we do a full refresh.
+	*/
 	refresh(recursive: boolean, item?: ExplorerItem, cancelEditing: boolean = true): Promise<void> {
 		if (!this.tree || !this.isBodyVisible() || (item && !this.tree.hasNode(item))) {
 			// Tree node doesn't exist yet

@@ -10,12 +10,12 @@ import { setExtensionContext } from './util';
 import { commandUpdateToken, commandValidateToken, commandClearToken } from './commands';
 
 export function activate(context: vscode.ExtensionContext) {
-  setExtensionContext(context);
-  context.subscriptions.push(new GitHub1sFS());
+	setExtensionContext(context);
+	context.subscriptions.push(new GitHub1sFS());
 
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider(SettingsView.viewType, new SettingsView()));
+	context.subscriptions.push(vscode.window.registerWebviewViewProvider(SettingsView.viewType, new SettingsView()));
 
-  context.subscriptions.push(vscode.commands.registerCommand('github1s.validate-token', commandValidateToken));
+	context.subscriptions.push(vscode.commands.registerCommand('github1s.validate-token', commandValidateToken));
 	context.subscriptions.push(vscode.commands.registerCommand('github1s.update-token', commandUpdateToken));
 	context.subscriptions.push(vscode.commands.registerCommand('github1s.clear-token', commandClearToken));
-};
+}

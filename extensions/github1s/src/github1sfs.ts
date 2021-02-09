@@ -4,16 +4,16 @@
  */
 
 import {
-  workspace,
-  Disposable,
-  FileSystemProvider,
-  FileSystemError,
-  Event,
-  EventEmitter,
-  FileChangeEvent,
-  FileStat,
-  FileType,
-  Uri,
+	workspace,
+	Disposable,
+	FileSystemProvider,
+	FileSystemError,
+	Event,
+	EventEmitter,
+	FileChangeEvent,
+	FileStat,
+	FileType,
+	Uri,
 } from 'vscode';
 import { noop, dirname, reuseable,  b64DecodeUnicode} from './util';
 import { readGitHubDirectory, readGitHubFile } from './api';
@@ -62,24 +62,24 @@ export class Directory implements FileStat {
 export type Entry = File | Directory;
 
 export class GitHub1sFS implements FileSystemProvider, Disposable {
-  static scheme = 'github1s';
-  private readonly disposable: Disposable;
-  private _emitter = new EventEmitter<FileChangeEvent[]>();
-  private root: Directory = null;
+	static scheme = 'github1s';
+	private readonly disposable: Disposable;
+	private _emitter = new EventEmitter<FileChangeEvent[]>();
+	private root: Directory = null;
 
-  onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
+	onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
-  constructor() {
-    this.disposable = Disposable.from(
+	constructor() {
+		this.disposable = Disposable.from(
 			workspace.registerFileSystemProvider(GitHub1sFS.scheme, this, { isCaseSensitive: true, isReadonly: true }),
 		);
-  }
+	}
 
-  dispose() {
-    this.disposable?.dispose();
-  }
+	dispose() {
+		this.disposable?.dispose();
+	}
 
-  // --- lookup
+	// --- lookup
 	private async _lookup(uri: Uri, silent: false): Promise<Entry>;
 	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined>;
 	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined> {
@@ -110,9 +110,9 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		if (entry instanceof Directory) {
 			return entry;
 		}
-    if (!silent) {
-      throw FileSystemError.FileNotADirectory(uri);
-    }
+		if (!silent) {
+			throw FileSystemError.FileNotADirectory(uri);
+		}
 	}
 
 	private async _lookupAsFile(uri: Uri, silent: boolean): Promise<File> {
@@ -120,9 +120,9 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		if (entry instanceof File) {
 			return entry;
 		}
-    if (!silent) {
-      throw FileSystemError.FileIsADirectory(uri);
-    }
+		if (!silent) {
+			throw FileSystemError.FileIsADirectory(uri);
+		}
 	}
 
 	private _lookupParentDirectory(uri: Uri): Promise<Directory> {
@@ -130,16 +130,18 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		return this._lookupAsDirectory(_dirname, false);
 	}
 
-  watch(uri: Uri, options: { recursive: boolean; excludes: string[]; }): Disposable {
-    return new Disposable(noop);
-  }
+	watch(uri: Uri, options: { recursive: boolean; excludes: string[]; }): Disposable {
+		return new Disposable(noop);
+	}
 
-  stat(uri: Uri): FileStat | Thenable<FileStat> {
-    return this._lookup(uri, false);
-  }
+	stat(uri: Uri): FileStat | Thenable<FileStat> {
+		return this._lookup(uri, false);
+	}
 
-  readDirectory = reuseable((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
-    if (!uri.authority) throw FileSystemError.FileNotFound(uri);
+	readDirectory = reuseable((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
+		if (!uri.authority) {
+			throw FileSystemError.FileNotFound(uri);
+		}
 		return this._lookupAsDirectory(uri, false).then(parent => {
 			if (parent.entries !== null) {
 				const res = Array.from(parent.entries.values())
@@ -161,10 +163,12 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				});
 			});
 		});
-  }, (uri: Uri) => uri.toString());
+	}, (uri: Uri) => uri.toString());
 
 	readFile = reuseable((uri: Uri): Uint8Array | Thenable<Uint8Array> => {
-    if (!uri.authority) throw FileSystemError.FileNotFound(uri);
+		if (!uri.authority) {
+			throw FileSystemError.FileNotFound(uri);
+		}
 		return this._lookupAsFile(uri, false).then(file => {
 			if (file.data !== null) {
 				return file.data;
@@ -175,26 +179,26 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				file.data = encoder.encode(b64DecodeUnicode(blob.content));
 				return file.data;
 			});
-		})
-  }, (uri: Uri) => uri.toString());
+		});
+	}, (uri: Uri) => uri.toString());
 
-  createDirectory(uri: Uri): void | Thenable<void> {
-    return Promise.resolve();
-  }
+	createDirectory(uri: Uri): void | Thenable<void> {
+		return Promise.resolve();
+	}
 
-  writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
-    return Promise.resolve();
-  }
+	writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
+		return Promise.resolve();
+	}
 
-  delete(uri: Uri, options: { recursive: boolean; }): void | Thenable<void> {
-    return Promise.resolve();
-  }
+	delete(uri: Uri, options: { recursive: boolean; }): void | Thenable<void> {
+		return Promise.resolve();
+	}
 
-  rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-    return Promise.resolve();
-  }
+	rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean; }): void | Thenable<void> {
+		return Promise.resolve();
+	}
 
-  copy?(source: Uri, destination: Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-    return Promise.resolve();
-  }
+	copy?(source: Uri, destination: Uri, options: { overwrite: boolean; }): void | Thenable<void> {
+		return Promise.resolve();
+	}
 }
