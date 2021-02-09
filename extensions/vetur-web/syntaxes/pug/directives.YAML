@@ -1,0 +1,5 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+scopeName: vue.pug.directives
+injectionSelector: "L:meta.tag.other -text.html.vue-html"
+patterns:
+  - include: 'source.vue#vue-directives'
