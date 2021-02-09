@@ -7,7 +7,7 @@ const http = require('http');
 const handler = require('serve-handler');
 
 const APP_ROOT = path.join(__dirname, '..');
-const options = { public: path.join(APP_ROOT, 'dist'), cleanUrls: false, };
+const options = { public: path.join(APP_ROOT, 'dist'), cleanUrls: true, };
 
 const server = http.createServer((request, response) => {
   const urlObj = url.parse(request.url);

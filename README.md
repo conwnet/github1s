@@ -27,7 +27,7 @@ $ cd github1s
 $ yarn
 $ yarn watch
 $ yarn serve # in another shell
-$ # Then visit http://localhost:5000 once the build is completed.
+$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ## Build
