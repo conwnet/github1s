@@ -1,0 +1,65 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+	"ecmaVersion": 6,
+	"sourceType": "module"
+  },
+  "plugins": [
+	"@typescript-eslint",
+	"jsdoc"
+  ],
+  "rules": {
+	"constructor-super": "warn",
+	"curly": "warn",
+	"eqeqeq": "warn",
+	"no-buffer-constructor": "warn",
+	"no-caller": "warn",
+	"no-debugger": "warn",
+	"no-duplicate-case": "warn",
+	"no-duplicate-imports": "warn",
+	"no-eval": "warn",
+	"no-extra-semi": "warn",
+	"no-new-wrappers": "warn",
+	"no-redeclare": "off",
+	"no-sparse-arrays": "warn",
+	"no-throw-literal": "warn",
+	"no-unsafe-finally": "warn",
+	"no-unused-labels": "warn",
+	"no-restricted-globals": [
+		"warn",
+		"name",
+		"length",
+		"event",
+		"closed",
+		"external",
+		"status",
+		"origin",
+		"orientation",
+		"context"
+	], // non-complete list of globals that are easy to access unintentionally
+	"no-var": "warn",
+	"jsdoc/no-types": "warn",
+	"semi": "off",
+	"@typescript-eslint/semi": "warn",
+	"@typescript-eslint/naming-convention": [
+		"warn",
+		{
+			"selector": "class",
+			"format": [
+				"PascalCase"
+			]
+		}
+	]
+  },
+	"overrides": [
+		{
+				"files": [
+						"*.js"
+				],
+				"rules": {
+						"jsdoc/no-types": "off"
+				}
+		}
+	]
+}

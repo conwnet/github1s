@@ -54,8 +54,8 @@
 	<script>
 		fetch('/{STATIC_FOLDER}/configure/extensions.json').then(response => response.text()).then(extensionsJson => {
 			document.getElementById('vscode-workbench-builtin-extensions').setAttribute('data-settings', extensionsJson);
-      document.getElementById('vscode-extension-host-iframe-src').setAttribute('data-settings', '/{STATIC_FOLDER}/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html');
+	document.getElementById('vscode-extension-host-iframe-src').setAttribute('data-settings', '/{STATIC_FOLDER}/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html');
 			require(['vs/code/browser/workbench/workbench'], function() {});
-		}); 
+		});
 	</script>
 </html>

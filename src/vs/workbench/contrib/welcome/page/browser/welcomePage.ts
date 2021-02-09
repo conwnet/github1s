@@ -139,7 +139,7 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 
 	private registerListeners() {
 		this.editorService.onDidActiveEditorChange(() => this.doUpdateWindowUrl());
-	};
+	}
 }
 
 function isWelcomePageEnabled(configurationService: IConfigurationService, contextService: IWorkspaceContextService) {
@@ -401,10 +401,12 @@ class WelcomePage extends Disposable {
 		container.querySelector('.create-new-token')?.addEventListener('click', () => window?.open('https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s'));
 		container.querySelector('.update-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.update-token').then(() => this.refreshGitHubTokenStatus(container)));
 		container.querySelector('.clear-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.clear-token').then(() => this.refreshGitHubTokenStatus(container)));
-	};
+	}
 
 	updateElementText(element: HTMLElement, text: string | number, type?: 'SUCCESS' | 'WARNING' | 'ERROR') {
-		if (!element) return;
+		if (!element) {
+			return;
+		}
 		element.innerText = `${text}`;
 		element.classList.remove('text-warning', 'text-error', 'text-success');
 		if (type === 'SUCCESS') {
@@ -417,7 +419,7 @@ class WelcomePage extends Disposable {
 	}
 
 	getGitHubTokenStatus() {
-		return this.commandService.executeCommand('github1s.validate-token', true);	
+		return this.commandService.executeCommand('github1s.validate-token', true);
 	}
 
 	refreshGitHubTokenStatus(container: HTMLElement) {
@@ -445,15 +447,19 @@ class WelcomePage extends Disposable {
 		}
 
 		const textType = (value: number) => {
-			if (value <= 0) return 'ERROR';
-			if (value > 99) return 'SUCCESS';
-			return 'WARNING'; 
-		}
+			if (value <= 0) {
+				return 'ERROR';
+			}
+			if (value > 99) {
+				return 'SUCCESS';
+			}
+			return 'WARNING';
+		};
 		this.updateElementText(limitElement, tokenStatus.limit, textType(+tokenStatus.limit));
 		this.updateElementText(remainingElement, tokenStatus.remaining, textType(+tokenStatus.remaining));
 		this.updateElementText(resetElement, tokenStatus.reset);
 		this.updateElementText(timerElement, Math.max(tokenStatus.reset - Math.ceil(Date.now() / 1000), 0));
-	
+
 		if (!tokenStatus.token) {
 			this.updateElementText(statusElement, 'Unauthorized', 'WARNING');
 			return;

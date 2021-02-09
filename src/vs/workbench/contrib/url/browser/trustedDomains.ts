@@ -213,9 +213,9 @@ export async function readAuthenticationTrustedDomains(accessor: ServicesAccesso
 
 // modify by vscode
 const github1sDefaultTrustedDomains = [
-  '*.github.com',
-  '*.microsoft.com',
-  '*.github1s.com',
+	'*.github.com',
+	'*.microsoft.com',
+	'*.github1s.com',
 ];
 
 export function readStaticTrustedDomains(accessor: ServicesAccessor): IStaticTrustedDomains {

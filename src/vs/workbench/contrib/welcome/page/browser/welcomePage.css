@@ -18,32 +18,32 @@
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .text-warning {
-  color: #cca700;
+	color: #cca700;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .text-error {
-  color: #f48771;
+	color: #f48771;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .text-success {
-  color: #89d185
+	color: #89d185
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .refresh-button {
-  vertical-align: bottom;
-  cursor: pointer;
+	vertical-align: bottom;
+	cursor: pointer;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .refresh-button:hover {
-  color: #3794ff;
+	color: #3794ff;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .refresh-button:hover {
-  color: #3794ff;
+	color: #3794ff;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .refresh-button:active {
-  color: #094771;
+	color: #094771;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .row {
