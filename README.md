@@ -3,6 +3,8 @@
 
 One second to read GitHub code with VS Code.
 
+[Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
+
 ## Usage
 
 Just add `1s` after `github` and press `Enter` in browser address bar for any repository you want to read.
