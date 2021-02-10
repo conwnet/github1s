@@ -15,7 +15,7 @@ interface GitHubRouteState {
 
 export const parseGitHubUrl = (url: string): GitHubRouteState => {
 	const urlObj = new window.URL(url);
-	const parts = urlObj.pathname.split('/').filter(Boolean);
+	const parts = urlObj.pathname.split(/\/|%2F/g).filter(Boolean);
 	const hasFileType = ['tree', 'blob'].includes(parts[2]);
 	const hasBranchName = hasFileType && parts[3];
 
