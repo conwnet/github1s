@@ -9,7 +9,7 @@ function main() {
 	if [ "$VERCEL" = 1 ]; then
 		echo "On Vercel"
 		yum groupinstall "Development Tools"
-		yum install libX11-devel.x86_64 libxkbfile-devel.x86_64 libsecret-devel
+		yum install libX11-devel.x86_64 libxkbfile-devel.x86_64 libsecret-devel rsync
 	fi
 }
 
