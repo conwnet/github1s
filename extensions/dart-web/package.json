@@ -1,0 +1,96 @@
+{
+	"name": "dart-code",
+	"displayName": "Dart",
+	"description": "Dart language support and debugger for Visual Studio Code.",
+	"version": "3.20.0-dev",
+	"publisher": "Dart-Code",
+	"engines": {
+		"vscode": "^1.52.0"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"bugs": {
+		"url": "https://github.com/Dart-Code/Dart-Code/issues"
+	},
+	"homepage": "https://dartcode.org/",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Dart-Code/Dart-Code.git"
+	},
+	"categories": [
+		"Programming Languages",
+		"Snippets",
+		"Linters",
+		"Formatters",
+		"Debuggers"
+	],
+	"keywords": [
+		"dart",
+		"flutter",
+		"fuchsia",
+		"multi-root ready"
+	],
+	"icon": "media/dart.png",
+	"activationEvents": [
+		"onLanguage:dart"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "dart",
+				"extensions": [
+					".dart"
+				],
+				"aliases": [
+					"Dart"
+				],
+				"configuration": "./syntaxes/dart-language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "dart",
+				"scopeName": "source.dart",
+				"path": "./syntaxes/dart.json"
+			}
+		],
+		"colors": [
+			{
+				"id": "dart.closingLabels",
+				"description": "The color of the 'closing label' annotations shown against constructor, method invocations and lists that span multiple lines. If not supplied, the color for 'tab.inactiveForeground' will be used.",
+				"defaults": {
+					"dark": "tab.inactiveForeground",
+					"light": "tab.inactiveForeground",
+					"highContrast": "tab.inactiveForeground"
+				}
+			}
+		],
+		"semanticTokenScopes": [
+			{
+				"language": "dart",
+				"scopes": {
+					"keyword": [
+						"keyword"
+					],
+					"keyword.control": [
+						"keyword.control"
+					],
+					"property.declaration": [
+						"entity.name.function.member"
+					]
+				}
+			}
+		],
+		"configurationDefaults": {
+			"[dart]": {
+				"editor.tabSize": 2,
+				"editor.insertSpaces": true,
+				"editor.detectIndentation": false,
+				"editor.suggest.insertMode": "replace"
+			}
+		}
+	},
+	"scripts": {
+		"compile": "echo done",
+		"watch": "echo done"
+	}
+}

@@ -53,7 +53,7 @@ const scanBuiltinExtensions = () => {
 
 const scanGithub1sExtensions = () => {
 	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
-	return extensions.map(item => getExtensionData(path.join(APP_ROOT, 'extensions', item)));
+	return extensions.map(item => getExtensionData(path.join(APP_ROOT, 'extensions', item))).filter(Boolean);
 };
 
 const main = () => {
