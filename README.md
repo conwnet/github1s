@@ -5,6 +5,8 @@ One second to read GitHub code with VS Code.
 
 [Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
 
+[Bookmarklet (drag me to your browser's bookmark toolbar](javascript:(function()%7Bwindow.location.href%20%3D%20window.location.href.replace('github.com'%2C%20'github1s.com')%7D)())
+
 ## Usage
 
 Just add `1s` after `github` and press `Enter` in browser address bar for any repository you want to read.
