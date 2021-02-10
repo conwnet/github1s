@@ -17,9 +17,11 @@ For Example VS Code:
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
 
-### Chrome Extension
+### Browser Extensions
 
 [Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
+
+There will be a button on GitHub page after you install the extension:
 
 ![bQrnNlT](https://i.imgur.com/bQrnNlT.gif)
 
