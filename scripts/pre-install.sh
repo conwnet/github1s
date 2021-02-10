@@ -8,7 +8,8 @@ APP_ROOT=$(pwd)
 function main() {
 	if [ "$VERCEL" = 1 ]; then
 		echo "On Vercel"
-		yum install libx11-dev libxkbfile-dev libxkbfile-dev -y
+		yum groupinstall "Development Tools"
+		yum install libX11-devel.x86_64 libxkbfile-devel.x86_64 libsecret-devel
 	fi
 }
 
