@@ -1,0 +1,91 @@
+{
+	"name": "Kotlin",
+	"displayName": "Kotlin Language",
+	"description": "Kotlin language support for VS Code, this file is modified by github1s",
+	"version": "1.7.1",
+	"publisher": "mathiasfrohlich",
+	"license": "Apache-2.0",
+	"scripts": {
+		"compile": "echo done",
+		"watch": "echo done"
+	},
+	"engines": {
+		"vscode": "^1.8.0"
+	},
+	"icon": "artwork/icon.png",
+	"categories": [
+		"Programming Languages"
+	],
+	"bugs": {
+		"url": "https://github.com/mathiasfrohlich/vscode-kotlin/issues"
+	},
+	"homepage": "https://github.com/mathiasfrohlich/vscode-kotlin",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mathiasfrohlich/vscode-kotlin.git"
+	},
+	"keywords": [
+		"Kotlin",
+		"kotlin",
+		"kt",
+		"kts"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "kotlin",
+				"aliases": [
+					"Kotlin",
+					"kotlin"
+				],
+				"extensions": [
+					".kt"
+				],
+				"configuration": "./kotlin.configuration.json"
+			},
+			{
+				"id": "kotlinscript",
+				"aliases": [
+					"Kotlinscript",
+					"kotlinscript"
+				],
+				"extensions": [
+					".kts"
+				],
+				"configuration": "./kotlin.configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "kotlin",
+				"scopeName": "source.kotlin",
+				"path": "./syntaxes/Kotlin.tmLanguage"
+			},
+			{
+				"language": "kotlinscript",
+				"scopeName": "source.kotlin",
+				"path": "./syntaxes/Kotlin.tmLanguage"
+			},
+			{
+				"scopeName": "markdown.kotlin.codeblock",
+				"path": "./syntaxes/codeblock.json",
+				"injectTo": [
+					"text.html.markdown"
+				],
+				"embeddedLanguages": {
+					"meta.embedded.block.kotlin": "kotlin"
+				}
+			}
+		],
+		"snippets": [
+			{
+				"language": "kotlin",
+				"path": "./snippets/kotlin.json"
+			},
+			{
+				"language": "kotlinscript",
+				"path": "./snippets/kotlin.json"
+			}
+		]
+	}
+}
