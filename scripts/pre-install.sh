@@ -8,7 +8,7 @@ APP_ROOT=$(pwd)
 function main() {
 	if [ "$VERCEL" = 1 ]; then
 		echo "On Vercel"
-		amazon-linux-extras install xkbfile
+		yum install libx11-dev libxkbfile-dev libxkbfile-dev -y
 	fi
 }
 
