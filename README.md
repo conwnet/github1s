@@ -3,15 +3,11 @@
 
 One second to read GitHub code with VS Code.
 
-[Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
-
-Or Save as a bookmarklet (GitHub markdown doesn't allow js links, just copy it into a bookmark) 
-
-```
-javascript: window.location.href = window.location.href.replace('github.com', 'github1s.com')
-```
-
 ## Usage
+
+There are mutliple ways to use this web app:
+
+### Manually change the URL
 
 Just add `1s` after `github` and press `Enter` in browser address bar for any repository you want to read.
 
@@ -20,6 +16,21 @@ For Example VS Code:
 [https://github1s.com/microsoft/vscode](https://github1s.com/microsoft/vscode)
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
+
+### Chrome Extension
+
+[Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
+
+![bQrnNlT](https://i.imgur.com/bQrnNlT.gif)
+
+### Bookmarklet
+
+Save below code as a bookmarklet, and click the bookmarket on GitHub page. (GitHub markdown doesn't allow js links, just copy it into a bookmark)
+
+```
+javascript: window.location.href = window.location.href.replace('github.com', 'github1s.com')
+```
+
 
 ## Demo
 
