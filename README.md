@@ -3,7 +3,7 @@
 
 One second to read GitHub code with VS Code.
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/users/lodjfmkfbfkpdhnhkcdcoonghhghbkhe)](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
+[Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
 
 ## Usage
 
