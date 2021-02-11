@@ -1,0 +1,111 @@
+{
+  "scopeName": "source.ocaml.opam",
+  "fileTypes": ["opam"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#fields" },
+    { "include": "#values" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "comment": "block comment",
+          "name": "comment.block.opam",
+          "begin": "\\(\\*",
+          "end": "\\*\\)"
+        },
+        {
+          "comment": "line comment",
+          "name": "comment.line.opam",
+          "begin": "#",
+          "end": "$"
+        }
+      ]
+    },
+
+    "fields": {
+      "comment": "labeled field",
+      "match": "^([[:word:]-]*[[:alpha:]][[:word:]-]*)(:)",
+      "captures": {
+        "1": { "name": "entity.name.tag.opam" },
+        "2": { "name": "keyword.operator.opam" }
+      }
+    },
+
+    "values": {
+      "patterns": [
+        {
+          "comment": "boolean literal",
+          "name": "constant.language.opam",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "integer literal",
+          "name": "constant.numeric.decimal.opam",
+          "match": "(\\b|\\-?)[[:digit:]]+\\b"
+        },
+        {
+          "comment": "double-quote string literal",
+          "name": "string.quoted.double.opam",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "include": "#string-elements" }]
+        },
+        {
+          "comment": "triple-double-quote string literal",
+          "name": "string.quoted.triple-double.opam",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [{ "include": "#string-elements" }]
+        },
+        {
+          "comment": "operator",
+          "name": "keyword.operator.opam",
+          "match": "[!=<>\\|&?:]+"
+        },
+        {
+          "comment": "identifier",
+          "match": "\\b([[:word:]+-]+)\\b",
+          "name": "variable.parameter.opam"
+        }
+      ]
+    },
+
+    "string-elements": {
+      "patterns": [
+        {
+          "comment": "escaped backslash",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\\\\\"
+        },
+        {
+          "comment": "escaped quote or whitespace",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\[\"ntbr\\n]"
+        },
+        {
+          "comment": "character from decimal ASCII code",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\[[:digit:]]{3}"
+        },
+        {
+          "comment": "character from hexadecimal ASCII code",
+          "name": "constant.character.escape.opam",
+          "match": "\\\\x[[:xdigit:]]{2}"
+        },
+        {
+          "comment": "variable interpolation",
+          "name": "constant.variable.opam",
+          "begin": "%\\{",
+          "end": "}\\%"
+        },
+        {
+          "comment": "unknown escape sequence",
+          "name": "invalid.illegal.unknown-escape.opam",
+          "match": "\\\\."
+        }
+      ]
+    }
+  }
+}

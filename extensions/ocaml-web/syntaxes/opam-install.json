@@ -1,0 +1,23 @@
+{
+  "scopeName": "source.ocaml.opam-install",
+  "fileTypes": ["install"],
+  "patterns": [
+    {
+      "name": "comment.line.opam-install",
+      "begin": "#",
+      "end": "$"
+    },
+    {
+      "match": "^[[:space:]]*(lib|lib_root|libexec|libexec_root|bin|sbin|toplevel|share|share_root|etc|doc|stublibs|man|misc)[[:space:]]*(:)",
+      "captures": {
+        "1": { "name": "entity.name.tag.opam-install" },
+        "2": { "name": "keyword.operator.opam-install" }
+      }
+    },
+    {
+      "name": "string.quoted.double.opam-install",
+      "begin": "\"",
+      "end": "\""
+    }
+  ]
+}

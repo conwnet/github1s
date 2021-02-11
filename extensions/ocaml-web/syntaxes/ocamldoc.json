@@ -1,0 +1,31 @@
+{
+  "scopeName": "source.ocaml.ocamldoc",
+  "name": "comment.other.ocamldoc",
+  "fileTypes": ["mld"],
+  "patterns": [
+    {
+      "name": "comment.other.ocamldoc",
+      "begin": "",
+      "end": "",
+      "patterns": [{ "include": "#markup" }]
+    }
+  ],
+  "repository": {
+    "markup": {
+      "patterns": [
+        {
+          "comment": "ocamldoc documentation tag",
+          "name": "keyword.doc-tag.ocamldoc",
+          "match": "\\@[[:lower:]]+"
+        },
+        {
+          "comment": "embedded ocaml source",
+          "begin": "\\[",
+          "end": "\\]",
+          "contentName": "source.embedded.ocamldoc",
+          "patterns": [{ "include": "source.ocaml" }]
+        }
+      ]
+    }
+  }
+}

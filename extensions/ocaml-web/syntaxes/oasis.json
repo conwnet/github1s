@@ -1,0 +1,69 @@
+{
+  "scopeName": "source.ocaml.oasis",
+  "fileTypes": ["_oasis"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#fields" },
+    { "include": "#sections" },
+    { "include": "#conditionals" },
+    { "include": "#substitution" }
+  ],
+  "repository": {
+    "comments": {
+      "comment": "line comment",
+      "name": "comment.line.oasis",
+      "begin": "#",
+      "end": "$"
+    },
+
+    "fields": {
+      "comment": "labeled field",
+      "match": "^[[:space:]]*([[:word:]]+)(:|\\+:|\\$:)",
+      "captures": {
+        "1": { "name": "entity.name.tag.oasis" },
+        "2": { "name": "keyword.operator.oasis" }
+      }
+    },
+
+    "sections": {
+      "comment": "labeled section",
+      "begin": "^[[:space:]]*(Flag|Library|Object|Executable|Document|Test|SourceRepository)",
+      "beginCaptures": { "1": { "name": "keyword.other.oasis" } },
+      "end": "$",
+      "contentName": "string.other.oasis"
+    },
+
+    "conditionals": {
+      "patterns": [
+        {
+          "comment": "if condition",
+          "name": "keyword.other.oasis",
+          "match": "\\b(if|else)\\b"
+        },
+        {
+          "comment": "operators",
+          "name": "keyword.operator.oasis",
+          "match": "(!|&&|\\|\\|)"
+        },
+        {
+          "comment": "boolean",
+          "name": "constant.language.oasis",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "tests",
+          "begin": "\\b(os_type|system|architecture|ccomp_type|ocaml_version|flag)\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "entity.name.function.oasis" }
+          }
+        }
+      ]
+    },
+
+    "substitution": {
+      "match": "\\$[[:word:]]+",
+      "name": "constant.language.oasis"
+    }
+  }
+}

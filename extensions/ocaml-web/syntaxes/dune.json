@@ -1,0 +1,349 @@
+{
+  "name": "dune",
+  "scopeName": "source.dune",
+  "fileTypes": ["dune", "jbuild"],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "meta.stanza.dune",
+      "begin": "\\([[:space:]]*(library|rule|executable|executables|rule|ocamllex|ocamlyacc|menhir|install|alias|copy_files|copy_files#|jbuild_version|include)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "meta.class.stanza.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.library.field.dune",
+      "begin": "\\([[:space:]]*(name|public_name|synopsis|install_c_headers|ppx_runtime_libraries|c_flags|cxx_flags|c_names|cxx_names|library_flags|c_library_flags|virtual_deps|modes|kind|wrapped|optional|self_build_stubs_archive|no_dynlink|ppx\\.driver)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.rule.dune",
+      "begin": "\\([[:space:]]*(targets|deps|locks|loc|mode|action)[[:space:]]",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "end": "\\)",
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.mono-sexp.dune",
+      "match": "\\([[:space:]]*(fallback|optional)[[:space:]]*\\)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      }
+    },
+    {
+      "name": "meta.stanza.rule.action.dune",
+      "begin": "\\([[:space:]]*(run|chdir|setenv|with-stdout-to|with-stderr-to|with-outputs-to|ignore-stdout|ignore-stderr|ignore-outputs|progn|echo|cat|copy|copy#|system|bash|write-file|diff|diff\\?)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.action.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.install.dune",
+      "begin": "\\([[:space:]]*(section)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "name": "constant.language.rule.mode.dune",
+          "match": "\\b(lib|libexec|bin|sbin|toplevel|share|share_root|etc|doc|stublibs|man|misc)\\b"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.install.dune",
+      "begin": "\\([[:space:]]*(files)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.library.kind.dune",
+      "begin": "\\([[:space:]]*(normal|ppx_deriver|ppx_rewriter)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "constant.language.rule.mode.dune"
+        }
+      }
+    },
+    {
+      "name": "meta.stanza.executables.dune",
+      "begin": "\\([[:space:]]*(name|link_executables|link_flags|modes)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.lib-or-exec.buildable.dune",
+      "begin": "\\([[:space:]]*(preprocess|preprocessor_deps|lint|modules|modules_without_implementation|libraries|flags|ocamlc_flags|ocamlopt_flags|js_of_ocaml|allow_overlapping_dependencies|per_module)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.lib-or-exec.buildable.preprocess.dune",
+      "begin": "\\([[:space:]]*(no_preprocessing|action|pps)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.lib-or-exec.buildable.preprocess_deps.dune",
+      "begin": "\\([[:space:]]*(file|alias|alias_rec|glob_files|files_recursively_in)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "meta.stanza.lib-or-exec.buildable.libraries.dune",
+      "begin": "\\([[:space:]]*(select)[[:space:]]",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.dune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
+      "name": "constant.numeric.dune",
+      "match": "\\b\\d+\\b"
+    },
+    {
+      "name": "constant.language.dune",
+      "match": "(true|false)"
+    },
+    {
+      "name": "keyword.other.dune",
+      "match": "[[:space:]](as|from|->)[[:space:]]"
+    },
+    {
+      "name": "keyword.other.dune",
+      "match": "(\\!)"
+    },
+    {
+      "name": "constant.language.flag.dune",
+      "match": "(:\\w+)\\b"
+    },
+    {
+      "name": "constant.language.rule.mode.dune",
+      "match": "\\b(standard|fallback|promote|promote-until-then)\\b"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#variable"
+    },
+    {
+      "include": "#list"
+    },
+    {
+      "include": "#atom"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.dune",
+          "begin": "#\\|",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.begin.dune"
+            }
+          },
+          "end": "\\|#",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.end.dune"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "name": "comment.sexp.dune",
+          "begin": "#;[[:space:]]*\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "#comment-inner"
+            }
+          ]
+        },
+        {
+          "name": "comment.line.dune",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "comment-inner": {
+      "patterns": [
+        {
+          "name": "comment.sexp.inner.dune",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "#comment-inner"
+            }
+          ]
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.dune",
+          "begin": "(?=[^\\\\])(\")",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.dune"
+            }
+          },
+          "end": "(\")",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.dune"
+            }
+          },
+          "patterns": [
+            {
+              "name": "constant.character.string.escape.dune",
+              "match": "\\\\\""
+            },
+            {
+              "include": "#variable"
+            }
+          ]
+        }
+      ]
+    },
+    "variable": {
+      "patterns": [
+        {
+          "name": "variable.other.dune",
+          "match": "\\${[^}]*}"
+        }
+      ]
+    },
+    "list": {
+      "patterns": [
+        {
+          "name": "meta.list.dune",
+          "begin": "(\\()",
+          "end": "(\\))",
+          "captures": {
+            "1": {
+              "name": "entity.tag.list.parenthesis.dune"
+            }
+          },
+          "comment": "ok, for this one, I didn't know what to choose",
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "atom": {
+      "patterns": [
+        {
+          "name": "meta.atom.dune",
+          "match": "\\b[^[[:space:]]]+\\b"
+        }
+      ]
+    }
+  }
+}

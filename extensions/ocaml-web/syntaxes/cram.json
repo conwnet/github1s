@@ -1,0 +1,160 @@
+{
+  "scopeName": "source.cram",
+  "fileTypes": ["t"],
+  "patterns": [
+    {
+      "comment": "command",
+      "match": "^  (\\$|>) (.*)$",
+      "captures": {
+        "1": { "name": "keyword.operator.cram" },
+        "2": {
+          "name": "source.cram",
+          "patterns": [{ "include": "#escape" }, { "include": "#strings" }]
+        }
+      }
+    },
+    {
+      "comment": "regex output",
+      "match": "^  (.*) \\((re)\\)$",
+      "captures": {
+        "1": {
+          "name": "string.other.cram",
+          "patterns": [{ "include": "#regex" }]
+        },
+        "2": { "name": "keyword.other.cram" }
+      }
+    },
+    {
+      "comment": "glob output",
+      "match": "^  (.*) \\((glob)\\)$",
+      "captures": {
+        "1": {
+          "name": "string.other.cram",
+          "patterns": [{ "include": "#glob" }]
+        },
+        "2": { "name": "keyword.other.cram" }
+      }
+    },
+    {
+      "comment": "no end-of-line output",
+      "match": "^  (.*) \\((no-eol)\\)$",
+      "captures": {
+        "1": { "name": "string.other.cram" },
+        "2": { "name": "keyword.other.cram" }
+      }
+    },
+    {
+      "comment": "escaped output",
+      "match": "^  (.*) \\((esc)\\)$",
+      "captures": {
+        "1": {
+          "name": "string.other.cram",
+          "patterns": [{ "include": "#escape" }]
+        },
+        "2": { "name": "keyword.other.cram" }
+      }
+    },
+    {
+      "comment": "output",
+      "match": "^  (.*)$",
+      "captures": {
+        "1": { "name": "string.other.cram" }
+      }
+    },
+    {
+      "comment": "everything else is a comment",
+      "name": "comment.line.cram",
+      "match": "^.*$"
+    }
+  ],
+  "repository": {
+    "escape": {
+      "patterns": [
+        {
+          "comment": "octal escape",
+          "name": "constant.character.escape.cram",
+          "match": "\\\\0[[:digit:]]+"
+        },
+        {
+          "comment": "hex escape",
+          "name": "constant.character.escape.cram",
+          "match": "\\\\x[[:xdigit:]]{2}"
+        },
+        {
+          "comment": "other escaped character",
+          "name": "constant.character.escape.cram",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.cram",
+          "begin": "\"",
+          "end": "\"|$",
+          "patterns": [{ "include": "#escape" }]
+        },
+        {
+          "name": "string.quoted.single.cram",
+          "begin": "'",
+          "end": "'|$",
+          "patterns": [{ "include": "#escape" }]
+        }
+      ]
+    },
+    "glob": {
+      "patterns": [
+        {
+          "name": "keyword.other.cram",
+          "match": "[*?]"
+        },
+        {
+          "name": "keyword.other.cram",
+          "match": "\\\\[*?\\\\]"
+        }
+      ]
+    },
+    "regex": {
+      "patterns": [
+        {
+          "name": "keyword.other.regex",
+          "match": "\\\\."
+        },
+        {
+          "name": "keyword.other.regex",
+          "match": "[|^$]"
+        },
+        {
+          "begin": "\\[\\^?",
+          "end": "\\]",
+          "beginCaptures": [{ "name": "keyword.other.regex" }],
+          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "contentName": "source.regex",
+          "patterns": [{ "name": "keyword.other.regex", "match": "-" }]
+        },
+        {
+          "begin": "\\((\\?[:=!])?",
+          "end": "\\)",
+          "beginCaptures": [{ "name": "keyword.other.regex" }],
+          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "contentName": "source.regex",
+          "patterns": [{ "include": "#regex" }]
+        },
+        {
+          "begin": "{",
+          "end": "}",
+          "beginCaptures": [{ "name": "keyword.other.regex" }],
+          "endCaptures": [{ "name": "keyword.other.regex" }],
+          "contentName": "source.regex",
+          "patterns": [
+            {
+              "name": "constant.numeric.decimal.integer.regex",
+              "match": "[[:digit:]]+"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

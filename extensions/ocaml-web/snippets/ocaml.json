@@ -1,0 +1,54 @@
+{
+  "lambda": {
+    "prefix": "fun",
+    "body": ["fun (${1:pattern}) -> ${2:${1:pattern}}"]
+  },
+  "let .. in": {
+    "prefix": "let",
+    "body": ["let ${1:pattern} = ${2:()} in$0"]
+  },
+  "function": {
+    "prefix": "func",
+    "body": ["function\n| $0"]
+  },
+  "variant pattern": {
+    "prefix": "|",
+    "body": ["| ${1:_} -> $0"]
+  },
+  "let (toplevel)": {
+    "prefix": "let",
+    "body": ["let ${1:pattern} = $0"]
+  },
+  "val": {
+    "prefix": "val",
+    "body": ["val ${1:name} : $0"]
+  },
+  "sig": {
+    "prefix": "sig",
+    "body": ["sig\n  ${1}\nend$0"]
+  },
+  "struct": {
+    "prefix": "struct",
+    "body": ["struct\n  ${1}\nend$0"]
+  },
+  "module": {
+    "prefix": "module",
+    "body": ["module ${1:M} = struct\n  ${2}\nend$0"]
+  },
+  "module signature": {
+    "prefix": "module",
+    "body": ["module ${1:M} : sig\n  ${2}\nend$0"]
+  },
+  "module type": {
+    "prefix": "module",
+    "body": ["module type ${1:M} = sig\n  ${2}\nend$0"]
+  },
+  "match": {
+    "prefix": "match",
+    "body": ["match ${1:scrutinee} with\n| ${2:pattern} -> ${3:${2:pattern}}"]
+  },
+  "type declaration": {
+    "prefix": "type",
+    "body": ["type ${1:name} = $0"]
+  }
+}

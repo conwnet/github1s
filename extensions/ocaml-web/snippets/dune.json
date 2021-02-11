@@ -1,0 +1,30 @@
+{
+  "env": {
+    "prefix": "env",
+    "body": ["(env\n ($1 $2))"]
+  },
+  "executable": {
+    "prefix": "executable",
+    "body": ["(executable\n (name $1)\n (public_name $2)\n (libraries $3))"]
+  },
+  "executables": {
+    "prefix": "executables",
+    "body": ["(executables\n (names $1)\n (public_names $2)\n (libraries $3))"]
+  },
+  "install": {
+    "prefix": "install",
+    "body": ["(install\n (section $1)\n (files ($2.exe as $3)))"]
+  },
+  "library": {
+    "prefix": "library",
+    "body": ["(library\n (name $1)\n (public_name $2)\n (libraries $3))"]
+  },
+  "rule": {
+    "prefix": "rule",
+    "body": ["(rule\n (alias $1)\n (deps $2)\n (targets $3)\n (action $4))"]
+  },
+  "test": {
+    "prefix": "test",
+    "body": ["(test\n (name $1)\n (libraries $2))"]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "lang": {
+    "prefix": "lang",
+    "body": ["(lang $1 $2)"]
+  },
+  "name": {
+    "prefix": "name",
+    "body": ["(name $1)"]
+  },
+  "using": {
+    "prefix": "using",
+    "body": ["(using $1 $2)"]
+  },
+  "info": {
+    "prefix": "info",
+    "body": [
+      "(license $1)\n(authors \"$2\")\n(maintainers \"$3\")\n(source (${4|uri,github|} $5))\n(bug_reports \"$6\")\n(homepage \"$7\")\n(documentation \"$8\")"
+    ]
+  },
+  "package": {
+    "prefix": "package",
+    "body": [
+      "(package\n (name $1)\n (synopsis \"$2\")\n (description \"$3\")\n (depends $4))"
+    ]
+  }
+}

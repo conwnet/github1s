@@ -1,0 +1,57 @@
+{
+  "name": "ATD",
+  "scopeName": "source.atd",
+  "fileTypes": ["atd"],
+  "patterns": [
+    { "include": "source.ocaml#comments" },
+    { "include": "source.ocaml#strings" },
+    { "include": "#annotations" },
+    { "include": "#definitions" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "source.ocaml#operators" },
+    { "include": "source.ocaml#identifiers" }
+  ],
+  "repository": {
+    "annotations": {
+      "patterns": [
+        {
+          "begin": "(<)[[:space:]]*([[:lower:]_][[:word:]']*)",
+          "end": ">",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.atd" },
+            "2": { "name": "keyword.other.atd" }
+          },
+          "endCaptures": [{ "name": "keyword.other.atd" }],
+          "patterns": [{ "include": "$self" }]
+        }
+      ]
+    },
+    "definitions": {
+      "match": "\\b(type)[[:space:]]+('[[:alpha:]][[:word:]']*[[:space:]]+|\\(.*\\)[[:space:]]*)?([[:lower:]_][[:word:]']*)",
+      "captures": {
+        "1": { "name": "keyword.other.atd" },
+        "2": { "patterns": [{ "include": "$self" }] },
+        "3": { "name": "entity.name.function.binding.atd" }
+      }
+    },
+    "keywords": {
+      "name": "keyword.other.atd",
+      "match": "\\b(type|of|inherit)\\b(?!')"
+    },
+    "types": {
+      "patterns": [
+        {
+          "comment": "type parameter",
+          "name": "storage.type.ocaml.atd",
+          "match": "'[[:alpha:]][[:word:]']*\\b"
+        },
+        {
+          "comment": "builtin type",
+          "name": "support.type.ocaml.atd",
+          "match": "\\b(unit|bool|int|float|string|abstract)\\b"
+        }
+      ]
+    }
+  }
+}

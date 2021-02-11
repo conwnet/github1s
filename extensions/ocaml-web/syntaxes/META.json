@@ -1,0 +1,56 @@
+{
+  "scopeName": "source.ocaml.META",
+  "fileTypes": ["META"],
+  "patterns": [{ "include": "#comments" }, { "include": "#entries" }],
+  "repository": {
+    "comments": {
+      "comment": "line comment",
+      "name": "comment.line.META",
+      "begin": "#",
+      "end": "$"
+    },
+    "entries": {
+      "patterns": [
+        {
+          "comment": "assignment or addition",
+          "match": "\\b([[:word:].]+)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
+          "captures": {
+            "1": { "name": "entity.name.tag.META" },
+            "2": { "name": "keyword.operator.META" },
+            "3": { "name": "string.quoted.double.META" }
+          }
+        },
+        {
+          "comment": "assignment or addition with formal predicates",
+          "begin": "\\b([[:word:].]+)[[:space:]]*\\(",
+          "beginCaptures": {
+            "1": { "name": "entity.name.tag.META" }
+          },
+          "end": "\\)[[:space:]]*(\\+?=)[[:space:]]*(\".*\")",
+          "endCaptures": {
+            "1": { "name": "keyword.operator.META" },
+            "2": { "name": "string.quoted.double.META" }
+          },
+          "patterns": [
+            { "match": "-", "name": "keyword.operator.META" },
+            {
+              "comment": "standard predicates",
+              "match": "\\b(byte|native|toploop|mt|mt_posix|mt_vm|gprof|autolink)\\b",
+              "name": "constant.language.META"
+            }
+          ]
+        },
+        {
+          "comment": "subpackage",
+          "begin": "\\b(package)[[:space:]]*(\"[^.]*\")[[:space:]]*\\(",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.META" },
+            "2": { "name": "string.quoted.double.META" }
+          },
+          "end": "\\)",
+          "patterns": [{ "include": "$self" }]
+        }
+      ]
+    }
+  }
+}
