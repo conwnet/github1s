@@ -1,0 +1,314 @@
+{
+	"snippet.assert": {
+		"body": ["assert ${1:expression}"],
+		"description": "Code snippet for testing 'assert'",
+		"prefix": "as",
+		"scope": "v,vlang"
+	},
+	"snippet.break": {
+		"body": ["break$0"],
+		"description": "Code snippet for 'break'",
+		"prefix": "br",
+		"scope": "v,vlang"
+	},
+	"snippet.const": {
+		"body": ["const ${1:name} = ${2:value}"],
+		"description": "Code snippet for 'const'",
+		"prefix": "co",
+		"scope": "v,vlang"
+	},
+	"snippet.const.multiply": {
+		"body": ["const (", "\t$0", ")"],
+		"description": "Code snippet for multiply 'const'",
+		"prefix": "cons",
+		"scope": "v,vlang"
+	},
+	"snippet.continue": {
+		"body": ["continue$0"],
+		"description": "Code snippet for 'continue'",
+		"prefix": "con",
+		"scope": "v,vlang"
+	},
+	"snippet.defer": {
+		"body": ["defer ${1:function}($0)"],
+		"description": "Code snippet for 'defer' function",
+		"prefix": "def",
+		"scope": "v,vlang"
+	},
+	"snippet.else": {
+		"body": ["else {", "\t$0", "}"],
+		"description": "Code snippet for 'else' statement",
+		"prefix": "el",
+		"scope": "v,vlang"
+	},
+	"snippet.elseif": {
+		"body": ["else if ${1:expression} {", "\t$0", "}"],
+		"description": "Code snippet for 'else if' statement",
+		"prefix": "elf",
+		"scope": "v,vlang"
+	},
+	"snippet.enum": {
+		"body": ["enum ${1:name} {", "\t$0", "}"],
+		"description": "Code snippet for 'enum'",
+		"prefix": "en",
+		"scope": "v,vlang"
+	},
+	"snippet.flag": {
+		"body": ["#flag ${1:-flag}"],
+		"description": "Code snippet for '#flag'",
+		"prefix": "fl",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.eprint": {
+		"body": ["eprint('${1:text}')"],
+		"description": "Code snippet for standart based function 'eprint'",
+		"prefix": "epr",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.eprintln": {
+		"body": ["eprintln('${1:text}')"],
+		"description": "Code snippet for standart based function 'eprintln'",
+		"prefix": "eprl",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.init": {
+		"body": ["fn init() {", "\t$0", "}"],
+		"description": "Code snippet for 'init' function",
+		"prefix": "finit",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.main": {
+		"body": ["fn main() {", "\t$0", "}"],
+		"description": "Code snippet for 'main' function",
+		"prefix": "fmain",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.print": {
+		"body": ["print('${1:text}')"],
+		"description": "Code snippet for standart based function 'print'",
+		"prefix": "pr",
+		"scope": "v,vlang"
+	},
+	"snippet.fn.println": {
+		"body": ["println('${1:text}')"],
+		"description": "Code snippet for standart based function 'println'",
+		"prefix": "prl",
+		"scope": "v,vlang"
+	},
+	"snippet.for": {
+		"body": ["for {", "\t$0", "}"],
+		"description": "Code snippet for pure infinity loop 'for'",
+		"prefix": "for",
+		"scope": "v,vlang"
+	},
+	"snippet.for.index": {
+		"body": ["for ${1:i} := 0; $1 < ${3:count}; $1++ {", "\t$0", "}"],
+		"description": "Code snippet for index loop 'for'",
+		"prefix": "for",
+		"scope": "v,vlang"
+	},
+	"snippet.foreach": {
+		"body": ["for ${1:variable} in ${2:array} {", "\t$0", "}"],
+		"description": "Code snippet for foreach 'for'",
+		"prefix": "fore",
+		"scope": "v,vlang"
+	},
+	"snippet.foreach.index": {
+		"body": ["for ${1:_}, ${2:variable} in ${3:array} {", "\t$0", "}"],
+		"description": "Code snippet for index based loop 'for'",
+		"prefix": "fore",
+		"scope": "v,vlang"
+	},
+	"snippet.function": {
+		"body": ["fn ${1:name}() {", "\t$0", "}"],
+		"description": "Code snippet for function 'fn'",
+		"prefix": "fn",
+		"scope": "v,vlang"
+	},
+	"snippet.go": {
+		"body": ["go ${1:function}($0)"],
+		"description": "Code snippet for concurrency 'go'",
+		"prefix": "go",
+		"scope": "v,vlang"
+	},
+	"snippet.goto": {
+		"body": ["goto ${1:label}"],
+		"description": "Code snippet for 'goto' label",
+		"prefix": "got",
+		"scope": "v,vlang"
+	},
+	"snippet.if": {
+		"body": ["if ${1:expression} {", "\t$0", "}"],
+		"description": "Code snippet for 'if' statement",
+		"prefix": "if",
+		"scope": "v,vlang"
+	},
+	"snippet.if.compile": {
+		"body": ["\\$if ${1:expression} {", "\t$0", "}"],
+		"description": "Code snippet for compile time 'if'",
+		"prefix": "$i",
+		"scope": "v,vlang"
+	},
+	"snippet.ifelse": {
+		"body": ["if ${1:expression} {", "\t$0", "} else {", "\t$0", "}"],
+		"description": "Code snippet for 'if-else' statement",
+		"prefix": "ie",
+		"scope": "v,vlang"
+	},
+	"snippet.import": {
+		"body": ["import ${1:module}"],
+		"description": "Code snippet for 'import' module",
+		"prefix": "imp",
+		"scope": "v,vlang"
+	},
+	"snippet.include": {
+		"body": ["#include <${1:name}>"],
+		"description": "Code snippet for C '#include'",
+		"prefix": "inc",
+		"scope": "v,vlang"
+	},
+	"snippet.interface": {
+		"body": ["interface ${1:name} {$0}"],
+		"description": "Code snippet for 'interface'",
+		"prefix": "inte",
+		"scope": "v,vlang"
+	},
+	"snippet.map": {
+		"body": ["map[${1:key}]${2:value}{$0}"],
+		"description": "Code snippet for 'map'",
+		"prefix": "map",
+		"scope": "v,vlang"
+	},
+	"snippet.match": {
+		"body": ["match ${1:expression} {", "\t$0", "}"],
+		"description": "Code snippet for 'match' statement",
+		"prefix": "ma",
+		"scope": "v,vlang"
+	},
+	"snippet.module": {
+		"body": ["module ${1:name}"],
+		"description": "Code snippet for 'module'",
+		"prefix": "mod",
+		"scope": "v,vlang"
+	},
+	"snippet.public.function": {
+		"body": ["pub fn ${1:name}() {", "\t$0", "}"],
+		"description": "Code snippet for public function 'pub fn'",
+		"prefix": "pub",
+		"scope": "v,vlang"
+	},
+	"snippet.return": {
+		"body": ["return ${1:value}"],
+		"description": "Code snippet for 'return'",
+		"prefix": "ret",
+		"scope": "v,vlang"
+	},
+	"snippet.struct": {
+		"body": ["struct ${1:Name} {", "\t$0", "}"],
+		"description": "Code snippet for 'struct'",
+		"prefix": "stru",
+		"scope": "v,vlang"
+	},
+	"snippet.type": {
+		"body": ["type ${1:name} ${2:type}"],
+		"description": "Code snippet for 'type' definition",
+		"prefix": "ty",
+		"scope": "v,vlang"
+	},
+	"snippet.type.bool": {
+		"body": ["bool"],
+		"description": "Code snippet for Boolean",
+		"prefix": "bool",
+		"scope": "v,vlang"
+	},
+	"snippet.type.byte": {
+		"body": ["byte"],
+		"description": "Code snippet for Unsigned 8-bit Integer",
+		"prefix": "byte",
+		"scope": "v,vlang"
+	},
+	"snippet.type.byteptr": {
+		"body": ["byteptr"],
+		"description": "Code snippet for Byte*",
+		"prefix": "bptr",
+		"scope": "v,vlang"
+	},
+	"snippet.type.f32": {
+		"body": ["f32"],
+		"description": "Code snippet for 32-bit FloatingPoint",
+		"prefix": "float",
+		"scope": "v,vlang"
+	},
+	"snippet.type.f64": {
+		"body": ["f64"],
+		"description": "Code snippet for 64-bit FloatingPoint",
+		"prefix": "float64",
+		"scope": "v,vlang"
+	},
+	"snippet.type.i8": {
+		"body": ["i8"],
+		"description": "Code snippet for Signed 8-bit Integer",
+		"prefix": "int8",
+		"scope": "v,vlang"
+	},
+	"snippet.type.i16": {
+		"body": ["i16"],
+		"description": "Code snippet for Signed 16-bit Integer",
+		"prefix": "int16",
+		"scope": "v,vlang"
+	},
+	"snippet.type.i64": {
+		"body": ["i64"],
+		"description": "Code snippet for Signed 64-bit Integer",
+		"prefix": "int64",
+		"scope": "v,vlang"
+	},
+	"snippet.type.int": {
+		"body": ["int"],
+		"description": "Code snippet for Signed 32-bit Integer",
+		"prefix": "int",
+		"scope": "v,vlang"
+	},
+	"snippet.type.rune": {
+		"body": ["rune"],
+		"description": "Code snippet for Represents a Unicode CodePoint",
+		"prefix": "rune",
+		"scope": "v,vlang"
+	},
+	"snippet.type.string": {
+		"body": ["string"],
+		"description": "Code snippet for String",
+		"prefix": "str",
+		"scope": "v,vlang"
+	},
+	"snippet.type.u16": {
+		"body": ["u16"],
+		"description": "Code snippet for Unsigned 16-bit Integer",
+		"prefix": "u16",
+		"scope": "v,vlang"
+	},
+	"snippet.type.u32": {
+		"body": ["u32"],
+		"description": "Code snippet for Unsigned 32-bit Integer",
+		"prefix": "u32",
+		"scope": "v,vlang"
+	},
+	"snippet.type.u64": {
+		"body": ["u64"],
+		"description": "Code snippet for Unsigned 64-bit Integer",
+		"prefix": "u64",
+		"scope": "v,vlang"
+	},
+	"snippet.type.voidptr": {
+		"body": ["voidptr"],
+		"description": "Code snippet for Void*",
+		"prefix": "vptr",
+		"scope": "v,vlang"
+	},
+	"snippet.type.charptr": {
+		"body": ["charptr"],
+		"description": "Code snippet for char*",
+		"prefix": "cptr",
+		"scope": "v,vlang"
+	}
+}
