@@ -23,7 +23,7 @@ For Example VS Code:
 
 ## Documentation
 
-- [How it works](https://github.com/conwnet/github1s/tree/master/docs/guide.md)
+- [How it works](https://github.com/conwnet/github1s/blob/master/docs/guide.md)
 
 ## Screenshots
 
