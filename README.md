@@ -3,14 +3,6 @@
 
 One second to read GitHub code with VS Code.
 
-[Chrome Extension](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe/)
-
-Or Save as a bookmarklet (GitHub markdown doesn't allow js links, just copy it into a bookmark)
-
-```
-javascript: window.location.href = window.location.href.replace('github.com', 'github1s.com')
-```
-
 ## Usage
 
 Just add `1s` after `github` and press `Enter` in browser address bar for any repository you want to read.
@@ -20,6 +12,14 @@ For Example VS Code:
 [https://github1s.com/microsoft/vscode](https://github1s.com/microsoft/vscode)
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
+
+Browser extensions see [Third-party Related Projects](https://github.com/conwnet/github1s#third-party-related-projects)
+
+Or Save as a bookmarklet (GitHub markdown doesn't allow js links, just copy it into a bookmark)
+
+```
+javascript: window.location.href = window.location.href.replace('github.com', 'github1s.com')
+```
 
 ## Documentation
 
@@ -49,3 +49,22 @@ $ yarn
 $ yarn build
 ```
 
+## Third-party Related Projects
+
+### Chrome Extensions
+
+- [fhefh2015/GitHub1s_chrome_extension](https://github.com/fhefh2015/GitHub1s_chrome_extension) - [Chrome Web Store](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe)
+
+- [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer) - [Chrome Web Store](https://chrome.google.com/webstore/detail/github-code-viewer/ecddapgifccgblebfibdgkagfbdagjfn)
+
+- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
+
+
+### Firefox Extensions
+
+- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
+
+
+### Microsoft Edge Extensions
+
+- [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer)
