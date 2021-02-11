@@ -1,0 +1,108 @@
+{
+  "name": "OCamllex",
+  "scopeName": "source.ocaml.ocamllex",
+  "fileTypes": ["mll"],
+  "foldingStartMarker": "{",
+  "foldingStopMarker": "}",
+  "keyEquivalent": "^~O",
+  "patterns": [
+    {
+      "include": "source.ocaml#comments"
+    },
+    {
+      "include": "source.ocaml#strings"
+    },
+    {
+      "include": "source.ocaml#characters"
+    },
+
+    {
+      "include": "#rules"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#actions"
+    },
+    {
+      "include": "#regex"
+    },
+
+    {
+      "match": "(’|‘|“|”)",
+      "name": "invalid.illegal.unrecognized-character.ocamllex"
+    }
+  ],
+  "repository": {
+    "rules": {
+      "match": "\\b(rule|and)[[:space:]]+([[:lower:]][[:word:]']*('|\\b))",
+      "captures": {
+        "1": {
+          "name": "keyword.other.ocamllex"
+        },
+        "2": {
+          "name": "entity.name.function.rule.ocamllex"
+        }
+      }
+    },
+
+    "keywords": {
+      "patterns": [
+        {
+          "comment": "ocamllex reserved keywords",
+          "name": "keyword.other.ocamllex",
+          "match": "\\b(let|as|rule|and|parse|shortest|refill)\\b(?!')"
+        },
+        {
+          "comment": "assignment operator",
+          "match": "=",
+          "name": "keyword.operator.symbol.ocamllex"
+        }
+      ]
+    },
+
+    "actions": {
+      "patterns": [
+        {
+          "comment": "embedded ocaml source",
+          "begin": "{",
+          "beginCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "end": "}",
+          "endCaptures": [{ "name": "keyword.other.ocamllex" }],
+          "patterns": [{ "include": "source.ocaml" }]
+        }
+      ]
+    },
+
+    "regex": {
+      "patterns": [
+        {
+          "comment": "regex character set",
+          "name": "punctuation.character-set.ocamllex",
+          "match": "\\[|\\]"
+        },
+        {
+          "comment": "regex group",
+          "name": "punctuation.group.ocamllex",
+          "match": "\\(|\\)"
+        },
+        {
+          "comment": "regex operators",
+          "name": "keyword.operator.ocamllex",
+          "match": "\\^|#|\\*|\\+|\\?|\\||-"
+        },
+        {
+          "comment": "end-of-file token",
+          "name": "constant.language.eof.ocamllex",
+          "match": "\\beof\\b"
+        },
+        {
+          "comment": "reference to regex pattern",
+          "name": "entity.name.type.reference.ocamllex",
+          "match": "\\b[[:alpha:]][[:word:]']*('|\\b)"
+        }
+      ]
+    }
+  }
+}

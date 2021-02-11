@@ -1,0 +1,110 @@
+{
+  "scopeName": "source.ocaml.ocamlbuild",
+  "fileTypes": ["_tags"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#lines" },
+    {
+      "comment": "comma separator",
+      "name": "keyword.other.ocamlbuild punctuation.comma punctuation.separator.comma",
+      "match": ","
+    }
+  ],
+  "repository": {
+    "comments": {
+      "comment": "line comment",
+      "name": "comment.line.ocamlbuild",
+      "begin": "#",
+      "end": "$"
+    },
+
+    "lines": {
+      "begin": "^[[:space:]]*",
+      "end": "(:)|$",
+      "endCaptures": { "1": { "name": "keyword.operator.ocamlbuild" } },
+      "patterns": [{ "include": "#expressions" }]
+    },
+
+    "expressions": {
+      "comment": "glob expressions",
+      "patterns": [
+        {
+          "begin": "<",
+          "end": ">",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "name": "string.quoted.double.ocamlbuild",
+          "patterns": [{ "include": "#patterns" }]
+        },
+        {
+          "comment": "quoted string",
+          "name": "string.quoted.double.ocamlbuild",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "comment": "boolean",
+          "name": "constant.language.ocamlbuild",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "operators",
+          "name": "keyword.operator.ocamlbuild",
+          "match": "\\b(or|and|not)\\b"
+        },
+        { "include": "#variables" },
+        { "include": "$self" }
+      ]
+    },
+
+    "patterns": {
+      "comment": "glob patterns",
+      "patterns": [
+        { "name": "keyword.operator.ocamlbuild", "match": "\\?" },
+        { "name": "constant.language.ocamlbuild", "match": "\\*" },
+        {
+          "begin": "{",
+          "end": "}",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "patterns": [
+            { "name": "keyword.operator.ocamlbuild", "match": "," },
+            { "include": "#patterns" }
+          ]
+        },
+        {
+          "begin": "\\[\\^?",
+          "end": "\\]",
+          "beginCaptures": [{ "name": "keyword.operator.ocamlbuild" }],
+          "endCaptures": [{ "name": "keyword.operator.ocamlbuild" }]
+        }
+      ]
+    },
+
+    "variables": {
+      "comment": "pattern variables",
+      "patterns": [
+        {
+          "match": "(%)\\([^:)]*\\)",
+          "captures": {
+            "1": { "name": "keyword.operator.ocamlbuild" }
+          },
+          "patterns": [{ "include": "#expressions" }]
+        },
+        {
+          "begin": "(%)\\([^:]*(:)",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": { "name": "keyword.operator.ocamlbuild" },
+            "2": { "name": "keyword.operator.ocamlbuild" }
+          },
+          "patterns": [{ "include": "#expressions" }]
+        },
+        {
+          "name": "keyword.operator.ocamlbuild",
+          "match": "%"
+        }
+      ]
+    }
+  }
+}
