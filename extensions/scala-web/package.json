@@ -59,9 +59,6 @@
     "build": "npm-run-all build:syntax build:extension",
     "build:syntax": "ts-node src/typescript/GenerateTmLanguageFile.ts > ./syntaxes/Scala.tmLanguage.json",
     "build:extension": "vsce package --yarn",
-    "test": "npm-run-all test:*",
-    "test:unit": "vscode-tmgrammar-test -s source.scala -g syntaxes/Scala.tmLanguage.json -t 'tests/unit/**/*.test.scala'",
-    "test:snap": "vscode-tmgrammar-snap -s source.scala -g syntaxes/Scala.tmLanguage.json -t 'tests/snap/**/*.test.scala'",
     "compile": "echo done",
     "watch": "echo done"
   }
