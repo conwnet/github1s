@@ -44,7 +44,7 @@ export class RequestInvalidTokenError extends RequestError {
 		super(message, token);
 		if (typeof (<any>Object).setPrototypeOf === 'function') {
 			(<any>Object).setPrototypeOf(this, RequestInvalidTokenError.prototype);
-		};
+		}
 	}
 }
 

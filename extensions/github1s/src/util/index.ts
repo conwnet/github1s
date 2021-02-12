@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 export { fetch } from './fetch';
 export { reuseable, throttle } from './func';
-export { getExtensionContext, setExtensionContext } from './context';
+export { getExtensionContext, setExtensionContext, hasValidToken, getOAuthToken } from './context';
 
 export const noop = () => { };
 
