@@ -49,7 +49,7 @@ export class Directory implements FileStat {
 	size: number;
 	sha: string;
 	name: string;
-	entries: Map<string, File | Directory>;
+	entries: Map<string, File | Directory> | null;
 
 	constructor(public uri: Uri, name: string, options?: any) {
 		this.type = FileType.Directory;
@@ -61,9 +61,35 @@ export class Directory implements FileStat {
 		this.sha = (options && ('sha' in options)) ? options.sha : '';
 		this.size = (options && ('size' in options)) ? options.size : 0;
 	}
+
+	getNameTypePairs () {
+		return Array.from(this.entries?.values() || [])
+			.map((item: Entry) => [item.name, item instanceof Directory ? FileType.Directory : FileType.File]);
+	}
 }
 
 export type Entry = File | Directory;
+
+/**
+ * This funtion must be used for only GraphQL output
+ *
+ * @param entries the entries of a GitObject
+ * @param uri the parent URI
+ */
+const entriesToMap = (entries, uri) => {
+	if (!entries) {
+		return null;
+	}
+	const map = new Map<string, Entry>();
+	entries.forEach((item: any) => {
+		const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
+		const entry = fileType === FileType.Directory
+			? new Directory(uri, item.name, { sha: item.oid })
+			: new File(uri, item.name, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) });
+		map.set(item.name, entry);
+	});
+	return map;
+};
 
 export class GitHub1sFS implements FileSystemProvider, Disposable {
 	static scheme = 'github1s';
@@ -148,9 +174,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		}
 		return this._lookupAsDirectory(uri, false).then(parent => {
 			if (parent.entries !== null) {
-				const res = Array.from(parent.entries.values())
-					.map((item: any) => [item.name, item instanceof Directory ? FileType.Directory : FileType.File]);
-				return Promise.resolve(res);
+				return parent.getNameTypePairs();
 			}
 
 			if (hasValidToken()) {
@@ -168,16 +192,8 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 						if (!entries) {
 							throw FileSystemError.FileNotADirectory(uri);
 						}
-						parent.entries = new Map<string, Entry>();
-						return entries.map((item: any) => {
-							const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
-							parent.entries.set(
-								item.name, fileType === FileType.Directory
-								? new Directory(uri, item.path, { sha: item.oid })
-								: new File(uri, item.path, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) })
-							);
-							return [item.path, fileType];
-						});
+						parent.entries = entriesToMap(entries, uri);
+						return parent.getNameTypePairs();
 					});
 			}
 			return readGitHubDirectory(uri).then(data => {
