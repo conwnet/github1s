@@ -86,9 +86,6 @@ const entriesToMap = (entries, uri) => {
 		const entry = fileType === FileType.Directory
 			? new Directory(uri, item.name, { sha: item.oid })
 			: new File(uri, item.name, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) });
-		if (entry instanceof Directory) {
-			entry.entries = entriesToMap(item.object?.entries, Uri.joinPath(uri, entry.name));
-		}
 		map.set(item.name, entry);
 	});
 	return map;
