@@ -24,6 +24,7 @@ const authLink = setContext((_, { headers }) => {
 export const githubObjectQuery = gql`
 query objectQuery($owner: String! $repo: String! $expression: String!) {
   repository(name: $repo, owner: $owner) {
+    id
     object(expression: $expression) {
       ... on Tree {
         entries {
