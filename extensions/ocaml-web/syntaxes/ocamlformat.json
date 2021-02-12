@@ -1,0 +1,191 @@
+{
+  "name": "OCamlFormat",
+  "scopeName": "source.ocaml.ocamlformat",
+  "fileTypes": [".ocamlformat"],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#options"
+    },
+    {
+      "include": "#values"
+    },
+    {
+      "comment": "equals sign",
+      "name": "punctuation.separator.key-value.ocamlformat",
+      "match": "="
+    }
+  ],
+  "repository": {
+    "comments": {
+      "comment": "line comment",
+      "name": "comment.line.ocamlformat",
+      "begin": "#",
+      "end": "$"
+    },
+    "options": {
+      "patterns": [
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(align-cases|align-constructors-decl|align-variants-decl|assignment-operator)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(break-before-in|break-cases|break-collection-expressions|break-collection|break-fun-decl|break-fun-sig|break-infix-before-func|break-infix|break-separators|break-sequences|break-string-literals|break-struct)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(cases-exp-indent|cases-matching-exp-indent|comment-check)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(disable|disambiguate-non-breaking-match|doc-comments-padding|doc-comments-tag-only|doc-comments-val|doc-comments|dock-collection-brackets)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(escape-chars|escape-strings|exp-grouping|extension-indent|extension-sugar)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(field-space|function-indent-nested|function-indent)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(if-then-else|indent-after-in|indicate-multiline-delimiters|indicate-nested-or-patterns|infix-precedence)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(leading-nested-match-parens|let-and|let-binding-indent|let-binding-spacing|let-module|let-open)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(m|margin|match-indent-nested|match-indent|max-indent|module-item-spacing|max-iters)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(n|nested-match|no-align-cases|no-align-constructors-decl|no-align-variants-decl|no-break-infix-before-func|no-break-sequences|no-disable|no-disambiguate-non-breaking-match|no-dock-collection-brackets|no-leading-nested-match-parens|no-ocp-indent-compat|no-parens-ite|no-parse-docstrings|no-space-around-arrays|no-space-around-lists|no-space-around-records|no-space-around-variants|no-wrap-comments|no-wrap-fun-args)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(ocp-indent-compat)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(p|profile|parens-ite|parens-tuple-patterns|parens-tuple|parse-docstrings)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(q|quiet)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(sequence-blank-line|sequence-style|single-case|space-around-arrays|space-around-lists|space-around-records|space-around-variants|stritem-extension-indent)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(type-decl-indent|type-decl)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(version)\\b"
+        },
+        {
+          "name": "keyword.other.ocamlformat",
+          "match": "\\b(wrap-comments|wrap-fun-args)\\b"
+        }
+      ]
+    },
+    "values": {
+      "patterns": [
+        {
+          "comment": "boolean literal",
+          "name": "string.other.ocamlformat",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "comment": "numeric literal",
+          "name": "constant.numeric.decimal.ocamlformat",
+          "match": "\\b([[:digit:]]+(\\.[[:digit:]]*)*)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(after-when-possible|after|align|all|always|auto)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(before-except-val|before|begin-line)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(closing-on-separate-line|compact|conventional)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(decimal|default|double-semicolon)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(end-line)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(fit-or-vertical|fit|force)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(hexadecimal)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(indent)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(janestreet)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(k-r|keyword-first)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(long|loose)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(multi-line-only)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(natural|nested|never|no|normal)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(ocamlformat)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(parens|preserve-one|preserve)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(separator|short|smart|space|sparse)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(terminator|tight-decl|tight|toplevel)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(unsafe-no|unset)\\b"
+        },
+        {
+          "name": "string.other.ocamlformat",
+          "match": "\\b(wrap)\\b"
+        }
+      ]
+    }
+  }
+}

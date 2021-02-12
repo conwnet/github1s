@@ -1,0 +1,65 @@
+{
+  "name": "elm-ls-vscode",
+  "displayName": "Elm",
+  "description": "Improving your Elm experience since 2019",
+  "publisher": "elmTooling",
+  "icon": "images/elm.png",
+  "author": "Kolja Lampe",
+  "license": "MIT",
+  "version": "2.0.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elm-tooling/elm-language-client-vscode"
+  },
+  "categories": [
+    "Linters",
+    "Snippets",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "elm"
+  ],
+  "engines": {
+    "vscode": "^1.52.0"
+  },
+  "activationEvents": [
+    "onLanguage:elm"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "elm",
+        "aliases": [
+          "Elm",
+          "elm"
+        ],
+        "extensions": [
+          ".elm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "scopeName": "markdown.elm.codeblock",
+        "path": "./syntaxes/codeblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.elm": "elm",
+          "meta.embedded.block.glsl": "glsl"
+        }
+      },
+      {
+        "language": "elm",
+        "scopeName": "source.elm",
+        "path": "./syntaxes/elm-syntax.json"
+      }
+    ]
+  },
+  "scripts": {
+		"compile": "echo done",
+		"watch": "echo done"
+	}
+}

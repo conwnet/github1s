@@ -1,0 +1,29 @@
+{
+  "scopeName": "source.action.menhir",
+  "injectionSelector": "L:source.embedded-action.menhir",
+  "patterns": [
+    {
+      "begin": "(\\$(?:startpos|endpos|startofs|endofs|loc))[[:space:]]*\\(",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.menhir" }
+      },
+      "end": "\\)",
+      "patterns": [
+        { "include": "#anon-capture" },
+        { "include": "source.ocaml.menhir#token-name" },
+        { "include": "source.ocaml.menhir#production-name" }
+      ]
+    },
+    {
+      "match": "\\$(?:startpos|endpos|symbolstartpos|startofs|endofs|symbolstartofs|loc|sloc)\\b",
+      "name": "keyword.other.menhir"
+    },
+    { "include": "#anon-capture" }
+  ],
+  "repository": {
+    "anon-capture": {
+      "match": "\\$[[:digit:]]+\\b",
+      "name": "keyword.other.menhir"
+    }
+  }
+}

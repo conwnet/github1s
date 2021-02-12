@@ -13,7 +13,7 @@ interface UriState {
 	path: string;
 }
 
-const parseUri = (uri: vscode.Uri): UriState => {
+export const parseUri = (uri: vscode.Uri): UriState => {
 	const [owner, repo, branch] = (uri.authority || '').split('+').filter(Boolean);
 	return {
 		owner,

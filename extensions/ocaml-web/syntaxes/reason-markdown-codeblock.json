@@ -1,0 +1,24 @@
+{
+  "fileTypes": [],
+  "injectionSelector": "L:markup.fenced_code.block.markdown",
+  "patterns": [{ "include": "#reason-code-block" }],
+  "repository": {
+    "reason-code-block": {
+      "begin": "(re|reason|reasonml)(\\s+[^`~]*)?$",
+      "end": "(^|\\G)(?=\\s*[`~]{3,}\\s*$)",
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
+          "contentName": "meta.embedded.block.reason",
+          "patterns": [
+            {
+              "include": "source.reason"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "scopeName": "markdown.reason.codeblock"
+}

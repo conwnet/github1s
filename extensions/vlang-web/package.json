@@ -1,0 +1,79 @@
+{
+	"name": "vscode-vlang",
+	"displayName": "V",
+	"description": "V language support (syntax highlighting, formatter, linter, snippets) for Visual Studio Code.",
+	"publisher": "vlanguage",
+	"icon": "icons/icon.png",
+	"version": "0.1.7",
+	"license": "MIT",
+	"private": true,
+	"engines": {
+		"vscode": "^1.40.0"
+	},
+	"homepage": "https://vlang.io/",
+	"bugs": {
+		"url": "https://github.com/vlang/vscode-vlang/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vlang/vscode-vlang"
+	},
+	"keywords": [
+		"V",
+		"v",
+		"v language",
+		"vlang",
+		"extension",
+		"autocompletion"
+	],
+	"categories": [
+		"Snippets",
+		"Programming Languages"
+	],
+	"contributes": {
+		"snippets": [
+			{
+				"language": "v",
+				"path": "snippets/snippets.json"
+			}
+		],
+		"languages": [
+			{
+				"id": "v",
+				"aliases": [
+					"V"
+				],
+				"extensions": [
+					".v",
+					".vh",
+					".vsh"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "v",
+				"scopeName": "source.v",
+				"path": "./syntaxes/v.tmLanguage.json"
+			}
+		],
+		"configurationDefaults": {
+			"[v]": {
+				"editor.insertSpaces": false
+			}
+		},
+		"breakpoints": [
+			{
+				"language": "v"
+			}
+		]
+	},
+	"activationEvents": [
+		"onLanguage:v"
+	],
+	"scripts": {
+		"compile": "echo done",
+		"watch": "echo done"
+	}
+}

@@ -1,0 +1,73 @@
+{
+  "scopeName": "source.ocaml.merlin",
+  "fileTypes": ["merlin"],
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#directory" },
+    { "include": "#flag" },
+    { "include": "#package" }
+  ],
+  "repository": {
+    "comment": {
+      "begin": "#",
+      "end": "$",
+      "name": "comment.line.merlin"
+    },
+    "directory": {
+      "begin": "\\b(B|S)\\b",
+      "end": "$",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.merlin" }
+      },
+      "name": "string.other.merlin",
+      "patterns": [
+        {
+          "match": "[:./  \\\\]",
+          "name": "keyword.other.path.merlin"
+        },
+        {
+          "match": "[*?]",
+          "name": "keyword.other.glob.merlin"
+        }
+      ]
+    },
+    "flag": {
+      "begin": "\\b(FLG)\\b",
+      "end": "$",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.merlin" }
+      },
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.merlin"
+        },
+        {
+          "match": "([\\-\\+])\\b(?:([[:digit:]]+)|([[:lower:]][[:word:]]*))\\b",
+          "captures": {
+            "1": { "name": "keyword.other.merlin" },
+            "2": { "name": "constant.language.merlin" },
+            "3": { "name": "variable.parameter.merlin" }
+          }
+        }
+      ]
+    },
+    "package": {
+      "begin": "\\b(PKG)\\b",
+      "end": "$",
+      "beginCaptures": {
+        "1": { "name": "storage.type.merlin" }
+      },
+      "patterns": [
+        {
+          "match": "(?<![\\-\\+])\\b([[:lower:]][-[:word:]]*)\\b[[:space:]]*(\\.)?",
+          "captures": {
+            "1": { "name": "entity.name.class.merlin" },
+            "2": { "name": "keyword.other.merlin" }
+          }
+        }
+      ]
+    }
+  }
+}

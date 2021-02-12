@@ -15,9 +15,12 @@ import {
 	FileType,
 	Uri,
 } from 'vscode';
-import { noop, dirname, reuseable } from './util';
-import { readGitHubDirectory, readGitHubFile } from './api';
+import { noop, dirname, reuseable, hasValidToken } from './util';
+import { parseUri, readGitHubDirectory, readGitHubFile } from './api';
+import { apolloClient, githubObjectQuery } from './client';
 import { toUint8Array as decodeBase64 } from 'js-base64';
+
+const textEncoder = new TextEncoder();
 
 export class File implements FileStat {
 	type: FileType;
@@ -150,6 +153,33 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return Promise.resolve(res);
 			}
 
+			if (hasValidToken()) {
+				const state = parseUri(uri);
+				const directory = state.path.substring(1);
+				return apolloClient.query({
+					query: githubObjectQuery, variables: {
+						owner: state.owner,
+						repo: state.repo,
+						expression: `${state.branch}:${directory}`
+					}
+				})
+					.then((response) => {
+						const entries = response.data?.repository?.object?.entries;
+						if (!entries) {
+							throw FileSystemError.FileNotADirectory(uri);
+						}
+						parent.entries = new Map<string, Entry>();
+						return entries.map((item: any) => {
+							const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
+							parent.entries.set(
+								item.name, fileType === FileType.Directory
+								? new Directory(uri, item.path, { sha: item.oid })
+								: new File(uri, item.path, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) })
+							);
+							return [item.path, fileType];
+						});
+					});
+			}
 			return readGitHubDirectory(uri).then(data => {
 				parent.entries = new Map<string, Entry>();
 				return data.tree.map((item: any) => {
@@ -159,7 +189,6 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 						? new Directory(uri, item.path, { sha: item.sha })
 						: new File(uri, item.path, { sha: item.sha, size: item.size })
 					);
-
 					return [item.path, fileType];
 				});
 			});
@@ -173,6 +202,23 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		return this._lookupAsFile(uri, false).then(file => {
 			if (file.data !== null) {
 				return file.data;
+			}
+
+			if (hasValidToken()) {
+				const state = parseUri(uri);
+				const path = state.path.substring(1);
+				const directory = dirname(path);
+				return apolloClient.query({
+					query: githubObjectQuery, variables: {
+						owner: state.owner,
+						repo: state.repo,
+						expression: `${state.branch}:${directory}`
+					}
+				})
+					.then((response) => {
+						const entry = (response.data?.repository?.object?.entries || []).find(x => x.path === path);
+						return textEncoder.encode(entry?.object?.text);
+					});
 			}
 
 			return readGitHubFile(uri, file.sha).then(blob => {

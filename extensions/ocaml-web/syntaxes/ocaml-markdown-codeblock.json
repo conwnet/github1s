@@ -1,0 +1,24 @@
+{
+  "fileTypes": [],
+  "injectionSelector": "L:markup.fenced_code.block.markdown",
+  "patterns": [{ "include": "#ocaml-code-block" }],
+  "repository": {
+    "ocaml-code-block": {
+      "begin": "(ml|ocaml)(\\s+[^`~]*)?$",
+      "end": "(^|\\G)(?=\\s*[`~]{3,}\\s*$)",
+      "patterns": [
+        {
+          "begin": "(^|\\G)(\\s*)(.*)",
+          "while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
+          "contentName": "meta.embedded.block.ocaml",
+          "patterns": [
+            {
+              "include": "source.ocaml"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "scopeName": "markdown.ocaml.codeblock"
+}
