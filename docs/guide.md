@@ -47,7 +47,7 @@ What happens after you run `yarn watch`?
 
 3. Go to `lib/vscode` and run `yarn watch` (the native watch of vscode), it will trigger a new build if something in it has been changed.
 
-4. Watch the `src` directory, merge it in to `lib/vscode/src` if something in it has been changed. (When a new file is merged into `lib/vscode/src`, it will trigger the watcher that described in Step 3)
+4. Watch the `src` directory, merge it in to `lib/vscode/src` if something in it has been changed. (When a new file is merged into `lib/vscode/src`, it will trigger the watcher that is described in Step 3)
 
 5. Go to `extensions/github1s` and run `yarn watch`, it will trigger a new build if something has been changed.
 
