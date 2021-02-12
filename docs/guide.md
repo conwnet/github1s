@@ -20,7 +20,7 @@ Another thing that needs attention is [Rate Limit](https://docs.github.com/en/re
 
 > For API requests using Basic Authentication or OAuth, you can make up to 5,000 requests per hour.
 
-So, if you meet some problems when you use GitHub1s, even if you are using newer browsers, you could try to set a [GitHub OAuth Token](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header). Don't worry, we cannot see your token. It only stores in your browser [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) with [VS Code Extension globalState API](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) (Actually we don't have a server, do we?).
+So, if you meet some problems when you use GitHub1s, even if you are using newer browsers, you could try to set a [GitHub OAuth Token](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header). Don't worry, we cannot see your token. It is only stored in your browser [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) with [VS Code Extension globalState API](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) (Actually we don't have a server, do we?).
 
 But this does not mean the token is absolutely safe, **don't forget to clean it while you are using a device that doesn't belong to you**.
 
