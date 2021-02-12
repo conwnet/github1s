@@ -37,6 +37,7 @@ query objectQuery($owner: String! $repo: String! $expression: String!) {
               oid
               byteSize
               text
+              isBinary
             }
             ... on Tree {
               entries {
