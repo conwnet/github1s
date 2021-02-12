@@ -22,6 +22,10 @@ import { toUint8Array as decodeBase64 } from 'js-base64';
 
 const textEncoder = new TextEncoder();
 
+// graph_sql has some problems now, disable it temporary
+// https://github.com/conwnet/github1s/issues/90
+const ENABLE_GRAPH_SQL: boolean = false;
+
 export class File implements FileStat {
 	type: FileType;
 	ctime: number;
@@ -177,7 +181,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return parent.getNameTypePairs();
 			}
 
-			if (hasValidToken()) {
+			if (hasValidToken() && ENABLE_GRAPH_SQL) {
 				const state = parseUri(uri);
 				const directory = state.path.substring(1);
 				return apolloClient.query({
@@ -220,7 +224,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return file.data;
 			}
 
-			if (hasValidToken()) {
+			if (hasValidToken() && ENABLE_GRAPH_SQL) {
 				const state = parseUri(uri);
 				const path = state.path.substring(1);
 				const directory = dirname(path);
