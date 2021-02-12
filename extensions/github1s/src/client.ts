@@ -42,6 +42,7 @@ query objectQuery($owner: String! $repo: String! $expression: String!) {
                 oid
                 name
                 path
+                type
               }
             }
           }

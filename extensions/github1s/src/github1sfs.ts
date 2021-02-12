@@ -174,7 +174,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 							parent.entries.set(
 								item.path, fileType === FileType.Directory
 								? new Directory(uri, item.path, { sha: item.oid })
-								: new File(uri, item.path, { sha: item.oid, size: item.object. byteSize })
+								: new File(uri, item.path, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) })
 							);
 							return [item.path, fileType];
 						});
@@ -189,7 +189,6 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 						? new Directory(uri, item.path, { sha: item.sha })
 						: new File(uri, item.path, { sha: item.sha, size: item.size })
 					);
-
 					return [item.path, fileType];
 				});
 			});
@@ -204,11 +203,13 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 			const state = parseUri(uri);
 			const path = state.path.substring(1);
 			const directory = dirname(path);
-			return apolloClient.query({ query: githubObjectQuery, variables: {
-				owner: state.owner,
-				repo: state.repo,
-				expression: `${state.branch}:${directory}`
-			}})
+			return apolloClient.query({
+				query: githubObjectQuery, variables: {
+					owner: state.owner,
+					repo: state.repo,
+					expression: `${state.branch}:${directory}`
+				}
+			})
 				.then((response) => {
 					const entry = (response.data?.repository?.object?.entries || []).find(x => x.path === path);
 					return textEncoder.encode(entry?.object?.text);
