@@ -69,4 +69,4 @@ Put simply, we build the necessary code and do a minify. The minify script is mo
 
 - `scripts` - some scripts for build, watch, package, etc.
 
-- `resources` - some resource files such as templates, pictures, configuration file, etc.
+- `resources` - some resource files such as templates, pictures, configuration files, etc.
