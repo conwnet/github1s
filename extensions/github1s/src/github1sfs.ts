@@ -86,15 +86,19 @@ const entriesToMap = (entries, uri) => {
 	}
 	const map = new Map<string, Entry>();
 	entries.forEach((item: any) => {
-		const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
-		const entry = fileType === FileType.Directory
-			? new Directory(uri, item.name, { sha: item.oid })
-			: new File(uri, item.name, {
+		const isDirectory = item.type === 'tree';
+		let entry;
+		if (isDirectory) {
+			entry = new Directory(uri, item.name, { sha: item.oid });
+			entry.entries = entriesToMap(item?.object?.entries, Uri.joinPath(uri, item.name));
+		} else {
+			entry = new File(uri, item.name, {
 				sha: item.oid,
 				size: item.object?.byteSize,
 				// Set data to `null` if the blob is binary so that it will trigger the RESTful endpoint fallback.
 				data: item.object?.isBinary ? null : textEncoder.encode(item?.object?.text)
 			});
+		}
 		map.set(item.name, entry);
 	});
 	return map;
