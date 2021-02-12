@@ -61,6 +61,8 @@
     "build:extension": "vsce package --yarn",
     "test": "npm-run-all test:*",
     "test:unit": "vscode-tmgrammar-test -s source.scala -g syntaxes/Scala.tmLanguage.json -t 'tests/unit/**/*.test.scala'",
-    "test:snap": "vscode-tmgrammar-snap -s source.scala -g syntaxes/Scala.tmLanguage.json -t 'tests/snap/**/*.test.scala'"
+    "test:snap": "vscode-tmgrammar-snap -s source.scala -g syntaxes/Scala.tmLanguage.json -t 'tests/snap/**/*.test.scala'",
+    "compile": "echo done",
+    "watch": "echo done"
   }
 }
