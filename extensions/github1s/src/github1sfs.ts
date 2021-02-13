@@ -22,9 +22,7 @@ import { toUint8Array as decodeBase64 } from 'js-base64';
 
 const textEncoder = new TextEncoder();
 
-// graph_sql has some problems now, disable it temporary
-// https://github.com/conwnet/github1s/issues/90
-const ENABLE_GRAPH_SQL: boolean = false;
+const ENABLE_GRAPH_SQL: boolean = true;
 
 export class File implements FileStat {
 	type: FileType;
@@ -89,7 +87,12 @@ const entriesToMap = (entries, uri) => {
 		const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
 		const entry = fileType === FileType.Directory
 			? new Directory(uri, item.name, { sha: item.oid })
-			: new File(uri, item.name, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) });
+			: new File(uri, item.name, {
+				sha: item.oid,
+				size: item.object?.byteSize,
+				// Set data to `null` if the blob is binary so that it will trigger the RESTful endpoint fallback.
+				data: item.object?.isBinary ? null : textEncoder.encode(item?.object?.text)
+			});
 		map.set(item.name, entry);
 	});
 	return map;
@@ -224,23 +227,11 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return file.data;
 			}
 
-			if (hasValidToken() && ENABLE_GRAPH_SQL) {
-				const state = parseUri(uri);
-				const path = state.path.substring(1);
-				const directory = dirname(path);
-				return apolloClient.query({
-					query: githubObjectQuery, variables: {
-						owner: state.owner,
-						repo: state.repo,
-						expression: `${state.branch}:${directory}`
-					}
-				})
-					.then((response) => {
-						const entry = (response.data?.repository?.object?.entries || []).find(x => x.path === path);
-						return textEncoder.encode(entry?.object?.text);
-					});
-			}
-
+			/**
+			 * Below code will only be triggered in two cases:
+			 *   1. The GraphQL query is disabled
+			 *   2. The GraphQL query is enabled, but the blob/file is binary
+			 */
 			return readGitHubFile(uri, file.sha).then(blob => {
 				file.data = decodeBase64(blob.content);
 				return file.data;
