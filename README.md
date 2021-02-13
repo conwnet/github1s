@@ -58,14 +58,14 @@ $ yarn build
 - [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer) - [Chrome Web Store](https://chrome.google.com/webstore/detail/github-code-viewer/ecddapgifccgblebfibdgkagfbdagjfn)
 
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide)
+- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Chrome Web Store](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe)
 
 
 ### Firefox Extensions
 
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
-- [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/fr/firefox/addon/github1s/)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide)
+- [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s/)
+- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github-web-ide/)
 
 
 ### Microsoft Edge Extensions
