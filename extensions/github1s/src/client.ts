@@ -22,33 +22,59 @@ const authLink = setContext((_, { headers }) => {
 });
 
 export const githubObjectQuery = gql`
-query objectQuery($owner: String! $repo: String! $expression: String!) {
-  repository(name: $repo, owner: $owner) {
-    id
-    object(expression: $expression) {
+fragment TreeEntryFields on TreeEntry {
+  oid
+  name
+  path
+  type
+}
+
+fragment BlobFields on Blob {
+  oid
+  byteSize
+  text
+  isBinary
+}
+
+fragment TreeField on Tree {
+  id
+  entries {
+    ...TreeEntryFields
+    object {
+      ...BlobFields
       ... on Tree {
         entries {
-          oid
-          name
-          path
-          type
+          ...TreeEntryFields
           object {
-            ... on Blob {
-              oid
-              byteSize
-              text
-            }
+            ...BlobFields
             ... on Tree {
               entries {
-                oid
-                name
-                path
-                type
+                ...TreeEntryFields
+                object {
+                  ...BlobFields
+                  ... on Tree {
+                    entries {
+                      ...TreeEntryFields
+                      object {
+                        ...BlobFields
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         }
       }
+    }
+  }
+}
+
+query objectQuery($owner: String!, $repo: String!, $expression: String!) {
+  repository(name: $repo, owner: $owner) {
+    id
+    object(expression: $expression) {
+      ...TreeField
     }
   }
 }

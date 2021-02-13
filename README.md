@@ -63,6 +63,7 @@ $ yarn build
 ### Firefox Extensions
 
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
+- [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/fr/firefox/addon/github1s/)
 
 
 ### Microsoft Edge Extensions

@@ -22,6 +22,8 @@ import { toUint8Array as decodeBase64 } from 'js-base64';
 
 const textEncoder = new TextEncoder();
 
+const ENABLE_GRAPH_SQL: boolean = true;
+
 export class File implements FileStat {
 	type: FileType;
 	ctime: number;
@@ -49,7 +51,7 @@ export class Directory implements FileStat {
 	size: number;
 	sha: string;
 	name: string;
-	entries: Map<string, File | Directory>;
+	entries: Map<string, File | Directory> | null;
 
 	constructor(public uri: Uri, name: string, options?: any) {
 		this.type = FileType.Directory;
@@ -61,9 +63,44 @@ export class Directory implements FileStat {
 		this.sha = (options && ('sha' in options)) ? options.sha : '';
 		this.size = (options && ('size' in options)) ? options.size : 0;
 	}
+
+	getNameTypePairs () {
+		return Array.from(this.entries?.values() || [])
+			.map((item: Entry) => [item.name, item instanceof Directory ? FileType.Directory : FileType.File]);
+	}
 }
 
 export type Entry = File | Directory;
+
+/**
+ * This funtion must be used for only GraphQL output
+ *
+ * @param entries the entries of a GitObject
+ * @param uri the parent URI
+ */
+const entriesToMap = (entries, uri) => {
+	if (!entries) {
+		return null;
+	}
+	const map = new Map<string, Entry>();
+	entries.forEach((item: any) => {
+		const isDirectory = item.type === 'tree';
+		let entry;
+		if (isDirectory) {
+			entry = new Directory(uri, item.name, { sha: item.oid });
+			entry.entries = entriesToMap(item?.object?.entries, Uri.joinPath(uri, item.name));
+		} else {
+			entry = new File(uri, item.name, {
+				sha: item.oid,
+				size: item.object?.byteSize,
+				// Set data to `null` if the blob is binary so that it will trigger the RESTful endpoint fallback.
+				data: item.object?.isBinary ? null : textEncoder.encode(item?.object?.text)
+			});
+		}
+		map.set(item.name, entry);
+	});
+	return map;
+};
 
 export class GitHub1sFS implements FileSystemProvider, Disposable {
 	static scheme = 'github1s';
@@ -148,12 +185,10 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		}
 		return this._lookupAsDirectory(uri, false).then(parent => {
 			if (parent.entries !== null) {
-				const res = Array.from(parent.entries.values())
-					.map((item: any) => [item.name, item instanceof Directory ? FileType.Directory : FileType.File]);
-				return Promise.resolve(res);
+				return parent.getNameTypePairs();
 			}
 
-			if (hasValidToken()) {
+			if (hasValidToken() && ENABLE_GRAPH_SQL) {
 				const state = parseUri(uri);
 				const directory = state.path.substring(1);
 				return apolloClient.query({
@@ -168,16 +203,8 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 						if (!entries) {
 							throw FileSystemError.FileNotADirectory(uri);
 						}
-						parent.entries = new Map<string, Entry>();
-						return entries.map((item: any) => {
-							const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
-							parent.entries.set(
-								item.name, fileType === FileType.Directory
-								? new Directory(uri, item.path, { sha: item.oid })
-								: new File(uri, item.path, { sha: item.oid, size: item.object?.byteSize, data: textEncoder.encode(item?.object?.text) })
-							);
-							return [item.path, fileType];
-						});
+						parent.entries = entriesToMap(entries, uri);
+						return parent.getNameTypePairs();
 					});
 			}
 			return readGitHubDirectory(uri).then(data => {
@@ -204,23 +231,11 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 				return file.data;
 			}
 
-			if (hasValidToken()) {
-				const state = parseUri(uri);
-				const path = state.path.substring(1);
-				const directory = dirname(path);
-				return apolloClient.query({
-					query: githubObjectQuery, variables: {
-						owner: state.owner,
-						repo: state.repo,
-						expression: `${state.branch}:${directory}`
-					}
-				})
-					.then((response) => {
-						const entry = (response.data?.repository?.object?.entries || []).find(x => x.path === path);
-						return textEncoder.encode(entry?.object?.text);
-					});
-			}
-
+			/**
+			 * Below code will only be triggered in two cases:
+			 *   1. The GraphQL query is disabled
+			 *   2. The GraphQL query is enabled, but the blob/file is binary
+			 */
 			return readGitHubFile(uri, file.sha).then(blob => {
 				file.data = decodeBase64(blob.content);
 				return file.data;
