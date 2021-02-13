@@ -22,8 +22,6 @@ import { toUint8Array as decodeBase64 } from 'js-base64';
 
 const textEncoder = new TextEncoder();
 
-// graph_sql has some problems now, disable it temporary
-// https://github.com/conwnet/github1s/issues/90
 const ENABLE_GRAPH_SQL: boolean = true;
 
 export class File implements FileStat {
