@@ -1,0 +1,16 @@
+{
+  "productConfiguration": {
+    "version": "1.53.0-dev",
+    "nameShort": "GitHub1s",
+    "nameLong": "GitHub1s"
+  },
+  "homeIndicator": {
+		"href": "https://github.com",
+		"icon": "code",
+		"title": "Home"
+	},
+  "folderUri": {
+		"scheme": "github1s",
+		"path": "/"
+	}
+}

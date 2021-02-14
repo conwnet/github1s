@@ -64,7 +64,7 @@ export class Directory implements FileStat {
 		this.size = (options && ('size' in options)) ? options.size : 0;
 	}
 
-	getNameTypePairs () {
+	getNameTypePairs() {
 		return Array.from(this.entries?.values() || [])
 			.map((item: Entry) => [item.name, item instanceof Directory ? FileType.Directory : FileType.File]);
 	}
@@ -111,8 +111,17 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 	onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
 	constructor() {
+		const state = parseUri(workspace.workspaceFolders[0].uri);
 		this.disposable = Disposable.from(
 			workspace.registerFileSystemProvider(GitHub1sFS.scheme, this, { isCaseSensitive: true, isReadonly: true }),
+			workspace.registerResourceLabelFormatter({
+				scheme: GitHub1sFS.scheme,
+				formatting: {
+					label: "${path}",
+					separator: "/",
+					workspaceSuffix: `${state.owner}/${state.repo}`
+				}
+			})
 		);
 	}
 

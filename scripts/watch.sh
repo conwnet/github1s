@@ -4,11 +4,11 @@ set -euo pipefail
 cd "$(dirname "${0}")/.."
 APP_ROOT=$(pwd)
 
-function watch_vscode() {
-	cd ${APP_ROOT}/lib/vscode
-	yarn watch 2>&1 > /dev/null &
-	echo "watching vscode"
-}
+# function watch_vscode() {
+# 	cd ${APP_ROOT}/lib/vscode
+# 	yarn watch 2>&1 > /dev/null &
+# 	echo "watching vscode"
+# }
 
 function watch_github1s() {
 	cd ${APP_ROOT}/scripts/watch
@@ -22,11 +22,11 @@ function watch_github1s_extension() {
 	echo "watching github1s_extensions"
 }
 
-function watch_dist() {
-	cd ${APP_ROOT}/scripts/watch
-	node watch-dist.js
-	echo "auto sync to dist"
-}
+# function watch_dist() {
+# 	cd ${APP_ROOT}/scripts/watch
+# 	node watch-dist.js
+# 	echo "auto sync to dist"
+# }
 
 # execute all necessary tasks
 function main() {
@@ -36,16 +36,7 @@ function main() {
 	./package/copy-node_modules.sh
 	./package/copy-extensions.sh
 	node ./package/generate-config.js
-	watch_vscode
-	watch_github1s
-	watch_github1s_extension
 
-	echo 'please waiting...'
-	while [ ! -e "${APP_ROOT}/lib/vscode/out" ]
-	do
-		echo "waiting for vscode build..."
-		sleep 3
-	done
 	watch_dist
 }
 

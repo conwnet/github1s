@@ -15,6 +15,7 @@ function main() {
 	fi
 	cp resources/favicon.ico dist
 	cp resources/manifest.json dist
+	cp resources/product.json dist
 
 	echo "copy resources done!"
 }

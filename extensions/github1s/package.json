@@ -2,6 +2,7 @@
   "name": "github1s",
   "version": "0.0.0",
   "publisher": "github1s",
+  "enableProposedApi": true,
   "description": "",
   "private": true,
   "main": "index.js",
