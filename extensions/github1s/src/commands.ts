@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { getExtensionContext } from './util';
-import { validateToken } from './api';
+import { getGitHubBranches, validateToken } from './api';
 
 export const commandValidateToken = (silent: boolean = false) => {
 	const context = getExtensionContext();
@@ -63,4 +63,10 @@ export const commandClearToken = (silent: boolean = false) => {
 		}
 		return false;
 	});
+};
+
+export const commandGetGitHubBranches = (url: string) => {
+	const { pathname } = new URL(url);
+	const [ owner = 'conwnet', repo = 'github1s' ] = pathname.split(/\/|%2F/g).filter(Boolean);
+	return getGitHubBranches(owner, repo);
 };

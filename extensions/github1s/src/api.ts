@@ -4,23 +4,39 @@
  */
 
 import * as vscode from 'vscode';
+import { getBranches } from './github-api-gql';
+import { hasValidToken, splitPathByBranchName, getNormalizedPath, reuseable } from './util';
 import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError, throttledReportNetworkError } from './util/fetch';
 
-interface UriState {
+export const ENABLE_GRAPHQL: boolean = true;
+
+export interface UriState {
 	owner: string;
 	repo: string;
 	branch: string;
 	path: string;
+	uri: vscode.Uri
 }
 
-export const parseUri = (uri: vscode.Uri): UriState => {
-	const [owner, repo, branch] = (uri.authority || '').split('+').filter(Boolean);
-	return {
-		owner,
-		repo,
-		branch,
-		path: uri.path,
-	};
+export const isGraphQLEnabled = () => {
+	return hasValidToken() && ENABLE_GRAPHQL;
+};
+
+export const parseUri = (uri: vscode.Uri): Promise<UriState> => {
+	const [owner, repo, pathname] = (uri.authority || '').split('+').filter(Boolean);
+	return getGitHubBranches(owner, repo)
+		.then(
+			branchNames => {
+				const [branch] = splitPathByBranchName(pathname, branchNames);
+				return {
+					owner,
+					repo,
+					branch,
+					path: getNormalizedPath(uri.path, branch),
+					uri,
+				};
+			}
+		);
 };
 
 const handleRequestError = (error: RequestError) => {
@@ -42,14 +58,12 @@ const handleRequestError = (error: RequestError) => {
 	throw vscode.FileSystemError.Unavailable(error.message || 'Unknown Error Occurred When Request To GitHub');
 };
 
-export const readGitHubDirectory = (uri: vscode.Uri) => {
-	const state: UriState = parseUri(uri);
+export const readGitHubDirectory = (state: UriState) => {
 	return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/trees/${state.branch}${state.path.replace(/^\//, ':')}`)
 		.catch(handleRequestError);
 };
 
-export const readGitHubFile = (uri: vscode.Uri, fileSha: string) => {
-	const state: UriState = parseUri(uri);
+export const readGitHubFile = (state: UriState, fileSha: string) => {
 	return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/blobs/${fileSha}`)
 		.catch(handleRequestError);
 };
@@ -66,4 +80,27 @@ export const validateToken = (token: string) => {
 		throttledReportNetworkError();
 		throw new RequestError('Request Failed, Maybe an Network Error', token);
 	});
+};
+
+const branchNameCache = new Map();
+
+export const fetchGitHubBranches = (owner: string, repo: string) => {
+	const key = owner + '/' + repo;
+	if (branchNameCache.has(key)) {
+		return Promise.resolve(branchNameCache.get(key));
+	}
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/branches`)
+		.then(res => {
+			const names = res.map(x => x.name);
+			branchNameCache.set(key, names);
+			return names;
+		})
+		.catch(handleRequestError);
+};
+
+export const getGitHubBranches = (owner: string, repo: string) => {
+	if (isGraphQLEnabled()) {
+		return getBranches(owner, repo);
+	}
+	return fetchGitHubBranches(owner, repo);
 };

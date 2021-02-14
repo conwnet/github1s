@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { GitHub1sFS } from './github1sfs';
 import { SettingsView } from './settings-view';
 import { setExtensionContext } from './util';
-import { commandUpdateToken, commandValidateToken, commandClearToken } from './commands';
+import { commandUpdateToken, commandValidateToken, commandClearToken, commandGetGitHubBranches } from './commands';
 
 export function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
@@ -18,4 +18,5 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('github1s.validate-token', commandValidateToken));
 	context.subscriptions.push(vscode.commands.registerCommand('github1s.update-token', commandUpdateToken));
 	context.subscriptions.push(vscode.commands.registerCommand('github1s.clear-token', commandClearToken));
+	context.subscriptions.push(vscode.commands.registerCommand('github1s.get-github-branches', commandGetGitHubBranches));
 }

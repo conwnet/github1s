@@ -401,11 +401,15 @@ class WindowIndicator implements IWindowIndicator {
 (function () {
 	const route = parseGitHubUrl(window.location.href);
 	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
-		folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
+		/**
+		 * We couldn't figure out the correct branch here since branch might has `/` i.e. `feat/new-feat-1`.
+		 * So we have to use the `route.path` in authority and figure out branch in github1s extension.
+		 */
+		folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.path}` }),
 		staticExtensions: [],
 		enableSyncByDefault: false,
 		webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
-};
+	};
 
 	// Revive static extension locations
 	if (Array.isArray(config.staticExtensions)) {

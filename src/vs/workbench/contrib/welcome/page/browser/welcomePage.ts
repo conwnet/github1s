@@ -47,7 +47,7 @@ import { IEditorOptions } from 'vs/platform/editor/common/editor';
 import { IWorkbenchLayoutService } from 'vs/workbench/services/layout/browser/layoutService';
 import { IViewletService } from 'vs/workbench/services/viewlet/browser/viewlet';
 import { buttonBackground, buttonHoverBackground, welcomePageBackground } from 'vs/workbench/contrib/welcome/page/browser/welcomePageColors';
-import { parseGitHubUrl } from 'vs/github1s/util';
+import { parseGitHubUrl, parseGitHubUrlWithBranchNames } from 'vs/github1s/util';
 
 const configurationKey = 'workbench.startupEditor';
 const oldConfigurationKey = 'workbench.welcome.enabled';
@@ -72,7 +72,7 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 			const route = parseGitHubUrl(window.location.href);
 			const activeResource = editorService.activeEditor?.resource;
 			if (route.path !== '/' && (!activeResource || activeResource.scheme === 'github1s' || activeResource.path !== route.path)) {
-				const file = URI.from({ scheme: 'github1s', authority: `${route.owner}+${route.repo}+${route.branch}`, path: route.path });
+				const file = URI.from({ scheme: 'github1s', authority: `${route.owner}+${route.repo}+${route.path}`, path: route.path });
 				fileService.resolve(file)
 					.then(() => this.commandService.executeCommand(route.type === 'tree' ? 'revealInExplorer' : 'vscode.open', file))
 					.then(() => this.registerListeners(), () => this.registerListeners());
@@ -125,16 +125,20 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 	}
 
 	private doUpdateWindowUrl(): void {
-		const state = parseGitHubUrl(window.location.href);
-		const editor = this.editorService.activeEditor;
-		const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
-		// if no file opened and the branch is HEAD current, only retain owner and repo in url
-		const windowUrl = !filePath && state.branch === 'HEAD'
-			? `/${state.owner}/${state.repo}`
-			: `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
-		if (window.history.replaceState) {
-			window.history.replaceState(null, '', windowUrl);
-		}
+		getGitHubBranches(this.commandService, window.location.href).then(
+			(branchNames) => {
+				const state = parseGitHubUrlWithBranchNames(window.location.href, branchNames);
+				const editor = this.editorService.activeEditor;
+				const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
+				// if no file opened and the branch is HEAD current, only retain owner and repo in url
+				const windowUrl = !filePath && state.branch === 'HEAD'
+					? `/${state.owner}/${state.repo}`
+					: `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
+				if (window.history.replaceState) {
+					window.history.replaceState(null, '', windowUrl);
+				}
+			}
+		);
 	}
 
 	private registerListeners() {
@@ -151,6 +155,10 @@ function isWelcomePageEnabled(configurationService: IConfigurationService, conte
 		}
 	}
 	return startupEditor.value === 'welcomePage' || startupEditor.value === 'gettingStarted' || startupEditor.value === 'readme' || startupEditor.value === 'welcomePageInEmptyWorkbench' && contextService.getWorkbenchState() === WorkbenchState.EMPTY;
+}
+
+function getGitHubBranches(commandService: ICommandService, url: string) {
+	return commandService.executeCommand('github1s.get-github-branches', url);
 }
 
 export class WelcomePageAction extends Action {
@@ -353,7 +361,9 @@ class WelcomePage extends Disposable {
 			prodName.textContent = this.productService.nameLong;
 		}
 
-		gitHubTokenStatus.then(tokenStatus => this.doUpdateGitHubTokenStatus(container, tokenStatus));
+		gitHubTokenStatus.then(tokenStatus => {
+			this.doUpdateGitHubTokenStatus(container, tokenStatus);
+		});
 		this.registerGitHub1sListeners(container);
 
 		recentlyOpened.then(({ workspaces }) => {

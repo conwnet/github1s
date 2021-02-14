@@ -13,6 +13,7 @@
     "onCommand:github1s.validate-token",
     "onCommand:github1s.update-token",
     "onCommand:github1s.clear-token",
+    "onCommand:github1s.get-github-branches",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
