@@ -4,10 +4,11 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"outDir": "out",
+    "rootDir": "src",
 		"lib": [ "es2016", "WebWorker" ],
 		"sourceMap": true
 	},
-	"include": [
-		"src"
+	"exclude": [
+		"node_modules"
 	]
 }

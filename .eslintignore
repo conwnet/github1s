@@ -1,3 +1,4 @@
 **/node_modules/**
 **/lib/vscode/**
 **/dist/**
+*.d.ts
