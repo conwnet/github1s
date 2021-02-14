@@ -42,30 +42,6 @@ fragment TreeField on Tree {
     ...TreeEntryFields
     object {
       ...BlobFields
-      ... on Tree {
-        entries {
-          ...TreeEntryFields
-          object {
-            ...BlobFields
-            ... on Tree {
-              entries {
-                ...TreeEntryFields
-                object {
-                  ...BlobFields
-                  ... on Tree {
-                    entries {
-                      ...TreeEntryFields
-                      object {
-                        ...BlobFields
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   }
 }
