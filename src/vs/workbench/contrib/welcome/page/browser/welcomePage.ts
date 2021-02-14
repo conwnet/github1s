@@ -361,9 +361,7 @@ class WelcomePage extends Disposable {
 			prodName.textContent = this.productService.nameLong;
 		}
 
-		gitHubTokenStatus.then(tokenStatus => {
-			this.doUpdateGitHubTokenStatus(container, tokenStatus);
-		});
+		gitHubTokenStatus.then(tokenStatus => this.doUpdateGitHubTokenStatus(container, tokenStatus));
 		this.registerGitHub1sListeners(container);
 
 		recentlyOpened.then(({ workspaces }) => {
