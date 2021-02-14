@@ -33,7 +33,7 @@
     "package": "./scripts/package.sh",
     "watch": "./scripts/watch.sh",
     "serve": "node ./scripts/serve-dist.js",
-    "eslint": "eslint --ext .ts --ext .js ./src/vs ./extensions"
+    "eslint": "eslint --ext .ts --ext .js ./extensions"
   },
   "lint-staged": {
     "*.{js,ts}": [
