@@ -63,7 +63,7 @@ $ yarn build
 
 ### Firefox Extensions
 
-- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
+- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s-extension)
 - [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s/)
 - [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github-web-ide/)
 
