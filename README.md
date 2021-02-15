@@ -27,6 +27,8 @@ javascript: window.location.href = window.location.href.replace('github.com', 'g
 
 ## Screenshots
 
+![VS Code - GitHub1s](https://raw.githubusercontent.com/mohitjaisal/github1s/master/resources/images/Github1sDemo1.gif)
+
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/demo.png)
 
 ## Development
