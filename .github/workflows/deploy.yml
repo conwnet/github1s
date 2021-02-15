@@ -27,3 +27,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
         cname: github1s.com
+        keep_files: true
