@@ -1,0 +1,30 @@
+name: Deploy on tags
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+
+    - run: yarn --frozen-lockfile
+    - run: yarn build
+    - run: yarn hash
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        cname: github1s.com
+        keep_files: true
