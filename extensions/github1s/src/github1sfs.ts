@@ -21,7 +21,7 @@ import {
 	Uri,
 } from 'vscode';
 import Fuse from 'fuse.js';
-import { noop, reuseable, getCurrentAuthority, joinPath } from './util';
+import { noop, reuseable, getCurrentAuthority } from './util';
 import { readGitHubDirectory, readGitHubFile, getGithubAllFiles, isGraphQLEnabled } from './api';
 import { apolloClient } from './client';
 import { githubObjectQuery } from './github-api-gql';
@@ -155,7 +155,6 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 			workspace.registerFileSystemProvider(GitHub1sFS.scheme, this, { isCaseSensitive: true, isReadonly: true }),
 			workspace.registerFileSearchProvider(GitHub1sFS.scheme, this),
 		);
-		this.loadAllFiles();
 	}
 
 	dispose() {
@@ -170,6 +169,7 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 		let currentAuthority = await getCurrentAuthority();
 		if (!this.root.get(currentAuthority)) {
 			this.root.set(currentAuthority, new Directory(uri.with({ path: '/' }), ''));
+			this.loadAllFiles();
 		}
 		let entry = this.root.get(currentAuthority);
 		for (const part of parts) {
@@ -305,8 +305,11 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 			if (!treeData.truncated) {
 				// the number of items in the tree array maybe exceeded maximum limit
 				// only update the rootDirectory if `treeData.truncated` is false
-				const rootDirectory = await this._lookupAsDirectory(Uri.parse(`github1s://${authority}/`), false);
-				(treeData.tree || []).forEach((githubEntry: GithubRESTEntry) => insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory));
+
+				const rootDirectory = await this._lookupAsDirectory(Uri.parse('').with({ scheme: GitHub1sFS.scheme, authority, path: '/' }), false);
+				(treeData.tree || []).forEach((githubEntry: GithubRESTEntry) => {
+					insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
+				});
 			}
 			this.fuse = new Fuse(((treeData.tree || []) as GithubRESTEntry[]).filter(item => (item.type === 'blob')), { keys: ['path'] });
 		});
@@ -316,10 +319,8 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 		if (!this.fuse) {
 			return null;
 		}
-		return getCurrentAuthority().then((authority: string) => {
-			return this.fuse.search(query.pattern).map((result) => {
-				return Uri.parse(`github1s://${authority}/${result.item.path}`);
-			});
+		return this.fuse.search(query.pattern).map((result) => {
+			return Uri.parse('').with({ scheme: GitHub1sFS.scheme, path: result.item.path });
 		});
 	}
 }
