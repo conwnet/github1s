@@ -4,8 +4,8 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionContext } from './util';
-import { getGitHubBranches, validateToken } from './api';
+import { getExtensionContext, getRepositoryBranches, getRepositoryTags, getCurrentRef, getCurrentAuthority, changeCurrentRef } from './util';
+import { validateToken } from './api';
 
 export const commandValidateToken = (silent: boolean = false) => {
 	const context = getExtensionContext();
@@ -65,8 +65,24 @@ export const commandClearToken = (silent: boolean = false) => {
 	});
 };
 
-export const commandGetGitHubBranches = (url: string) => {
-	const { pathname } = new URL(url);
-	const [ owner = 'conwnet', repo = 'github1s' ] = pathname.split(/\/|%2F/g).filter(Boolean);
-	return getGitHubBranches(owner, repo);
+export const commandGetCurrentAuthority = (): Promise<string> => getCurrentAuthority();
+
+export const commandSwitchBranch = () => {
+	return Promise.all([getRepositoryBranches(), getCurrentRef()]).then(([repositoryBranches, currentRef]) => (
+		vscode.window.showQuickPick(repositoryBranches.map(item => item.name), { placeHolder: currentRef }).then((newRef: string) => {
+			return newRef && changeCurrentRef(newRef).then((newRef) => {
+				vscode.window.showInformationMessage(`Switch to branch: ${newRef}`);
+			});
+		})
+	));
+};
+
+export const commandSwitchTag = () => {
+	return Promise.all([getRepositoryTags(), getCurrentRef()]).then(([repositoryBranches, currentRef]) => (
+		vscode.window.showQuickPick(repositoryBranches.map(item => item.name), { placeHolder: currentRef }).then((newRef: string) => {
+			return newRef && changeCurrentRef(newRef).then((newRef) => {
+				vscode.window.showInformationMessage(`Switch to branch: ${newRef}`);
+			});
+		})
+	));
 };

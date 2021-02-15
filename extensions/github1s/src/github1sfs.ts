@@ -15,8 +15,8 @@ import {
 	FileType,
 	Uri,
 } from 'vscode';
-import { noop, reuseable } from './util';
-import { parseUri, readGitHubDirectory, readGitHubFile, UriState, isGraphQLEnabled } from './api';
+import { noop, reuseable, getCurrentAuthority } from './util';
+import { readGitHubDirectory, readGitHubFile, isGraphQLEnabled } from './api';
 import { apolloClient } from './client';
 import { githubObjectQuery } from './github-api-gql';
 import { toUint8Array as decodeBase64 } from 'js-base64';
@@ -105,7 +105,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 	static scheme = 'github1s';
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
-	private root: Directory = null;
+	private root: Map<string, Directory | File> = new Map();
 
 	onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
@@ -120,12 +120,15 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 	}
 
 	// --- lookup
-	private async _lookup(state: UriState, silent: boolean): Promise<Entry | undefined> {
-		if (!this.root) {
-			this.root = new Directory(state.uri.with({ path: '/' }), '');
+	private async _lookup(uri: Uri, silent: false): Promise<Entry>;
+	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined>;
+	private async _lookup(uri: Uri, silent: boolean): Promise<Entry | undefined> {
+		let parts = uri.path.split('/').filter(Boolean);
+		let currentAuthority = await getCurrentAuthority();
+		if (!this.root.get(currentAuthority)) {
+			this.root.set(currentAuthority, new Directory(uri.with({ path: '/' }), ''));
 		}
-		let entry: Entry = this.root;
-		let parts = state.path.split('/').filter(Boolean);
+		let entry = this.root.get(currentAuthority);
 		for (const part of parts) {
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
@@ -136,7 +139,7 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 			}
 			if (!child) {
 				if (!silent) {
-					throw FileSystemError.FileNotFound(state.uri);
+					throw FileSystemError.FileNotFound(uri);
 				} else {
 					return undefined;
 				}
@@ -146,23 +149,23 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 		return entry;
 	}
 
-	private async _lookupAsDirectory(state: UriState, silent: boolean): Promise<Directory> {
-		const entry = await this._lookup(state, silent);
+	private async _lookupAsDirectory(uri: Uri, silent: boolean): Promise<Directory> {
+		const entry = await this._lookup(uri, silent);
 		if (entry instanceof Directory) {
 			return entry;
 		}
 		if (!silent) {
-			throw FileSystemError.FileNotADirectory(state.uri);
+			throw FileSystemError.FileNotADirectory(uri);
 		}
 	}
 
-	private async _lookupAsFile(state: UriState, silent: boolean): Promise<File> {
-		const entry = await this._lookup(state, silent);
+	private async _lookupAsFile(uri: Uri, silent: boolean): Promise<File> {
+		const entry = await this._lookup(uri, silent);
 		if (entry instanceof File) {
 			return entry;
 		}
 		if (!silent) {
-			throw FileSystemError.FileIsADirectory(state.uri);
+			throw FileSystemError.FileIsADirectory(uri);
 		}
 	}
 
@@ -171,76 +174,64 @@ export class GitHub1sFS implements FileSystemProvider, Disposable {
 	}
 
 	stat(uri: Uri): FileStat | Thenable<FileStat> {
-		return parseUri(uri).then(
-			state => this._lookup(state, false)
-		);
+		return this._lookup(uri, false);
 	}
 
 	readDirectory = reuseable((uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
-		if (!uri.authority) {
-			throw FileSystemError.FileNotFound(uri);
-		}
-		return parseUri(uri)
-			.then((state) => {
-				return this._lookupAsDirectory(state, false).then(parent => {
-					if (parent.entries !== null) {
-						return parent.getNameTypePairs();
-					}
-
-					if (isGraphQLEnabled()) {
-						const directory = state.path.substring(1);
-						return apolloClient.query({
-							query: githubObjectQuery, variables: {
-								owner: state.owner,
-								repo: state.repo,
-								expression: `${state.branch}:${directory}`
-							}
-						})
-							.then((response) => {
-								const entries = response.data?.repository?.object?.entries;
-								if (!entries) {
-									throw FileSystemError.FileNotADirectory(uri);
-								}
-								parent.entries = entriesToMap(entries, uri);
-								return parent.getNameTypePairs();
-							});
-					}
-					return readGitHubDirectory(state).then(data => {
-						parent.entries = new Map<string, Entry>();
-						return data.tree.map((item: any) => {
-							const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
-							parent.entries.set(
-								item.path, fileType === FileType.Directory
-								? new Directory(uri, item.path, { sha: item.sha })
-								: new File(uri, item.path, { sha: item.sha, size: item.size })
-							);
-							return [item.path, fileType];
-						});
-					});
-				});
+		return this._lookupAsDirectory(uri, false).then(async parent => {
+			if (parent.entries !== null) {
+				return parent.getNameTypePairs();
 			}
-			);
+
+			const [owner, repo, ref] = (uri.authority || await getCurrentAuthority()).split('+');
+			if (isGraphQLEnabled()) {
+					return apolloClient.query({
+						query: githubObjectQuery, variables: {
+							owner,
+							repo,
+							expression: `${ref}:${uri.path.slice(1)}`
+						}
+					})
+						.then((response) => {
+							const entries = response.data?.repository?.object?.entries;
+							if (!entries) {
+								throw FileSystemError.FileNotADirectory(uri);
+							}
+							parent.entries = entriesToMap(entries, uri);
+							return parent.getNameTypePairs();
+						});
+			}
+
+			return readGitHubDirectory(owner, repo, ref, uri.path).then(data => {
+				parent.entries = new Map<string, Entry>();
+				return data.tree.map((item: any) => {
+					const fileType: FileType = item.type === 'tree' ? FileType.Directory : FileType.File;
+					parent.entries.set(
+						item.path, fileType === FileType.Directory
+						? new Directory(uri, item.path, { sha: item.sha })
+						: new File(uri, item.path, { sha: item.sha, size: item.size })
+					);
+					return [item.path, fileType];
+				});
+			});
+		});
 	}, (uri: Uri) => uri.toString());
 
 	readFile = reuseable((uri: Uri): Uint8Array | Thenable<Uint8Array> => {
-		if (!uri.authority) {
-			throw FileSystemError.FileNotFound(uri);
-		}
-		return parseUri(uri).then(state => {
-			return this._lookupAsFile(state, false).then(file => {
-				if (file.data !== null) {
-					return file.data;
-				}
+		return this._lookupAsFile(uri, false).then(async file => {
+			if (file.data !== null) {
+				return file.data;
+			}
 
-				/**
-				 * Below code will only be triggered in two cases:
-				 *   1. The GraphQL query is disabled
-				 *   2. The GraphQL query is enabled, but the blob/file is binary
-				 */
-				return readGitHubFile(state, file.sha).then(blob => {
-					file.data = decodeBase64(blob.content);
-					return file.data;
-				});
+			/**
+			 * Below code will only be triggered in two cases:
+			 *   1. The GraphQL query is disabled
+			 *   2. The GraphQL query is enabled, but the blob/file is binary
+			 */
+			const [owner, repo] = (uri.authority || await getCurrentAuthority()).split('+');
+			return readGitHubFile(owner, repo, file.sha).then(blob => {
+				file.data = decodeBase64(blob.content);
+				return file.data;
 			});
 		});
 	}, (uri: Uri) => uri.toString());

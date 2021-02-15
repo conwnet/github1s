@@ -47,11 +47,21 @@ import { IEditorOptions } from 'vs/platform/editor/common/editor';
 import { IWorkbenchLayoutService } from 'vs/workbench/services/layout/browser/layoutService';
 import { IViewletService } from 'vs/workbench/services/viewlet/browser/viewlet';
 import { buttonBackground, buttonHoverBackground, welcomePageBackground } from 'vs/workbench/contrib/welcome/page/browser/welcomePageColors';
-import { parseGitHubUrl, parseGitHubUrlWithBranchNames } from 'vs/github1s/util';
+import { replaceBrowserUrl } from 'vs/github1s/util';
 
 const configurationKey = 'workbench.startupEditor';
 const oldConfigurationKey = 'workbench.welcome.enabled';
 const telemetryFrom = 'welcomePage';
+
+const getCurrentFileState = (ref: string): { type: string, path: string } => {
+	const uri = URI.parse(window.location.href);
+	const [_owner, _repo, type, ...otherParts] = (uri.path || '').split('/').filter(Boolean);
+	const refAndFilePath = otherParts.join('/');
+	if (!['tree', 'blob'].includes(type) || !refAndFilePath.startsWith(ref)) {
+		return { type: 'tree', path: '/' };
+	}
+	return { type, path: refAndFilePath.slice(ref.length) || '/' };
+};
 
 export class WelcomePageContribution implements IWorkbenchContribution {
 
@@ -69,53 +79,53 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 
 		const enabled = isWelcomePageEnabled(configurationService, contextService);
 		if (enabled && lifecycleService.startupKind !== StartupKind.ReloadedWindow) {
-			const route = parseGitHubUrl(window.location.href);
 			const activeResource = editorService.activeEditor?.resource;
-			if (route.path !== '/' && (!activeResource || activeResource.scheme === 'github1s' || activeResource.path !== route.path)) {
-				const file = URI.from({ scheme: 'github1s', authority: `${route.owner}+${route.repo}+${route.path}`, path: route.path });
-				fileService.resolve(file)
-					.then(() => this.commandService.executeCommand(route.type === 'tree' ? 'revealInExplorer' : 'vscode.open', file))
-					.then(() => this.registerListeners(), () => this.registerListeners());
-				return;
-			}
+			getCurrentAuthority(commandService).then((authority: string) => {
+				const fileState = getCurrentFileState(authority.split('+')[2]);
+				if (fileState.path !== '/' && (!activeResource || activeResource.scheme !== 'github1s' || activeResource.path !== fileState.path)) {
+					const currentFileUri = URI.from({ scheme: 'github1s', authority, path: fileState.path });
+					fileService.resolve(currentFileUri)
+						.then(() => this.commandService.executeCommand(fileState.type === 'tree' ? 'revealInExplorer' : 'vscode.open', currentFileUri))
+						.then(() => this.registerListeners(), () => this.registerListeners());
+					return;
+				}
+				backupFileService.hasBackups().then(hasBackups => {
+					// Open the welcome even if we opened a set of default editors
+					if ((!editorService.activeEditor || layoutService.openedDefaultEditors) && !hasBackups) {
+						return Promise.all(contextService.getWorkspace().folders.map(folder => {
+							const folderUri = folder.uri;
+							return fileService.resolve(folderUri)
+								.then(folder => {
+									const files = folder.children ? folder.children.map(child => child.name).sort() : [];
+									const file = files.find(file => file.toLowerCase() === 'readme.md') || files.find(file => file.toLowerCase().startsWith('readme'));
 
-			backupFileService.hasBackups().then(hasBackups => {
-				// Open the welcome even if we opened a set of default editors
-				if ((!editorService.activeEditor || layoutService.openedDefaultEditors) && !hasBackups) {
-					return Promise.all(contextService.getWorkspace().folders.map(folder => {
-						const folderUri = folder.uri;
-						return fileService.resolve(folderUri)
-							.then(folder => {
-								const files = folder.children ? folder.children.map(child => child.name).sort() : [];
-								const file = files.find(file => file.toLowerCase() === 'readme.md') || files.find(file => file.toLowerCase().startsWith('readme'));
-
-								if (file) {
-									return joinPath(folderUri, file);
+									if (file) {
+										return joinPath(folderUri, file);
+									}
+									return undefined;
+								}, onUnexpectedError);
+						})).then(arrays.coalesce)
+							.then<any>(readmes => {
+								if (!editorService.activeEditor) {
+									if (readmes.length) {
+										const isMarkDown = (readme: URI) => readme.path.toLowerCase().endsWith('.md');
+										return Promise.all([
+											this.commandService.executeCommand('markdown.showPreview', null, readmes.filter(isMarkDown), { locked: true }),
+											editorService.openEditors(readmes.filter(readme => !isMarkDown(readme))
+												.map(readme => ({ resource: readme }))),
+										]);
+									} else {
+										return instantiationService.createInstance(WelcomePage).openEditor();
+									}
 								}
 								return undefined;
-							}, onUnexpectedError);
-					})).then(arrays.coalesce)
-						.then<any>(readmes => {
-							if (!editorService.activeEditor) {
-								if (readmes.length) {
-									const isMarkDown = (readme: URI) => readme.path.toLowerCase().endsWith('.md');
-									return Promise.all([
-										this.commandService.executeCommand('markdown.showPreview', null, readmes.filter(isMarkDown), { locked: true }),
-										editorService.openEditors(readmes.filter(readme => !isMarkDown(readme))
-											.map(readme => ({ resource: readme }))),
-									]);
-								} else {
-									return instantiationService.createInstance(WelcomePage).openEditor();
-								}
-							}
-							return undefined;
-						});
-				}
-				return undefined;
-			}).then(undefined, onUnexpectedError).then(() => this.registerListeners(), () => this.registerListeners());
+							});
+					}
+					return undefined;
+				}).then(undefined, onUnexpectedError).then(() => this.registerListeners(), () => this.registerListeners());
+			});
 		}
 	}
-
 
 	private getGitHubFilePathOrEmpty(uri?: URI): string {
 		if (!uri || !uri.path || uri.scheme !== 'github1s') {
@@ -125,20 +135,16 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 	}
 
 	private doUpdateWindowUrl(): void {
-		getGitHubBranches(this.commandService, window.location.href).then(
-			(branchNames) => {
-				const state = parseGitHubUrlWithBranchNames(window.location.href, branchNames);
-				const editor = this.editorService.activeEditor;
-				const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
-				// if no file opened and the branch is HEAD current, only retain owner and repo in url
-				const windowUrl = !filePath && state.branch === 'HEAD'
-					? `/${state.owner}/${state.repo}`
-					: `/${state.owner}/${state.repo}/${filePath ? 'blob' : 'tree'}/${state.branch}${filePath}`;
-				if (window.history.replaceState) {
-					window.history.replaceState(null, '', windowUrl);
-				}
-			}
-		);
+		getCurrentAuthority(this.commandService).then(authority => {
+			const [owner, repo, ref] = authority.split('+');
+			const editor = this.editorService.activeEditor;
+			const filePath = this.getGitHubFilePathOrEmpty(editor?.resource);
+			// if no file opened and the branch is HEAD current, only retain owner and repo in url
+			const windowUrl = !filePath && ref.toUpperCase() === 'HEAD'
+				? `/${owner}/${repo}`
+				: `/${owner}/${repo}/${filePath ? 'blob' : 'tree'}/${ref}${filePath}`;
+			replaceBrowserUrl(windowUrl);
+		});
 	}
 
 	private registerListeners() {
@@ -157,8 +163,8 @@ function isWelcomePageEnabled(configurationService: IConfigurationService, conte
 	return startupEditor.value === 'welcomePage' || startupEditor.value === 'gettingStarted' || startupEditor.value === 'readme' || startupEditor.value === 'welcomePageInEmptyWorkbench' && contextService.getWorkbenchState() === WorkbenchState.EMPTY;
 }
 
-function getGitHubBranches(commandService: ICommandService, url: string) {
-	return commandService.executeCommand('github1s.get-github-branches', url);
+function getCurrentAuthority(commandService: ICommandService): Promise<string> {
+	return commandService.executeCommand('github1s.get-current-authority') as Promise<string>;
 }
 
 export class WelcomePageAction extends Action {
