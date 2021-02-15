@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 export { fetch } from './fetch';
 export { reuseable, throttle } from './func';
 export { getExtensionContext, setExtensionContext, hasValidToken, getOAuthToken } from './context';
+export { getCurrentRef, getCurrentAuthority, getRepositoryBranches, getRepositoryTags, changeCurrentRef } from './git-ref';
 
 export const noop = () => { };
 
@@ -65,35 +66,4 @@ export const getWebviewOptions = (extensionUri: vscode.Uri): vscode.WebviewOptio
 		// And restrict the webview to only loading content from our extension's `assets` directory.
 		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')]
 	};
-};
-
-export const splitPathByBranchName = (pathname: string, branchNames: string[]) => {
-	const branchNameSet = new Set([...branchNames, 'HEAD']);
-	const parts = pathname.split('/').filter(Boolean).slice(1);
-	if (parts.length < 1) {
-		return ['HEAD', '/'];
-	}
-	let branch;
-	for (const part of parts) {
-		branch = branch ? `${branch}/${part}` : part;
-		if (branchNameSet.has(branch)) {
-			return [
-				branch,
-				parts.join('/').substring(branch.length)
-			];
-		}
-	}
-	// commit id based URL
-	return [parts[0], '/' + parts.slice(1).join('')];
-};
-
-export const getNormalizedPath = (path, branch) => {
-	/**
-	 * Handle the inital path since there is no way to determine the branch name
-	 * before the workbench (extension) loaded.
-	 */
-	if (path.startsWith('/tree') || path.startsWith('/blob')) {
-		return path.substring(7 + branch.length);
-	}
-	return path;
 };

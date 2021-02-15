@@ -4,8 +4,8 @@
  */
 
 import * as vscode from 'vscode';
-import { getBranches } from './github-api-gql';
-import { hasValidToken, splitPathByBranchName, getNormalizedPath, reuseable } from './util';
+// import { getBranches } from './github-api-gql';
+import { hasValidToken } from './util';
 import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError, throttledReportNetworkError } from './util/fetch';
 
 export const ENABLE_GRAPHQL: boolean = true;
@@ -13,30 +13,11 @@ export const ENABLE_GRAPHQL: boolean = true;
 export interface UriState {
 	owner: string;
 	repo: string;
-	branch: string;
 	path: string;
-	uri: vscode.Uri
 }
 
 export const isGraphQLEnabled = () => {
 	return hasValidToken() && ENABLE_GRAPHQL;
-};
-
-export const parseUri = (uri: vscode.Uri): Promise<UriState> => {
-	const [owner, repo, pathname] = (uri.authority || '').split('+').filter(Boolean);
-	return getGitHubBranches(owner, repo)
-		.then(
-			branchNames => {
-				const [branch] = splitPathByBranchName(pathname, branchNames);
-				return {
-					owner,
-					repo,
-					branch,
-					path: getNormalizedPath(uri.path, branch),
-					uri,
-				};
-			}
-		);
 };
 
 const handleRequestError = (error: RequestError) => {
@@ -58,13 +39,13 @@ const handleRequestError = (error: RequestError) => {
 	throw vscode.FileSystemError.Unavailable(error.message || 'Unknown Error Occurred When Request To GitHub');
 };
 
-export const readGitHubDirectory = (state: UriState) => {
-	return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/trees/${state.branch}${state.path.replace(/^\//, ':')}`)
+export const readGitHubDirectory = (owner: string, repo: string, ref: string, path: string) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${path.replace(/^\//, ':')}`)
 		.catch(handleRequestError);
 };
 
-export const readGitHubFile = (state: UriState, fileSha: string) => {
-	return fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/blobs/${fileSha}`)
+export const readGitHubFile = (owner: string, repo: string, fileSha: string) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs/${fileSha}`)
 		.catch(handleRequestError);
 };
 
@@ -82,25 +63,33 @@ export const validateToken = (token: string) => {
 	});
 };
 
-const branchNameCache = new Map();
-
-export const fetchGitHubBranches = (owner: string, repo: string) => {
-	const key = owner + '/' + repo;
-	if (branchNameCache.has(key)) {
-		return Promise.resolve(branchNameCache.get(key));
-	}
-	return fetch(`https://api.github.com/repos/${owner}/${repo}/branches`)
-		.then(res => {
-			const names = res.map(x => x.name);
-			branchNameCache.set(key, names);
-			return names;
+export const getGithubBranches = (owner: string, repo: string) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100`)
+		.then(branches => {
+			// TODO: only no more than 200 branches are supported
+			if (branches.length === 100) {
+				return fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100&page=2`).then(otherBranches => [...branches, ...otherBranches]);
+			}
+			return branches;
 		})
 		.catch(handleRequestError);
 };
 
-export const getGitHubBranches = (owner: string, repo: string) => {
-	if (isGraphQLEnabled()) {
-		return getBranches(owner, repo);
-	}
-	return fetchGitHubBranches(owner, repo);
+export const getGithubTags = (owner: string, repo: string) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/tags?per_page=100`)
+		.then(tags => {
+			// TODO: only no more than 200 tags are supported
+			if (tags.length === 100) {
+				return fetch(`https://api.github.com/repos/${owner}/${repo}/tags?per_page=100&page=2`).then(otherTags => [...tags, ...otherTags]);
+			}
+			return tags;
+		})
+		.catch(handleRequestError);
 };
+
+// export const getGitHubBranches = (owner: string, repo: string) => {
+// 	if (isGraphQLEnabled()) {
+// 		return getBranches(owner, repo);
+// 	}
+// 	return getGithubBranches(owner, repo);
+// };
