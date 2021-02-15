@@ -18,8 +18,14 @@ import { localize } from 'vs/nls';
 import { Schemas } from 'vs/base/common/network';
 import product from 'vs/platform/product/common/product';
 import { parseLogLevel } from 'vs/platform/log/common/log';
-import { parseGitHubUrl } from 'vs/github1s/util';
+import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
 import { renderNotification } from 'vs/github1s/notification';
+
+// custom vs code commands defined by github1s
+const getGitHub1sCustomCommands: () => ({id: string, handler: (...args: any[]) => unknown }[]) = () => [
+	{ id: 'github1s.vscode.get-browser-url', handler: getBrowserUrl },
+	{ id: 'github1s.vscode.replace-browser-url', handler: replaceBrowserUrl },
+];
 
 function doCreateUri(path: string, queryValues: Map<string, string>): URI {
 	let query: string | undefined = undefined;
@@ -380,7 +386,7 @@ class WindowIndicator implements IWindowIndicator {
 			}
 
 			if (uri?.scheme === 'github1s') {
-				[repositoryOwner, repositoryName] = uri.authority.split('+');
+				[repositoryOwner = 'conwnet', repositoryName = 'github1s'] = URI.parse(getBrowserUrl()).path.split('/').filter(Boolean);
 			}
 		}
 
@@ -399,9 +405,10 @@ class WindowIndicator implements IWindowIndicator {
 }
 
 (function () {
-	const route = parseGitHubUrl(window.location.href);
+	const [repoOwner = 'conwnet', repoName = 'github1s'] = (URI.parse(window.location.href).path || '').split('/').filter(Boolean);
 	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
-		folderUri: URI.from({ scheme: "github1s", path: '/', authority: `${route.owner}+${route.repo}+${route.branch}` }),
+		// the empty authority means github1s should get it from `window.location.href`
+		folderUri: URI.from({ scheme: "github1s", path: '/', authority: '' }),
 		staticExtensions: [],
 		enableSyncByDefault: false,
 		webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
@@ -474,7 +481,7 @@ class WindowIndicator implements IWindowIndicator {
 
 	// Home Indicator
 	const homeIndicator: IHomeIndicator = {
-		href: `https://github.com/${route.owner}/${route.repo}`,
+		href: `https://github.com/${repoOwner}/${repoName}`,
 		icon: 'github',
 		title: localize('home', "Home")
 	};
@@ -524,6 +531,7 @@ class WindowIndicator implements IWindowIndicator {
 	// Finally create workbench
 	create(document.body, {
 		...config,
+		commands: getGitHub1sCustomCommands(),
 		logLevel: logLevel ? parseLogLevel(logLevel) : undefined,
 		settingsSyncOptions,
 		homeIndicator,

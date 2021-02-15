@@ -291,7 +291,7 @@ export class TitlebarPart extends Part implements ITitleService {
 		const remoteName = this.labelService.getHostLabel(Schemas.vscodeRemote, this.environmentService.remoteAuthority);
 		const separator = this.configurationService.getValue<string>('window.titleSeparator');
 		const titleTemplate = this.configurationService.getValue<string>('window.title');
-	const [owner, repo] = (folderName || '').split('+');
+		const [owner = 'conwnet', repo = 'github1s'] = URI.parse(window.location.href).path.split('/').filter(Boolean);
 
 		return template(titleTemplate, {
 			activeEditorShort,

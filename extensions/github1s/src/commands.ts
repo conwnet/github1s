@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionContext } from './util';
+import { getExtensionContext, getRepositoryBranches, getRepositoryTags, getCurrentRef, getCurrentAuthority, changeCurrentRef } from './util';
 import { validateToken } from './api';
 
 export const commandValidateToken = (silent: boolean = false) => {
@@ -63,4 +63,26 @@ export const commandClearToken = (silent: boolean = false) => {
 		}
 		return false;
 	});
+};
+
+export const commandGetCurrentAuthority = (): Promise<string> => getCurrentAuthority();
+
+export const commandSwitchBranch = () => {
+	return Promise.all([getRepositoryBranches(), getCurrentRef()]).then(([repositoryBranches, currentRef]) => (
+		vscode.window.showQuickPick(repositoryBranches.map(item => item.name), { placeHolder: currentRef }).then((newRef: string) => {
+			return newRef && changeCurrentRef(newRef).then((newRef) => {
+				vscode.window.showInformationMessage(`Switch to branch: ${newRef}`);
+			});
+		})
+	));
+};
+
+export const commandSwitchTag = () => {
+	return Promise.all([getRepositoryTags(), getCurrentRef()]).then(([repositoryBranches, currentRef]) => (
+		vscode.window.showQuickPick(repositoryBranches.map(item => item.name), { placeHolder: currentRef }).then((newRef: string) => {
+			return newRef && changeCurrentRef(newRef).then((newRef) => {
+				vscode.window.showInformationMessage(`Switch to branch: ${newRef}`);
+			});
+		})
+	));
 };

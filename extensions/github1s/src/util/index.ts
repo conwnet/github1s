@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 export { fetch } from './fetch';
 export { reuseable, throttle } from './func';
 export { getExtensionContext, setExtensionContext, hasValidToken, getOAuthToken } from './context';
+export { getCurrentRef, getCurrentAuthority, getRepositoryBranches, getRepositoryTags, changeCurrentRef } from './git-ref';
 
 export const noop = () => { };
 
