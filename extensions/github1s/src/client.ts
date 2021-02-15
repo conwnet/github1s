@@ -21,41 +21,6 @@ const authLink = setContext((_, { headers }) => {
 	};
 });
 
-export const githubObjectQuery = gql`
-fragment TreeEntryFields on TreeEntry {
-  oid
-  name
-  path
-  type
-}
-
-fragment BlobFields on Blob {
-  oid
-  byteSize
-  text
-  isBinary
-}
-
-fragment TreeField on Tree {
-  id
-  entries {
-    ...TreeEntryFields
-    object {
-      ...BlobFields
-    }
-  }
-}
-
-query objectQuery($owner: String!, $repo: String!, $expression: String!) {
-  repository(name: $repo, owner: $owner) {
-    id
-    object(expression: $expression) {
-      ...TreeField
-    }
-  }
-}
-`;
-
 export const apolloClient = new ApolloClient({
 	link: authLink.concat(httpLink),
 	cache: new InMemoryCache()
