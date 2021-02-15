@@ -5,7 +5,7 @@ One second to read GitHub code with VS Code.
 
 ## Usage
 
-Just add `1s` after `github` and press `Enter` in browser address bar for any repository you want to read.
+Just add `1s` after `github` and before `.com` in any GitHub repository's URL in your browser and press `Enter` in browser address bar for any repository you want to read.
 
 For Example VS Code:
 
