@@ -47,7 +47,7 @@ export default () => `
 				<h2 class="caption">Authentication</h2>
 				<div class="list">
 					<div class="item"><button class="update-oauth-token"><h3 class="caption">Update OAuth Token</h3><span class="detail">Use a <a href="https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header" target="_blank">GitHub OAuth token</a> to increase your rate limit</span></button></div>
-					<div class="item"><button class="create-new-token"><h3 class="caption">Create New Token</h3><span class="detail">Create a new Token from you GitHub Account</span></button></div>
+					<div class="item"><button class="create-new-token"><h3 class="caption">Create New Token</h3><span class="detail">Create a new Token from your GitHub Account</span></button></div>
 					<div class="item"><button class="clear-oauth-token"><h3 class="caption">Clear Saved Token</h3><span class="detail">Clear the saved GitHub OAuth Token for security</span></button></div>
 				</div>
 				</div>
