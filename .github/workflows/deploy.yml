@@ -1,9 +1,7 @@
-name: Node.js CI
+name: Deploy
 
 on:
   push:
-    branches:
-      - master
     tags:
       - v*
 
