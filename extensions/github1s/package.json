@@ -4,7 +4,7 @@
   "publisher": "github1s",
   "description": "",
   "private": true,
-  "main": "index.js",
+  "enableProposedApi": true,
   "directories": {
     "lib": "lib"
   },
@@ -80,6 +80,7 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/client": "^3.3.9",
+    "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",

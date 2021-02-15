@@ -87,6 +87,11 @@ export const getGithubTags = (owner: string, repo: string) => {
 		.catch(handleRequestError);
 };
 
+export const getGithubAllFiles = (owner: string, repo: string, ref: string, path: string = '/') => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${path.replace(/^\//, ':')}?recursive=1`)
+		.catch(handleRequestError);
+};
+
 // export const getGitHubBranches = (owner: string, repo: string) => {
 // 	if (isGraphQLEnabled()) {
 // 		return getBranches(owner, repo);
