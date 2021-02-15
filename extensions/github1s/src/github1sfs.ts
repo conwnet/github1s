@@ -146,7 +146,7 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
 	private root: Map<string, Directory | File> = new Map();
-	private fuse: Fuse<GithubRESTEntry> = null;
+	private fuseMap: Map<string, Fuse<GithubRESTEntry>> = new Map();
 
 	onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 
@@ -169,7 +169,6 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 		let currentAuthority = await getCurrentAuthority();
 		if (!this.root.get(currentAuthority)) {
 			this.root.set(currentAuthority, new Directory(uri.with({ path: '/' }), ''));
-			this.loadAllFiles();
 		}
 		let entry = this.root.get(currentAuthority);
 		for (const part of parts) {
@@ -293,12 +292,14 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 	}
 
 	/**
-	 * loadAllFiles for fuzzy file search,
+	 * getFuse for fuzzy file search,
 	 * it maybe take longer time, so we just run it in backend
 	 * if this is failed, the fuzzy search maybe not work fine
 	 */
-	loadAllFiles = reuseable(async () => {
-		const authority: string = await getCurrentAuthority();
+	getFuse = reuseable(async (authority): Promise<Fuse<GithubRESTEntry>> => {
+		if (this.fuseMap.has(authority)) {
+			return this.fuseMap.get(authority);
+		}
 		const [owner, repo, ref] = authority.split('+');
 
 		return getGithubAllFiles(owner, repo, ref).then(async treeData => {
@@ -311,16 +312,17 @@ export class GitHub1sFS implements FileSystemProvider, FileSearchProvider, Dispo
 					insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
 				});
 			}
-			this.fuse = new Fuse(((treeData.tree || []) as GithubRESTEntry[]).filter(item => (item.type === 'blob')), { keys: ['path'] });
+			const fuse = new Fuse(((treeData.tree || []) as GithubRESTEntry[]).filter(item => (item.type === 'blob')), { keys: ['path'] });
+			this.fuseMap.set(authority, fuse);
+			return fuse;
 		});
 	});
 
 	provideFileSearchResults(query: FileSearchQuery, _options: FileSearchOptions, _token: CancellationToken): ProviderResult<Uri[]> {
-		if (!this.fuse) {
-			return null;
-		}
-		return this.fuse.search(query.pattern).map((result) => {
-			return Uri.parse('').with({ scheme: GitHub1sFS.scheme, path: result.item.path });
-		});
+		return getCurrentAuthority().then((authority) => this.getFuse(authority))
+		.then((fuse: Fuse<GithubRESTEntry>) => fuse.search(query.pattern).map((result) => {
+				return Uri.parse('').with({ scheme: GitHub1sFS.scheme, path: result.item.path });
+			})
+		);
 	}
 }
