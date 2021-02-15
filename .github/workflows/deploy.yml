@@ -19,7 +19,7 @@ jobs:
 
     - run: yarn --frozen-lockfile
     - run: yarn build
-    # Add command to generate artifact for gh-pages branch
+    - run: yarn hash
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
