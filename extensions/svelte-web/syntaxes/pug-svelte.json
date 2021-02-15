@@ -1,0 +1,293 @@
+{
+  "scopeName": "svelte.pug",
+  "fileTypes": [],
+  "injectionSelector": "L:text.pug -meta.embedded.ts -meta.tag.other -text.block.pug, L:inline.pug -meta.embedded.ts -meta.tag.other",
+  "patterns": [
+    {
+      "include": "#interp-object-literal"
+    },
+    {
+      "include": "#interp"
+    },
+    {
+      "include": "#tag-component"
+    },
+    {
+      "include": "#tag-component-no-params"
+    },
+    {
+      "include": "#mixin-svelte"
+    },
+    {
+      "include": "#mixin-else"
+    }
+  ],
+  "repository": {
+    "interp-object-literal": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){\\s*?(?={)",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "(?<=})\\s*?}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts#object-literal"
+        }
+      ]
+    },
+    "interp": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts"
+        }
+      ]
+    },
+    "tag-component": {
+      "name": "meta.tag.svelte",
+      "begin": "(?<=^\\s*?|#\\[\\s*?|:\\s+?)([A-Z][a-zA-Z0-9_]*)\\s*?(?=\\()",
+      "beginCaptures": {
+        "0": {
+          "name": "support.class.component.svelte"
+        }
+      },
+      "end": "(?<=\\))",
+      "endCaptures": {
+        "0": {
+          "name": "constant.name.attribute.tag"
+        }
+      },
+      "patterns": [
+        {
+          "include": "text.pug#tag_attributes"
+        }
+      ]
+    },
+    "tag-component-no-params": {
+      "name": "meta.tag.svelte",
+      "match": "(?<=^\\s*?|#\\[\\s*?|:\\s+?)([A-Z][a-zA-Z0-9_]*)",
+      "captures": {
+        "0": {
+          "name": "support.class.component.svelte"
+        }
+      }
+    },
+    "mixin-svelte": {
+      "match": "(?<=^\\s*?|#\\[\\s*?|:\\s+?)(\\+)(debug|if|elseif|then|catch|each|await|html|key)\\s*?(\\()\\s*?([`'\"])(.*?)(\\k<4>)\\s*?(\\))",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword"
+        },
+        "2": {
+          "patterns": [
+            {
+              "match": "debug",
+              "name": "keyword.other.debugger"
+            },
+            {
+              "match": "if|elseif",
+              "name": "keyword.control.conditional"
+            },
+            {
+              "match": "then|catch|await",
+              "name": "keyword.control.flow"
+            },
+            {
+              "match": "each",
+              "name": "keyword.control"
+            },
+            {
+              "match": "html|key",
+              "name": "support.function"
+            }
+          ]
+        },
+        "3": {
+          "name": "meta.brace.round"
+        },
+        "4": {
+          "name": "punctuation.definition.generic.begin"
+        },
+        "5": {
+          "patterns": [
+            {
+              "match": "(?<=each\\s*?\\(\\s*?')(.*)\\s+?(as\\s+?(.*?)(\\s*?,\\s*?)(.*?|)(\\s+?\\(.*\\)|)$)",
+              "captures": {
+                "1": {
+                  "name": "meta.embedded.ts",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "2": {
+                  "name": "keyword.control.as"
+                },
+                "3": {
+                  "name": "meta.embedded.t",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "4": {
+                  "name": "punctuation.separator"
+                },
+                "5": {
+                  "name": "meta.embedded.t",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "6": {
+                  "patterns": [
+                    {
+                      "match": "(\\()(.*)(\\))",
+                      "captures": {
+                        "1": {
+                          "name": "meta.brace.round"
+                        },
+                        "2": {
+                          "name": "variable"
+                        },
+                        "3": {
+                          "name": "meta.brace.round"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "match": "(?<=each\\s*?\\(\\s*?')(.*)\\s+?(as\\s+?(.*?)(\\s+?\\(.*\\)|)$)",
+              "captures": {
+                "1": {
+                  "name": "meta.embedded.ts",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "2": {
+                  "name": "keyword.control.as"
+                },
+                "3": {
+                  "name": "meta.embedded.t",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "4": {
+                  "patterns": [
+                    {
+                      "match": "(\\()(.*)(\\))",
+                      "captures": {
+                        "1": {
+                          "name": "meta.brace.round"
+                        },
+                        "2": {
+                          "name": "variable"
+                        },
+                        "3": {
+                          "name": "meta.brace.round"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "match": "(?<=await\\s*?\\(\\s*?')(.*)\\s+?(then(.*)$)",
+              "captures": {
+                "1": {
+                  "name": "meta.embedded.ts",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                },
+                "2": {
+                  "name": "keyword.control.flow"
+                },
+                "3": {
+                  "name": "variable"
+                }
+              }
+            },
+            {
+              "match": "(?<=debug\\s*?\\(\\s*?')(\\w+?)(,|$)",
+              "captures": {
+                "1": {
+                  "name": "variable"
+                },
+                "2": {
+                  "name": "punctuation.separator"
+                }
+              }
+            },
+            {
+              "match": "(.*)$",
+              "captures": {
+                "0": {
+                  "name": "meta.embedded.ts",
+                  "patterns": [
+                    {
+                      "include": "source.ts"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.generic.end"
+        },
+        "7": {
+          "name": "meta.brace.round"
+        }
+      }
+    },
+    "mixin-else": {
+      "match": "(?<=^\\s*?|#\\[\\s*?|:\\s+?)(\\+)(else)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword"
+        },
+        "2": {
+          "name": "keyword.control.conditional"
+        }
+      }
+    }
+  }
+}

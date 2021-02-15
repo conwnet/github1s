@@ -1,0 +1,695 @@
+---
+name: Svelte Component
+scopeName: source.svelte
+fileTypes: [svelte]
+uuid: 7582b62f-51d9-4a84-8c8d-fc189530faf6
+
+injections:
+  # ---- EMBEDDED LANGUAGES
+  # Yes, this is dark, abyssal magic - conjured up from the depths of tedious experimentation.
+
+  # Format:
+  #  'L:meta.<script|style|template>.svelte (meta.lang.<lang> | meta.lang.<langalternative> | ...) - (meta source)'
+  #     patterns: [{begin: '(?<=>)(?!</)', end: '(?=</)', name: meta.embedded.block.svelte,
+  #     contentName: source.<lang>, patterns: [{ include: source.<lang> }]}]
+
+  # Script Languages
+  # JavaScript | 'javascript' | 'source.js'
+  "L:meta.script.svelte meta.lang.javascript - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.js,
+          patterns: [{ include: source.js }],
+        },
+      ]
+
+  # TypeScript | 'ts' 'typescript' | 'source.ts'
+  "L:meta.script.svelte (meta.lang.ts | meta.lang.typescript) - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.ts,
+          patterns: [{ include: source.ts }],
+        },
+      ]
+
+  # CoffeeScript | 'coffee' | 'source.coffee'
+  "L:meta.script.svelte meta.lang.coffee - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.coffee,
+          patterns: [{ include: source.coffee }],
+        },
+      ]
+
+  # Default (JavaScript)
+  "L:meta.script.svelte - meta.lang - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.js,
+          patterns: [{ include: source.js }],
+        },
+      ]
+
+  # ----
+
+  # Style Languages
+  # Stylus | 'stylus' | 'source.stylus'
+  "L:meta.style.svelte meta.lang.stylus - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.stylus,
+          patterns: [{ include: source.stylus }],
+        },
+      ]
+
+  # Sass | 'sass' | 'source.sass'
+  "L:meta.style.svelte meta.lang.sass - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.sass,
+          patterns: [{ include: source.sass }],
+        },
+      ]
+
+  # CSS | 'css' | 'source.css'
+  "L:meta.style.svelte meta.lang.css - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.css,
+          patterns: [{ include: source.css }],
+        },
+      ]
+
+  # SCSS | 'scss' | 'source.css.scss'
+  "L:meta.style.svelte meta.lang.scss - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.css.scss,
+          patterns: [{ include: source.css.scss }],
+        },
+      ]
+
+  # Less | 'less' | 'source.css.less'
+  "L:meta.style.svelte meta.lang.less - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.css.less,
+          patterns: [{ include: source.css.less }],
+        },
+      ]
+
+  # PostCSS | 'postcss' | 'source.css.postcss'
+  "L:meta.style.svelte meta.lang.postcss - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.css.postcss,
+          patterns: [{ include: source.css.postcss }],
+        },
+      ]
+
+  # Default (CSS)
+  "L:meta.style.svelte - meta.lang - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: source.css,
+          patterns: [{ include: source.css }],
+        },
+      ]
+
+  # ----
+
+  # Template Languages
+  # Pug | 'pug' | 'text.pug'
+  "L:meta.template.svelte meta.lang.pug - (meta source)":
+    patterns:
+      [
+        {
+          begin: "(?<=>)(?!</)",
+          end: "(?=</)",
+          name: meta.embedded.block.svelte,
+          contentName: text.pug,
+          patterns: [{ include: text.pug }],
+        },
+      ]
+
+  # Default (just introduces a new scope)
+  "L:meta.template.svelte - meta.lang - (meta source)":
+    patterns:
+      [
+        {
+          begin: '(?<=>)\s',
+          end: "(?=</template)",
+          patterns: [{ include: "#scope" }],
+        },
+      ]
+
+  # ---- LANGUAGE EXTENSIONS
+
+  # - TS / JS / CS -
+
+  "L:(source.ts, source.js, source.coffee)":
+    patterns:
+      # Matches the store accessor symbol.
+      # i.e. the `$` in `$myStore`.
+      - match: (?<![_$[:alnum:]])\$(?=[_[:alpha:]][_$[:alnum:]]*)
+        name: punctuation.definition.variable.svelte
+      # Matches the built-in constants/keywords that Svelte supports.
+      # e.g. `$$restProps`.
+      - match: (?<![_$[:alnum:]])(\$\$)(?=props|restProps|slots)
+        name: punctuation.definition.variable.svelte
+
+  # - PUG -
+  # TODO: Pug language injections
+
+# note: these patterns are NOT perfect
+# matching _perfectly_ against tags and attributes would involve insanely huge regexes
+# if these somehow do not cover all use cases, then we can introduce a compile step with variables
+#
+# special tags: [#@/:][a-z]*
+# HTML valid tag names: [a-z][\w0-9:-]*
+# TS variables: [_$[:alpha:]][_$[:alnum:]]*
+# element directives: [a-z]:[_$[:alpha:]][_\-$[:alnum:]]*(\|\w*)*
+
+# Start of grammar.
+patterns:
+  - include: "#scope"
+
+# Contains all of our patterns.
+repository:
+  # -------
+  #  SCOPE
+
+  # Used whenever a new scope is introduced, such as at the root level or within a content tag.
+  scope:
+    patterns:
+      - include: "#comments"
+      - include: "#special-tags"
+      - include: "#tags"
+      - include: "#interpolation"
+      # Content text.
+      # This matches only inbetween all the nodes - nothing inside of them.
+      - begin: (?<=>|})
+        end: (?=<|{)
+        name: text.svelte
+
+  # ----------
+  #  COMMENTS
+
+  # Basic HTML comments.
+  comments:
+    begin: <!--
+    end: -->
+    captures:
+      0: { name: punctuation.definition.comment.svelte }
+    name: comment.block.svelte
+    patterns:
+      # Component documentation.
+      - begin: (@)(component)
+        beginCaptures:
+          1: { name: punctuation.definition.keyword.svelte }
+          2:
+            {
+              name: storage.type.class.component.svelte keyword.declaration.class.component.svelte,
+            }
+        end: (?=-->)
+        contentName: comment.block.documentation.svelte
+        patterns:
+          # The reason we do it like this is so that the Markdown grammar cannot break out of the `-->` bit.
+          # Embedded languages, for whatever reason, can only break out of begin-end blocks. (...most of the time)
+          # If you shove them in a match pattern, it cannot break out of it's matched bounds.
+          # And since the match consumed the line leading to `-->`,
+          # the 'block' markdown won't break out of the comment block.
+          - match: .*?(?=-->)
+            captures: { 0: { patterns: [include: text.html.markdown] } }
+          - include: text.html.markdown
+      # Validations
+      - {
+          match: '\G-?>|<!--(?!>)|<!-(?=-->)|--!>',
+          name: invalid.illegal.characters-not-allowed-here.svelte,
+        }
+
+  # ------
+  #  MISC
+
+  # Destructuring {} and [] JS syntax. Currently only used in some special tags.
+  destructuring:
+    patterns:
+      # {...}
+      - {
+          begin: "(?={)",
+          end: "(?<=})",
+          name: meta.embedded.expression.svelte source.ts,
+          patterns: [include: source.ts#object-binding-pattern],
+        }
+      # [...]
+      - {
+          begin: '(?=\[)',
+          end: '(?<=\])',
+          name: meta.embedded.expression.svelte source.ts,
+          patterns: [include: source.ts#array-binding-pattern],
+        }
+
+  # Plain old interpolation between `{...}` blocks.
+  interpolation:
+    patterns:
+      - begin: \{
+        end: \}
+        beginCaptures:
+          { 0: { name: punctuation.section.embedded.begin.svelte } }
+        endCaptures: { 0: { name: punctuation.section.embedded.end.svelte } }
+        contentName: meta.embedded.expression.svelte source.ts
+        patterns:
+          # Object literals - usually used within attributes.
+          - begin: \G\s*(?={)
+            end: (?<=})
+            patterns: [include: source.ts#object-literal]
+          - include: source.ts
+
+  # --------------
+  #  SPECIAL TAGS
+
+  # All special tags together. Used whenever a new scope is introduced.
+  special-tags:
+    patterns:
+      - include: "#special-tags-void"
+      - include: "#special-tags-block-begin"
+      - include: "#special-tags-block-end"
+
+  # Special tag keywords, like `#if` and `/await`.
+  special-tags-keywords:
+    match: ([#@/:])(else\s+if|[a-z]*)
+    captures:
+      1: { name: punctuation.definition.keyword.svelte }
+      # The keyword itself. If others are patched in in the future, they can easily be added here.
+      2:
+        {
+          patterns:
+            [
+              {
+                match: if|else\s+if|else,
+                name: keyword.control.conditional.svelte,
+              },
+              { match: each|key, name: keyword.control.svelte },
+              { match: await|then|catch, name: keyword.control.flow.svelte },
+              { match: html, name: keyword.other.svelte },
+              { match: debug, name: keyword.other.debugger.svelte },
+            ],
+        }
+
+  # Scopes special tag _block start nodes_ depending on what type they are, such as `#if` or `#await` blocks.
+  special-tags-modes:
+    patterns:
+      # Expressions or simple values.
+      - begin: (?<=(if|key|then|catch|html).*?)\G
+        end: (?=})
+        name: meta.embedded.expression.svelte source.ts
+        patterns: [include: source.ts]
+
+      # Each.
+      - begin: (?<=each.*?)\G
+        end: (?=})
+        patterns:
+          # Start expression.
+          - begin: \G\s*?(?=\S)
+            end: (?=(?:^\s*|\s+)(as))
+            contentName: meta.embedded.expression.svelte source.ts
+            patterns: [include: source.ts]
+          # 'as' token and onwards.
+          - begin: (as)
+            beginCaptures: { 1: { name: keyword.control.as.svelte } }
+            end: (?=})
+            patterns:
+              # [] and {} destructuring blocks.
+              - include: "#destructuring"
+              # Key expression.
+              - begin: \(
+                end: \)|(?=})
+                captures: { 0: { name: meta.brace.round.svelte } }
+                contentName: meta.embedded.expression.svelte source.ts
+                patterns: [include: source.ts]
+              # Name or index expression.
+              - match: (\s*([_$[:alpha:]][_$[:alnum:]]*)\s*)
+                captures:
+                  {
+                    1:
+                      {
+                        name: meta.embedded.expression.svelte source.ts,
+                        patterns: [include: source.ts],
+                      },
+                  }
+              # The comma.
+              - { match: ",", name: punctuation.separator.svelte }
+
+      # Await.
+      - begin: (?<=await.*?)\G
+        end: (?=})
+        patterns:
+          # Promise expression.
+          - begin: \G\s*?(?=\S)
+            end: \s+(then)|(?=})
+            endCaptures: { 1: { name: keyword.control.flow.svelte } }
+            contentName: meta.embedded.expression.svelte source.ts
+            patterns: [include: source.ts]
+          # Then expression.
+          - begin: (?<=then\b)
+            end: (?=})
+            contentName: meta.embedded.expression.svelte source.ts
+            patterns: [include: source.ts]
+
+      # Debug.
+      - begin: (?<=debug.*?)\G
+        end: (?=})
+        patterns:
+          # Variables.
+          - match: "[_$[:alpha:]][_$[:alnum:]]*"
+            captures:
+              {
+                0:
+                  {
+                    name: meta.embedded.expression.svelte source.ts,
+                    patterns: [include: source.ts],
+                  },
+              }
+          # The commas.
+          - { match: ",", name: punctuation.separator.svelte }
+
+  # Special void tags like `{:else}` and `{@html}`.
+  special-tags-void:
+    begin: ({)\s*((?:[@:])(else\s+if|[a-z]*))
+    beginCaptures:
+      1: { name: punctuation.definition.block.begin.svelte }
+      2: { patterns: [include: "#special-tags-keywords"] }
+    end: \}
+    endCaptures: { 0: { name: punctuation.definition.block.end.svelte } }
+    name: meta.special.$3.svelte
+    patterns: [include: "#special-tags-modes"]
+
+  # Special tag blocks like `{#if}...{/if}`.
+  # Split up into start and end because we don't need to preserve the name
+  # inside and because it makes whitespace matching logic more robust
+  special-tags-block-begin:
+    # This pattern is technically not correct,
+    # as the (#|:|/)[logic] keywords do not care about whitespace between it and the { bracket.
+    # This means newlines are actually valid!
+    # However, deciphering what is logic and what is interpolation would be stupidly tedious. So we don't.
+    begin: ({)\s*(#([a-z]*))
+    end: (})
+    name: meta.special.$3.svelte meta.special.start.svelte
+    beginCaptures:
+      1: { name: punctuation.definition.block.begin.svelte }
+      2: { patterns: [include: "#special-tags-keywords"] }
+    endCaptures: { 0: { name: punctuation.definition.block.end.svelte } }
+    patterns: [include: "#special-tags-modes"]
+
+  special-tags-block-end:
+    # This is again technically not correct, and due to the same whitespacing reasons.
+    # However... just don't introduce newlines in `{/if}` blocks. 'cuz that's weird.
+    begin: ({)\s*(/([a-z]*))
+    end: (})
+    name: meta.special.$3.svelte meta.special.end.svelte
+    beginCaptures:
+      1: { name: punctuation.definition.block.begin.svelte }
+      2: { patterns: [include: "#special-tags-keywords"] }
+    endCaptures:
+      1: { name: punctuation.definition.block.end.svelte }
+
+  # ------------
+  #  ATTRIBUTES
+
+  attributes:
+    patterns:
+      - include: "#attributes-directives"
+      - include: "#attributes-keyvalue"
+      - include: "#attributes-interpolated"
+
+  # Interpolated shorthand attributes, like `{variable}` sitting by itself.
+  attributes-interpolated:
+    begin: (?<!:|=)\s*({)
+    end: (\})
+    captures: { 1: { name: entity.other.attribute-name.svelte } }
+    contentName: meta.embedded.expression.svelte source.ts
+    patterns: [include: source.ts]
+
+  # Matches attribute keyvalues. (and boolean attributes as well)
+  # e.g. `class="my-class"`
+  attributes-keyvalue:
+    begin: ([_$[:alpha:]][_\-$[:alnum:]]*)
+    beginCaptures: { 1: { name: entity.other.attribute-name.svelte } }
+    end: (?=\s*+[^=\s])
+    name: "meta.attribute.$1.svelte"
+    patterns: [include: "#attributes-value"]
+
+  # The value part of attribute keyvalues. e.g. `="my-class"` in `class="my-class"`
+  attributes-value:
+    begin: "="
+    beginCaptures: { 0: { name: punctuation.separator.key-value.svelte } }
+    end: (?<=[^\s=])(?!\s*=)|(?=/?>)
+    patterns:
+      # No quotes - just an interpolation expression.
+      - include: "#interpolation"
+      # Units, meaning digit characters and an optional unit string. e.g. `15px`
+      - match: ([0-9._]+[\w]{,4})(?=\s|/?>)
+        name: constant.numeric.decimal.svelte
+        patterns: [include: "#interpolation"]
+      # Unquoted strings.
+      - match: ([^\s"'=<>`/]|/(?!>))+
+        name: string.unquoted.svelte
+        patterns: [include: "#interpolation"]
+      # Quoted strings.
+      - begin: (['"])
+        end: \1
+        beginCaptures:
+          { 0: { name: punctuation.definition.string.begin.svelte } }
+        endCaptures: { 0: { name: punctuation.definition.string.end.svelte } }
+        name: string.quoted.svelte
+        patterns: [include: "#interpolation"]
+
+  # For Svelte element directives. Scopes the 'on' part in `on:click`.
+  attributes-directives-keywords:
+    patterns:
+      # If other keywords are patched in in the future, they can be added here but also need to be added
+      # where attributes-directives-keywords is included.
+      - { match: on|use|bind, name: keyword.control.svelte }
+      - {
+          match: transition|in|out|animate,
+          name: keyword.other.animation.svelte,
+        }
+      - { match: let, name: storage.type.svelte }
+      - { match: class, name: entity.other.attribute-name.svelte }
+
+  # For Svelte element directives. Scopes the 'click' part in `on:click`.
+  # The scope of the variable should represent what data type it generally is.
+  attributes-directives-types:
+    patterns:
+      # If other keywords are patched in in the future, they can easily be added here.
+      - { match: "(?<=(on):).*$", name: entity.name.type.svelte }
+      - { match: "(?<=(bind):).*$", name: variable.parameter.svelte }
+      - {
+          match: "(?<=(use|transition|in|out|animate):).*$",
+          name: variable.function.svelte,
+        }
+      - { match: "(?<=(let|class):).*$", name: variable.parameter.svelte }
+
+  # For directives that may be better suited using different scopes if assigned to something.
+  # e.g. `class:var={var}` is different to `class:var`.
+  # In the latter, `var` is a variable identifier and not a CSS class name.
+  attributes-directives-types-assigned:
+    patterns:
+      # Special Cases
+      # Makes 'bind:this' display like `this` would in JS.
+      - { match: "(?<=(bind):)this$", name: variable.language.svelte }
+      # If other keywords are patched in in the future, they can easily be added here.
+      - { match: "(?<=(bind):).*$", name: entity.name.type.svelte }
+      - {
+          match: "(?<=(class):).*$",
+          name: entity.other.attribute-name.class.svelte,
+        }
+      # Defaults to the non-assignment version for everything else.
+      - include: "#attributes-directives-types"
+
+  # Matches Svelte element directives, e.g. `on:click|preventDefault={var}`
+  attributes-directives:
+    # If something is added to attributes-directives-keywords, it must be added to the begin-regex, too.
+    begin: (?<!<)(on|use|bind|transition|in|out|animate|let|class)(:)(?:([_$[:alpha:]][_\-$[:alnum:]]*(?=\s*=))|([_$[:alpha:]][_\-$[:alnum:]]*))((\|\w+)*)
+    beginCaptures:
+      1: { patterns: [include: "#attributes-directives-keywords"] }
+      2: { name: punctuation.definition.keyword.svelte }
+      3: { patterns: [include: "#attributes-directives-types-assigned"] }
+      4: { patterns: [include: "#attributes-directives-types"] }
+      5:
+        {
+          patterns:
+            [
+              { match: '\w+', name: support.function.svelte },
+              { match: '\|', name: punctuation.separator.svelte },
+            ],
+        }
+    end: (?=\s*+[^=\s])
+    name: meta.directive.$1.svelte
+    patterns:
+      - include: "#attributes-value"
+
+  # ------
+  #  TAGS
+
+  # All tags together. Used whenever a new nested scope is introduced (and the root scope, of course).
+  tags:
+    patterns:
+      # The order is important here - void tags need to matched before block tags and end before start.
+      - include: "#tags-lang"
+      - include: "#tags-void"
+      - include: "#tags-general-end"
+      - include: "#tags-general-start"
+
+  # -- TAG COMPONENTS
+
+  # Scopes the `name` part in `<name>`.
+  tags-name:
+    patterns:
+      # Svelte (`svelte:<type>`) elements.
+      - match: '(svelte)(:)([a-z][\w0-9:-]*)'
+        captures:
+          1: { name: keyword.control.svelte }
+          2: { name: punctuation.definition.keyword.svelte }
+          3: { name: entity.name.tag.svelte }
+      # Slot.
+      - { match: "slot", name: keyword.control.svelte }
+      # Components.
+      - { match: "[A-Z][a-zA-Z0-9_]*", name: support.class.component.svelte }
+      # Custom elements. (has a dash, but otherwise is a valid HTML element)
+      - {
+          match: '[a-z][\w0-9:]*-[\w0-9:-]*',
+          name: meta.tag.custom.svelte entity.name.tag.svelte,
+        }
+      # HTML elements.
+      - { match: '[a-z][\w0-9:-]*', name: entity.name.tag.svelte }
+
+  # Attributes for tag start nodes. Meant to start immediately after the `<name` section.
+  tags-start-attributes:
+    begin: \G
+    end: (?=/?>)
+    name: meta.tag.start.svelte
+    patterns: [include: "#attributes"]
+
+  # Same as tags-start-attributes but slightly adjusted for special script/style/template tags.
+  tags-lang-start-attributes:
+    begin: \G
+    end: (?=/>)|>
+    name: meta.tag.start.svelte
+    patterns: [include: "#attributes"]
+
+  # Matches the beginning (`<name`) section of a tag start node.
+  tags-start-node:
+    match: (<)([^/\s>/]*)
+    captures:
+      1: { name: punctuation.definition.tag.begin.svelte }
+      2: { patterns: [include: "#tags-name"] }
+    name: meta.tag.start.svelte
+
+  # Matches tag end nodes.
+  tags-end-node:
+    match: (</)(.*?)\s*(>)|(/>)
+    captures:
+      1: { name: meta.tag.end.svelte punctuation.definition.tag.begin.svelte }
+      2: { name: meta.tag.end.svelte, patterns: [include: "#tags-name"] }
+      3: { name: meta.tag.end.svelte punctuation.definition.tag.end.svelte }
+      4: { name: meta.tag.start.svelte punctuation.definition.tag.end.svelte }
+
+  # -- TAG TYPES
+
+  # Language tags - they are handled differently for the purposes of language injection.
+  tags-lang:
+    begin: <(script|style|template)
+    end: </\1\s*>|/>
+    beginCaptures: { 0: { patterns: [include: "#tags-start-node"] } }
+    endCaptures: { 0: { patterns: [include: "#tags-end-node"] } }
+    name: meta.$1.svelte
+    patterns:
+      # Tags with a language specified.
+      - begin: \G(?=\s*(type|lang)\s*=\s*(['"]|)(?:text/)?(\w+)\2)
+        end: (?=</|/>)
+        name: meta.lang.$3.svelte
+        patterns: [include: "#tags-lang-start-attributes"]
+      # Fallback to default language.
+      - include: "#tags-lang-start-attributes"
+
+  # Void element tags. They must be treated separately due to their lack of end nodes.
+  # A void element cannot be differentiated from other tags, unless you look at their name.
+  # This is because there is a specific list of void elements in HTML5. We use that to scope void elements.
+  # If we didn't, a void element would appear as an unclosed element to the grammar.
+  tags-void:
+    begin: (<)(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)(?=\s|/?>)
+    beginCaptures:
+      1: { name: punctuation.definition.tag.begin.svelte }
+      2: { name: entity.name.tag.svelte }
+    end: /?>
+    endCaptures: { 0: { name: punctuation.definition.tag.begin.svelte } }
+    name: meta.tag.void.svelte
+    patterns: [include: "#attributes"]
+
+  # All other tags, including custom/special Svelte tags.
+  # Split up into start and end because we don't need to preserve the name
+  # inside and because it makes whitespace matching logic more robust
+  tags-general-start:
+    begin: (<)([^/\s>/]*)
+    end: (/?>)
+    beginCaptures: { 0: { patterns: [include: "#tags-start-node"] } }
+    endCaptures:
+      1: { name: meta.tag.start.svelte punctuation.definition.tag.end.svelte }
+    name: meta.scope.tag.$2.svelte
+    patterns:
+      - include: "#tags-start-attributes"
+
+  tags-general-end:
+    begin: (</)([^/\s>]*)
+    end: (>)
+    beginCaptures:
+      1: { name: meta.tag.end.svelte punctuation.definition.tag.begin.svelte }
+      2: { name: meta.tag.end.svelte, patterns: [include: "#tags-name"] }
+    endCaptures:
+      1: { name: meta.tag.end.svelte punctuation.definition.tag.end.svelte }
+    name: meta.scope.tag.$2.svelte

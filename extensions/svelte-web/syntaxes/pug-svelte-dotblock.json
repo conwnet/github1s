@@ -1,0 +1,55 @@
+{
+  "scopeName": "svelte.pug.dotblock",
+  "fileTypes": [],
+  "injectionSelector": "L:text.block.pug -meta.embedded.ts",
+  "patterns": [
+    {
+      "include": "#interp-object-literal"
+    },
+    {
+      "include": "#interp"
+    }
+  ],
+  "repository": {
+    "interp-object-literal": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){\\s*?(?={)",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "(?<=})\\s*?}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts#object-literal"
+        }
+      ]
+    },
+    "interp": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts"
+        }
+      ]
+    }
+  }
+}

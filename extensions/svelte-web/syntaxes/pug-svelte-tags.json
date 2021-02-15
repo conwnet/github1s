@@ -1,0 +1,201 @@
+{
+  "scopeName": "svelte.pug.tags",
+  "fileTypes": [],
+  "injectionSelector": "L:text.pug meta.tag.other -meta.embedded.ts",
+  "patterns": [
+    {
+      "include": "#interp-object-literal"
+    },
+    {
+      "include": "#interp"
+    },
+    {
+      "include": "#attr-function"
+    },
+    {
+      "include": "#attr-interp"
+    },
+    {
+      "include": "#attr-interp-invalid-quotes"
+    },
+    {
+      "include": "#attr-interp-invalid-noquotes"
+    },
+    {
+      "include": "#attr-event"
+    },
+    {
+      "include": "#attr-variable"
+    }
+  ],
+  "repository": {
+    "interp-object-literal": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){\\s*?(?={)",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "(?<=})\\s*?}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts#object-literal"
+        }
+      ]
+    },
+    "interp": {
+      "contentName": "meta.interpolation meta.embedded.ts",
+      "begin": "(?![!$#]){",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      },
+      "end": "}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts"
+        }
+      ]
+    },
+    "attr-interp": {
+      "match": "\\b(?<=[\\w$\\-_]*)\\s*?(!=|=)\\s*?([`'\"])((?![$!#]){.*})(\\k<2>)",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "match": "=",
+              "name": "invalid.illegal"
+            },
+            {
+              "match": "!=",
+              "name": "keyword.operator.assignment"
+            }
+          ]
+        },
+        "2": {
+          "name": "punctuation.section.interpolation.begin"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#interp"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.section.interpolation.begin"
+        }
+      }
+    },
+    "attr-interp-invalid-quotes": {
+      "match": "\\b(?<=[\\w$\\-_]*)\\s*?(!=|=)\\s*?([`'\"])((?![$!#]){.*})(?!\\k<2>)",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "match": "=",
+              "name": "invalid.illegal"
+            },
+            {
+              "match": "!=",
+              "name": "keyword.operator.assignment"
+            }
+          ]
+        },
+        "2": {
+          "name": "punctuation.section.interpolation.begin"
+        },
+        "3": {
+          "name": "invalid.illegal"
+        },
+        "4": {
+          "name": "invalid.illegal"
+        }
+      }
+    },
+    "attr-interp-invalid-noquotes": {
+      "match": "\\b(?<=[\\w$\\-_]*)\\s*?(!=|=)\\s*?(?![`'\"])((?![$!#]){.*})(?![`'\"])",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "match": "=",
+              "name": "invalid.illegal"
+            },
+            {
+              "match": "!=",
+              "name": "keyword.operator.assignment"
+            }
+          ]
+        },
+        "2": {
+          "name": "invalid.illegal"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#interp"
+            }
+          ]
+        },
+        "4": {
+          "name": "invalid.illegal"
+        }
+      }
+    },
+    "attr-function": {
+      "match": "\\b(use|transition|in|out|animate)(:)(\\w+)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name"
+        },
+        "2": {
+          "name": "keyword.operator.assignment"
+        },
+        "3": {
+          "name": "variable.function"
+        }
+      }
+    },
+    "attr-event": {
+      "match": "\\b(on)(:)(\\w+)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name"
+        },
+        "2": {
+          "name": "keyword.operator.assignment"
+        },
+        "3": {
+          "name": "entity.name.type"
+        }
+      }
+    },
+    "attr-variable": {
+      "match": "\\b(bind|class|let)(:)(\\w+)",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name"
+        },
+        "2": {
+          "name": "keyword.operator.assignment"
+        },
+        "3": {
+          "name": "variable.parameter"
+        }
+      }
+    }
+  }
+}
