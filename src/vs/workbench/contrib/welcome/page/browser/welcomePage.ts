@@ -55,7 +55,7 @@ const telemetryFrom = 'welcomePage';
 
 const getCurrentFileState = (ref: string): { type: string, path: string } => {
 	const uri = URI.parse(window.location.href);
-	const [_owner, _repo, type, ...otherParts] = (uri.path || '').split('/').filter(Boolean);
+	const [type, ...otherParts] = (uri.path || '').split('/').filter(Boolean).slice(2);
 	const refAndFilePath = otherParts.join('/');
 	if (!['tree', 'blob'].includes(type) || !refAndFilePath.startsWith(ref)) {
 		return { type: 'tree', path: '/' };
