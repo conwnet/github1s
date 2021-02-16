@@ -2,7 +2,3 @@ lib
 dist
 out
 node_modules
-
-*.yml
-*.yaml
-*.json
