@@ -405,14 +405,15 @@ class WindowIndicator implements IWindowIndicator {
 }
 
 (function () {
-	const [repoOwner = 'conwnet', repoName = 'github1s'] = (URI.parse(window.location.href).path || '').split('/').filter(Boolean);
-	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = {
-		// the empty authority means github1s should get it from `window.location.href`
-		folderUri: URI.from({ scheme: "github1s", path: '/', authority: '' }),
-		staticExtensions: [],
-		enableSyncByDefault: false,
-		webWorkerExtensionHostIframeSrc: document.getElementById('vscode-extension-host-iframe-src')?.getAttribute('data-settings') as string,
-};
+
+	// Find config by checking for DOM
+	const configElement = document.getElementById('vscode-workbench-web-configuration');
+	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
+	if (!configElement || !configElementAttribute) {
+		throw new Error('Missing web configuration element');
+	}
+
+	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = JSON.parse(configElementAttribute);
 
 	// Revive static extension locations
 	if (Array.isArray(config.staticExtensions)) {
@@ -480,6 +481,7 @@ class WindowIndicator implements IWindowIndicator {
 	const workspaceProvider = new WorkspaceProvider(workspace, payload);
 
 	// Home Indicator
+	const [repoOwner = 'conwnet', repoName = 'github1s'] = (URI.parse(window.location.href).path || '').split('/').filter(Boolean);
 	const homeIndicator: IHomeIndicator = {
 		href: `https://github.com/${repoOwner}/${repoName}`,
 		icon: 'github',
