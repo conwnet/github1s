@@ -99,23 +99,9 @@
     "dev": "webpack --config extension.webpack.config.js --watch"
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.43",
     "@types/vscode": "^1.52.0",
     "eslint": "^4.6.1",
-    "typescript": "^2.6.1",
     "webpack": "^5.21.2",
     "webpack-cli": "^4.5.0"
-  },
-  "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
-    "crypto-browserify": "^3.12.0",
-    "global-jsdom": "^8.0.0-beta.1",
-    "http-browserify": "^1.7.0",
-    "https-browserify": "^1.0.0",
-    "jsdom": "^11.5.1",
-    "node-prismjs": "^0.1.1",
-    "path": "^0.12.7",
-    "prismjs": "^1.9.0"
   }
 }

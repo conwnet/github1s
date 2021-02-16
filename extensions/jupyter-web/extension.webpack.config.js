@@ -19,48 +19,12 @@ module.exports = /** @type WebpackConfig */ {
 		extension: "./src/extension.js",
 	},
 	resolve: {
-		// node: { fs: 'empty', child_process: 'empty', net: 'empty', tls: 'empty' },
-		fallback: {
-			fs: false,
-			child_process: false,
-			net: false,
-			tls: false,
-			stream: false,
-			assert: false,
-			url: false,
-			buffer: false,
-			querystring: false,
-			zlib: false,
-			os: false,
-			crypto: require.resolve("crypto-browserify"),
-		},
 		mainFields: ["module", "main"],
 		extensions: [".ts", ".js"], // support ts-files and js-files
 		alias: {
 			https: "https-browserify",
 			http: "http-browserify",
 		},
-	},
-	module: {
-		rules: [
-			{
-				test: /\.ts$/,
-				exclude: /node_modules/,
-				use: [
-					{
-						// configure TypeScript loader:
-						// * enable sources maps for end-to-end source maps
-						loader: "ts-loader",
-						options: {
-							compilerOptions: {
-								sourceMap: true,
-								declaration: false,
-							},
-						},
-					},
-				],
-			},
-		],
 	},
 	externals: {
 		vscode: "commonjs vscode", // ignored because it doesn't exist

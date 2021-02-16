@@ -1,20 +1,12 @@
 import vscode from "vscode";
 
-export const parseUri = (uri) => {
-	const [owner, repo, branch] = (uri.authority || "")
-		.split("+")
-		.filter(Boolean);
-	return {
-		owner,
-		repo,
-		branch,
-		path: uri.path,
-	};
-};
-
 vscode.commands.registerCommand("jupyter.showPreview", async function (uri) {
 	try {
-		const { owner, repo, branch, path } = parseUri(uri);
+		const authority = await vscode.commands.executeCommand('github1s.get-current-authority');
+		// TODO: It may not work fine when there are special characters in `ref` or `path`
+		const  [owner, repo, ref] = (authority || "").split('+').filter(Boolean);
+		const path = uri.path;
+
 		// const success = await vscode.commands.executeCommand('vscode.previewHtml', previewUri, vscode.ViewColumn.Two, 'IPython Notebook Preview');
 		// Create and show panel
 		const panel = vscode.window.createWebviewPanel(
@@ -24,23 +16,23 @@ vscode.commands.registerCommand("jupyter.showPreview", async function (uri) {
 			{ enableScripts: true, retainContextWhenHidden: true }
 		);
 		panel.webview.html = `
-            <style> 
-                .vscode-dark { 
-                    padding: 0px !important; 
-                } 
-                #menubar { 
-                    display : none !important; 
-                } 
-                .nbviewer { 
-                    padding-top: 0px !important ; 
-                }  
+            <style>
+                .vscode-dark {
+                    padding: 0px !important;
+                }
+                #menubar {
+                    display : none !important;
+                }
+                .nbviewer {
+                    padding-top: 0px !important ;
+                }
             </style>
-            <iframe 
-                class="ifrm" 
-                style="height: 100vh; width: 100vw; padding: 0px;" 
-                class="webview ready" 
-                sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads" 
-                src="https://nbviewer.jupyter.org/github/${owner}/${repo}/blob/${branch}${path}"
+            <iframe
+                class="ifrm"
+                style="height: 100vh; width: 100vw; padding: 0px;"
+                class="webview ready"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
+                src="https://nbviewer.jupyter.org/github/${owner}/${repo}/blob/${ref}${path}"
             >
             </iframe>
         `;
