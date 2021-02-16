@@ -1,4 +1,5 @@
 ![GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/logo.png)
+
 # github1s
 
 One second to read GitHub code with VS Code.
@@ -44,6 +45,14 @@ $ yarn serve # in another shell
 $ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
+### Format all codes
+
+```bash
+yarn format
+```
+
+It uses `prettier` to format all possible codes.
+
 ## Build
 
 ```bash
@@ -70,7 +79,6 @@ $ yarn build
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s-extension)
 - [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s/)
 - [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github-web-ide/)
-
 
 ### Microsoft Edge Extensions
 
