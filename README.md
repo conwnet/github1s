@@ -63,7 +63,7 @@ $ yarn build
 
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
 - [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Chrome Web Store](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe)
-
+- [katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut) - [Chrome Web Store](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo)
 
 ### Firefox Extensions
 
