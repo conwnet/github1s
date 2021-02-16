@@ -8,7 +8,11 @@ import * as vscode from 'vscode';
 import { hasValidToken } from './util';
 import { fetch, RequestError, RequestRateLimitError, RequestInvalidTokenError, RequestNotFoundError, throttledReportNetworkError } from './util/fetch';
 
-export const ENABLE_GRAPHQL: boolean = true;
+// TODO: GraphQL API is experimental now, we need more test.
+// It maybe crash or slow when there are too many files in one directory.
+// For example the repository `git/git`, the TTFB cost about 3 seconds,
+// and the response body size exceed 7MB before zip
+export const ENABLE_GRAPHQL: boolean = false;
 
 export interface UriState {
 	owner: string;
