@@ -24,8 +24,6 @@
 
 Vue tooling for VS Code.
 
-
-
 - [vls](./server): Vue Language Server
 - [vti](./vti): Vetur Terminal Interface
 - [Docs](https://vuejs.github.io/vetur)

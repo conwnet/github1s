@@ -4,6 +4,7 @@
 [![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/Elmtooling.elm-ls-vscode.svg)](https://marketplace.visualstudio.com/items?itemName=Elmtooling.elm-ls-vscode)
 [![Rating](https://vsmarketplacebadge.apphb.com/rating-star/Elmtooling.elm-ls-vscode.svg)](https://marketplace.visualstudio.com/items?itemName=Elmtooling.elm-ls-vscode)
 ![Compile](https://github.com/elm-tooling/elm-language-client-vscode/workflows/Compile/badge.svg)
+
 # This extension is a fork from [elm-language-client-vscode](https://github.com/elm-tooling/elm-language-client-vscode) for github1s.
 
 Supports elm 0.19 and up
@@ -57,7 +58,7 @@ Example:
 
 ```json
 {
-  "entrypoints": ["./src/Main.elm"]
+	"entrypoints": ["./src/Main.elm"]
 }
 ```
 

@@ -23,32 +23,36 @@ module.exports = /** @type WebpackConfig */ {
 		extensions: ['.ts', '.js'], // support ts-files and js-files
 	},
 	module: {
-		rules: [{
-			test: /\.ts$/,
-			exclude: /node_modules/,
-			use: [{
-				// configure TypeScript loader:
-				// * enable sources maps for end-to-end source maps
-				loader: 'ts-loader',
-				options: {
-					compilerOptions: {
-						'sourceMap': true,
-						'declaration': false
-					}
-				}
-			}]
-		}]
+		rules: [
+			{
+				test: /\.ts$/,
+				exclude: /node_modules/,
+				use: [
+					{
+						// configure TypeScript loader:
+						// * enable sources maps for end-to-end source maps
+						loader: 'ts-loader',
+						options: {
+							compilerOptions: {
+								sourceMap: true,
+								declaration: false,
+							},
+						},
+					},
+				],
+			},
+		],
 	},
 	externals: {
-		'vscode': 'commonjs vscode', // ignored because it doesn't exist
+		vscode: 'commonjs vscode', // ignored because it doesn't exist
 	},
 	performance: {
-		hints: false
+		hints: false,
 	},
 	output: {
 		filename: 'extension.js',
 		path: path.join(__dirname, 'dist'),
-		libraryTarget: 'commonjs'
+		libraryTarget: 'commonjs',
 	},
-	devtool: 'source-map'
+	devtool: 'source-map',
 };

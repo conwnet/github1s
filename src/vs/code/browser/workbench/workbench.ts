@@ -3,7 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IWorkbenchConstructionOptions, create, ICredentialsProvider, IURLCallbackProvider, IWorkspaceProvider, IWorkspace, IWindowIndicator, IHomeIndicator, IProductQualityChangeHandler, ISettingsSyncOptions } from 'vs/workbench/workbench.web.api';
+import {
+	IWorkbenchConstructionOptions,
+	create,
+	ICredentialsProvider,
+	IURLCallbackProvider,
+	IWorkspaceProvider,
+	IWorkspace,
+	IWindowIndicator,
+	IHomeIndicator,
+	IProductQualityChangeHandler,
+	ISettingsSyncOptions,
+} from 'vs/workbench/workbench.web.api';
 import { URI, UriComponents } from 'vs/base/common/uri';
 import { Event, Emitter } from 'vs/base/common/event';
 import { generateUuid } from 'vs/base/common/uuid';
@@ -11,7 +22,10 @@ import { CancellationToken } from 'vs/base/common/cancellation';
 import { streamToBuffer } from 'vs/base/common/buffer';
 import { Disposable } from 'vs/base/common/lifecycle';
 import { request } from 'vs/base/parts/request/browser/request';
-import { isFolderToOpen, isWorkspaceToOpen } from 'vs/platform/windows/common/windows';
+import {
+	isFolderToOpen,
+	isWorkspaceToOpen,
+} from 'vs/platform/windows/common/windows';
 import { isEqual } from 'vs/base/common/resources';
 import { isStandalone } from 'vs/base/browser/browser';
 import { localize } from 'vs/nls';
@@ -22,7 +36,10 @@ import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
 import { renderNotification } from 'vs/github1s/notification';
 
 // custom vs code commands defined by github1s
-const getGitHub1sCustomCommands: () => ({id: string, handler: (...args: any[]) => unknown }[]) = () => [
+const getGitHub1sCustomCommands: () => {
+	id: string;
+	handler: (...args: any[]) => unknown;
+}[] = () => [
 	{ id: 'github1s.vscode.get-browser-url', handler: getBrowserUrl },
 	{ id: 'github1s.vscode.replace-browser-url', handler: replaceBrowserUrl },
 ];
@@ -37,7 +54,7 @@ function doCreateUri(path: string, queryValues: Map<string, string>): URI {
 				query = '';
 			}
 
-			const prefix = (index++ === 0) ? '' : '&';
+			const prefix = index++ === 0 ? '' : '&';
 			query += `${prefix}${key}=${encodeURIComponent(value)}`;
 		});
 	}
@@ -52,32 +69,55 @@ interface ICredential {
 }
 
 class LocalStorageCredentialsProvider implements ICredentialsProvider {
-
 	static readonly CREDENTIALS_OPENED_KEY = 'credentials.provider';
 
 	private readonly authService: string | undefined;
 
 	constructor() {
-		let authSessionInfo: { readonly id: string, readonly accessToken: string, readonly providerId: string, readonly canSignOut?: boolean, readonly scopes: string[][] } | undefined;
-		const authSessionElement = document.getElementById('vscode-workbench-auth-session');
-		const authSessionElementAttribute = authSessionElement ? authSessionElement.getAttribute('data-settings') : undefined;
+		let authSessionInfo:
+			| {
+					readonly id: string;
+					readonly accessToken: string;
+					readonly providerId: string;
+					readonly canSignOut?: boolean;
+					readonly scopes: string[][];
+			  }
+			| undefined;
+		const authSessionElement = document.getElementById(
+			'vscode-workbench-auth-session'
+		);
+		const authSessionElementAttribute = authSessionElement
+			? authSessionElement.getAttribute('data-settings')
+			: undefined;
 		if (authSessionElementAttribute) {
 			try {
 				authSessionInfo = JSON.parse(authSessionElementAttribute);
-			} catch (error) { /* Invalid session is passed. Ignore. */ }
+			} catch (error) {
+				/* Invalid session is passed. Ignore. */
+			}
 		}
 
 		if (authSessionInfo) {
 			// Settings Sync Entry
-			this.setPassword(`${product.urlProtocol}.login`, 'account', JSON.stringify(authSessionInfo));
+			this.setPassword(
+				`${product.urlProtocol}.login`,
+				'account',
+				JSON.stringify(authSessionInfo)
+			);
 
 			// Auth extension Entry
 			this.authService = `${product.urlProtocol}-${authSessionInfo.providerId}.login`;
-			this.setPassword(this.authService, 'account', JSON.stringify(authSessionInfo.scopes.map(scopes => ({
-				id: authSessionInfo!.id,
-				scopes,
-				accessToken: authSessionInfo!.accessToken
-			}))));
+			this.setPassword(
+				this.authService,
+				'account',
+				JSON.stringify(
+					authSessionInfo.scopes.map((scopes) => ({
+						id: authSessionInfo!.id,
+						scopes,
+						accessToken: authSessionInfo!.accessToken,
+					}))
+				)
+			);
 		}
 	}
 
@@ -85,7 +125,9 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 	private get credentials(): ICredential[] {
 		if (!this._credentials) {
 			try {
-				const serializedCredentials = window.localStorage.getItem(LocalStorageCredentialsProvider.CREDENTIALS_OPENED_KEY);
+				const serializedCredentials = window.localStorage.getItem(
+					LocalStorageCredentialsProvider.CREDENTIALS_OPENED_KEY
+				);
 				if (serializedCredentials) {
 					this._credentials = JSON.parse(serializedCredentials);
 				}
@@ -102,14 +144,20 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 	}
 
 	private save(): void {
-		window.localStorage.setItem(LocalStorageCredentialsProvider.CREDENTIALS_OPENED_KEY, JSON.stringify(this.credentials));
+		window.localStorage.setItem(
+			LocalStorageCredentialsProvider.CREDENTIALS_OPENED_KEY,
+			JSON.stringify(this.credentials)
+		);
 	}
 
 	async getPassword(service: string, account: string): Promise<string | null> {
 		return this.doGetPassword(service, account);
 	}
 
-	private async doGetPassword(service: string, account?: string): Promise<string | null> {
+	private async doGetPassword(
+		service: string,
+		account?: string
+	): Promise<string | null> {
 		for (const credential of this.credentials) {
 			if (credential.service === service) {
 				if (typeof account !== 'string' || account === credential.account) {
@@ -121,7 +169,11 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 		return null;
 	}
 
-	async setPassword(service: string, account: string, password: string): Promise<void> {
+	async setPassword(
+		service: string,
+		account: string,
+		password: string
+	): Promise<void> {
 		this.doDeletePassword(service, account);
 
 		this.credentials.push({ service, account, password });
@@ -154,10 +206,13 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 		return result;
 	}
 
-	private async doDeletePassword(service: string, account: string): Promise<boolean> {
+	private async doDeletePassword(
+		service: string,
+		account: string
+	): Promise<boolean> {
 		let found = false;
 
-		this._credentials = this.credentials.filter(credential => {
+		this._credentials = this.credentials.filter((credential) => {
 			if (credential.service === service && credential.account === account) {
 				found = true;
 
@@ -178,9 +233,11 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 		return this.doGetPassword(service);
 	}
 
-	async findCredentials(service: string): Promise<Array<{ account: string, password: string }>> {
+	async findCredentials(
+		service: string
+	): Promise<Array<{ account: string; password: string }>> {
 		return this.credentials
-			.filter(credential => credential.service === service)
+			.filter((credential) => credential.service === service)
 			.map(({ account, password }) => ({ account, password }));
 	}
 
@@ -189,16 +246,20 @@ class LocalStorageCredentialsProvider implements ICredentialsProvider {
 		queryValues.set('logout', String(true));
 		queryValues.set('service', service);
 
-		await request({
-			url: doCreateUri('/auth/logout', queryValues).toString(true)
-		}, CancellationToken.None);
+		await request(
+			{
+				url: doCreateUri('/auth/logout', queryValues).toString(true),
+			},
+			CancellationToken.None
+		);
 	}
 }
 
-class PollingURLCallbackProvider extends Disposable implements IURLCallbackProvider {
-
-	static readonly FETCH_INTERVAL = 500; 			// fetch every 500ms
-	static readonly FETCH_TIMEOUT = 5 * 60 * 1000; 	// ...but stop after 5min
+class PollingURLCallbackProvider
+	extends Disposable
+	implements IURLCallbackProvider {
+	static readonly FETCH_INTERVAL = 500; // fetch every 500ms
+	static readonly FETCH_TIMEOUT = 5 * 60 * 1000; // ...but stop after 5min
 
 	static readonly QUERY_KEYS = {
 		REQUEST_ID: 'vscode-requestId',
@@ -206,7 +267,7 @@ class PollingURLCallbackProvider extends Disposable implements IURLCallbackProvi
 		AUTHORITY: 'vscode-authority',
 		PATH: 'vscode-path',
 		QUERY: 'vscode-query',
-		FRAGMENT: 'vscode-fragment'
+		FRAGMENT: 'vscode-fragment',
 	};
 
 	private readonly _onCallback = this._register(new Emitter<URI>());
@@ -216,16 +277,30 @@ class PollingURLCallbackProvider extends Disposable implements IURLCallbackProvi
 		const queryValues: Map<string, string> = new Map();
 
 		const requestId = generateUuid();
-		queryValues.set(PollingURLCallbackProvider.QUERY_KEYS.REQUEST_ID, requestId);
+		queryValues.set(
+			PollingURLCallbackProvider.QUERY_KEYS.REQUEST_ID,
+			requestId
+		);
 
-		const { scheme, authority, path, query, fragment } = options ? options : { scheme: undefined, authority: undefined, path: undefined, query: undefined, fragment: undefined };
+		const { scheme, authority, path, query, fragment } = options
+			? options
+			: {
+					scheme: undefined,
+					authority: undefined,
+					path: undefined,
+					query: undefined,
+					fragment: undefined,
+			  };
 
 		if (scheme) {
 			queryValues.set(PollingURLCallbackProvider.QUERY_KEYS.SCHEME, scheme);
 		}
 
 		if (authority) {
-			queryValues.set(PollingURLCallbackProvider.QUERY_KEYS.AUTHORITY, authority);
+			queryValues.set(
+				PollingURLCallbackProvider.QUERY_KEYS.AUTHORITY,
+				authority
+			);
 		}
 
 		if (path) {
@@ -246,15 +321,23 @@ class PollingURLCallbackProvider extends Disposable implements IURLCallbackProvi
 		return doCreateUri('/callback', queryValues);
 	}
 
-	private async periodicFetchCallback(requestId: string, startTime: number): Promise<void> {
-
+	private async periodicFetchCallback(
+		requestId: string,
+		startTime: number
+	): Promise<void> {
 		// Ask server for callback results
 		const queryValues: Map<string, string> = new Map();
-		queryValues.set(PollingURLCallbackProvider.QUERY_KEYS.REQUEST_ID, requestId);
+		queryValues.set(
+			PollingURLCallbackProvider.QUERY_KEYS.REQUEST_ID,
+			requestId
+		);
 
-		const result = await request({
-			url: doCreateUri('/fetch-callback', queryValues).toString(true)
-		}, CancellationToken.None);
+		const result = await request(
+			{
+				url: doCreateUri('/fetch-callback', queryValues).toString(true),
+			},
+			CancellationToken.None
+		);
 
 		// Check for callback results
 		const content = await streamToBuffer(result.stream);
@@ -270,14 +353,15 @@ class PollingURLCallbackProvider extends Disposable implements IURLCallbackProvi
 
 		// Continue fetching unless we hit the timeout
 		if (Date.now() - startTime < PollingURLCallbackProvider.FETCH_TIMEOUT) {
-			setTimeout(() => this.periodicFetchCallback(requestId, startTime), PollingURLCallbackProvider.FETCH_INTERVAL);
+			setTimeout(
+				() => this.periodicFetchCallback(requestId, startTime),
+				PollingURLCallbackProvider.FETCH_INTERVAL
+			);
 		}
 	}
-
 }
 
 class WorkspaceProvider implements IWorkspaceProvider {
-
 	static QUERY_PARAM_EMPTY_WINDOW = 'ew';
 	static QUERY_PARAM_FOLDER = 'folder';
 	static QUERY_PARAM_WORKSPACE = 'workspace';
@@ -287,10 +371,17 @@ class WorkspaceProvider implements IWorkspaceProvider {
 	constructor(
 		public readonly workspace: IWorkspace,
 		public readonly payload: object
-	) { }
+	) {}
 
-	async open(workspace: IWorkspace, options?: { reuse?: boolean, payload?: object }): Promise<void> {
-		if (options?.reuse && !options.payload && this.isSame(this.workspace, workspace)) {
+	async open(
+		workspace: IWorkspace,
+		options?: { reuse?: boolean; payload?: object }
+	): Promise<void> {
+		if (
+			options?.reuse &&
+			!options.payload &&
+			this.isSame(this.workspace, workspace)
+		) {
 			return; // return early if workspace and environment is not changing and we are reusing window
 		}
 
@@ -308,8 +399,10 @@ class WorkspaceProvider implements IWorkspaceProvider {
 		}
 	}
 
-	private createTargetUrl(workspace: IWorkspace, options?: { reuse?: boolean, payload?: object }): string | undefined {
-
+	private createTargetUrl(
+		workspace: IWorkspace,
+		options?: { reuse?: boolean; payload?: object }
+	): string | undefined {
 		// Empty
 		let targetHref: string | undefined = undefined;
 		if (!workspace) {
@@ -318,17 +411,23 @@ class WorkspaceProvider implements IWorkspaceProvider {
 
 		// Folder
 		else if (isFolderToOpen(workspace)) {
-			targetHref = `${document.location.origin}${document.location.pathname}?${WorkspaceProvider.QUERY_PARAM_FOLDER}=${encodeURIComponent(workspace.folderUri.toString())}`;
+			targetHref = `${document.location.origin}${document.location.pathname}?${
+				WorkspaceProvider.QUERY_PARAM_FOLDER
+			}=${encodeURIComponent(workspace.folderUri.toString())}`;
 		}
 
 		// Workspace
 		else if (isWorkspaceToOpen(workspace)) {
-			targetHref = `${document.location.origin}${document.location.pathname}?${WorkspaceProvider.QUERY_PARAM_WORKSPACE}=${encodeURIComponent(workspace.workspaceUri.toString())}`;
+			targetHref = `${document.location.origin}${document.location.pathname}?${
+				WorkspaceProvider.QUERY_PARAM_WORKSPACE
+			}=${encodeURIComponent(workspace.workspaceUri.toString())}`;
 		}
 
 		// Append payload if any
 		if (options?.payload) {
-			targetHref += `&${WorkspaceProvider.QUERY_PARAM_PAYLOAD}=${encodeURIComponent(JSON.stringify(options.payload))}`;
+			targetHref += `&${
+				WorkspaceProvider.QUERY_PARAM_PAYLOAD
+			}=${encodeURIComponent(JSON.stringify(options.payload))}`;
 		}
 
 		return targetHref;
@@ -366,7 +465,6 @@ class WorkspaceProvider implements IWorkspaceProvider {
 }
 
 class WindowIndicator implements IWindowIndicator {
-
 	readonly onDidChange = Event.None;
 
 	readonly label: string;
@@ -386,38 +484,58 @@ class WindowIndicator implements IWindowIndicator {
 			}
 
 			if (uri?.scheme === 'github1s') {
-				[repositoryOwner = 'conwnet', repositoryName = 'github1s'] = URI.parse(getBrowserUrl()).path.split('/').filter(Boolean);
+				[repositoryOwner = 'conwnet', repositoryName = 'github1s'] = URI.parse(
+					getBrowserUrl()
+				)
+					.path.split('/')
+					.filter(Boolean);
 			}
 		}
 
 		// Repo
 		if (repositoryName && repositoryOwner) {
-			this.label = localize('playgroundLabelRepository', "$(remote) GitHub1s: {0}/{1}", repositoryOwner, repositoryName);
-			this.tooltip = localize('playgroundRepositoryTooltip', "GitHub1s: {0}/{1}", repositoryOwner, repositoryName);
+			this.label = localize(
+				'playgroundLabelRepository',
+				'$(remote) GitHub1s: {0}/{1}',
+				repositoryOwner,
+				repositoryName
+			);
+			this.tooltip = localize(
+				'playgroundRepositoryTooltip',
+				'GitHub1s: {0}/{1}',
+				repositoryOwner,
+				repositoryName
+			);
 		}
 
 		// No Repo
 		else {
-			this.label = localize('playgroundLabel', "$(remote) GitHub1s");
-			this.tooltip = localize('playgroundTooltip', "GitHub1s");
+			this.label = localize('playgroundLabel', '$(remote) GitHub1s');
+			this.tooltip = localize('playgroundTooltip', 'GitHub1s');
 		}
 	}
 }
 
 (function () {
-
 	// Find config by checking for DOM
-	const configElement = document.getElementById('vscode-workbench-web-configuration');
-	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
+	const configElement = document.getElementById(
+		'vscode-workbench-web-configuration'
+	);
+	const configElementAttribute = configElement
+		? configElement.getAttribute('data-settings')
+		: undefined;
 	if (!configElement || !configElementAttribute) {
 		throw new Error('Missing web configuration element');
 	}
 
-	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents, workspaceUri?: UriComponents } = JSON.parse(configElementAttribute);
+	const config: IWorkbenchConstructionOptions & {
+		folderUri?: UriComponents;
+		workspaceUri?: UriComponents;
+	} = JSON.parse(configElementAttribute);
 
 	// Revive static extension locations
 	if (Array.isArray(config.staticExtensions)) {
-		config.staticExtensions.forEach(extension => {
+		config.staticExtensions.forEach((extension) => {
 			extension.extensionLocation = URI.revive(extension.extensionLocation);
 		});
 	}
@@ -431,7 +549,6 @@ class WindowIndicator implements IWindowIndicator {
 	const query = new URL(document.location.href).searchParams;
 	query.forEach((value, key) => {
 		switch (key) {
-
 			// Folder
 			case WorkspaceProvider.QUERY_PARAM_FOLDER:
 				workspace = { folderUri: URI.parse(value) };
@@ -481,11 +598,15 @@ class WindowIndicator implements IWindowIndicator {
 	const workspaceProvider = new WorkspaceProvider(workspace, payload);
 
 	// Home Indicator
-	const [repoOwner = 'conwnet', repoName = 'github1s'] = (URI.parse(window.location.href).path || '').split('/').filter(Boolean);
+	const [repoOwner = 'conwnet', repoName = 'github1s'] = (
+		URI.parse(window.location.href).path || ''
+	)
+		.split('/')
+		.filter(Boolean);
 	const homeIndicator: IHomeIndicator = {
 		href: `https://github.com/${repoOwner}/${repoName}`,
 		icon: 'github',
-		title: localize('home', "Home")
+		title: localize('home', 'Home'),
 	};
 
 	// Window indicator (unless connected to a remote)
@@ -495,7 +616,9 @@ class WindowIndicator implements IWindowIndicator {
 	}
 
 	// Product Quality Change Handler
-	const productQualityChangeHandler: IProductQualityChangeHandler = (quality) => {
+	const productQualityChangeHandler: IProductQualityChangeHandler = (
+		quality
+	) => {
 		let queryString = `quality=${quality}`;
 
 		// Save all other query params we might have
@@ -510,22 +633,26 @@ class WindowIndicator implements IWindowIndicator {
 	};
 
 	// settings sync options
-	const settingsSyncOptions: ISettingsSyncOptions | undefined = config.settingsSyncOptions ? {
-		enabled: config.settingsSyncOptions.enabled,
-		enablementHandler: (enablement) => {
-			let queryString = `settingsSync=${enablement ? 'true' : 'false'}`;
+	const settingsSyncOptions:
+		| ISettingsSyncOptions
+		| undefined = config.settingsSyncOptions
+		? {
+				enabled: config.settingsSyncOptions.enabled,
+				enablementHandler: (enablement) => {
+					let queryString = `settingsSync=${enablement ? 'true' : 'false'}`;
 
-			// Save all other query params we might have
-			const query = new URL(document.location.href).searchParams;
-			query.forEach((value, key) => {
-				if (key !== 'settingsSync') {
-					queryString += `&${key}=${value}`;
-				}
-			});
+					// Save all other query params we might have
+					const query = new URL(document.location.href).searchParams;
+					query.forEach((value, key) => {
+						if (key !== 'settingsSync') {
+							queryString += `&${key}=${value}`;
+						}
+					});
 
-			window.location.href = `${window.location.origin}?${queryString}`;
-		}
-	} : undefined;
+					window.location.href = `${window.location.origin}?${queryString}`;
+				},
+		  }
+		: undefined;
 
 	// Remove the html load spinner
 	document.querySelector('#load-spinner')?.remove();
@@ -541,7 +668,7 @@ class WindowIndicator implements IWindowIndicator {
 		productQualityChangeHandler,
 		workspaceProvider,
 		urlCallbackProvider: new PollingURLCallbackProvider(),
-		credentialsProvider: new LocalStorageCredentialsProvider()
+		credentialsProvider: new LocalStorageCredentialsProvider(),
 	});
 
 	setTimeout(() => renderNotification(), 1000);

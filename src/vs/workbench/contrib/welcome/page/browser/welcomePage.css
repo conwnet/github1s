@@ -26,7 +26,7 @@
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .text-success {
-	color: #89d185
+	color: #89d185;
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .refresh-button {
@@ -72,7 +72,7 @@
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .keyboard {
-	font-family: "Lucida Grande", sans-serif;/* Keyboard shortcuts */
+	font-family: 'Lucida Grande', sans-serif; /* Keyboard shortcuts */
 }
 
 .monaco-workbench .part.editor > .content .welcomePage a {
@@ -100,7 +100,7 @@
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .subtitle {
-	margin-top: .8em;
+	margin-top: 0.8em;
 	font-size: 2.6em;
 	display: block;
 }
@@ -140,17 +140,35 @@
 	text-overflow: ellipsis;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage.emptyRecent .splash .recent .list {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage.emptyRecent
+	.splash
+	.recent
+	.list {
 	display: none;
 }
 .monaco-workbench .part.editor > .content .welcomePage .splash .recent .none {
 	display: none;
 }
-.monaco-workbench .part.editor > .content .welcomePage.emptyRecent .splash .recent .none {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage.emptyRecent
+	.splash
+	.recent
+	.none {
 	display: initial;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .splash .recent li.moreRecent {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.splash
+	.recent
+	li.moreRecent {
 	margin-top: 5px;
 }
 
@@ -166,7 +184,13 @@
 	text-overflow: ellipsis;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .splash .showOnStartup > .checkbox {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.splash
+	.showOnStartup
+	> .checkbox {
 	vertical-align: bottom;
 }
 
@@ -189,20 +213,34 @@
 	font-family: inherit;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button > span {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	> span {
 	display: inline-block;
-	width:100%;
+	width: 100%;
 	min-width: 0;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button h3 {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	h3 {
 	font-weight: normal;
 	font-size: 1em;
 	margin: 0;
-	margin-bottom: .25em;
+	margin-bottom: 0.25em;
 	min-width: 0;
 	white-space: nowrap;
 	overflow: hidden;
@@ -213,41 +251,93 @@
 	border: none;
 }
 
-.monaco-workbench.hc-black .part.editor > .content .welcomePage .commands .item button > h3 {
+.monaco-workbench.hc-black
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	> h3 {
 	font-weight: bold;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button:focus {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button:focus {
 	outline-style: solid;
 	outline-width: 1px;
 }
 
-.monaco-workbench.hc-black .part.editor > .content .welcomePage .commands .item button {
+.monaco-workbench.hc-black
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button {
 	border-width: 1px;
 	border-style: solid;
 }
 
-.monaco-workbench.hc-black .part.editor > .content .welcomePage .commands .item button:hover {
+.monaco-workbench.hc-black
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button:hover {
 	outline-width: 1px;
 	outline-style: dashed;
 	outline-offset: -5px;
 }
 
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button .enabledExtension {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	.enabledExtension {
 	display: none;
 }
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button .installExtension.installed {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	.installExtension.installed {
 	display: none;
 }
-.monaco-workbench .part.editor > .content .welcomePage .commands .item button .enabledExtension.installed {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePage
+	.commands
+	.item
+	button
+	.enabledExtension.installed {
 	display: inline;
 }
 
-.monaco-workbench .part.editor > .content .welcomePageContainer.max-height-685px .title {
+.monaco-workbench
+	.part.editor
+	> .content
+	.welcomePageContainer.max-height-685px
+	.title {
 	display: none;
 }
 
-.file-icons-enabled .show-file-icons .vs_code_welcome_page-name-file-icon.file-icon::before {
+.file-icons-enabled
+	.show-file-icons
+	.vs_code_welcome_page-name-file-icon.file-icon::before {
 	content: ' ';
 	background-image: url('../../../../browser/media/code-icon.svg');
 }
