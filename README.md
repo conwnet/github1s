@@ -84,3 +84,7 @@ $ yarn build
 
 - [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer)
 - [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide)
+
+### Tampermonkey scripts
+
+- [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
