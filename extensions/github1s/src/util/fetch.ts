@@ -49,31 +49,47 @@ export class RequestInvalidTokenError extends RequestError {
 }
 
 // only report network error once in 5 seconds
-export const throttledReportNetworkError = throttle(() => vscode.window.showErrorMessage('Request Failed, Maybe an Network Error'), 5000);
+export const throttledReportNetworkError = throttle(
+	() =>
+		vscode.window.showErrorMessage('Request Failed, Maybe an Network Error'),
+	5000
+);
 
 export const fetch = (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
-	const customHeaders = (options && 'headers' in options ? options.headers : {});
+	const customHeaders = options && 'headers' in options ? options.headers : {};
 
-	return self.fetch(url, { mode: 'cors', ...options, headers: { ...authHeaders, ...customHeaders } })
+	return self
+		.fetch(url, {
+			mode: 'cors',
+			...options,
+			headers: { ...authHeaders, ...customHeaders },
+		})
 		.catch(() => {
 			throttledReportNetworkError();
 			throw new RequestError('Request Failed, Maybe an Network Error', token);
 		})
-		.then(response => {
+		.then((response) => {
 			if (response.status < 400) {
 				return response.json();
 			}
 			if (response.status === 403) {
-				return response.json().then(data => { throw new RequestRateLimitError(data.message, token); });
+				return response.json().then((data) => {
+					throw new RequestRateLimitError(data.message, token);
+				});
 			}
 			if (response.status === 401) {
-				return response.json().then(data => { throw new RequestInvalidTokenError(data.message, token); });
+				return response.json().then((data) => {
+					throw new RequestInvalidTokenError(data.message, token);
+				});
 			}
 			if (response.status === 404) {
 				throw new RequestNotFoundError('Not Found', token);
 			}
-			throw new RequestError(`GitHub1s: Request got HTTP ${response.status} response`, token);
+			throw new RequestError(
+				`GitHub1s: Request got HTTP ${response.status} response`,
+				token
+			);
 		});
 };

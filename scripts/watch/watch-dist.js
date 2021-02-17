@@ -28,10 +28,13 @@ const autoSyncVscodeOut = async () => {
 
 	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
 
-	chokidar.watch(SOURCE).on('all', debounce((_, path) => {
-		cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
-		console.log(`sync ${path}`);
-	}, 300));
+	chokidar.watch(SOURCE).on(
+		'all',
+		debounce((_, path) => {
+			cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
+			console.log(`sync ${path}`);
+		}, 300)
+	);
 };
 
 const autoSyncGitHub1sExtension = async () => {
@@ -40,10 +43,13 @@ const autoSyncGitHub1sExtension = async () => {
 
 	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
 
-	chokidar.watch(SOURCE).on('all', debounce((_, path) => {
-		cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
-		console.log(`sync ${path}`);
-	}, 300));
+	chokidar.watch(SOURCE).on(
+		'all',
+		debounce((_, path) => {
+			cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
+			console.log(`sync ${path}`);
+		}, 300)
+	);
 };
 
 const main = () => {
@@ -54,4 +60,3 @@ const main = () => {
 };
 
 main();
-

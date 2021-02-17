@@ -14,8 +14,7 @@
  * - Copy this file to your project.
  */
 
- declare module 'vscode' {
-
+declare module 'vscode' {
 	// #region auth provider: https://github.com/microsoft/vscode/issues/88309
 
 	/**
@@ -34,12 +33,12 @@
 	}
 
 	/**
-	* An [event](#Event) which fires when an [AuthenticationSession](#AuthenticationSession) is added, removed, or changed.
-	*/
+	 * An [event](#Event) which fires when an [AuthenticationSession](#AuthenticationSession) is added, removed, or changed.
+	 */
 	export interface AuthenticationProviderAuthenticationSessionsChangeEvent {
 		/**
 		 * The ids of the [AuthenticationSession](#AuthenticationSession)s that have been added.
-		*/
+		 */
 		readonly added: ReadonlyArray<string>;
 
 		/**
@@ -73,7 +72,7 @@
 
 		/**
 		 * Whether it is possible to be signed into multiple accounts at once with this provider
-		*/
+		 */
 		readonly supportsMultipleAccounts: boolean;
 
 		/**
@@ -109,7 +108,9 @@
 		 * @param provider The authentication provider provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerAuthenticationProvider(provider: AuthenticationProvider): Disposable;
+		export function registerAuthenticationProvider(
+			provider: AuthenticationProvider
+		): Disposable;
 
 		/**
 		 * @deprecated - getSession should now trigger extension activation.
@@ -137,12 +138,15 @@
 
 		/**
 		 * @deprecated
-		* Logout of a specific session.
-		* @param providerId The id of the provider to use
-		* @param sessionId The session id to remove
-		* provider
-		*/
-		export function logout(providerId: string, sessionId: string): Thenable<void>;
+		 * Logout of a specific session.
+		 * @param providerId The id of the provider to use
+		 * @param sessionId The session id to remove
+		 * provider
+		 */
+		export function logout(
+			providerId: string,
+			sessionId: string
+		): Thenable<void>;
 
 		/**
 		 * Retrieve a password that was stored with key. Returns undefined if there
@@ -187,20 +191,20 @@
 	}
 
 	export interface ResolvedOptions {
-		extensionHostEnv?: { [key: string]: string | null; };
+		extensionHostEnv?: { [key: string]: string | null };
 	}
 
 	export interface TunnelOptions {
-		remoteAddress: { port: number, host: string; };
+		remoteAddress: { port: number; host: string };
 		// The desired local port. If this port can't be used, then another will be chosen.
 		localAddressPort?: number;
 		label?: string;
 	}
 
 	export interface TunnelDescription {
-		remoteAddress: { port: number, host: string; };
+		remoteAddress: { port: number; host: string };
 		//The complete local address(ex. localhost:1234)
-		localAddress: { port: number, host: string; } | string;
+		localAddress: { port: number; host: string } | string;
 	}
 
 	export interface Tunnel extends TunnelDescription {
@@ -220,7 +224,6 @@
 		 * detected are read-only from the forwarded ports UI.
 		 */
 		environmentTunnels?: TunnelDescription[];
-
 	}
 
 	export interface TunnelCreationOptions {
@@ -230,17 +233,27 @@
 		elevationRequired?: boolean;
 	}
 
-	export type ResolverResult = ResolvedAuthority & ResolvedOptions & TunnelInformation;
+	export type ResolverResult = ResolvedAuthority &
+		ResolvedOptions &
+		TunnelInformation;
 
 	export class RemoteAuthorityResolverError extends Error {
-		static NotAvailable(message?: string, handled?: boolean): RemoteAuthorityResolverError;
-		static TemporarilyNotAvailable(message?: string): RemoteAuthorityResolverError;
+		static NotAvailable(
+			message?: string,
+			handled?: boolean
+		): RemoteAuthorityResolverError;
+		static TemporarilyNotAvailable(
+			message?: string
+		): RemoteAuthorityResolverError;
 
 		constructor(message?: string);
 	}
 
 	export interface RemoteAuthorityResolver {
-		resolve(authority: string, context: RemoteAuthorityResolverContext): ResolverResult | Thenable<ResolverResult>;
+		resolve(
+			authority: string,
+			context: RemoteAuthorityResolverContext
+		): ResolverResult | Thenable<ResolverResult>;
 		/**
 		 * Can be optionally implemented if the extension can forward ports better than the core.
 		 * When not implemented, the core will use its default forwarding logic.
@@ -249,12 +262,19 @@
 		 * To enable the "Change Local Port" action on forwarded ports, make sure to set the `localAddress` of
 		 * the returned `Tunnel` to a `{ port: number, host: string; }` and not a string.
 		 */
-		tunnelFactory?: (tunnelOptions: TunnelOptions, tunnelCreationOptions: TunnelCreationOptions) => Thenable<Tunnel> | undefined;
+		tunnelFactory?: (
+			tunnelOptions: TunnelOptions,
+			tunnelCreationOptions: TunnelCreationOptions
+		) => Thenable<Tunnel> | undefined;
 
 		/**
 		 * Provides filtering for candidate ports.
 		 */
-		showCandidatePort?: (host: string, port: number, detail: string) => Thenable<boolean>;
+		showCandidatePort?: (
+			host: string,
+			port: number,
+			detail: string
+		) => Thenable<boolean>;
 	}
 
 	export namespace workspace {
@@ -299,8 +319,13 @@
 	}
 
 	export namespace workspace {
-		export function registerRemoteAuthorityResolver(authorityPrefix: string, resolver: RemoteAuthorityResolver): Disposable;
-		export function registerResourceLabelFormatter(formatter: ResourceLabelFormatter): Disposable;
+		export function registerRemoteAuthorityResolver(
+			authorityPrefix: string,
+			resolver: RemoteAuthorityResolver
+		): Disposable;
+		export function registerResourceLabelFormatter(
+			formatter: ResourceLabelFormatter
+		): Disposable;
 	}
 
 	//#endregion
@@ -317,7 +342,12 @@
 	}
 
 	export namespace window {
-		export function createWebviewTextEditorInset(editor: TextEditor, line: number, height: number, options?: WebviewOptions): WebviewEditorInset;
+		export function createWebviewTextEditorInset(
+			editor: TextEditor,
+			line: number,
+			height: number,
+			options?: WebviewOptions
+		): WebviewEditorInset;
 	}
 
 	//#endregion
@@ -325,10 +355,25 @@
 	//#region read/write in chunks: https://github.com/microsoft/vscode/issues/84515
 
 	export interface FileSystemProvider {
-		open?(resource: Uri, options: { create: boolean; }): number | Thenable<number>;
+		open?(
+			resource: Uri,
+			options: { create: boolean }
+		): number | Thenable<number>;
 		close?(fd: number): void | Thenable<void>;
-		read?(fd: number, pos: number, data: Uint8Array, offset: number, length: number): number | Thenable<number>;
-		write?(fd: number, pos: number, data: Uint8Array, offset: number, length: number): number | Thenable<number>;
+		read?(
+			fd: number,
+			pos: number,
+			data: Uint8Array,
+			offset: number,
+			length: number
+		): number | Thenable<number>;
+		write?(
+			fd: number,
+			pos: number,
+			data: Uint8Array,
+			offset: number,
+			length: number
+		): number | Thenable<number>;
 	}
 
 	//#endregion
@@ -547,7 +592,12 @@
 		 * @param progress A progress callback that must be invoked for all results.
 		 * @param token A cancellation token.
 		 */
-		provideTextSearchResults(query: TextSearchQuery, options: TextSearchOptions, progress: Progress<TextSearchResult>, token: CancellationToken): ProviderResult<TextSearchComplete>;
+		provideTextSearchResults(
+			query: TextSearchQuery,
+			options: TextSearchOptions,
+			progress: Progress<TextSearchResult>,
+			token: CancellationToken
+		): ProviderResult<TextSearchComplete>;
 	}
 
 	//#endregion
@@ -596,7 +646,11 @@
 		 * @param options A set of options to consider while searching files.
 		 * @param token A cancellation token.
 		 */
-		provideFileSearchResults(query: FileSearchQuery, options: FileSearchOptions, token: CancellationToken): ProviderResult<Uri[]>;
+		provideFileSearchResults(
+			query: FileSearchQuery,
+			options: FileSearchOptions,
+			token: CancellationToken
+		): ProviderResult<Uri[]>;
 	}
 
 	export namespace workspace {
@@ -609,7 +663,10 @@
 		 * @param provider The provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerFileSearchProvider(scheme: string, provider: FileSearchProvider): Disposable;
+		export function registerFileSearchProvider(
+			scheme: string,
+			provider: FileSearchProvider
+		): Disposable;
 
 		/**
 		 * Register a text search provider.
@@ -620,7 +677,10 @@
 		 * @param provider The provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerTextSearchProvider(scheme: string, provider: TextSearchProvider): Disposable;
+		export function registerTextSearchProvider(
+			scheme: string,
+			provider: TextSearchProvider
+		): Disposable;
 	}
 
 	//#endregion
@@ -703,7 +763,11 @@
 		 * @param token A token that can be used to signal cancellation to the underlying search engine.
 		 * @return A thenable that resolves when the search is complete.
 		 */
-		export function findTextInFiles(query: TextSearchQuery, callback: (result: TextSearchResult) => void, token?: CancellationToken): Thenable<TextSearchComplete>;
+		export function findTextInFiles(
+			query: TextSearchQuery,
+			callback: (result: TextSearchResult) => void,
+			token?: CancellationToken
+		): Thenable<TextSearchComplete>;
 
 		/**
 		 * Search text in files across all [workspace folders](#workspace.workspaceFolders) in the workspace.
@@ -713,7 +777,12 @@
 		 * @param token A token that can be used to signal cancellation to the underlying search engine.
 		 * @return A thenable that resolves when the search is complete.
 		 */
-		export function findTextInFiles(query: TextSearchQuery, options: FindTextInFilesOptions, callback: (result: TextSearchResult) => void, token?: CancellationToken): Thenable<TextSearchComplete>;
+		export function findTextInFiles(
+			query: TextSearchQuery,
+			options: FindTextInFilesOptions,
+			callback: (result: TextSearchResult) => void,
+			token?: CancellationToken
+		): Thenable<TextSearchComplete>;
 	}
 
 	//#endregion
@@ -731,7 +800,6 @@
 	}
 
 	export namespace commands {
-
 		/**
 		 * Registers a diff information command that can be invoked via a keyboard shortcut,
 		 * a menu item, an action, or directly.
@@ -746,7 +814,11 @@
 		 * @param thisArg The `this` context used when invoking the handler function.
 		 * @return Disposable which unregisters this command on disposal.
 		 */
-		export function registerDiffInformationCommand(command: string, callback: (diff: LineChange[], ...args: any[]) => any, thisArg?: any): Disposable;
+		export function registerDiffInformationCommand(
+			command: string,
+			callback: (diff: LineChange[], ...args: any[]) => any,
+			thisArg?: any
+		): Disposable;
 	}
 
 	//#endregion
@@ -771,15 +843,12 @@
 
 	//#endregion
 
-
-
 	//#region @joaomoreno: SCM validation
 
 	/**
 	 * Represents the validation type of the Source Control input.
 	 */
 	export enum SourceControlInputBoxValidationType {
-
 		/**
 		 * Something not allowed by the rules of a language or other means.
 		 */
@@ -793,11 +862,10 @@
 		/**
 		 * Something to inform about but not a problem.
 		 */
-		Information = 2
+		Information = 2,
 	}
 
 	export interface SourceControlInputBoxValidation {
-
 		/**
 		 * The validation message to display.
 		 */
@@ -813,12 +881,14 @@
 	 * Represents the input box in the Source Control viewlet.
 	 */
 	export interface SourceControlInputBox {
-
 		/**
 		 * A validation function for the input box. It's possible to change
 		 * the validation provider simply by setting this property to a different function.
 		 */
-		validateInput?(value: string, cursorPosition: number): ProviderResult<SourceControlInputBoxValidation | undefined | null>;
+		validateInput?(
+			value: string,
+			cursorPosition: number
+		): ProviderResult<SourceControlInputBoxValidation | undefined | null>;
 	}
 
 	//#endregion
@@ -826,7 +896,6 @@
 	//#region @joaomoreno: SCM selected provider
 
 	export interface SourceControl {
-
 		/**
 		 * Whether the source control is selected.
 		 */
@@ -917,7 +986,10 @@
 
 	//#region Tree View: https://github.com/microsoft/vscode/issues/61313
 	export interface TreeView<T> extends Disposable {
-		reveal(element: T | undefined, options?: { select?: boolean, focus?: boolean, expand?: boolean | number }): Thenable<void>;
+		reveal(
+			element: T | undefined,
+			options?: { select?: boolean; focus?: boolean; expand?: boolean | number }
+		): Thenable<void>;
 	}
 	//#endregion
 
@@ -933,12 +1005,10 @@
 	//#region Status bar item with ID and Name: https://github.com/microsoft/vscode/issues/74972
 
 	export namespace window {
-
 		/**
 		 * Options to configure the status bar item.
 		 */
 		export interface StatusBarItemOptions {
-
 			/**
 			 * A unique identifier of the status bar item. The identifier
 			 * is for example used to allow a user to show or hide the
@@ -978,7 +1048,9 @@
 		 * of the extension and the `StatusBarItemOptions.name` will be the extension name.
 		 * @return A new status bar item.
 		 */
-		export function createStatusBarItem(options?: StatusBarItemOptions): StatusBarItem;
+		export function createStatusBarItem(
+			options?: StatusBarItemOptions
+		): StatusBarItem;
 	}
 
 	//#endregion
@@ -988,7 +1060,6 @@
 	// TODO: Also for custom editor
 
 	export interface CustomTextEditorProvider {
-
 		/**
 		 * Handle when the underlying resource for a custom editor is renamed.
 		 *
@@ -1001,7 +1072,11 @@
 		 *
 		 * @return Thenable indicating that the webview editor has been moved.
 		 */
-		moveCustomTextEditor?(newDocument: TextDocument, existingWebviewPanel: WebviewPanel, token: CancellationToken): Thenable<void>;
+		moveCustomTextEditor?(
+			newDocument: TextDocument,
+			existingWebviewPanel: WebviewPanel,
+			token: CancellationToken
+		): Thenable<void>;
 	}
 
 	//#endregion
@@ -1021,13 +1096,13 @@
 
 	export enum CellKind {
 		Markdown = 1,
-		Code = 2
+		Code = 2,
 	}
 
 	export enum CellOutputKind {
 		Text = 1,
 		Error = 2,
-		Rich = 3
+		Rich = 3,
 	}
 
 	export interface CellStreamOutput {
@@ -1077,29 +1152,37 @@
 		 *   }
 		 * }
 		 */
-		data: { [key: string]: any; };
+		data: { [key: string]: any };
 
 		readonly metadata?: NotebookCellOutputMetadata;
 	}
 
-	export type CellOutput = CellStreamOutput | CellErrorOutput | CellDisplayOutput;
+	export type CellOutput =
+		| CellStreamOutput
+		| CellErrorOutput
+		| CellDisplayOutput;
 
 	export class NotebookCellOutputItem {
-
 		readonly mime: string;
 		readonly value: unknown;
 		readonly metadata?: Record<string, string | number | boolean>;
 
-		constructor(mime: string, value: unknown, metadata?: Record<string, string | number | boolean>);
+		constructor(
+			mime: string,
+			value: unknown,
+			metadata?: Record<string, string | number | boolean>
+		);
 	}
 
 	//TODO@jrieken add id?
 	export class NotebookCellOutput {
-
 		readonly outputs: NotebookCellOutputItem[];
 		readonly metadata?: Record<string, string | number | boolean>;
 
-		constructor(outputs: NotebookCellOutputItem[], metadata?: Record<string, string | number | boolean>);
+		constructor(
+			outputs: NotebookCellOutputItem[],
+			metadata?: Record<string, string | number | boolean>
+		);
 
 		//TODO@jrieken HACK to workaround dependency issues...
 		toJSON(): any;
@@ -1109,12 +1192,12 @@
 		Running = 1,
 		Idle = 2,
 		Success = 3,
-		Error = 4
+		Error = 4,
 	}
 
 	export enum NotebookRunState {
 		Running = 1,
-		Idle = 2
+		Idle = 2,
 	}
 
 	export interface NotebookCellMetadata {
@@ -1286,20 +1369,39 @@
 
 		locationAt(positionOrRange: Position | Range): Location;
 		positionAt(location: Location): Position;
-		contains(uri: Uri): boolean
+		contains(uri: Uri): boolean;
 	}
 
 	export interface WorkspaceEdit {
 		replaceNotebookMetadata(uri: Uri, value: NotebookDocumentMetadata): void;
-		replaceNotebookCells(uri: Uri, start: number, end: number, cells: NotebookCellData[], metadata?: WorkspaceEditEntryMetadata): void;
-		replaceNotebookCellOutput(uri: Uri, index: number, outputs: (NotebookCellOutput | CellOutput)[], metadata?: WorkspaceEditEntryMetadata): void;
-		replaceNotebookCellMetadata(uri: Uri, index: number, cellMetadata: NotebookCellMetadata, metadata?: WorkspaceEditEntryMetadata): void;
+		replaceNotebookCells(
+			uri: Uri,
+			start: number,
+			end: number,
+			cells: NotebookCellData[],
+			metadata?: WorkspaceEditEntryMetadata
+		): void;
+		replaceNotebookCellOutput(
+			uri: Uri,
+			index: number,
+			outputs: (NotebookCellOutput | CellOutput)[],
+			metadata?: WorkspaceEditEntryMetadata
+		): void;
+		replaceNotebookCellMetadata(
+			uri: Uri,
+			index: number,
+			cellMetadata: NotebookCellMetadata,
+			metadata?: WorkspaceEditEntryMetadata
+		): void;
 	}
 
 	export interface NotebookEditorEdit {
 		replaceMetadata(value: NotebookDocumentMetadata): void;
 		replaceCells(start: number, end: number, cells: NotebookCellData[]): void;
-		replaceCellOutput(index: number, outputs: (NotebookCellOutput | CellOutput)[]): void;
+		replaceCellOutput(
+			index: number,
+			outputs: (NotebookCellOutput | CellOutput)[]
+		): void;
 		replaceCellMetadata(index: number, metadata: NotebookCellMetadata): void;
 	}
 
@@ -1337,7 +1439,6 @@
 		 * The primary selected cell on this notebook editor.
 		 */
 		readonly selection?: NotebookCell;
-
 
 		/**
 		 * The current visible ranges in the editor (vertically).
@@ -1387,11 +1488,19 @@
 		 * @param callback A function which can create edits using an [edit-builder](#NotebookEditorEdit).
 		 * @return A promise that resolves with a value indicating if the edits could be applied.
 		 */
-		edit(callback: (editBuilder: NotebookEditorEdit) => void): Thenable<boolean>;
+		edit(
+			callback: (editBuilder: NotebookEditorEdit) => void
+		): Thenable<boolean>;
 
-		setDecorations(decorationType: NotebookEditorDecorationType, range: NotebookCellRange): void;
+		setDecorations(
+			decorationType: NotebookEditorDecorationType,
+			range: NotebookCellRange
+		): void;
 
-		revealRange(range: NotebookCellRange, revealType?: NotebookEditorRevealType): void;
+		revealRange(
+			range: NotebookCellRange,
+			revealType?: NotebookEditorRevealType
+		): void;
 	}
 
 	export interface NotebookOutputSelector {
@@ -1416,7 +1525,6 @@
 	}
 
 	export interface NotebookCellsChangeEvent {
-
 		/**
 		 * The affected document.
 		 */
@@ -1425,7 +1533,6 @@
 	}
 
 	export interface NotebookCellMoveEvent {
-
 		/**
 		 * The affected document.
 		 */
@@ -1435,7 +1542,6 @@
 	}
 
 	export interface NotebookCellOutputsChangeEvent {
-
 		/**
 		 * The affected document.
 		 */
@@ -1444,7 +1550,6 @@
 	}
 
 	export interface NotebookCellLanguageChangeEvent {
-
 		/**
 		 * The affected document.
 		 */
@@ -1483,7 +1588,6 @@
 	}
 
 	interface NotebookDocumentContentChangeEvent {
-
 		/**
 		 * The document that the edit is for.
 		 */
@@ -1491,7 +1595,6 @@
 	}
 
 	interface NotebookDocumentEditEvent {
-
 		/**
 		 * The document that the edit is for.
 		 */
@@ -1583,17 +1686,36 @@
 	export interface NotebookContentProvider {
 		readonly options?: NotebookDocumentContentOptions;
 		readonly onDidChangeNotebookContentOptions?: Event<NotebookDocumentContentOptions>;
-		readonly onDidChangeNotebook: Event<NotebookDocumentContentChangeEvent | NotebookDocumentEditEvent>;
+		readonly onDidChangeNotebook: Event<
+			NotebookDocumentContentChangeEvent | NotebookDocumentEditEvent
+		>;
 
 		/**
 		 * Content providers should always use [file system providers](#FileSystemProvider) to
 		 * resolve the raw content for `uri` as the resouce is not necessarily a file on disk.
 		 */
-		openNotebook(uri: Uri, openContext: NotebookDocumentOpenContext): NotebookData | Promise<NotebookData>;
-		resolveNotebook(document: NotebookDocument, webview: NotebookCommunication): Promise<void>;
-		saveNotebook(document: NotebookDocument, cancellation: CancellationToken): Promise<void>;
-		saveNotebookAs(targetResource: Uri, document: NotebookDocument, cancellation: CancellationToken): Promise<void>;
-		backupNotebook(document: NotebookDocument, context: NotebookDocumentBackupContext, cancellation: CancellationToken): Promise<NotebookDocumentBackup>;
+		openNotebook(
+			uri: Uri,
+			openContext: NotebookDocumentOpenContext
+		): NotebookData | Promise<NotebookData>;
+		resolveNotebook(
+			document: NotebookDocument,
+			webview: NotebookCommunication
+		): Promise<void>;
+		saveNotebook(
+			document: NotebookDocument,
+			cancellation: CancellationToken
+		): Promise<void>;
+		saveNotebookAs(
+			targetResource: Uri,
+			document: NotebookDocument,
+			cancellation: CancellationToken
+		): Promise<void>;
+		backupNotebook(
+			document: NotebookDocument,
+			context: NotebookDocumentBackupContext,
+			cancellation: CancellationToken
+		): Promise<NotebookDocumentBackup>;
 	}
 
 	export interface NotebookKernel {
@@ -1609,24 +1731,35 @@
 		cancelAllCellsExecution(document: NotebookDocument): void;
 	}
 
-	export type NotebookFilenamePattern = GlobPattern | { include: GlobPattern; exclude: GlobPattern };
+	export type NotebookFilenamePattern =
+		| GlobPattern
+		| { include: GlobPattern; exclude: GlobPattern };
 
 	export interface NotebookDocumentFilter {
 		viewType?: string | string[];
 		filenamePattern?: NotebookFilenamePattern;
 	}
 
-	export interface NotebookKernelProvider<T extends NotebookKernel = NotebookKernel> {
+	export interface NotebookKernelProvider<
+		T extends NotebookKernel = NotebookKernel
+	> {
 		onDidChangeKernels?: Event<NotebookDocument | undefined>;
-		provideKernels(document: NotebookDocument, token: CancellationToken): ProviderResult<T[]>;
-		resolveKernel?(kernel: T, document: NotebookDocument, webview: NotebookCommunication, token: CancellationToken): ProviderResult<void>;
+		provideKernels(
+			document: NotebookDocument,
+			token: CancellationToken
+		): ProviderResult<T[]>;
+		resolveKernel?(
+			kernel: T,
+			document: NotebookDocument,
+			webview: NotebookCommunication,
+			token: CancellationToken
+		): ProviderResult<void>;
 	}
 
 	/**
 	 * Represents the alignment of status bar items.
 	 */
 	export enum NotebookCellStatusBarAlignment {
-
 		/**
 		 * Aligned to the left side.
 		 */
@@ -1635,7 +1768,7 @@
 		/**
 		 * Aligned to the right side.
 		 */
-		Right = 2
+		Right = 2,
 	}
 
 	export interface NotebookCellStatusBarItem {
@@ -1669,7 +1802,6 @@
 		selection?: NotebookCellRange;
 	}
 
-
 	export namespace notebook {
 		export function registerNotebookContentProvider(
 			notebookType: string,
@@ -1691,8 +1823,13 @@
 			provider: NotebookKernelProvider
 		): Disposable;
 
-		export function createNotebookEditorDecorationType(options: NotebookDecorationRenderOptions): NotebookEditorDecorationType;
-		export function openNotebookDocument(uri: Uri, viewType?: string): Promise<NotebookDocument>;
+		export function createNotebookEditorDecorationType(
+			options: NotebookDecorationRenderOptions
+		): NotebookEditorDecorationType;
+		export function openNotebookDocument(
+			uri: Uri,
+			viewType?: string
+		): Promise<NotebookDocument>;
 		export const onDidOpenNotebookDocument: Event<NotebookDocument>;
 		export const onDidCloseNotebookDocument: Event<NotebookDocument>;
 		export const onDidSaveNotebookDocument: Event<NotebookDocument>;
@@ -1713,9 +1850,15 @@
 		 * @param notebook
 		 * @param selector
 		 */
-		export function createConcatTextDocument(notebook: NotebookDocument, selector?: DocumentSelector): NotebookConcatTextDocument;
+		export function createConcatTextDocument(
+			notebook: NotebookDocument,
+			selector?: DocumentSelector
+		): NotebookConcatTextDocument;
 
-		export const onDidChangeActiveNotebookKernel: Event<{ document: NotebookDocument, kernel: NotebookKernel | undefined }>;
+		export const onDidChangeActiveNotebookKernel: Event<{
+			document: NotebookDocument;
+			kernel: NotebookKernel | undefined;
+		}>;
 
 		/**
 		 * Creates a notebook cell status bar [item](#NotebookCellStatusBarItem).
@@ -1726,17 +1869,26 @@
 		 * @param priority The priority of the item. Higher values mean the item should be shown more to the left.
 		 * @return A new status bar item.
 		 */
-		export function createCellStatusBarItem(cell: NotebookCell, alignment?: NotebookCellStatusBarAlignment, priority?: number): NotebookCellStatusBarItem;
+		export function createCellStatusBarItem(
+			cell: NotebookCell,
+			alignment?: NotebookCellStatusBarAlignment,
+			priority?: number
+		): NotebookCellStatusBarItem;
 	}
 
 	export namespace window {
 		export const visibleNotebookEditors: NotebookEditor[];
 		export const onDidChangeVisibleNotebookEditors: Event<NotebookEditor[]>;
 		export const activeNotebookEditor: NotebookEditor | undefined;
-		export const onDidChangeActiveNotebookEditor: Event<NotebookEditor | undefined>;
+		export const onDidChangeActiveNotebookEditor: Event<
+			NotebookEditor | undefined
+		>;
 		export const onDidChangeNotebookEditorSelection: Event<NotebookEditorSelectionChangeEvent>;
 		export const onDidChangeNotebookEditorVisibleRanges: Event<NotebookEditorVisibleRangesChangeEvent>;
-		export function showNotebookDocument(document: NotebookDocument, options?: NotebookDocumentShowOptions): Promise<NotebookEditor>;
+		export function showNotebookDocument(
+			document: NotebookDocument,
+			options?: NotebookDocumentShowOptions
+		): Promise<NotebookEditor>;
 	}
 
 	//#endregion
@@ -1797,7 +1949,7 @@
 		/**
 		 * The icon path or [ThemeIcon](#ThemeIcon) for the timeline item.
 		 */
-		iconPath?: Uri | { light: Uri; dark: Uri; } | ThemeIcon;
+		iconPath?: Uri | { light: Uri; dark: Uri } | ThemeIcon;
 
 		/**
 		 * A human readable string describing less prominent details of the timeline item.
@@ -1883,7 +2035,7 @@
 		 * An optional maximum number timeline items or the all timeline items newer (inclusive) than the timestamp or id that should be returned.
 		 * If `undefined` all timeline items should be returned.
 		 */
-		limit?: number | { timestamp: number; id?: string; };
+		limit?: number | { timestamp: number; id?: string };
 	}
 
 	export interface TimelineProvider {
@@ -1912,7 +2064,11 @@
 		 * @return The [timeline result](#TimelineResult) or a thenable that resolves to such. The lack of a result
 		 * can be signaled by returning `undefined`, `null`, or an empty array.
 		 */
-		provideTimeline(uri: Uri, options: TimelineOptions, token: CancellationToken): ProviderResult<Timeline>;
+		provideTimeline(
+			uri: Uri,
+			options: TimelineOptions,
+			token: CancellationToken
+		): ProviderResult<Timeline>;
 	}
 
 	export namespace workspace {
@@ -1926,8 +2082,11 @@
 		 * @param scheme A scheme or schemes that defines which documents this provider is applicable to. Can be `*` to target all documents.
 		 * @param provider A timeline provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
-		*/
-		export function registerTimelineProvider(scheme: string | string[], provider: TimelineProvider): Disposable;
+		 */
+		export function registerTimelineProvider(
+			scheme: string | string[],
+			provider: TimelineProvider
+		): Disposable;
 	}
 
 	//#endregion
@@ -1938,7 +2097,7 @@
 		Other = 0,
 		Comment = 1,
 		String = 2,
-		RegEx = 4
+		RegEx = 4,
 	}
 
 	export interface TokenInformation {
@@ -1947,7 +2106,10 @@
 	}
 
 	export namespace languages {
-		export function getTokenInformationAtPosition(document: TextDocument, position: Position): Promise<TokenInformation>;
+		export function getTokenInformationAtPosition(
+			document: TextDocument,
+			position: Position
+		): Promise<TokenInformation>;
 	}
 
 	//#endregion
@@ -1962,7 +2124,7 @@
 		/**
 		 * The extension is running in a Webworker extension host. Runtime access is limited to Webworker APIs.
 		 */
-		Webworker = 2
+		Webworker = 2,
 	}
 
 	export interface ExtensionContext {
@@ -1971,11 +2133,9 @@
 
 	//#endregion
 
-
 	//#region https://github.com/microsoft/vscode/issues/102091
 
 	export interface TextDocument {
-
 		/**
 		 * The [notebook](#NotebookDocument) that contains this document as a notebook cell or `undefined` when
 		 * the document is not contained by a notebook (this should be the more frequent case).
@@ -1998,23 +2158,31 @@
 		 * selectors. It is activated when either tests need to be enumerated, or
 		 * a document matching the selector is opened.
 		 */
-		export function registerTestProvider<T extends TestItem>(testProvider: TestProvider<T>): Disposable;
+		export function registerTestProvider<T extends TestItem>(
+			testProvider: TestProvider<T>
+		): Disposable;
 
 		/**
 		 * Runs tests with the given options. If no options are given, then
 		 * all tests are run. Returns the resulting test run.
 		 */
-		export function runTests<T extends TestItem>(options: TestRunOptions<T>): Thenable<void>;
+		export function runTests<T extends TestItem>(
+			options: TestRunOptions<T>
+		): Thenable<void>;
 
 		/**
 		 * Returns an observer that retrieves tests in the given workspace folder.
 		 */
-		export function createWorkspaceTestObserver(workspaceFolder: WorkspaceFolder): TestObserver;
+		export function createWorkspaceTestObserver(
+			workspaceFolder: WorkspaceFolder
+		): TestObserver;
 
 		/**
 		 * Returns an observer that retrieves tests in the given text document.
 		 */
-		export function createDocumentTestObserver(document: TextDocument): TestObserver;
+		export function createDocumentTestObserver(
+			document: TextDocument
+		): TestObserver;
 	}
 
 	export interface TestObserver {
@@ -2143,7 +2311,10 @@
 		 * fire with update test states during the run.
 		 * @todo this will eventually need to be able to return a summary report, coverage for example.
 		 */
-		runTests?(options: TestRunOptions<T>, cancellationToken: CancellationToken): ProviderResult<void>;
+		runTests?(
+			options: TestRunOptions<T>,
+			cancellationToken: CancellationToken
+		): ProviderResult<void>;
 	}
 
 	/**
@@ -2220,7 +2391,7 @@
 		// Test run has been skipped
 		Skipped = 4,
 		// Test run failed for some other reason (compilation error, timeout, etc)
-		Errored = 5
+		Errored = 5,
 	}
 
 	/**
@@ -2251,7 +2422,11 @@
 		 * @param messages List of associated messages for the test
 		 * @param duration Length of time the test run took, if appropriate.
 		 */
-		constructor(runState: TestRunState, messages?: TestMessage[], duration?: number);
+		constructor(
+			runState: TestRunState,
+			messages?: TestMessage[],
+			duration?: number
+		);
 	}
 
 	/**
@@ -2261,7 +2436,7 @@
 		Error = 0,
 		Warning = 1,
 		Information = 2,
-		Hint = 3
+		Hint = 3,
 	}
 
 	/**
@@ -2303,7 +2478,6 @@
 	 * show text and icons and run a command on click.
 	 */
 	export interface StatusBarItem {
-
 		/**
 		 * The background color for this entry.
 		 *

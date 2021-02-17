@@ -2,6 +2,7 @@
 [![Gitter Chat](https://img.shields.io/badge/chat-gitter-blue.svg)](https://gitter.im/dart-code/Dart-Code)
 [![Follow on Twitter](https://img.shields.io/badge/twitter-dartcode-blue.svg)](https://twitter.com/DartCode)
 [![Contribute to Dart Code](https://img.shields.io/badge/help-contribute-551A8B.svg)](https://github.com/Dart-Code/Dart-Code/blob/master/CONTRIBUTING.md)
+
 # This extension is a fork from [Dart-Code](https://github.com/Dart-Code/Dart-Code) for github1s.
 
 # At present only languages features is reserved
@@ -13,11 +14,9 @@ Dart Code extends [VS Code](https://code.visualstudio.com/) with support for the
 effectively editing, refactoring, running, and reloading [Flutter](https://flutter.dev/)
 mobile apps, and [AngularDart](https://angulardart.org) web apps.
 
-
 ## Installation
 
 Dart Code can be [installed from the Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code) or by [searching within VS Code](https://code.visualstudio.com/docs/editor/extension-gallery#_search-for-an-extension).
-
 
 ## Features
 
@@ -53,26 +52,21 @@ Dart Code can be [installed from the Visual Studio Code Marketplace](https://mar
 - [Pub Upgrade Packages command](https://dartcode.org/docs/commands/#pub-upgrade-packages)
 - [Type Hierarchy](https://dartcode.org/docs/commands/#dart-show-type-hierarchy)
 
-
 ## Extension Settings
 
 A full list of settings is [available here](https://dartcode.org/docs/settings/).
-
 
 ## Frequently Asked Questions
 
 A list of frequently asked questions is [available here](https://dartcode.org/faq/).
 
-
 ## Key Bindings
 
 A list of useful key bindings is [available here](https://dartcode.org/docs/key-bindings/).
 
-
 ## Refactorings and Code Fixes
 
 A full list of supported refactors is [available here](https://dartcode.org/docs/refactorings-and-code-fixes/).
-
 
 ## Analytics
 
@@ -85,7 +79,6 @@ This extension reports some analytics such as:
 - Platform and Dart/Flutter SDK versions
 
 Reporting can be disabled via the [`dart.allowAnalytics` setting](https://dartcode.org/docs/settings/#dartallowanalytics).
-
 
 ## Release Notes
 

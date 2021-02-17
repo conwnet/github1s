@@ -10,7 +10,9 @@ export default () => `
 <div class="welcomePageContainer">
 	<div class="welcomePage" role="document">
 		<div class="title">
-			<h1 class="caption">${escape(localize('welcomePage.vscode', "Visual Studio Code"))}</h1>
+			<h1 class="caption">${escape(
+				localize('welcomePage.vscode', 'Visual Studio Code')
+			)}</h1>
 			<p class="subtitle detail">
 				One second to read GitHub code with VS Code
 			</p>
@@ -31,7 +33,7 @@ export default () => `
 					</ul>
 				</div>
 				<div class="section help">
-					<h2 class="caption">${escape(localize('welcomePage.help', "Help"))}</h2>
+					<h2 class="caption">${escape(localize('welcomePage.help', 'Help'))}</h2>
 					<ul>
 						<li><a href="https://github.com/conwnet/github1s" target="_blank">GitHub1s Repository</a></li>
 						<li><a href="https://github.com/microsoft/vscode" target="_blank">VS Code Repository</a></li>
@@ -40,7 +42,9 @@ export default () => `
 						<li><a href="https://github.com/conwnet/github1s/issues" target="_blank">Advices and Issues</a></li>
 					</ul>
 				</div>
-				<p class="showOnStartup"><input type="checkbox" id="showOnStartup" class="checkbox"> <label class="caption" for="showOnStartup">${escape(localize('welcomePage.showOnStartup', "Show welcome page on startup"))}</label></p>
+				<p class="showOnStartup"><input type="checkbox" id="showOnStartup" class="checkbox"> <label class="caption" for="showOnStartup">${escape(
+					localize('welcomePage.showOnStartup', 'Show welcome page on startup')
+				)}</label></p>
 			</div>
 			<div class="commands">
 				<div class="section authentication">
@@ -52,10 +56,27 @@ export default () => `
 				</div>
 				</div>
 				<div class="section learn">
-					<h2 class="caption">${escape(localize('welcomePage.learn', "Learn"))}</h2>
+					<h2 class="caption">${escape(localize('welcomePage.learn', 'Learn'))}</h2>
 					<div class="list">
-						<div class="item showCommands"><button data-href="command:workbench.action.showCommands"><h3 class="caption">${escape(localize('welcomePage.showCommands', "Find and run all commands"))}</h3> <span class="detail">${escape(localize('welcomePage.showCommandsDescription', "Rapidly access and search commands from the Command Palette ({0})")).replace('{0}', '<span class="shortcut" data-command="workbench.action.showCommands"></span>')}</span></button></div>
-						<div class="item showInterfaceOverview"><button data-href="command:workbench.action.showInterfaceOverview"><h3 class="caption">${escape(localize('welcomePage.interfaceOverview', "Interface overview"))}</h3> <span class="detail">${escape(localize('welcomePage.interfaceOverviewDescription', "Get a visual overlay highlighting the major components of the UI"))}</span></button></div>
+						<div class="item showCommands"><button data-href="command:workbench.action.showCommands"><h3 class="caption">${escape(
+							localize('welcomePage.showCommands', 'Find and run all commands')
+						)}</h3> <span class="detail">${escape(
+	localize(
+		'welcomePage.showCommandsDescription',
+		'Rapidly access and search commands from the Command Palette ({0})'
+	)
+).replace(
+	'{0}',
+	'<span class="shortcut" data-command="workbench.action.showCommands"></span>'
+)}</span></button></div>
+						<div class="item showInterfaceOverview"><button data-href="command:workbench.action.showInterfaceOverview"><h3 class="caption">${escape(
+							localize('welcomePage.interfaceOverview', 'Interface overview')
+						)}</h3> <span class="detail">${escape(
+	localize(
+		'welcomePage.interfaceOverviewDescription',
+		'Get a visual overlay highlighting the major components of the UI'
+	)
+)}</span></button></div>
 					</div>
 				</div>
 			</div>

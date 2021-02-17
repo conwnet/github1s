@@ -3,11 +3,13 @@
 [![Version](https://vsmarketplacebadge.apphb.com/version/vlanguage.vscode-vlang.svg)](https://marketplace.visualstudio.com/items?itemName=vlanguage.vscode-vlang)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/vlanguage.vscode-vlang.svg)](https://marketplace.visualstudio.com/items?itemName=vlanguage.vscode-vlang)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vlang/vscode-vlang/CI)
+
 # This extension is a fork from [vscode-vlang](https://github.com/vlang/vscode-vlang) for github1s.
 
 Provides [V language](https://vlang.io) support for Visual Studio Code.
 
 ## Table of Contents
+
 - [Preview](#preview)
 - [Features](#features)
   - [Code Editing](#code-editing)
@@ -33,11 +35,12 @@ Provides [V language](https://vlang.io) support for Visual Studio Code.
 
 ## Usage
 
-You will need to install [Visual Studio Code](https://code.visualstudio.com/) >= `0.26`. In the command palette (Cmd+Shift+P) select Install Extension and choose `V`. You can also install the extension from the [Marketplace](https://marketplace.visualstudio.com/vscode). Open any `.v, .vh, .vsh`  file in VS Code.
+You will need to install [Visual Studio Code](https://code.visualstudio.com/) >= `0.26`. In the command palette (Cmd+Shift+P) select Install Extension and choose `V`. You can also install the extension from the [Marketplace](https://marketplace.visualstudio.com/vscode). Open any `.v, .vh, .vsh` file in VS Code.
 
 _Note_: It is recommended to turn `Auto Save` on in Visual Studio Code (`File -> Auto Save`) when using this extension.
 
 ## Commands
+
 - `V: Run current file`
 - `V: Build an optimized executable from current file`
 - `V: Show help info`

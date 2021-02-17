@@ -8,7 +8,7 @@
 	z-index: 999;
 	display: flex;
 	box-shadow: 1px 1px 5px 3px #1e1e1e;
-	background: rgba(0, 0, 0, .8);
+	background: rgba(0, 0, 0, 0.8);
 	font-size: 14px;
 }
 

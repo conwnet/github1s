@@ -3,7 +3,12 @@
  * @author xcv58
  */
 
-import { ApolloClient, createHttpLink, InMemoryCache, gql } from '@apollo/client/core';
+import {
+	ApolloClient,
+	createHttpLink,
+	InMemoryCache,
+	gql,
+} from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
 import { getOAuthToken } from './util';
 
@@ -16,12 +21,12 @@ const authLink = setContext((_, { headers }) => {
 	return {
 		headers: {
 			...headers,
-			authorization: `Bearer ${oAuthToken}`
-		}
+			authorization: `Bearer ${oAuthToken}`,
+		},
 	};
 });
 
 export const apolloClient = new ApolloClient({
 	link: authLink.concat(httpLink),
-	cache: new InMemoryCache()
+	cache: new InMemoryCache(),
 });

@@ -48,12 +48,12 @@ npm install esy --global
 
 ```json
 {
-  "dependencies": {
-    "@opam/ocaml-lsp-server": "*",
-    "@opam/ocamlfind-secondary": "*",
-    "@opam/reason": "*",
-    "ocaml": "4.6.x"
-  }
+	"dependencies": {
+		"@opam/ocaml-lsp-server": "*",
+		"@opam/ocamlfind-secondary": "*",
+		"@opam/reason": "*",
+		"ocaml": "4.6.x"
+	}
 }
 ```
 

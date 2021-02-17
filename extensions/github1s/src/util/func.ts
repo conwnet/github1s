@@ -27,7 +27,7 @@ export const reuseable = (func, computeCacheKey = defaultComputeCacheKey) => {
 
 export const throttle = (func: Function, interval: number) => {
 	let timer = null;
-	return function(...args: any[]): any {
+	return function (...args: any[]): any {
 		if (timer) {
 			return;
 		}

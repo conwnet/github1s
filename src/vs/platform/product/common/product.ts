@@ -12,10 +12,15 @@ import { dirname, joinPath } from 'vs/base/common/resources';
 let product: IProductConfiguration;
 
 // Web or Native (sandbox TODO@sandbox need to add all properties of product.json)
-if (isWeb || typeof require === 'undefined' || typeof require.__$__nodeRequire !== 'function') {
-
+if (
+	isWeb ||
+	typeof require === 'undefined' ||
+	typeof require.__$__nodeRequire !== 'function'
+) {
 	// Built time configuration (do NOT modify)
-	product = { /*BUILD->INSERT_PRODUCT_CONFIGURATION*/ } as IProductConfiguration;
+	product = {
+		/*BUILD->INSERT_PRODUCT_CONFIGURATION*/
+	} as IProductConfiguration;
 
 	// Running out of sources
 	if (Object.keys(product).length === 0) {
@@ -35,7 +40,7 @@ if (isWeb || typeof require === 'undefined' || typeof require.__$__nodeRequire !
 			extensionAllowedProposedApi: [
 				'ms-vscode.vscode-js-profile-flame',
 				'ms-vscode.vscode-js-profile-table',
-				'ms-vscode.github-browser'
+				'ms-vscode.github-browser',
 			],
 		});
 	}
@@ -43,24 +48,25 @@ if (isWeb || typeof require === 'undefined' || typeof require.__$__nodeRequire !
 
 // Native (non-sandboxed)
 else {
-
 	// Obtain values from product.json and package.json
 	const rootPath = dirname(FileAccess.asFileUri('', require));
 
 	product = require.__$__nodeRequire(joinPath(rootPath, 'product.json').fsPath);
-	const pkg = require.__$__nodeRequire(joinPath(rootPath, 'package.json').fsPath) as { version: string; };
+	const pkg = require.__$__nodeRequire(
+		joinPath(rootPath, 'package.json').fsPath
+	) as { version: string };
 
 	// Running out of sources
 	if (env['VSCODE_DEV']) {
 		Object.assign(product, {
 			nameShort: `${product.nameShort} Dev`,
 			nameLong: `${product.nameLong} Dev`,
-			dataFolderName: `${product.dataFolderName}-dev`
+			dataFolderName: `${product.dataFolderName}-dev`,
 		});
 	}
 
 	Object.assign(product, {
-		version: pkg.version
+		version: pkg.version,
 	});
 }
 
