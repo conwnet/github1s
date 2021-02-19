@@ -148,7 +148,8 @@ export class WelcomePageContribution implements IWorkbenchContribution {
 				) {
 					const currentFileUri = URI.from({
 						scheme: 'github1s',
-						authority,
+						// We must not add authority because it would be different with
+						// VS Code internal ExplorerService's authority.
 						path: fileState.path,
 					});
 					fileService
