@@ -25,6 +25,7 @@ javascript: window.location.href = window.location.href.replace('github.com', 'g
 ## Documentation
 
 - [How it works](https://github.com/conwnet/github1s/blob/master/docs/guide.md)
+- [Roadmap](https://github.com/conwnet/github1s/projects/1)
 
 ## Screenshots
 
