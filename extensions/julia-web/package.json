@@ -1,0 +1,90 @@
+{
+    "name": "language-julia",
+    "displayName": "Julia",
+    "description": "Julia Language Support",
+    "version": "1.1.26",
+    "preview": false,
+    "publisher": "julialang",
+    "engines": {
+        "vscode": "^1.52.0"
+    },
+    "license": "SEE LICENSE IN LICENSE",
+    "bugs": {
+        "url": "https://github.com/julia-vscode/julia-vscode/issues"
+    },
+    "homepage": "https://www.julia-vscode.org/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/julia-vscode/julia-vscode.git"
+    },
+    "icon": "images/julia-logo.png",
+    "categories": [
+        "Programming Languages",
+        "Snippets",
+        "Linters",
+        "Debuggers"
+    ],
+    "activationEvents": [
+        "onLanguage:julia",
+        "onLanguage:juliamarkdown"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "julia",
+                "aliases": [
+                    "Julia",
+                    "julia"
+                ],
+                "extensions": [
+                    ".jl"
+                ],
+                "firstLine": "^#!\\s*/.*\\bjulia[0-9.-]*\\b",
+                "configuration": "./julia.language-configuration.json"
+            },
+            {
+                "id": "juliamarkdown",
+                "aliases": [
+                    "Julia Markdown",
+                    "juliamarkdown"
+                ],
+                "extensions": [
+                    ".jmd"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "julia",
+                "scopeName": "source.julia",
+                "path": "./syntaxes/julia.json",
+                "embeddedLanguages": {
+                    "meta.embedded.inline.cpp": "cpp",
+                    "meta.embedded.inline.javascript": "javascript",
+                    "meta.embedded.inline.markdown": "juliamarkdown",
+                    "meta.embedded.inline.python": "python",
+                    "meta.embedded.inline.r": "r"
+                }
+            },
+            {
+                "language": "juliamarkdown",
+                "scopeName": "text.html.markdown.julia",
+                "path": "./syntaxes/juliamarkdown.json"
+            },
+            {
+                "scopeName": "markdown.julia.codeblock",
+                "path": "./syntaxes/juliacodeblock.json",
+                "injectTo": [
+                    "text.html.markdown"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.julia": "julia"
+                }
+            }
+        ]
+    },
+    "scripts": {
+      "compile": "echo done",
+      "watch": "echo done"
+    }
+}
