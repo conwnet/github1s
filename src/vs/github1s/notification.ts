@@ -6,7 +6,7 @@
 import 'vs/css!./notification';
 
 const NOTIFICATION_STORAGE_KEY = 'GITHUB1S_NOTIFICATION';
-// change it if a new notification should be shown
+// Change this if a new notification should be shown
 const NOTIFICATION_STORAGE_VALUE = '20210212';
 
 const notification = {
@@ -25,7 +25,7 @@ const notificationHtml = `
 	</div>
 </div>
 <div class="notification-footer">
-	<button class="notification-confirm-button">I know</button>
+	<button class="notification-confirm-button">OK</button>
 	<div class="notification-show-me-again">
 		<input type="checkbox" checked>Don't show me again</div>
 	</div>
@@ -33,7 +33,7 @@ const notificationHtml = `
 `;
 
 export const renderNotification = () => {
-	// if user has confirm the notification and check `don't show me again`, ignore it
+	// If user has confirmed the notification and checked `don't show me again`, ignore it
 	if (
 		!window.localStorage ||
 		window.localStorage.getItem(NOTIFICATION_STORAGE_KEY) ===
