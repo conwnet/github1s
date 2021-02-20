@@ -29,6 +29,7 @@ import {
 	noop,
 	trimStart,
 	parseGitmodules,
+	parseSubmoduleUrl,
 	reuseable,
 	getCurrentAuthority,
 } from './util';
@@ -373,19 +374,9 @@ export class GitHub1sFS
 					`can't found corresponding declare in .gitmodules`
 				);
 			}
-			const githubUri = Uri.parse(gitmoduleData.url);
-			if (!githubUri.authority.endsWith('github.com')) {
-				throw FileSystemError.Unavailable(
-					'only github submodules are supported now'
-				);
-			}
-			const [submoduleOwner, submoduleRepoPart] = githubUri.path
-				.split('/')
-				.filter(Boolean);
-			// if there are a repo which the name endsWith '.git' (likes conwnet/demo.git), this ambiguity may cause a problem
-			const submoduleRepo = submoduleRepoPart.endsWith('.git')
-				? submoduleRepoPart.slice(0, -4)
-				: submoduleRepoPart;
+			const [submoduleOwner, submoduleRepo] = parseSubmoduleUrl(
+				gitmoduleData.url
+			);
 			const submoduleAuthority = `${submoduleOwner}+${submoduleRepo}+${
 				directory.sha || 'HEAD'
 			}`;
