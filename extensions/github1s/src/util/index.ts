@@ -19,6 +19,7 @@ export {
 	getRepositoryTags,
 	changeCurrentRef,
 } from './git-ref';
+export { parseGitmodules, parseSubmoduleUrl } from './submodule';
 
 export const noop = () => {};
 
