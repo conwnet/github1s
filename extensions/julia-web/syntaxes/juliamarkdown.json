@@ -1,0 +1,15 @@
+{
+    "name": "julia Markdown",
+    "scopeName": "text.html.markdown.julia",
+    "fileTypes": [
+        "jmd"
+    ],
+    "patterns": [
+        {
+            "include": "markdown.julia.codeblock"
+        },
+        {
+            "include": "text.html.markdown"
+        }
+    ]
+}
