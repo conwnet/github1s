@@ -104,7 +104,7 @@ $ yarn build
 ### Microsoft Edge Extensions
 
 - [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide)
+- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Edge Add-ons Store](https://microsoftedge.microsoft.com/addons/detail/akjbkjciknacicbnkfjbnlaeednpadcf)
 
 ### Tampermonkey scripts
 
