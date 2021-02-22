@@ -6,8 +6,8 @@
 import * as vscode from 'vscode';
 import {
 	getExtensionContext,
-	getRepositoryBranches,
-	getRepositoryTags,
+	getRepositoryBranchRefs,
+	getRepositoryTagRefs,
 	getCurrentRef,
 	getCurrentAuthority,
 	changeCurrentRef,
@@ -115,7 +115,7 @@ export const commandGetCurrentAuthority = (): Promise<string> =>
 	getCurrentAuthority();
 
 export const commandSwitchBranch = () => {
-	return Promise.all([getRepositoryBranches(), getCurrentRef()]).then(
+	return Promise.all([getRepositoryBranchRefs(), getCurrentRef()]).then(
 		([repositoryBranches, currentRef]) =>
 			vscode.window
 				.showQuickPick(
@@ -136,7 +136,7 @@ export const commandSwitchBranch = () => {
 };
 
 export const commandSwitchTag = () => {
-	return Promise.all([getRepositoryTags(), getCurrentRef()]).then(
+	return Promise.all([getRepositoryTagRefs(), getCurrentRef()]).then(
 		([repositoryBranches, currentRef]) =>
 			vscode.window
 				.showQuickPick(

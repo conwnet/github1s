@@ -5,33 +5,25 @@
 
 import * as vscode from 'vscode';
 import { reuseable } from './func';
-import { getGithubBranches, getGithubTags } from '../api';
+import { getGithubBranchRefs, getGithubTagRefs } from '../api';
 
-export interface RepositoryBranch {
+export interface RepositoryRef {
 	name: string;
-	commit: {
-		sha: string;
-		url: string;
-	};
-	protected?: boolean;
-}
-
-export interface RepositoryTag {
-	name: string;
-	commit: {
-		sha: string;
-		url: string;
-	};
-	zipball_url: string;
-	tarball_url: string;
+	ref: string;
 	node_id: string;
+	url: string;
+	object: {
+		sha: string;
+		type: string;
+		url: string;
+	};
 }
 
 let currentOwner = '';
 let currentRepo = '';
 let currentRef = '';
-let repositoryBranches: RepositoryBranch[] = null;
-let repositoryTags: RepositoryTag[] = null;
+let repositoryBranchRefs: RepositoryRef[] = null;
+let repositoryTagRefs: RepositoryRef[] = null;
 
 // get current browser uri, update `currentOwner` and `currentRepo`
 const getBrowserUri = (): Promise<vscode.Uri> => {
@@ -48,54 +40,48 @@ const getBrowserUri = (): Promise<vscode.Uri> => {
 	});
 };
 
-const getRepositoryBranchesFromUri = reuseable(
-	(
-		uri: vscode.Uri,
-		forceUpdate: boolean = false
-	): Promise<RepositoryBranch[]> => {
+const getRepositoryBranchRefsFromUri = reuseable(
+	(uri: vscode.Uri, forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 		// use the cached branches if already fetched and not forceUpdate
-		if (repositoryBranches && repositoryBranches.length && !forceUpdate) {
-			return Promise.resolve(repositoryBranches);
+		if (repositoryBranchRefs && repositoryBranchRefs.length && !forceUpdate) {
+			return Promise.resolve(repositoryBranchRefs);
 		}
 		const [owner = 'conwnet', repo = 'github1s'] = uri.path
 			.split('/')
 			.filter(Boolean);
-		return getGithubBranches(owner, repo).then(
-			(githubBranches) => (repositoryBranches = githubBranches)
+		return getGithubBranchRefs(owner, repo).then(
+			(branchRefs: RepositoryRef[]) => (repositoryBranchRefs = branchRefs)
 		);
 	}
 );
 
-export const getRepositoryBranches = reuseable(
-	(forceUpdate: boolean = false): Promise<RepositoryBranch[]> => {
+export const getRepositoryBranchRefs = reuseable(
+	(forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 		return getBrowserUri().then((uri) =>
-			getRepositoryBranchesFromUri(uri, forceUpdate)
+			getRepositoryBranchRefsFromUri(uri, forceUpdate)
 		);
 	}
 );
 
-const getRepositoryTagsFromUri = reuseable(
-	(
-		uri: vscode.Uri,
-		forceUpdate: boolean = false
-	): Promise<RepositoryBranch[]> => {
+const getRepositoryTagRefsFromUri = reuseable(
+	(uri: vscode.Uri, forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 		// use the cached tags if already fetched and not forceUpdate
-		if (repositoryTags && repositoryTags.length && !forceUpdate) {
-			return Promise.resolve(repositoryTags);
+		if (repositoryTagRefs && repositoryTagRefs.length && !forceUpdate) {
+			return Promise.resolve(repositoryTagRefs);
 		}
 		const [owner = 'conwnet', repo = 'github1s'] = uri.path
 			.split('/')
 			.filter(Boolean);
-		return getGithubTags(owner, repo).then(
-			(githubTags) => (repositoryTags = githubTags)
+		return getGithubTagRefs(owner, repo).then(
+			(tagRefs: RepositoryRef[]) => (repositoryTagRefs = tagRefs)
 		);
 	}
 );
 
-export const getRepositoryTags = reuseable(
-	(forceUpdate: boolean = false): Promise<RepositoryBranch[]> => {
+export const getRepositoryTagRefs = reuseable(
+	(forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 		return getBrowserUri().then((uri) =>
-			getRepositoryTagsFromUri(uri, forceUpdate)
+			getRepositoryTagRefsFromUri(uri, forceUpdate)
 		);
 	}
 );
@@ -136,12 +122,14 @@ const getCurrentRefFromUri = reuseable(
 			return Promise.resolve('HEAD');
 		}
 
-		const branchNamesPromise: Promise<string[]> = getRepositoryBranchesFromUri(
+		const branchNamesPromise: Promise<
+			string[]
+		> = getRepositoryBranchRefsFromUri(uri).then((branchRefs) =>
+			branchRefs.map((item) => item.name)
+		);
+		const tagNamesPromise: Promise<string[]> = getRepositoryTagRefsFromUri(
 			uri
-		).then((branches) => branches.map((item) => item.name));
-		const tagNamesPromise: Promise<string[]> = getRepositoryTagsFromUri(
-			uri
-		).then((tags) => tags.map((item) => item.name));
+		).then((tagRefs) => tagRefs.map((item) => item.name));
 
 		return branchNamesPromise.then((branchNames: string[]) => {
 			// try to find current ref from repo branches, we needn't wait to tags request ready if can find it here
