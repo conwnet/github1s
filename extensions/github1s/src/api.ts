@@ -101,34 +101,30 @@ export const validateToken = (token: string) => {
 		});
 };
 
-export const getGithubBranches = (owner: string, repo: string) => {
+// the [List Branches](https://docs.github.com/en/rest/reference/repos#list-branches) API
+// only returned max to 100 branches for per request
+// [List matching references](https://docs.github.com/en/rest/reference/git#list-matching-references)
+// can returned all branches for a request, and there is an issue for this API
+// https://github.com/github/docs/issues/3863
+export const getGithubBranchRefs = (owner: string, repo: string) => {
 	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100`
+		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/heads`
 	)
-		.then((branches) => {
-			// TODO: only no more than 200 branches are supported
-			if (branches.length === 100) {
-				return fetch(
-					`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100&page=2`
-				).then((otherBranches) => [...branches, ...otherBranches]);
-			}
-			return branches;
+		.then((branchRefs) => {
+			// the field in branchRef will looks like `refs/heads/<branch>`, we add a name field here
+			return branchRefs.map((item) => ({ ...item, name: item.ref.slice(11) }));
 		})
 		.catch(handleRequestError);
 };
 
-export const getGithubTags = (owner: string, repo: string) => {
+// It's similar to `getGithubBranchRefs`
+export const getGithubTagRefs = (owner: string, repo: string) => {
 	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/tags?per_page=100`
+		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/tags`
 	)
-		.then((tags) => {
-			// TODO: only no more than 200 tags are supported
-			if (tags.length === 100) {
-				return fetch(
-					`https://api.github.com/repos/${owner}/${repo}/tags?per_page=100&page=2`
-				).then((otherTags) => [...tags, ...otherTags]);
-			}
-			return tags;
+		.then((tagRefs) => {
+			// the field in tagRef will looks like `refs/tags/<tag>`, we add a name field here
+			return tagRefs.map((item) => ({ ...item, name: item.ref.slice(10) }));
 		})
 		.catch(handleRequestError);
 };

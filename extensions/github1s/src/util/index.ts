@@ -15,8 +15,8 @@ export {
 export {
 	getCurrentRef,
 	getCurrentAuthority,
-	getRepositoryBranches,
-	getRepositoryTags,
+	getRepositoryBranchRefs,
+	getRepositoryTagRefs,
 	changeCurrentRef,
 } from './git-ref';
 export { parseGitmodules, parseSubmoduleUrl } from './submodule';
