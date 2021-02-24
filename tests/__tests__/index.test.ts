@@ -49,6 +49,6 @@ it('should load successfully', async () => {
 	expect(tab).toBe('[Preview] README.md');
 	// Title updated based on the repo
 	expect(await page.title()).toBe(
-		'[Preview] README.md — conwnet/github1s — GitHub1s'
+		'[Preview] README.md - conwnet/github1s - GitHub1s'
 	);
 });
