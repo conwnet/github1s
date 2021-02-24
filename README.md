@@ -16,10 +16,10 @@ For example, try it on the VS Code repo:
 
 For browser extensions, see [Third-party Related Projects](https://github.com/conwnet/github1s#third-party-related-projects).
 
-Or save the following code snippet as a bookmarklet (GitHub markdown doesn't allow js links, so just copy it into a bookmark).
+Or save the following code snippet as a bookmarklet, you can use it to quickly switch between github.com and github1s.com (GitHub markdown doesn't allow js links, so just copy it into a bookmark).
 
 ```
-javascript: window.location.href = window.location.href.replace('github.com', 'github1s.com')
+javascript: window.location.href = window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' })
 ```
 
 ## Documentation
