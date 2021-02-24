@@ -40,7 +40,7 @@
     "watch:dist": "cd scripts/watch && node watch-dist.js",
     "serve": "node ./scripts/serve-dist.js",
     "format": "prettier --write .",
-    "eslint": "eslint --ext .ts --ext .js ./src/vs ./extensions"
+    "eslint": "eslint --ext .ts --ext .js ."
   },
   "lint-staged": {
     "*.{js,ts}": [
