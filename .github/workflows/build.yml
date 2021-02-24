@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Build & Test
 
 on:
   push:
@@ -25,5 +25,4 @@ jobs:
       - run: yarn --frozen-lockfile
       - run: yarn eslint
       - run: yarn build
-      - run: yarn serve
       - run: yarn test:ci
