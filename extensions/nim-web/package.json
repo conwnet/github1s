@@ -1,0 +1,273 @@
+{
+  "name": "nimvscode",
+  "displayName": "Nim",
+  "description": "Nim language support for Visual Studio Code written in Nim",
+  "version": "0.1.17",
+  "publisher": "nimsaem",
+  "author": {
+    "name": "Saem"
+  },
+  "license": "MIT",
+  "icon": "images/nim_icon.png",
+  "homepage": "https://github.com/saem/vscode-nim/blob/main/README.md",
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "galleryBanner": {
+    "color": "#2C2A35",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saem/vscode-nim.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saem/vscode-nim/issues"
+  },
+  "scripts": {
+    "vscode:prepublish": "nimble release",
+    "compile": "echo done",
+    "watch": "echo done"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.17.17",
+    "@types/vscode": "^1.27.0",
+    "ovsx": "0.1.0-next.e000fdb",
+    "typescript": "^2.6.1",
+    "vsce": "^1.79.5",
+    "vscode-test": "^1.4.0"
+  },
+  "engines": {
+    "vscode": "^1.27.0"
+  },
+  "activationEvents": [
+    "onLanguage:nim",
+    "onLanguage:nimcfg",
+    "onLanguage:nimble",
+    "onCommand:nim.build",
+    "onCommand:nim.run",
+    "onCommand:nim.runTest",
+    "onCommand:nim.execSelectionInTerminal"
+  ],
+  "main": "./out/nimvscode.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "nim",
+        "aliases": [
+          "Nim",
+          "nim"
+        ],
+        "extensions": [
+          ".nim",
+          ".nims",
+          "nim.cfg",
+          ".nim.cfg"
+        ],
+        "configuration": "./nimcfg.json"
+      },
+      {
+        "id": "nimble",
+        "aliases": [
+          "Nimble",
+          "nimble"
+        ],
+        "extensions": [
+          ".nimble"
+        ],
+        "configuration": "./nimcfg.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nim",
+        "scopeName": "source.nim",
+        "path": "./syntaxes/nim.json"
+      },
+      {
+        "language": "nimble",
+        "scopeName": "source.nimble",
+        "path": "./syntaxes/nimble.json"
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "nim",
+        "owner": "nim",
+        "fileLocation": "absolute",
+        "severity": "error",
+        "pattern": {
+          "regexp": "(?!^(\\.+|Hint|\\s+$))(.*)\\((\\d+),\\s(\\d+)\\)\\s+((Error|Warning|Hint):\\s(.*)|(template/generic instantiation from here.*))(\\s\\[.*\\])?",
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "severity": 6,
+          "message": 7
+        }
+      },
+      {
+        "name": "nim test",
+        "owner": "nim",
+        "fileLocation": "absolute",
+        "pattern": [
+          {
+            "regexp": "  \\[(OK|FAILED|SKIPPED)\\] (.*)",
+            "severity": 1,
+            "code": 2
+          },
+          {
+            "regexp": "    (.*)\\((\\d+), (\\d+)\\): (.*)",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "message": 4,
+            "loop": true
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "nim.run.file",
+        "title": "Run selected Nim file",
+        "category": "Nim"
+      },
+      {
+        "command": "nim.check",
+        "title": "Check Nim project",
+        "category": "Nim"
+      },
+      {
+        "command": "nim.execSelectionInTerminal",
+        "title": "Run Selection/Line in Nim Terminal",
+        "category": "Nim"
+      },
+      {
+        "command": "nim.clearCaches",
+        "title": "Clear internal caches",
+        "category": "Nim"
+      },
+      {
+        "command": "nim.listCandidateProjects",
+        "title": "List candidate nim projects",
+        "category": "Nim"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == 'nim'",
+          "command": "nim.run.file",
+          "group": "run@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "key": "F6",
+        "command": "nim.run.file",
+        "when": "editorLangId == 'nim'"
+      },
+      {
+        "key": "ctrl+alt+b",
+        "command": "nim.check",
+        "when": "editorLangId == 'nim'"
+      },
+      {
+        "key": "shift+enter",
+        "command": "nim.execSelectionInTerminal",
+        "when": "editorFocus && editorLangId == nim && !findInputFocussed && !replaceInputFocussed"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Nim configuration",
+      "properties": {
+        "nim.project": {
+          "type": "array",
+          "default": [],
+          "description": "Nim project file, if empty use current selected."
+        },
+        "nim.projectMapping": {
+          "type": "object",
+          "default": {},
+          "description": "For non project mode list of per file project mapping using regex, for example ```{\"(.*).inim\": \"$1.nim\"}```"
+        },
+        "nim.test-project": {
+          "type": "string",
+          "default": "",
+          "description": "Optional test project."
+        },
+        "nim.buildOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Execute build task from tasks.json file on save."
+        },
+        "nim.buildCommand": {
+          "type": "string",
+          "default": "c",
+          "description": "Nim build command (c, cpp, doc, etc)"
+        },
+        "nim.runOutputDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Output directory for run selected file command. The directory is relative to the workspace root."
+        },
+        "nim.lintOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Check code by using 'nim check' on save."
+        },
+        "nim.enableNimsuggest": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable calling nimsuggest process to provide completion suggestions, hover suggestions, etc.\nThis option requires restart to take effect."
+        },
+        "nim.useNimsuggestCheck": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use nimsuggest in order to run check, instead of the nim compiler."
+        },
+        "nim.logNimsuggest": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable verbose logging of nimsuggest to use profile directory."
+        },
+        "nim.licenseString": {
+          "type": "string",
+          "default": "",
+          "description": "Optional license text that will be inserted on nim file creation."
+        },
+        "nim.nimsuggestRestartTimeout": {
+          "type": "integer",
+          "default": 60,
+          "description": "Nimsuggest will be restarted after this timeout in minutes, if 0 then restart disabled.\nThis option requires restart to take effect."
+        },
+        "nim.nimprettyIndent": {
+          "type": "integer",
+          "default": 0,
+          "description": "Nimpretty: set the number of spaces that is used for indentation\n--indent:0 means autodetection (default behaviour)."
+        },
+        "nim.nimprettyMaxLineLen": {
+          "type": "integer",
+          "default": 80,
+          "description": "Nimpretty: set the desired maximum line length (default: 80)."
+        }
+      }
+    },
+    "breakpoints": [
+      {
+        "language": "nim"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "nim",
+        "path": "./snippets/nim.json"
+      }
+    ]
+  }
+}
