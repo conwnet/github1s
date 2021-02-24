@@ -8,6 +8,7 @@
 		"allowUnreachableCode": false,
 		"strict": true,
 		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true,
 		"baseUrl": ".",
 		"target": "es2017",
 		"paths": {
