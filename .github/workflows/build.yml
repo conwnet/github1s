@@ -25,4 +25,5 @@ jobs:
       - run: yarn --frozen-lockfile
       - run: yarn eslint
       - run: yarn build
+      - uses: microsoft/playwright-github-action@v1
       - run: yarn test:ci
