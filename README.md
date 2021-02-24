@@ -81,6 +81,12 @@ $ yarn
 $ yarn build
 ```
 
+## Feedback
+
+- If something is not working, [create an issue](https://github.com/conwnet/github1s/issues/new)
+
+- If you have a question, [discuss on gitter](https://gitter.im/conwnet/github1s)
+
 ## Third-party Related Projects
 
 ### Chrome Extensions
