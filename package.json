@@ -40,7 +40,7 @@
     "watch:dist": "cd scripts/watch && node watch-dist.js",
     "serve": "node ./scripts/serve-dist.js",
     "format": "prettier --write .",
-    "eslint": "eslint --ext .ts --ext .js ./extensions",
+    "eslint": "eslint --ext .ts --ext .js .",
     "test:ci": "start-test serve 5000 test",
     "test": "cd tests && yarn && yarn jest"
   },

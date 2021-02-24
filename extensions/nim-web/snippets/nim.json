@@ -1,0 +1,76 @@
+{
+  ".source.nim": {
+    "procedure": {
+      "prefix": "proc",
+      "body": "proc ${1:name}(${2:arguments}): ${3:return type} =\n\t$0"
+    },
+    "function": {
+      "prefix": "func",
+      "body": "func ${1:name}(${2:arguments}): ${3:return type} =\n\t$0"
+    },
+    "method": {
+      "prefix": "method",
+      "body": "method ${1:name}(${2:arguments}): ${3:return type} =\n\t$0"
+    },
+    "iterator": {
+      "prefix": "iterator",
+      "body": "iterator ${1:name}(${2:arguments}): ${3:return type}$0"
+    },
+    "array": {
+      "prefix": "array",
+      "body": "array[${1:length}, ${2:type}]$0"
+    },
+    "sequence": {
+      "prefix": "seq",
+      "body": "seq[${1:type}]$0"
+    },
+    "if": {
+      "prefix": "if",
+      "body": "if ${1:expression}:\n\t$0"
+    },
+    "for": {
+      "prefix": "for",
+      "body": "for ${1:index} in ${2:sequence}:\n\t$0"
+    },
+    "while": {
+      "prefix": "while",
+      "body": "while ${1:expression}:\n\t$0"
+    },
+    "block": {
+      "prefix": "block",
+      "body": "block ${1:name}:\n\t$0"
+    },
+    "case": {
+      "prefix": "case",
+      "body": "case ${1:value}\n$0"
+    },
+    "of": {
+      "prefix": "of",
+      "body": "of ${1:value}:\n\t$0"
+    },
+    "import from": {
+      "prefix": "from",
+      "body": "from ${1:module} import ${2:field}"
+    },
+    "import": {
+      "prefix": "import",
+      "body": "import ${1:module}"
+    },
+    "try-except": {
+      "prefix": "try",
+      "body": "try:\n\t$0\nexcept ${1:exception}:\n\t"
+    },
+    "template": {
+      "prefix": "template",
+      "body": "template ${1:name}(${2:arguments}): ${3:return type} =\n\t$0"
+    },
+    "macro": {
+      "prefix": "macro",
+      "body": "macro ${1:name}(${2:arguments}): ${3:return type} =\n\t$0"
+    },
+    "pragma": {
+      "prefix": "pr",
+      "body": "{.${1:name}.}"
+    }
+  }
+}
