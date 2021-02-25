@@ -7,7 +7,7 @@ APP_ROOT=$(pwd)
 function main() {
 	for entry in "${APP_ROOT}/extensions"/*
 	do
-		if [ -d "$entry" ]
+		if [ -f "$entry/package.json" ]
 		then
 			cd $entry
 			yarn compile
