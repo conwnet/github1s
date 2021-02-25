@@ -42,6 +42,13 @@ if (
 				'ms-vscode.vscode-js-profile-table',
 				'ms-vscode.github-browser',
 			],
+			extensionsGallery: {
+				serviceUrl: 'https://marketplace.visualstudio.com/_apis/public/gallery',
+				cacheUrl: 'https://vscode.blob.core.windows.net/gallery/index',
+				itemUrl: 'https://marketplace.visualstudio.com/items',
+				controlUrl: 'https://az764295.vo.msecnd.net/extensions/marketplace.json',
+				recommendationsUrl: 'https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz',
+			}
 		});
 	}
 }
