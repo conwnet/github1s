@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 // import { getBranches } from './github-api-gql';
-import { hasValidToken } from './util';
+import { hasValidToken, encodeFilePath } from './util';
 import {
 	fetch,
 	RequestError,
@@ -67,10 +67,9 @@ export const readGitHubDirectory = (
 	path: string
 ) => {
 	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${path.replace(
-			/^\//,
-			':'
-		)}`
+		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(
+			path
+		).replace(/^\//, ':')}`
 	).catch(handleRequestError);
 };
 
@@ -136,10 +135,9 @@ export const getGithubAllFiles = (
 	path: string = '/'
 ) => {
 	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${path.replace(
-			/^\//,
-			':'
-		)}?recursive=1`
+		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(
+			path
+		).replace(/^\//, ':')}?recursive=1`
 	).catch(handleRequestError);
 };
 
