@@ -82,3 +82,10 @@ export const getWebviewOptions = (
 		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')],
 	};
 };
+
+export const encodeFilePath = (filePath: string): string => {
+	return filePath
+		.split('/')
+		.map((segment) => encodeURIComponent(segment))
+		.join('/');
+};
