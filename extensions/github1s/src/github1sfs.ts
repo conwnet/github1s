@@ -227,7 +227,7 @@ export class GitHub1sFS
 		this.disposable = Disposable.from(
 			workspace.registerFileSystemProvider(GitHub1sFS.scheme, this, {
 				isCaseSensitive: true,
-				isReadonly: true,
+				isReadonly: false,
 			}),
 			workspace.registerFileSearchProvider(GitHub1sFS.scheme, this),
 			window.registerFileDecorationProvider(this)
