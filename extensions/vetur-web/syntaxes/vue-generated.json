@@ -1,9 +1,7 @@
 {
   "name": "Vue",
   "scopeName": "source.vue",
-  "fileTypes": [
-    "vue"
-  ],
+  "fileTypes": ["vue"],
   "uuid": "5512c10d-4cc5-434c-b8fc-53b912f55ab3",
   "patterns": [
     {

@@ -59,7 +59,7 @@
     ]
   },
   "scripts": {
-		"compile": "echo done",
-		"watch": "echo done"
-	}
+    "compile": "echo done",
+    "watch": "echo done"
+  }
 }
