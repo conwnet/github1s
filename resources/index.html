@@ -22,92 +22,96 @@
 		<title>GitHub1s</title>
 		<style>
 			#load-spinner {
-				width: 100vw;
-				text-align: center;
-				padding-top: 100px;
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				background-color: #1e1e1e;
 			}
-			.lds-roller {
+
+			.lds-grid {
 				display: inline-block;
 				position: relative;
 				width: 80px;
 				height: 80px;
 			}
-			.lds-roller div {
-				animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-				transform-origin: 40px 40px;
-			}
-			.lds-roller div:after {
-				content: ' ';
-				display: block;
+
+			.lds-grid div {
 				position: absolute;
-				width: 7px;
-				height: 7px;
+				width: 16px;
+				height: 16px;
 				border-radius: 50%;
-				background: #000;
-				margin: -4px 0 0 -4px;
+				background: #fff;
+				animation: lds-grid 1.2s linear infinite;
 			}
-			.lds-roller div:nth-child(1) {
-				animation-delay: -0.036s;
+
+			.lds-grid div:nth-child(1) {
+				top: 8px;
+				left: 8px;
+				animation-delay: 0s;
 			}
-			.lds-roller div:nth-child(1):after {
-				top: 63px;
-				left: 63px;
-			}
-			.lds-roller div:nth-child(2) {
-				animation-delay: -0.072s;
-			}
-			.lds-roller div:nth-child(2):after {
-				top: 68px;
-				left: 56px;
-			}
-			.lds-roller div:nth-child(3) {
-				animation-delay: -0.108s;
-			}
-			.lds-roller div:nth-child(3):after {
-				top: 71px;
-				left: 48px;
-			}
-			.lds-roller div:nth-child(4) {
-				animation-delay: -0.144s;
-			}
-			.lds-roller div:nth-child(4):after {
-				top: 72px;
-				left: 40px;
-			}
-			.lds-roller div:nth-child(5) {
-				animation-delay: -0.18s;
-			}
-			.lds-roller div:nth-child(5):after {
-				top: 71px;
+
+			.lds-grid div:nth-child(2) {
+				top: 8px;
 				left: 32px;
+				animation-delay: -0.4s;
 			}
-			.lds-roller div:nth-child(6) {
-				animation-delay: -0.216s;
+
+			.lds-grid div:nth-child(3) {
+				top: 8px;
+				left: 56px;
+				animation-delay: -0.8s;
 			}
-			.lds-roller div:nth-child(6):after {
-				top: 68px;
-				left: 24px;
+
+			.lds-grid div:nth-child(4) {
+				top: 32px;
+				left: 8px;
+				animation-delay: -0.4s;
 			}
-			.lds-roller div:nth-child(7) {
-				animation-delay: -0.252s;
+
+			.lds-grid div:nth-child(5) {
+				top: 32px;
+				left: 32px;
+				animation-delay: -0.8s;
 			}
-			.lds-roller div:nth-child(7):after {
-				top: 63px;
-				left: 17px;
+
+			.lds-grid div:nth-child(6) {
+				top: 32px;
+				left: 56px;
+				animation-delay: -1.2s;
 			}
-			.lds-roller div:nth-child(8) {
-				animation-delay: -0.288s;
-			}
-			.lds-roller div:nth-child(8):after {
+
+			.lds-grid div:nth-child(7) {
 				top: 56px;
-				left: 12px;
+				left: 8px;
+				animation-delay: -0.8s;
 			}
-			@keyframes lds-roller {
-				0% {
-					transform: rotate(0deg);
-				}
+
+			.lds-grid div:nth-child(8) {
+				top: 56px;
+				left: 32px;
+				animation-delay: -1.2s;
+			}
+
+			.lds-grid div:nth-child(9) {
+				top: 56px;
+				left: 56px;
+				animation-delay: -1.6s;
+			}
+
+			@keyframes lds-grid {
+				0%,
 				100% {
-					transform: rotate(360deg);
+					opacity: 1;
+				}
+
+				50% {
+					opacity: 0.5;
 				}
 			}
 		</style>
@@ -118,7 +122,8 @@
 			<h1>You need to enable JavaScript to run this app.</h1>
 		</noscript>
 		<div id="load-spinner" aria-label="loading">
-			<div class="lds-roller">
+			<div class="lds-grid">
+				<div></div>
 				<div></div>
 				<div></div>
 				<div></div>

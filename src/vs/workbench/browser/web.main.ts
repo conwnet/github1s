@@ -386,5 +386,11 @@ class BrowserMain extends Disposable {
 export function main(domElement: HTMLElement, options: IWorkbenchConstructionOptions): Promise<IWorkbench> {
 	const workbench = new BrowserMain(domElement, options);
 
-	return workbench.open();
+	// below codes are changed by github1s
+	return workbench.open().then(workbench => {
+		// Remove the html load spinner
+		document.querySelector('#load-spinner')?.remove();
+		return workbench;
+	});
+	// above codes are changed by github1s
 }
