@@ -133,7 +133,7 @@
 
 	<script>
 		self.require = {
-			baseUrl: `${window.location.origin}/{STATIC_FOLDER}/vscode`,
+			baseUrl: `${window.location.origin}/static/{STATIC_HASH_CODE}/vscode`,
 			recordStats: true,
 			trustedTypesPolicy: window.trustedTypes?.createPolicy('amdLoader', {
 				createScriptURL(value) {
@@ -144,25 +144,25 @@
 				},
 			}),
 			paths: {
-				'vscode-textmate': `${window.location.origin}/{STATIC_FOLDER}/node_modules/vscode-textmate/release/main`,
-				'vscode-oniguruma': `${window.location.origin}/{STATIC_FOLDER}/node_modules/vscode-oniguruma/release/main`,
-				xterm: `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm/lib/xterm.js`,
-				'xterm-addon-search': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-search/lib/xterm-addon-search.js`,
-				'xterm-addon-unicode11': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-unicode11/lib/xterm-addon-unicode11.js`,
-				'xterm-addon-webgl': `${window.location.origin}/{STATIC_FOLDER}/node_modules/xterm-addon-webgl/lib/xterm-addon-webgl.js`,
-				'tas-client-umd': `${window.location.origin}/{STATIC_FOLDER}/node_modules/tas-client-umd/lib/tas-client-umd.js`,
-				'iconv-lite-umd': `${window.location.origin}/{STATIC_FOLDER}/node_modules/iconv-lite-umd/lib/iconv-lite-umd.js`,
-				jschardet: `${window.location.origin}/{STATIC_FOLDER}/node_modules/jschardet/dist/jschardet.min.js`,
+				'vscode-textmate': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/vscode-textmate/release/main`,
+				'vscode-oniguruma': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/vscode-oniguruma/release/main`,
+				xterm: `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/xterm/lib/xterm.js`,
+				'xterm-addon-search': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/xterm-addon-search/lib/xterm-addon-search.js`,
+				'xterm-addon-unicode11': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/xterm-addon-unicode11/lib/xterm-addon-unicode11.js`,
+				'xterm-addon-webgl': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/xterm-addon-webgl/lib/xterm-addon-webgl.js`,
+				'tas-client-umd': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/tas-client-umd/lib/tas-client-umd.js`,
+				'iconv-lite-umd': `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/iconv-lite-umd/lib/iconv-lite-umd.js`,
+				jschardet: `${window.location.origin}/static/{STATIC_HASH_CODE}/node_modules/jschardet/dist/jschardet.min.js`,
 			},
 		};
 	</script>
-	<script src="/{STATIC_FOLDER}/vscode/vs/loader.js"></script>
-	<script src="/{STATIC_FOLDER}/vscode/vs/workbench/workbench.web.api.js"></script>
+	<script src="/static/{STATIC_HASH_CODE}/vscode/vs/loader.js"></script>
+	<script src="/static/{STATIC_HASH_CODE}/vscode/vs/workbench/workbench.web.api.js"></script>
 	<script>
 		globalThis.MonacoPerformanceMarks.push('willLoadWorkbenchMain', Date.now());
 	</script>
 	<script>
-		fetch('/{STATIC_FOLDER}/configure/extensions.json')
+		fetch('/static/{STATIC_HASH_CODE}/configure/extensions.json')
 			.then((response) => response.text())
 			.then((extensionsJson) => {
 				document
@@ -176,9 +176,9 @@
 							enableSyncByDefault: false,
 							webviewEndpoint:
 								window.location.origin +
-								'/{STATIC_FOLDER}/vscode/vs/workbench/contrib/webview/browser/pre',
+								'/static/{STATIC_HASH_CODE}/vscode/vs/workbench/contrib/webview/browser/pre',
 							webWorkerExtensionHostIframeSrc:
-								'/{STATIC_FOLDER}/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
+								'/static/{STATIC_HASH_CODE}/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
 						})
 					);
 				document

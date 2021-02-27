@@ -1,7 +1,8 @@
 {
   "routes": [{
       "src": "/static/(.*)",
-      "dest": "/images/$1"
+      "dest": "/static/$1",
+      "headers": { "Cache-Control": "max-age=604800" }
     },
     {
       "src": "/favicon.ico",
