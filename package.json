@@ -29,7 +29,7 @@
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
     "build": "./scripts/build.sh",
-    "vercel-build": "yarn build && mv dist public",
+    "vercel-build": "yarn build && yarn hash && mv dist public",
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
