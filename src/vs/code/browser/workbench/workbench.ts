@@ -654,9 +654,6 @@ class WindowIndicator implements IWindowIndicator {
 		  }
 		: undefined;
 
-	// Remove the html load spinner
-	document.querySelector('#load-spinner')?.remove();
-
 	// Finally create workbench
 	create(document.body, {
 		...config,
