@@ -6,7 +6,7 @@ tasks:
   - command: yarn serve
 ports:
   - port: 5000
-    onOpen: open-preview
+    onOpen: open-browser
 github:
   prebuilds:
     # enable for the master/default branch (defaults to true)
