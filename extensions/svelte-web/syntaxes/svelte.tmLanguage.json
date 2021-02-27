@@ -1,9 +1,7 @@
 {
   "name": "Svelte Component",
   "scopeName": "source.svelte",
-  "fileTypes": [
-    "svelte"
-  ],
+  "fileTypes": ["svelte"],
   "uuid": "7582b62f-51d9-4a84-8c8d-fc189530faf6",
   "injections": {
     "L:meta.script.svelte meta.lang.javascript - (meta source)": {
