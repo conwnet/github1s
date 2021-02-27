@@ -1,7 +1,7 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: yarn global add js-yaml && yarn && yarn build
+  - init: yarn && yarn build
     command: yarn watch
   - command: yarn serve
 ports:
