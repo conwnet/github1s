@@ -1,33 +1,22 @@
-[![](https://vsmarketplacebadge.apphb.com/version-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
-[![](https://vsmarketplacebadge.apphb.com/installs-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
-[![](https://vsmarketplacebadge.apphb.com/rating-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
-
 # This extension is a fork from [vscode-kotlin](https://github.com/mathiasfrohlich/vscode-kotlin) for github1s
 
 # At present only languages features is reserved
 
 # I have deleted some files and only reserved the necessary code
 
+[![](https://vsmarketplacebadge.apphb.com/version-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
+[![](https://vsmarketplacebadge.apphb.com/installs-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
+[![](https://vsmarketplacebadge.apphb.com/rating-short/mathiasfrohlich.Kotlin.svg)](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin)
+
 # Kotlin Language
 
 Syntax support for the Kotlin programming language.
-This extension adds basic features to help make writing Kotlin much more pleasant in VSCode
+This extension adds basic features to help make reading Kotlin much more pleasant in VSCode
 
 ## Features
 
 - Syntax highlighting
 - Code snippets
-- Region code folding
-
-## Installation
-
-You can install the plugin by searching for [Kotlin Language extension](https://marketplace.visualstudio.com/items?itemName=mathiasfrohlich.Kotlin) in the extensions market place, or by entering
-
-```
-ext install kotlin language
-```
-
-in to the command palette.
 
 ## Contributing
 

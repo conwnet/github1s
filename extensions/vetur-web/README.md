@@ -1,3 +1,9 @@
+# This extension is a fork from [Vetur](https://github.com/vuejs/vetur) for github1s.
+
+# At present only languages features is reserved
+
+# I have deleted some files and only reserved the necessary code
+
 <p>
   <h1 align="center">Vetur</h1>
 </p>
@@ -17,11 +23,6 @@
   </a>
   <br>
 </p>
-
-# This extension is a fork from [Vetur](https://github.com/vuejs/vetur) for github1s.
-
-# At present only languages features is reserved
-
 Vue tooling for VS Code.
 
 - [vls](./server): Vue Language Server
@@ -58,39 +59,10 @@ Thanks to the following companies for supporting Vetur's development:
 
 - [Syntax-highlighting](https://vuejs.github.io/vetur/guide/highlighting.html)
 - [Snippet](https://vuejs.github.io/vetur/guide/snippet.html)
-- [Emmet](https://vuejs.github.io/vetur/guide/emmet.html)
-- [Linting / Error Checking](https://vuejs.github.io/vetur/guide/linting-error.html)
-- [Formatting](https://vuejs.github.io/vetur/guide/formatting.html)
-- [IntelliSense](https://vuejs.github.io/vetur/guide/intellisense.html)
-- [Debugging](https://vuejs.github.io/vetur/guide/debugging.html)
-- [Component Data](https://vuejs.github.io/vetur/guide/framework.html): auto-completion and hover-information for popular Vue frameworks and your own custom components
-- [Experimental Interpolation Features](https://vuejs.github.io/vetur/guide/interpolation.html): auto-completion, hover information and type-checking in Vue template
-- [VTI](https://vuejs.github.io/vetur/guide/vti.html): Surface template type-checking errors on CLI
-- [Global components](https://vuejs.github.io/vetur/guide/global-components.html): support define global components.
-
-## Quick Start
-
-- Install [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur).
-- Try it with [Veturpack](https://github.com/octref/veturpack).
-- Refer to [setup](https://vuejs.github.io/vetur/guide/setup.html) page for setting up.
-- Refer to each feature's own page for setting up specific features.
 
 ## FAQ
 
 [FAQ](https://vuejs.github.io/vetur/guide/FAQ.html)
-
-## Limitations
-
-- You can restart Vue language service when Vetur slow ([#2192](https://github.com/vuejs/vetur/issues/2192))
-- yarn pnp (https://vuejs.github.io/vetur/guide/setup.html#yarn-pnp)
-
-## Roadmap
-
-See [#873](https://github.com/vuejs/vetur/issues/873).
-
-## Contribution
-
-See [CONTRIBUTING.md](https://github.com/vuejs/vetur/blob/master/.github/CONTRIBUTING.md)
 
 ## License
 
