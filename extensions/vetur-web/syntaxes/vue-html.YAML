@@ -13,10 +13,7 @@ patterns:
     end: (>)(<)(/)(\2)(>)
     endCaptures:
       '1': { name: punctuation.definition.tag.end.html }
-      '2':
-        {
-          name: punctuation.definition.tag.begin.html meta.scope.between-tag-pair.html,
-        }
+      '2': { name: punctuation.definition.tag.begin.html meta.scope.between-tag-pair.html }
       '3': { name: punctuation.definition.tag.begin.html }
       '4': { name: support.class.component.html }
       '5': { name: punctuation.definition.tag.end.html }
@@ -30,10 +27,7 @@ patterns:
     end: (>)(<)(/)(\2)(>)
     endCaptures:
       '1': { name: punctuation.definition.tag.end.html }
-      '2':
-        {
-          name: punctuation.definition.tag.begin.html meta.scope.between-tag-pair.html,
-        }
+      '2': { name: punctuation.definition.tag.begin.html meta.scope.between-tag-pair.html }
       '3': { name: punctuation.definition.tag.begin.html }
       '4': { name: entity.name.tag.html }
       '5': { name: punctuation.definition.tag.end.html }
