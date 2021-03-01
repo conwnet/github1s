@@ -23,6 +23,14 @@ import {
 	FileDecoration,
 	ThemeColor,
 	FileDecorationProvider,
+	TextSearchProvider,
+	TextSearchQuery,
+	TextSearchOptions,
+	Progress,
+	TextSearchResult,
+	TextSearchComplete,
+	Range,
+	Position,
 } from 'vscode';
 import Fuse from 'fuse.js';
 import {
@@ -42,6 +50,8 @@ import {
 import { apolloClient } from './client';
 import { githubObjectQuery } from './github-api-gql';
 import { toUint8Array as decodeBase64 } from 'js-base64';
+import { getTextSearchResults } from './sourcegraph-api';
+import { showSourcegraphSearchMessage } from './messages';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -208,6 +218,7 @@ export class GitHub1sFS
 		FileSystemProvider,
 		FileSearchProvider,
 		FileDecorationProvider,
+		TextSearchProvider,
 		Disposable {
 	static scheme = 'github1s';
 	private readonly disposable: Disposable;
@@ -230,6 +241,7 @@ export class GitHub1sFS
 				isReadonly: true,
 			}),
 			workspace.registerFileSearchProvider(GitHub1sFS.scheme, this),
+			workspace.registerTextSearchProvider(GitHub1sFS.scheme, this),
 			window.registerFileDecorationProvider(this)
 		);
 	}
@@ -563,6 +575,60 @@ export class GitHub1sFS
 				return GitHub1sFS.submoduleDecorationData;
 			}
 			return null;
+		});
+	}
+
+	provideTextSearchResults(
+		query: TextSearchQuery,
+		options: TextSearchOptions,
+		progress: Progress<TextSearchResult>,
+		_token: CancellationToken
+	) {
+		return getCurrentAuthority().then(async (authority) => {
+			const [owner, repo, ref] = authority.split('+');
+			const searchResults = await getTextSearchResults(
+				owner,
+				repo,
+				ref,
+				query,
+				options
+			);
+
+			(searchResults.results || []).forEach((item) => {
+				const fileUri = Uri.parse('').with({
+					// because we set the authority of workspace as '' (on application start)
+					// at src/vs/code/browser/workbench/workbench.ts
+					// so don't specified authority here, or the VS Code won't use the results
+					// authority,
+					scheme: GitHub1sFS.scheme,
+					path: `/${item.file?.path}`,
+				});
+				(item.lineMatches || []).forEach((match) => {
+					progress.report({
+						uri: fileUri,
+						ranges: (match.offsetAndLengths || []).map(
+							(range) =>
+								new Range(
+									new Position(match.lineNumber, range[0]),
+									new Position(match.lineNumber, range[0] + range[1])
+								)
+						),
+						preview: {
+							text: match.preview,
+							matches: (match.offsetAndLengths || []).map(
+								(range) =>
+									new Range(
+										new Position(0, range[0]),
+										new Position(0, range[0] + range[1])
+									)
+							),
+						},
+					});
+				});
+			});
+
+			showSourcegraphSearchMessage();
+			return { limitHit: searchResults.limitHit } as TextSearchComplete;
 		});
 	}
 }
