@@ -12,13 +12,11 @@ import {
 import { TextSearchQuery, TextSearchOptions } from 'vscode';
 import { trimStart, trimEnd } from './util';
 
-// the Sourcegraph refused the CORS check now, use `cors-anywhere` for temporary
-const CORS_PROXY_PREFIX = 'https://cors-anywhere.herokuapp.com/';
 const sourcegraphLink = createHttpLink({
-	uri: CORS_PROXY_PREFIX + 'https://sourcegraph.com/.api/graphql',
-	headers: {
-		'x-requested-with': 'https://github1s.com',
-	},
+	// Since the Sourcegraph refused the CORS check now,
+	// use Vercel Serverless Function to proxy it temporarily
+	// See `/api/sourcegraph.js`
+	uri: '/api/sourcegraph',
 });
 
 const sourcegraphClient = new ApolloClient({
