@@ -35,6 +35,14 @@ javascript: window.location.href = window.location.href.replace(/github(1s)?.com
 
 ## Development
 
+### Cloud-based development
+
+You can start an online development environment with [Gitpod](https://www.gitpod.io) by clicking the following button:
+
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/conwnet/github1s)
+
+### Local development
+
 You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development.
 
 ```bash
