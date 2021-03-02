@@ -21,6 +21,9 @@ module.exports = /** @type WebpackConfig */ {
 	resolve: {
 		mainFields: ['module', 'main'],
 		extensions: ['.ts', '.js'], // support ts-files and js-files
+		alias: {
+			'@': path.resolve(__dirname, 'src'),
+		},
 	},
 	module: {
 		rules: [

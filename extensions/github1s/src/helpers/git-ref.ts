@@ -5,7 +5,10 @@
 
 import * as vscode from 'vscode';
 import { reuseable } from './func';
-import { getGithubBranchRefs, getGithubTagRefs } from '../api';
+import {
+	getGithubBranchRefs,
+	getGithubTagRefs,
+} from '@/interfaces/github-api-rest';
 
 export interface RepositoryRef {
 	name: string;

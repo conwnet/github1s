@@ -4,22 +4,6 @@
  */
 
 import * as vscode from 'vscode';
-export { fetch } from './fetch';
-export { reuseable, throttle } from './func';
-export {
-	getExtensionContext,
-	setExtensionContext,
-	hasValidToken,
-	getOAuthToken,
-} from './context';
-export {
-	getCurrentRef,
-	getCurrentAuthority,
-	getRepositoryBranchRefs,
-	getRepositoryTagRefs,
-	changeCurrentRef,
-} from './git-ref';
-export { parseGitmodules, parseSubmoduleUrl } from './submodule';
 
 export const noop = () => {};
 

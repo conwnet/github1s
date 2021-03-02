@@ -4,15 +4,15 @@
  */
 
 import * as vscode from 'vscode';
+import { getExtensionContext } from '@/helpers/context';
 import {
-	getExtensionContext,
 	getRepositoryBranchRefs,
 	getRepositoryTagRefs,
 	getCurrentRef,
 	getCurrentAuthority,
 	changeCurrentRef,
-} from './util';
-import { validateToken } from './api';
+} from '@/helpers/git-ref';
+import { validateToken } from '@/interfaces/github-api-rest';
 
 export const commandValidateToken = (silent: boolean = false) => {
 	const context = getExtensionContext();

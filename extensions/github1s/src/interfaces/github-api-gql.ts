@@ -5,6 +5,17 @@
 
 import { gql } from '@apollo/client/core';
 import { apolloClient } from './client';
+import { hasValidToken } from '@/helpers/context';
+
+// TODO: GraphQL API is experimental now, we need more test.
+// It maybe crash or slow when there are too many files in one directory.
+// For example the repository `git/git`, the TTFB cost about 3 seconds,
+// and the response body size exceed 7MB before zip
+export const ENABLE_GRAPHQL: boolean = false;
+
+export const isGraphQLEnabled = () => {
+	return hasValidToken() && ENABLE_GRAPHQL;
+};
 
 /**
  * Query to get first 100 branch name
