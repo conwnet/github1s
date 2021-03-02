@@ -10,7 +10,7 @@ import {
 	gql,
 } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
-import { getOAuthToken } from './util';
+import { getOAuthToken } from '@/helpers/context';
 
 const httpLink = createHttpLink({
 	uri: 'https://api.github.com/graphql',

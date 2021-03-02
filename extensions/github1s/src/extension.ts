@@ -4,9 +4,8 @@
  */
 
 import * as vscode from 'vscode';
-import { GitHub1sFS } from './github1sfs';
-import { SettingsView } from './settings-view';
-import { setExtensionContext } from './util';
+import { SettingsView } from '@/views/settings-view';
+import { setExtensionContext } from '@/helpers/context';
 import {
 	commandUpdateToken,
 	commandValidateToken,
@@ -14,12 +13,42 @@ import {
 	commandSwitchBranch,
 	commandSwitchTag,
 	commandGetCurrentAuthority,
-} from './commands';
+} from '@/commands';
+import {
+	GitHub1sFileSystemProvider,
+	GitHub1sFileSearchProvider,
+	GitHub1sTextSearchProvider,
+	GitHub1sSubmoduleDecorationProvider,
+} from '@/providers';
 
 export function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
-	context.subscriptions.push(new GitHub1sFS());
 
+	// providers
+	const fsProvider = new GitHub1sFileSystemProvider();
+	context.subscriptions.push(
+		vscode.workspace.registerFileSystemProvider(
+			GitHub1sFileSystemProvider.scheme,
+			fsProvider,
+			{
+				isCaseSensitive: true,
+				isReadonly: true,
+			}
+		),
+		vscode.workspace.registerFileSearchProvider(
+			GitHub1sFileSearchProvider.scheme,
+			new GitHub1sFileSearchProvider(fsProvider)
+		),
+		vscode.workspace.registerTextSearchProvider(
+			GitHub1sTextSearchProvider.scheme,
+			new GitHub1sTextSearchProvider()
+		),
+		vscode.window.registerFileDecorationProvider(
+			new GitHub1sSubmoduleDecorationProvider(fsProvider)
+		)
+	);
+
+	// views
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SettingsView.viewType,
@@ -27,6 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
+	// commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			'github1s.validate-token',

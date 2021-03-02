@@ -10,7 +10,7 @@ import {
 	gql,
 } from '@apollo/client/core';
 import { TextSearchQuery, TextSearchOptions } from 'vscode';
-import { trimStart, trimEnd } from './util';
+import { trimStart, trimEnd } from '@/helpers/util';
 
 const sourcegraphLink = createHttpLink({
 	// Since the Sourcegraph refused the CORS check now,
