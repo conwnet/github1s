@@ -86,6 +86,9 @@ const combineGlobsToRegExp = (globs: string[]) => {
 	return canBeConvertToRegExp(result) ? result : '';
 };
 
+const escapeRegexp = (text: string): string =>
+	text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
 const buildTextSearchQueryString = (
 	owner: string,
 	repo: string,
@@ -93,9 +96,10 @@ const buildTextSearchQueryString = (
 	query: TextSearchQuery,
 	options: TextSearchOptions
 ): string => {
-	// the string may looks like `repo:conwnet/github`
-	const repoString =
-		ref === 'HEAD' ? `repo:${owner}/${repo}` : `repo:${owner}/${repo}@${ref}`;
+	// the string may looks like `repo:^github\.com/conwnet/github1s`
+	const repoPattern = escapeRegexp(`github\.com/${owner}/${repo}`);
+	const repoStringWithRef =
+		ref === 'HEAD' ? `repo:^${repoPattern}$` : `repo:^${repoPattern}$@${ref}`;
 	// the string may looks like `case:yse file:src -file:node_modules`
 	const optionsString = [
 		query.isCaseSensitive ? `case:yes` : '',
@@ -110,8 +114,6 @@ const buildTextSearchQueryString = (
 		.join(' ');
 	// convert the pattern to adapt the sourcegraph API
 	let pattenString = query.pattern;
-	const escapeRegexp = (text: string): string =>
-		text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
 	if (!query.isRegExp && !query.isWordMatch) {
 		pattenString = `"${pattenString}"`;
@@ -123,7 +125,9 @@ const buildTextSearchQueryString = (
 		return `/\b${pattenString}\b/`;
 	}
 
-	return [repoString, optionsString, pattenString].filter(Boolean).join(' ');
+	return [repoStringWithRef, optionsString, pattenString]
+		.filter(Boolean)
+		.join(' ');
 };
 
 export const getTextSearchResults = (
