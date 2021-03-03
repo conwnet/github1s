@@ -169,8 +169,7 @@ export class GitHub1sFileSystemProvider
 			}
 			const submodulesFileContent = textDecoder.decode(
 				await this.readFile(
-					Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules'),
-					false
+					Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules')
 				)
 			);
 			// the path should declared in .gitmodules file
@@ -204,107 +203,100 @@ export class GitHub1sFileSystemProvider
 	);
 
 	readDirectory = reuseable(
-		(uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> => {
-			return this.lookupAsDirectory(uri, false).then(async (parent) => {
-				if (parent.entries !== null) {
-					return parent.getNameTypePairs();
-				}
-				if (parent.isSubmodule) {
-					await this._updateSubmoduleDirectory(parent);
-				}
-
-				const [owner, repo, ref] = parent.uri.authority.split('+');
-				if (isGraphQLEnabled()) {
-					return apolloClient
-						.query({
-							query: githubObjectQuery,
-							variables: {
-								owner,
-								repo,
-								expression: `${ref}:${Uri.joinPath(
-									parent.uri,
-									parent.name
-								).path.slice(1)}`,
-							},
-						})
-						.then((response) => {
-							const entries = response.data?.repository?.object?.entries;
-							if (!entries) {
-								throw FileSystemError.FileNotADirectory(uri);
-							}
-							insertGitHubGraphQLEntriesToDirectory(entries, parent);
-							return parent.getNameTypePairs();
-						});
-				}
-
-				return readGitHubDirectory(
-					owner,
-					repo,
-					ref,
-					Uri.joinPath(parent.uri, parent.name).path
-				).then((data) => {
-					// create new Entry to `parent.entries` only if `parent.entries.get(item.path)` is nil
-					(data.tree || []).forEach((item: GithubRESTEntry) =>
-						insertGitHubRESTEntryToDirectory(item, parent)
-					);
-					return parent.getNameTypePairs();
-				});
-			});
+		async (uri: Uri): Promise<[string, FileType][]> => {
+			const parent = await this.lookupAsDirectory(uri, false);
+			if (parent.entries !== null) {
+				return parent.getNameTypePairs();
+			}
+			if (parent.isSubmodule) {
+				await this._updateSubmoduleDirectory(parent);
+			}
+			const [owner, repo, ref] = parent.uri.authority.split('+');
+			if (isGraphQLEnabled()) {
+				return apolloClient
+					.query({
+						query: githubObjectQuery,
+						variables: {
+							owner,
+							repo,
+							expression: `${ref}:${Uri.joinPath(
+								parent.uri,
+								parent.name
+							).path.slice(1)}`,
+						},
+					})
+					.then((response) => {
+						const entries = response.data?.repository?.object?.entries;
+						if (!entries) {
+							throw FileSystemError.FileNotADirectory(uri);
+						}
+						insertGitHubGraphQLEntriesToDirectory(entries, parent);
+						return parent.getNameTypePairs();
+					});
+			}
+			const data = await readGitHubDirectory(
+				owner,
+				repo,
+				ref,
+				Uri.joinPath(parent.uri, parent.name).path
+			);
+			// create new Entry to `parent.entries` only if `parent.entries.get(item.path)` is nil
+			for (const item of data.tree || []) {
+				insertGitHubRESTEntryToDirectory(item, parent);
+			}
+			return parent.getNameTypePairs();
 		},
 		(uri: Uri) => uri.toString()
 	);
 
 	readFile = reuseable(
-		(uri: Uri): Uint8Array | Thenable<Uint8Array> => {
-			return this.lookupAsFile(uri, false).then(async (file) => {
-				if (file.data !== null) {
-					return file.data;
-				}
-
-				/**
-				 * Below code will only be triggered in two cases:
-				 *   1. The GraphQL query is disabled
-				 *   2. The GraphQL query is enabled, but the blob/file is binary
-				 */
-				const [owner, repo] = file.uri.authority.split('+');
-				return readGitHubFile(owner, repo, file.sha).then((blob) => {
-					file.data = decodeBase64(blob.content);
-					return file.data;
-				});
-			});
+		async (uri: Uri): Promise<Uint8Array> => {
+			const file = await this.lookupAsFile(uri, false);
+			if (file.data !== null) {
+				return file.data;
+			}
+			/**
+			 * Below code will only be triggered in two cases:
+			 *   1. The GraphQL query is disabled
+			 *   2. The GraphQL query is enabled, but the blob/file is binary
+			 */
+			const [owner, repo] = file.uri.authority.split('+');
+			const blob = await readGitHubFile(owner, repo, file.sha);
+			file.data = decodeBase64(blob.content);
+			return file.data;
 		},
 		(uri: Uri) => uri.toString()
 	);
 
-	createDirectory(uri: Uri): void | Thenable<void> {
-		return Promise.resolve();
+	async createDirectory(uri: Uri): Promise<void> {
+		return;
 	}
 
-	writeFile(
+	async writeFile(
 		uri: Uri,
 		content: Uint8Array,
 		options: { create: boolean; overwrite: boolean }
-	): void | Thenable<void> {
-		return Promise.resolve();
+	): Promise<void> {
+		return;
 	}
 
-	delete(uri: Uri, options: { recursive: boolean }): void | Thenable<void> {
-		return Promise.resolve();
+	async delete(uri: Uri, options: { recursive: boolean }): Promise<void> {
+		return;
 	}
 
-	rename(
+	async rename(
 		oldUri: Uri,
 		newUri: Uri,
 		options: { overwrite: boolean }
-	): void | Thenable<void> {
-		return Promise.resolve();
+	): Promise<void> {
+		return;
 	}
 
-	copy?(
+	async copy?(
 		source: Uri,
 		destination: Uri,
 		options: { overwrite: boolean }
-	): void | Thenable<void> {
-		return Promise.resolve();
+	): Promise<void> {
+		return;
 	}
 }
