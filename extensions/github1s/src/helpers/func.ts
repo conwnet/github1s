@@ -12,7 +12,7 @@ const defaultComputeCacheKey = (...args) => jsonStableStringify([...args]);
 // and previous request not completed
 export const reuseable = <T extends (...args: any[]) => Promise<any>>(
 	func: T,
-	computeCacheKey = defaultComputeCacheKey
+	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey
 ) => {
 	const cache = new Map<string, ReturnType<T>>();
 

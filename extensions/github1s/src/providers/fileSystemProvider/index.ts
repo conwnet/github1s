@@ -246,7 +246,7 @@ export class GitHub1sFileSystemProvider
 			}
 			return parent.getNameTypePairs();
 		},
-		(uri: Uri) => uri.toString()
+		(uri) => uri.toString()
 	);
 
 	readFile = reuseable(
@@ -265,7 +265,7 @@ export class GitHub1sFileSystemProvider
 			file.data = decodeBase64(blob.content);
 			return file.data;
 		},
-		(uri: Uri) => uri.toString()
+		(uri) => uri.toString()
 	);
 
 	async createDirectory(uri: Uri): Promise<void> {

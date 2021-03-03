@@ -9,6 +9,7 @@ import {
 	getGithubBranchRefs,
 	getGithubTagRefs,
 } from '@/interfaces/github-api-rest';
+import { forgetCache } from '@apollo/client/cache/inmemory/reactiveVars';
 
 export interface RepositoryRef {
 	name: string;
@@ -57,7 +58,8 @@ const getRepositoryBranchRefsFromUri = reuseable(
 
 		repositoryBranchRefs = await getGithubBranchRefs(owner, repo);
 		return repositoryBranchRefs;
-	}
+	},
+	(uri, forceUpdate) => `${uri.toString()}-${forceUpdate}`
 );
 
 export const getRepositoryBranchRefs = reuseable(
@@ -144,7 +146,8 @@ const getCurrentRefFromUri = reuseable(
 					findMatchedBranchOrTag(tagNames, parts) || maybeBranch);
 			})
 		);
-	}
+	},
+	(uri, forceUpdate) => `${uri.toString()}-${forceUpdate}`
 );
 
 export const getCurrentRef = reuseable(async (forceUpdate: boolean = false) => {

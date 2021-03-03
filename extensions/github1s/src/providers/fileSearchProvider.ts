@@ -38,7 +38,7 @@ export class GitHub1sFileSearchProvider
 	 * if this is failed, the fuzzy search maybe not work fine
 	 */
 	getFuse = reuseable(
-		async (authority): Promise<Fuse<GithubRESTEntry>> => {
+		async (authority: string): Promise<Fuse<GithubRESTEntry>> => {
 			if (this.fuseMap.has(authority)) {
 				return this.fuseMap.get(authority);
 			}
