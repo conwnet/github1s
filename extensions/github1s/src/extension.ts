@@ -20,6 +20,7 @@ import {
 	GitHub1sTextSearchProvider,
 	GitHub1sSubmoduleDecorationProvider,
 } from '@/providers';
+import { showSponsors } from '@/sponsors';
 
 export function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
@@ -84,4 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.switch-tag', commandSwitchTag)
 	);
+
+	// sponsors in Status Bar
+	showSponsors();
 }
