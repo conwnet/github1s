@@ -29,7 +29,7 @@ javascript: window.location.href = window.location.href.replace(/github(1s)?.com
 
 ## Enabling Private Repositories
 
-If you want to view non-public repositories, you need to add an OAuth token.  The token is stored only in your browser, and only send to GitHub when fetching your repository's files.  Click on the icon near the bottom of the left-hand row of icons, and the dialog box will prompt you for it, and even take you to your GitHub settings page to generate one, if needed.
+If you want to view non-public repositories, you need to add an OAuth token. The token is stored only in your browser, and only send to GitHub when fetching your repository's files. Click on the icon near the bottom of the left-hand row of icons, and the dialog box will prompt you for it, and even take you to your GitHub settings page to generate one, if needed.
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/timbaileyjones/github1s/master/resources/images/auth-token.png)
 
@@ -100,6 +100,16 @@ $ yarn build
 - If something is not working, [create an issue](https://github.com/conwnet/github1s/issues/new)
 
 - If you have a question, [discuss on gitter](https://gitter.im/conwnet/github1s)
+
+## Project Sponsors
+
+The continued development and maintenance of GitHub1s is made possible by these generous sponsors:
+
+<br />
+<a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
+	<img src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vercel-logo.svg">
+</a>
+<br /><br />
 
 ## Third-party Related Projects
 
