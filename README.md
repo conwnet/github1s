@@ -139,3 +139,13 @@ The continued development and maintenance of GitHub1s is made possible by these 
 ### Tampermonkey scripts
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
+
+### Maintainers! :blush:
+
+<table>
+  <tbody><tr>
+    <td align="center"><a href="https://github.com/conwnet"><img alt="" src="https://avatars.githubusercontent.com/conwnet" width="100px;"><br><sub><b>netcon</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=conwnet" title="Code">💻 🖋</a></td> </a></td>
+    <td align="center"><a href="https://github.com/xcv58"><img alt="" src="https://avatars.githubusercontent.com/xcv58" width="100px;"><br><sub><b>xcv58</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=xcv58" title="Code">💻 🖋</a></td></a></td>
+    <td align="center"><a href="https://github.com/Siddhant-K-code"><img alt="" src="https://avatars.githubusercontent.com/Siddhant-K-code" width="100px;"><br><sub><b>Siddhant Khare</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=Siddhant-K-code" title="Code">💻 🖋</a></td> </a></td>
+  </tr>
+</tbody></table>
