@@ -17,7 +17,7 @@ import {
 import {
 	GitHub1sFileSystemProvider,
 	GitHub1sFileSearchProvider,
-	GitHub1sTextSearchProvider,
+	// GitHub1sTextSearchProvider,
 	GitHub1sSubmoduleDecorationProvider,
 } from '@/providers';
 
@@ -39,10 +39,13 @@ export function activate(context: vscode.ExtensionContext) {
 			GitHub1sFileSearchProvider.scheme,
 			new GitHub1sFileSearchProvider(fsProvider)
 		),
-		vscode.workspace.registerTextSearchProvider(
-			GitHub1sTextSearchProvider.scheme,
-			new GitHub1sTextSearchProvider()
-		),
+		// TODO: The Code Search ability is powered by Sourcegraph
+		// We are actively in touch with the Sourcegraph Team
+		// It will be enabled if we get their permission
+		// vscode.workspace.registerTextSearchProvider(
+		// 	GitHub1sTextSearchProvider.scheme,
+		// 	new GitHub1sTextSearchProvider()
+		// ),
 		vscode.window.registerFileDecorationProvider(
 			new GitHub1sSubmoduleDecorationProvider(fsProvider)
 		)
