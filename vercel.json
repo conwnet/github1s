@@ -1,8 +1,15 @@
 {
-  "routes": [{
+  "routes": [
+    {
+      "src": "/api/sourcegraph",
+      "dest": "https://sourcegraph.com/.api/graphql"
+    },
+    {
       "src": "/static/(.*)",
       "dest": "/static/$1",
-      "headers": { "Cache-Control": "max-age=604800" }
+      "headers": {
+        "Cache-Control": "max-age=604800"
+      }
     },
     {
       "src": "/favicon.ico",

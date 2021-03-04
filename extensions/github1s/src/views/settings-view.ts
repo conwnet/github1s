@@ -4,9 +4,10 @@
  */
 
 import * as vscode from 'vscode';
-import { getNonce, getExtensionContext, getWebviewOptions } from './util';
-import { commandClearToken } from './commands';
-import { validateToken } from './api';
+import { getExtensionContext } from '@/helpers/context';
+import { getNonce, getWebviewOptions } from '@/helpers/util';
+import { commandClearToken } from '@/commands';
+import { validateToken } from '@/interfaces/github-api-rest';
 
 interface WebviewState {
 	token?: string;

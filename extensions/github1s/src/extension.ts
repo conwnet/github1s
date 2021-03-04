@@ -4,9 +4,8 @@
  */
 
 import * as vscode from 'vscode';
-import { GitHub1sFS } from './github1sfs';
-import { SettingsView } from './settings-view';
-import { setExtensionContext } from './util';
+import { SettingsView } from '@/views/settings-view';
+import { setExtensionContext } from '@/helpers/context';
 import {
 	commandUpdateToken,
 	commandValidateToken,
@@ -14,12 +13,46 @@ import {
 	commandSwitchBranch,
 	commandSwitchTag,
 	commandGetCurrentAuthority,
-} from './commands';
+} from '@/commands';
+import {
+	GitHub1sFileSystemProvider,
+	GitHub1sFileSearchProvider,
+	// GitHub1sTextSearchProvider,
+	GitHub1sSubmoduleDecorationProvider,
+} from '@/providers';
+import { showSponsors } from '@/sponsors';
 
 export function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
-	context.subscriptions.push(new GitHub1sFS());
 
+	// providers
+	const fsProvider = new GitHub1sFileSystemProvider();
+	context.subscriptions.push(
+		vscode.workspace.registerFileSystemProvider(
+			GitHub1sFileSystemProvider.scheme,
+			fsProvider,
+			{
+				isCaseSensitive: true,
+				isReadonly: true,
+			}
+		),
+		vscode.workspace.registerFileSearchProvider(
+			GitHub1sFileSearchProvider.scheme,
+			new GitHub1sFileSearchProvider(fsProvider)
+		),
+		// TODO: The Code Search ability is powered by Sourcegraph
+		// We are actively in touch with the Sourcegraph Team
+		// It will be enabled if we get their permission
+		// vscode.workspace.registerTextSearchProvider(
+		// 	GitHub1sTextSearchProvider.scheme,
+		// 	new GitHub1sTextSearchProvider()
+		// ),
+		vscode.window.registerFileDecorationProvider(
+			new GitHub1sSubmoduleDecorationProvider(fsProvider)
+		)
+	);
+
+	// views
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SettingsView.viewType,
@@ -27,6 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
+	// commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			'github1s.validate-token',
@@ -54,4 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.switch-tag', commandSwitchTag)
 	);
+
+	// sponsors in Status Bar
+	showSponsors();
 }

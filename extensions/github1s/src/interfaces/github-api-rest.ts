@@ -4,8 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-// import { getBranches } from './github-api-gql';
-import { hasValidToken, encodeFilePath } from './util';
+import { encodeFilePath } from '@/helpers/util';
 import {
 	fetch,
 	RequestError,
@@ -13,23 +12,13 @@ import {
 	RequestInvalidTokenError,
 	RequestNotFoundError,
 	throttledReportNetworkError,
-} from './util/fetch';
-
-// TODO: GraphQL API is experimental now, we need more test.
-// It maybe crash or slow when there are too many files in one directory.
-// For example the repository `git/git`, the TTFB cost about 3 seconds,
-// and the response body size exceed 7MB before zip
-export const ENABLE_GRAPHQL: boolean = false;
+} from '@/helpers/fetch';
 
 export interface UriState {
 	owner: string;
 	repo: string;
 	path: string;
 }
-
-export const isGraphQLEnabled = () => {
-	return hasValidToken() && ENABLE_GRAPHQL;
-};
 
 const handleRequestError = (error: RequestError) => {
 	if (error instanceof RequestRateLimitError) {
@@ -140,10 +129,3 @@ export const getGithubAllFiles = (
 		).replace(/^\//, ':')}?recursive=1`
 	).catch(handleRequestError);
 };
-
-// export const getGitHubBranches = (owner: string, repo: string) => {
-// 	if (isGraphQLEnabled()) {
-// 		return getBranches(owner, repo);
-// 	}
-// 	return getGithubBranches(owner, repo);
-// };

@@ -5,7 +5,11 @@
     "moduleResolution": "node",
     "outDir": "out",
     "lib": ["es2016", "WebWorker"],
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
   "include": [
     "src"

@@ -27,6 +27,12 @@ javascript: window.location.href = window.location.href.replace(/github(1s)?.com
 - [How it works](https://github.com/conwnet/github1s/blob/master/docs/guide.md)
 - [Roadmap](https://github.com/conwnet/github1s/projects/1)
 
+## Enabling Private Repositories
+
+If you want to view non-public repositories, you need to add an OAuth token. The token is stored only in your browser, and only send to GitHub when fetching your repository's files. Click on the icon near the bottom of the left-hand row of icons, and the dialog box will prompt you for it, and even take you to your GitHub settings page to generate one, if needed.
+
+![VS Code - GitHub1s](https://raw.githubusercontent.com/timbaileyjones/github1s/master/resources/images/auth-token.png)
+
 ## Screenshots
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/mohitjaisal/github1s/master/resources/images/Github1sDemo1.gif)
@@ -34,6 +40,14 @@ javascript: window.location.href = window.location.href.replace(/github(1s)?.com
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/demo.png)
 
 ## Development
+
+### Cloud-based development
+
+You can start an online development environment with [Gitpod](https://www.gitpod.io) by clicking the following button:
+
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/conwnet/github1s)
+
+### Local development
 
 You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development.
 
@@ -87,6 +101,16 @@ $ yarn build
 
 - If you have a question, [discuss on gitter](https://gitter.im/conwnet/github1s)
 
+## Project Sponsors
+
+The continued development and maintenance of GitHub1s is made possible by these generous sponsors:
+
+<br />
+<a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
+	<img src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vercel-logo.svg">
+</a>
+<br /><br />
+
 ## Third-party Related Projects
 
 ### Chrome Extensions
@@ -115,3 +139,13 @@ $ yarn build
 ### Tampermonkey scripts
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
+
+### Maintainers! :blush:
+
+<table>
+  <tbody><tr>
+    <td align="center"><a href="https://github.com/conwnet"><img alt="" src="https://avatars.githubusercontent.com/conwnet" width="100px;"><br><sub><b>netcon</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=conwnet" title="Code">💻 🖋</a></td> </a></td>
+    <td align="center"><a href="https://github.com/xcv58"><img alt="" src="https://avatars.githubusercontent.com/xcv58" width="100px;"><br><sub><b>xcv58</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=xcv58" title="Code">💻 🖋</a></td></a></td>
+    <td align="center"><a href="https://github.com/Siddhant-K-code"><img alt="" src="https://avatars.githubusercontent.com/Siddhant-K-code" width="100px;"><br><sub><b>Siddhant Khare</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=Siddhant-K-code" title="Code">💻 🖋</a></td> </a></td>
+  </tr>
+</tbody></table>

@@ -10,7 +10,9 @@ According to the above, obviously, the core concept of GitHub1s is to implement 
 
 _We may switch to the GitHub GraphQL API for more friendly user experience in the future, thanks to @xcv58 and @kanhegaonkarsaurabh. See details at [Issue 12](https://github.com/conwnet/github1s/issues/12)._
 
-GitHub1s is a purely static web app (because it really doesn't need a backend service, does it?). So we just deploy it on [GitHub Pages](https://pages.github.com/) now (the `gh-pages` branch of this repository), and it is free. The service of GitHub1s could be reliable (GitHub is very reliable) because nobody needs to pay the web hosting bills.
+~~GitHub1s is a purely static web app (because it really doesn't need a backend service, does it?). So we just deploy it on [GitHub Pages](https://pages.github.com/) now (the `gh-pages` branch of this repository), and it is free. The service of GitHub1s could be reliable (GitHub is very reliable) because nobody needs to pay the web hosting bills.~~
+
+We deploy GitHub1s on [Vercel](https://vercel.com/) now for minimize delays in loading and better developer experience. Thanks for the wonderful service provide by Vercel.
 
 # Rate Limit
 

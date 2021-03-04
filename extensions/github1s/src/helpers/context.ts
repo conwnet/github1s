@@ -13,7 +13,11 @@ export const setExtensionContext = (
 	extensionContext = _extensionContext;
 };
 
-export const getExtensionContext = (): vscode.ExtensionContext | null => {
+export const getExtensionContext = (): vscode.ExtensionContext => {
+	if (!extensionContext) {
+		throw new Error('extension context initialize failed!');
+	}
+
 	return extensionContext;
 };
 
