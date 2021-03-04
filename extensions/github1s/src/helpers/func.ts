@@ -10,10 +10,13 @@ const defaultComputeCacheKey = (...args) => jsonStableStringify([...args]);
 
 // reuse previous promise when a request call
 // and previous request not completed
-export const reuseable = (func, computeCacheKey = defaultComputeCacheKey) => {
-	const cache = new Map<string, Promise<any>>();
+export const reuseable = <T extends (...args: any[]) => Promise<any>>(
+	func: T,
+	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey
+) => {
+	const cache = new Map<string, ReturnType<T>>();
 
-	return function (...args: any[]): Promise<any> {
+	return function (...args: Parameters<T>): ReturnType<T> {
 		const key = computeCacheKey(...args);
 		if (cache.has(key)) {
 			return cache.get(key);
@@ -25,9 +28,12 @@ export const reuseable = (func, computeCacheKey = defaultComputeCacheKey) => {
 	};
 };
 
-export const throttle = (func: Function, interval: number) => {
+export const throttle = <T extends (...args: any[]) => any>(
+	func: T,
+	interval: number
+) => {
 	let timer = null;
-	return function (...args: any[]): any {
+	return function (...args: Parameters<T>): ReturnType<T> {
 		if (timer) {
 			return;
 		}

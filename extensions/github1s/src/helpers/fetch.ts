@@ -55,41 +55,40 @@ export const throttledReportNetworkError = throttle(
 	5000
 );
 
-export const fetch = (url: string, options?: RequestInit) => {
+export const fetch = async (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
 
-	return self
-		.fetch(url, {
+	let response: Response;
+	try {
+		response = await self.fetch(url, {
 			mode: 'cors',
 			...options,
 			headers: { ...authHeaders, ...customHeaders },
-		})
-		.catch(() => {
-			throttledReportNetworkError();
-			throw new RequestError('Request Failed, Maybe an Network Error', token);
-		})
-		.then((response) => {
-			if (response.status < 400) {
-				return response.json();
-			}
-			if (response.status === 403) {
-				return response.json().then((data) => {
-					throw new RequestRateLimitError(data.message, token);
-				});
-			}
-			if (response.status === 401) {
-				return response.json().then((data) => {
-					throw new RequestInvalidTokenError(data.message, token);
-				});
-			}
-			if (response.status === 404) {
-				throw new RequestNotFoundError('Not Found', token);
-			}
-			throw new RequestError(
-				`GitHub1s: Request got HTTP ${response.status} response`,
-				token
-			);
 		});
+	} catch (e) {
+		throttledReportNetworkError();
+		throw new RequestError('Request Failed, Maybe an Network Error', token);
+	}
+	if (response.status < 400) {
+		return response.json();
+	}
+	if (response.status === 403) {
+		return response.json().then((data) => {
+			throw new RequestRateLimitError(data.message, token);
+		});
+	}
+	if (response.status === 401) {
+		return response.json().then((data) => {
+			throw new RequestInvalidTokenError(data.message, token);
+		});
+	}
+	if (response.status === 404) {
+		throw new RequestNotFoundError('Not Found', token);
+	}
+	throw new RequestError(
+		`GitHub1s: Request got HTTP ${response.status} response`,
+		token
+	);
 };
