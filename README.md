@@ -105,11 +105,14 @@ $ yarn build
 
 The continued development and maintenance of GitHub1s is made possible by these generous sponsors:
 
-<br />
-<a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
-	<img src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vercel-logo.svg">
-</a>
-<br /><br />
+<table><tbody><tr>
+<td><a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
+<img height="40px" src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/sourcegraph-logo.svg">
+</a></td>
+<td><a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
+<img height="40px" src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vercel-logo.svg">
+</a></td>
+</tr></tbody></table>
 
 ## Third-party Related Projects
 
