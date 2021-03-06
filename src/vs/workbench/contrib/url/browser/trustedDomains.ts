@@ -306,6 +306,7 @@ const github1sDefaultTrustedDomains = [
 	'*.microsoft.com',
 	'*.github1s.com',
 	'*.vercel.com',
+	'*.sourcegraph.com',
 ];
 
 export function readStaticTrustedDomains(
