@@ -9,21 +9,30 @@ const NOTIFICATION_STORAGE_KEY = 'GITHUB1S_NOTIFICATION';
 // Change this if a new notification should be shown
 const NOTIFICATION_STORAGE_VALUE = '20210212';
 
-const notification = {
+const getGitpodRepoUrl = () => window.location.pathname.match(/^\/[^\/]+\/[^\/]+/) ? `https://gitpod.io/#https://github.com${window.location.pathname.match(/^\/[^\/]+\/[^\/]+/)![0]}` : '';
+
+const notifications = [{
 	title: 'ATTENTION: This page is NOT officially provided by GitHub.',
 	content:
 		'GitHub1s is an open source project, which is not officially provided by GitHub.',
 	link: 'https://github.com/conwnet/github1s',
-};
+}, {
+	title: `<a class="notification-link" href="${getGitpodRepoUrl()}" alt="Gitpod ready-to-code" target="_blank"><img src="https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod"></a>`,
+	content:
+	'Click the button above to develop your project in the cloud.',
+}];
 
-const notificationHtml = `
-<div class="notification-main">
-	<div class="notification-title">${notification.title}</div>
-	<div class="notification-content">
-		${notification.content}
-		<a class="notification-link" href="${notification.link}" target="_blank">See more</a>
-	</div>
-</div>
+const notificationHtml = `${
+	notifications.map(notification => (`
+		<div class="notification-main">
+			<div class="notification-title">${notification.title}</div>
+			<div class="notification-content">
+				${notification.content}
+				${notification.link ? `<a class="notification-link" href="${notification.link}" target="_blank">See more</a>` : ''}
+			</div>
+		</div>`
+	))
+}
 <div class="notification-footer">
 	<button class="notification-confirm-button">OK</button>
 	<div class="notification-show-me-again">
