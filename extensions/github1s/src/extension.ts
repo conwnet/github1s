@@ -22,8 +22,9 @@ import {
 	GitHub1sSubmoduleDecorationProvider,
 } from '@/providers';
 import { showSponsors } from '@/sponsors';
+import { showGitpod } from '@/gitpod';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
 
 	// providers
@@ -92,4 +93,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// sponsors in Status Bar
 	showSponsors();
+	await showGitpod();
 }
