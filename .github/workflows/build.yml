@@ -35,7 +35,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ matrix.node-version }}
 
-      - run: yarn --frozen-lockfile --network-timeout 1000000
+      - run: yarn --frozen-lockfile --network-timeout 500000
       - run: yarn eslint
       - run: yarn build
       - uses: microsoft/playwright-github-action@v1
