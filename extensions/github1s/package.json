@@ -66,6 +66,11 @@
         "command": "github1s.switch-tag",
         "title": "Switch to Another Tag",
         "category": "GitHub1s"
+      },
+      {
+        "command": "github1s.open-gitpod",
+        "title": "Edit files in Gitpod",
+        "category": "GitHub1s"
       }
     ]
   },
