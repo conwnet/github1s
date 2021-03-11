@@ -1,4 +1,4 @@
-![GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/logo.png)
+![GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/logo.svg)
 
 # github1s
 
