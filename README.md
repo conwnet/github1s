@@ -22,6 +22,16 @@ Or save the following code snippet as a bookmarklet, you can use it to quickly s
 javascript: window.location.href = window.location.href.replace(/github(1s)?.com/, function(match, p1) { return p1 ? 'github.com' : 'github1s.com' })
 ```
 
+### Develop in the cloud
+
+To edit files, run Docker containers, create pull requests and more, click the "[Gitpod](https://www.gitpod.io) ready-to-code" button at the bottom of your browser once you open your project with github1s.
+
+![Gitpod Notification](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/gitpod-notification.png)
+
+_Note_: If you already closed the notification, you can find a "Develop your project on Gitpod" button in the status bar. You can also open the Command Palette (default shortcut `Ctrl+Shift+P`) and choose `GitHub1s: Edit files in Gitpod`.
+
+![Gitpod Status Bar](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/gitpod-statusbar.png)
+
 ## Documentation
 
 - [How it works](https://github.com/conwnet/github1s/blob/master/docs/guide.md)

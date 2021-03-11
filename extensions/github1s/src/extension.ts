@@ -13,6 +13,7 @@ import {
 	commandSwitchBranch,
 	commandSwitchTag,
 	commandGetCurrentAuthority,
+	commandOpenGitpod,
 } from '@/commands';
 import {
 	GitHub1sFileSystemProvider,
@@ -21,8 +22,9 @@ import {
 	GitHub1sSubmoduleDecorationProvider,
 } from '@/providers';
 import { showSponsors } from '@/sponsors';
+import { showGitpod } from '@/gitpod';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
 
 	// providers
@@ -85,7 +87,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.switch-tag', commandSwitchTag)
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('github1s.open-gitpod', commandOpenGitpod)
+	);
 
 	// sponsors in Status Bar
 	showSponsors();
+	await showGitpod();
 }
