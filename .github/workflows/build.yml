@@ -36,6 +36,8 @@ jobs:
             ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ matrix.node-version }}
 
       - run: yarn --frozen-lockfile --network-timeout 500000
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn eslint
       - run: yarn build
       - uses: microsoft/playwright-github-action@v1
