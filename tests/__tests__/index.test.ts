@@ -1,6 +1,15 @@
 import { chromium, Browser, Page } from 'playwright';
+import {
+	toMatchImageSnapshot,
+	MatchImageSnapshotOptions,
+} from 'jest-image-snapshot';
 
-const expect = require('expect');
+expect.extend({ toMatchImageSnapshot });
+
+const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
+	failureThreshold: 0.1,
+	failureThresholdType: 'percent',
+};
 
 let browser: Browser;
 let page: Page;
@@ -51,4 +60,16 @@ it('should load successfully', async () => {
 	expect(await page.title()).toMatch(
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
 	);
+
+	const image = await page.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+});
+
+it('should open file correctly', async () => {
+	await page.goto(BASE_URL);
+	await page.click('[title="~/tsconfig.json"]');
+	await page.click('[data-resource-name="tsconfig.json"]');
+
+	const image = await page.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
