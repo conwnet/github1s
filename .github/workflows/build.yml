@@ -10,11 +10,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [14.x, 15.x]
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +35,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ matrix.node-version }}
 
-      - run: yarn --frozen-lockfile
+      - run: yarn --frozen-lockfile --network-timeout 500000
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn eslint
       - run: yarn build
       - uses: microsoft/playwright-github-action@v1
