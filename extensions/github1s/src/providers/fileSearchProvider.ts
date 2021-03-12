@@ -14,7 +14,7 @@ import {
 } from 'vscode';
 import Fuse from 'fuse.js';
 import { reuseable } from '@/helpers/func';
-import { getCurrentAuthority } from '@/helpers/git-ref';
+import router from '@/router';
 import { getGithubAllFiles } from '@/interfaces/github-api-rest';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 import { insertGitHubRESTEntryToDirectory } from './fileSystemProvider/util';
@@ -77,7 +77,7 @@ export class GitHub1sFileSearchProvider
 		_options: FileSearchOptions,
 		_token: CancellationToken
 	): ProviderResult<Uri[]> {
-		return getCurrentAuthority().then(async (authority) => {
+		return router.getAuthority().then(async (authority) => {
 			const fuse = await this.getFuse(authority);
 			return fuse.search(query.pattern).map((result) => {
 				return Uri.parse('').with({

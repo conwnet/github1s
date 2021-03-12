@@ -14,8 +14,7 @@
     "onCommand:github1s.update-token",
     "onCommand:github1s.clear-token",
     "onCommand:github1s.get-current-authority",
-    "onCommand:github1s.switch-branch",
-    "onCommand:github1s.switch-tag",
+    "onCommand:github1s.checkout-ref",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -58,13 +57,8 @@
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.switch-branch",
-        "title": "Switch to Another Branch",
-        "category": "GitHub1s"
-      },
-      {
-        "command": "github1s.switch-tag",
-        "title": "Switch to Another Tag",
+        "command": "github1s.checkout-ref",
+        "title": "Checkout to...",
         "category": "GitHub1s"
       },
       {
@@ -87,6 +81,7 @@
     "@apollo/client": "^3.3.9",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
+    "history": "^5.0.0",
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
     "p-finally": "^2.0.1",
