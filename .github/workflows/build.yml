@@ -17,6 +17,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    name: Build & Test on ${{ matrix.os }} with Node ${{ matrix.node-version }}
+
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
