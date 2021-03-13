@@ -4,15 +4,14 @@
  */
 
 import * as vscode from 'vscode';
-import { getCurrentAuthority } from '@/helpers/git-ref';
+import router from '@/router';
 
-const getGitpodRepoUri = () =>
-	getCurrentAuthority().then((currentAuthority) => {
-		const [currentOwner, currentRepo] = currentAuthority.split('+');
-		return vscode.Uri.parse(
-			`https://gitpod.io/#https://github.com/${currentOwner}/${currentRepo}`
-		);
-	});
+const getGitpodRepoUri = async () => {
+	const { owner, repo } = await router.getState();
+	return vscode.Uri.parse(
+		`https://gitpod.io/#https://github.com/${owner}/${repo}`
+	);
+};
 
 export const showGitpod = async () => {
 	const gitpodRepoUri = await getGitpodRepoUri();

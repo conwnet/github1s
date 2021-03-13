@@ -15,7 +15,7 @@ import {
 	Uri,
 } from 'vscode';
 import { toUint8Array as decodeBase64 } from 'js-base64';
-import { getCurrentAuthority } from '@/helpers/git-ref';
+import router from '@/router';
 import { noop, trimStart } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
@@ -57,7 +57,7 @@ export class GitHub1sFileSystemProvider
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | undefined> {
 		let parts = uri.path.split('/').filter(Boolean);
 		// if the authority of uri is empty, we should use `current authority`
-		const authority = uri.authority || (await getCurrentAuthority());
+		const authority = uri.authority || (await router.getAuthority());
 		if (!this.root.has(authority)) {
 			this.root.set(
 				authority,
