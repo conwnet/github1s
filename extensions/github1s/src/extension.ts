@@ -14,12 +14,8 @@ import {
 	commandGetCurrentAuthority,
 	commandOpenGitpod,
 } from '@/commands';
-import {
-	GitHub1sFileSystemProvider,
-	GitHub1sFileSearchProvider,
-	GitHub1sTextSearchProvider,
-	GitHub1sSubmoduleDecorationProvider,
-} from '@/providers';
+import { registerVSCodeProviders } from '@/providers';
+import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 import { showSponsors } from '@/sponsors';
 import { showGitpod } from '@/gitpod';
 import router from '@/router';
@@ -34,30 +30,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	await router.initialize();
 	// register the necessary event listeners
 	registerEventListeners();
-
-	// providers
-	const fsProvider = new GitHub1sFileSystemProvider();
-	context.subscriptions.push(
-		vscode.workspace.registerFileSystemProvider(
-			GitHub1sFileSystemProvider.scheme,
-			fsProvider,
-			{
-				isCaseSensitive: true,
-				isReadonly: true,
-			}
-		),
-		vscode.workspace.registerFileSearchProvider(
-			GitHub1sFileSearchProvider.scheme,
-			new GitHub1sFileSearchProvider(fsProvider)
-		),
-		vscode.workspace.registerTextSearchProvider(
-			GitHub1sTextSearchProvider.scheme,
-			new GitHub1sTextSearchProvider()
-		),
-		vscode.window.registerFileDecorationProvider(
-			new GitHub1sSubmoduleDecorationProvider(fsProvider)
-		)
-	);
+	// register VS Code providers
+	registerVSCodeProviders();
 
 	// views
 	context.subscriptions.push(

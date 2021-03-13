@@ -4,6 +4,7 @@
  */
 
 import { RouterState } from '@/router/types';
+import { updateSourceControlChanges } from '@/source-control/changes';
 import { updateCheckoutRefOnStatusBar } from '@/source-control/status-bar';
 
 export const sourceControlRouterListener = (
@@ -12,5 +13,9 @@ export const sourceControlRouterListener = (
 ) => {
 	if (currentState.ref !== previousState.ref) {
 		updateCheckoutRefOnStatusBar();
+	}
+
+	if (currentState.pullNumber !== previousState.pullNumber) {
+		updateSourceControlChanges();
 	}
 };
