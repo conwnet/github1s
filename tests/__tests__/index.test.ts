@@ -62,6 +62,12 @@ it('should load successfully', async () => {
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
 	);
 
+	// README file will be rendered in an iframe
+	await page.$eval(
+		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
+		(el: HTMLElement) => el.innerHTML
+	);
+
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
