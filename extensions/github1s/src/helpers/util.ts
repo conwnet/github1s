@@ -38,6 +38,11 @@ export const dirname = (path: string): string => {
 	return trimmedPath.substr(0, trimmedPath.lastIndexOf('/')) || '';
 };
 
+export const basename = (path: string): string => {
+	const trimmedPath = trimEnd(path, '/');
+	return trimmedPath.substr(trimmedPath.lastIndexOf('/') + 1) || '';
+};
+
 export const uniqueId = ((id) => () => id++)(1);
 
 export const prop = (obj: object, path: (string | number)[] = []): any => {

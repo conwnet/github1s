@@ -6,6 +6,7 @@
 import { parsePath } from 'history';
 import { parseTreeUrl } from './tree';
 import { parseBlobUrl } from './blob';
+import { parsePullUrl } from './pull';
 import { PageType, RouterState } from '../types';
 
 // detect concrete PageType the *third part* in url.path
@@ -13,9 +14,9 @@ const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 	const PAGE_TYPE_MAP = {
 		tree: PageType.TREE,
 		blob: PageType.BLOB,
+		pull: PageType.PULL,
 		// TODO: implements below types
 		// pulls: PageType.PULL_LIST,
-		// pull: PageType.PULL,
 		// commits: PageType.COMMIT_LIST,
 		// commit: PageType.COMMIT,
 	};
@@ -31,6 +32,8 @@ export const parseGitHubUrl = async (path: string): Promise<RouterState> => {
 			return parseTreeUrl(path);
 		case PageType.BLOB:
 			return parseBlobUrl(path);
+		case PageType.PULL:
+			return parsePullUrl(path);
 	}
 
 	// fallback to default

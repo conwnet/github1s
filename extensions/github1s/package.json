@@ -66,6 +66,44 @@
         "title": "Edit files in Gitpod",
         "category": "GitHub1s"
       }
+    ],
+    "colors": [
+      {
+        "id": "gitDecoration.addedResourceForeground",
+        "description": "%colors.added%",
+        "defaults": {
+          "light": "#587c0c",
+          "dark": "#81b88b",
+          "highContrast": "#1b5225"
+        }
+      },
+      {
+        "id": "gitDecoration.deletedResourceForeground",
+        "description": "%colors.deleted%",
+        "defaults": {
+          "light": "#ad0707",
+          "dark": "#c74e39",
+          "highContrast": "#c74e39"
+        }
+      },
+      {
+        "id": "gitDecoration.modifiedResourceForeground",
+        "description": "%colors.modified%",
+        "defaults": {
+          "light": "#895503",
+          "dark": "#E2C08D",
+          "highContrast": "#E2C08D"
+        }
+      },
+      {
+        "id": "gitDecoration.submoduleResourceForeground",
+        "description": "%colors.submodule%",
+        "defaults": {
+          "light": "#1258a7",
+          "dark": "#8db9e2",
+          "highContrast": "#8db9e2"
+        }
+      }
     ]
   },
   "scripts": {
