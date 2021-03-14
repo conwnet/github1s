@@ -61,6 +61,7 @@ it('should load successfully', async () => {
 	expect(await page.title()).toMatch(
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
 	);
+	await page.waitForTimeout(5000);
 
 	// README file will be rendered in an iframe
 	await page.$eval(
