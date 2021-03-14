@@ -25,7 +25,11 @@ function main() {
 	cd lib
 	git clone --depth 1 -b 1.52.1 https://github.com/microsoft/vscode.git vscode
 	cd vscode
-	yarn --frozen-lockfile
+	if  [ -z ${CI+x} ]; then
+		yarn --frozen-lockfile
+	else
+		yarn --frozen-lockfile || echo skip
+	fi
 }
 
 main "$@"
