@@ -16,7 +16,7 @@ import {
 	TextSearchResult,
 	Uri,
 } from 'vscode';
-import { getCurrentAuthority } from '@/helpers/git-ref';
+import router from '@/router';
 import { getTextSearchResults } from '@/interfaces/sourcegraph-api';
 import { showSourcegraphSearchMessage } from '@/messages';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
@@ -36,7 +36,7 @@ export class GitHub1sTextSearchProvider
 		progress: Progress<TextSearchResult>,
 		_token: CancellationToken
 	) {
-		return getCurrentAuthority().then(async (authority) => {
+		return router.getAuthority().then(async (authority) => {
 			const [owner, repo, ref] = authority.split('+');
 			const searchResults = await getTextSearchResults(
 				owner,

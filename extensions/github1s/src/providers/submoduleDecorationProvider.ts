@@ -13,6 +13,7 @@ import {
 	ProviderResult,
 	Uri,
 	ThemeColor,
+	EventEmitter,
 } from 'vscode';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 import { Directory } from './fileSystemProvider/types';
@@ -28,12 +29,17 @@ export class GitHub1sSubmoduleDecorationProvider
 		color: new ThemeColor('gitDecoration.submoduleResourceForeground'),
 	};
 
-	onDidChangeFileDecorations?: Event<Uri | Uri[]>;
+	private _onDidChangeFileDecorations = new EventEmitter<undefined>();
+	readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
 
 	constructor(private fsProvider: GitHub1sFileSystemProvider) {}
 
 	dispose() {
 		this.disposable?.dispose();
+	}
+
+	updateDecorations() {
+		this._onDidChangeFileDecorations.fire(undefined);
 	}
 
 	provideFileDecoration(

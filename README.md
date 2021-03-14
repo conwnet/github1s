@@ -41,7 +41,7 @@ _Note_: If you already closed the notification, you can find a "Develop your pro
 
 If you want to view non-public repositories, you need to add an OAuth token. The token is stored only in your browser, and only send to GitHub when fetching your repository's files. Click on the icon near the bottom of the left-hand row of icons, and the dialog box will prompt you for it, and even take you to your GitHub settings page to generate one, if needed.
 
-![VS Code - GitHub1s](https://raw.githubusercontent.com/timbaileyjones/github1s/master/resources/images/auth-token.png)
+<img height="500px" src="https://raw.githubusercontent.com/timbaileyjones/github1s/master/resources/images/auth-token.png" />
 
 ## Screenshots
 
@@ -116,7 +116,7 @@ $ yarn build
 The continued development and maintenance of GitHub1s is made possible by these generous sponsors:
 
 <table><tbody><tr>
-<td><a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">
+<td><a href="https://sourcegraph.com/">
 <img height="40px" src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/sourcegraph-logo.svg">
 </a></td>
 <td><a href="https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss">

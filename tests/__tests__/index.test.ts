@@ -1,6 +1,16 @@
 import { chromium, Browser, Page } from 'playwright';
+import {
+	toMatchImageSnapshot,
+	MatchImageSnapshotOptions,
+} from 'jest-image-snapshot';
 
-const expect = require('expect');
+expect.extend({ toMatchImageSnapshot });
+
+const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
+	failureThreshold: 0.1,
+	failureThresholdType: 'percent',
+	updatePassedSnapshot: true,
+};
 
 let browser: Browser;
 let page: Page;
@@ -51,4 +61,23 @@ it('should load successfully', async () => {
 	expect(await page.title()).toMatch(
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
 	);
+	await page.waitForTimeout(5000);
+
+	// README file will be rendered in an iframe
+	await page.$eval(
+		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
+		(el: HTMLElement) => el.innerHTML
+	);
+
+	const image = await page.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+});
+
+it('should open file correctly', async () => {
+	await page.goto(BASE_URL);
+	await page.click('[title="~/tsconfig.json"]');
+	await page.click('[data-resource-name="tsconfig.json"]');
+
+	const image = await page.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });

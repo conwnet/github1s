@@ -14,8 +14,7 @@
     "onCommand:github1s.update-token",
     "onCommand:github1s.clear-token",
     "onCommand:github1s.get-current-authority",
-    "onCommand:github1s.switch-branch",
-    "onCommand:github1s.switch-tag",
+    "onCommand:github1s.checkout-ref",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -58,19 +57,52 @@
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.switch-branch",
-        "title": "Switch to Another Branch",
-        "category": "GitHub1s"
-      },
-      {
-        "command": "github1s.switch-tag",
-        "title": "Switch to Another Tag",
+        "command": "github1s.checkout-ref",
+        "title": "Checkout to...",
         "category": "GitHub1s"
       },
       {
         "command": "github1s.open-gitpod",
         "title": "Edit files in Gitpod",
         "category": "GitHub1s"
+      }
+    ],
+    "colors": [
+      {
+        "id": "gitDecoration.addedResourceForeground",
+        "description": "%colors.added%",
+        "defaults": {
+          "light": "#587c0c",
+          "dark": "#81b88b",
+          "highContrast": "#1b5225"
+        }
+      },
+      {
+        "id": "gitDecoration.deletedResourceForeground",
+        "description": "%colors.deleted%",
+        "defaults": {
+          "light": "#ad0707",
+          "dark": "#c74e39",
+          "highContrast": "#c74e39"
+        }
+      },
+      {
+        "id": "gitDecoration.modifiedResourceForeground",
+        "description": "%colors.modified%",
+        "defaults": {
+          "light": "#895503",
+          "dark": "#E2C08D",
+          "highContrast": "#E2C08D"
+        }
+      },
+      {
+        "id": "gitDecoration.submoduleResourceForeground",
+        "description": "%colors.submodule%",
+        "defaults": {
+          "light": "#1258a7",
+          "dark": "#8db9e2",
+          "highContrast": "#8db9e2"
+        }
       }
     ]
   },
@@ -87,6 +119,7 @@
     "@apollo/client": "^3.3.9",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
+    "history": "^5.0.0",
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
     "p-finally": "^2.0.1",

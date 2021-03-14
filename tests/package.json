@@ -4,7 +4,9 @@
   "description": "test case for github1s",
   "devDependencies": {
     "@types/jest": "^26.0.20",
+    "@types/jest-image-snapshot": "^4.3.0",
     "jest": "^26.6.3",
+    "jest-image-snapshot": "^4.4.0",
     "jest-playwright-preset": "^1.4.7",
     "playwright": "^1.9.0",
     "start-server-and-test": "^1.12.0",
