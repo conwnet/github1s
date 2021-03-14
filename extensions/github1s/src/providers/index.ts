@@ -11,14 +11,23 @@ import { GitHub1sTextSearchProvider } from './textSearchProvider';
 import { GitHub1sSubmoduleDecorationProvider } from './submoduleDecorationProvider';
 import { GitHub1sChangedFileDecorationProvider } from './changedFileDecorationProvider';
 
+export const fileSystemProvider = new GitHub1sFileSystemProvider();
+export const fileSearchProvider = new GitHub1sFileSearchProvider(
+	fileSystemProvider
+);
+export const textSearchProvider = new GitHub1sTextSearchProvider();
+export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider(
+	fileSystemProvider
+);
+export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
+
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
-	const fsProvider = new GitHub1sFileSystemProvider();
 
 	context.subscriptions.push(
 		vscode.workspace.registerFileSystemProvider(
 			GitHub1sFileSystemProvider.scheme,
-			fsProvider,
+			fileSystemProvider,
 			{
 				isCaseSensitive: true,
 				isReadonly: true,
@@ -26,17 +35,13 @@ export const registerVSCodeProviders = () => {
 		),
 		vscode.workspace.registerFileSearchProvider(
 			GitHub1sFileSearchProvider.scheme,
-			new GitHub1sFileSearchProvider(fsProvider)
+			fileSearchProvider
 		),
 		vscode.workspace.registerTextSearchProvider(
 			GitHub1sTextSearchProvider.scheme,
-			new GitHub1sTextSearchProvider()
+			textSearchProvider
 		),
-		vscode.window.registerFileDecorationProvider(
-			new GitHub1sSubmoduleDecorationProvider(fsProvider)
-		),
-		vscode.window.registerFileDecorationProvider(
-			new GitHub1sChangedFileDecorationProvider()
-		)
+		vscode.window.registerFileDecorationProvider(submoduleDecorationProvider),
+		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider)
 	);
 };
