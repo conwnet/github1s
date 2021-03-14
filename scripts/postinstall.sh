@@ -25,11 +25,7 @@ function main() {
 	cd lib
 	git clone --depth 1 -b 1.52.1 https://github.com/microsoft/vscode.git vscode
 	cd vscode
-	if  [ -z ${CI+x} ]; then
-		yarn --frozen-lockfile
-	else
-		yarn --frozen-lockfile || echo 'suppress vscode compile error on CI'
-	fi
+	yarn --frozen-lockfile
 }
 
 main "$@"

@@ -62,8 +62,6 @@ it('should load successfully', async () => {
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
 	);
 
-	await page.waitForTimeout(5000);
-
 	// README file will be rendered in an iframe
 	await page.$eval(
 		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
