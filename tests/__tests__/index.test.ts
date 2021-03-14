@@ -9,6 +9,7 @@ expect.extend({ toMatchImageSnapshot });
 const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
 	failureThreshold: 0.1,
 	failureThresholdType: 'percent',
+	updatePassedSnapshot: true,
 };
 
 let browser: Browser;
@@ -59,6 +60,13 @@ it('should load successfully', async () => {
 	// Title updated based on the repo
 	expect(await page.title()).toMatch(
 		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
+	);
+	await page.waitForTimeout(5000);
+
+	// README file will be rendered in an iframe
+	await page.$eval(
+		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
+		(el: HTMLElement) => el.innerHTML
 	);
 
 	const image = await page.screenshot();
