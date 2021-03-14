@@ -28,7 +28,7 @@ function main() {
 	if  [ -z ${CI+x} ]; then
 		yarn --frozen-lockfile
 	else
-		yarn --frozen-lockfile || echo skip
+		yarn --frozen-lockfile || echo 'suppress vscode compile error on CI'
 	fi
 }
 
