@@ -145,6 +145,7 @@ export const getGithubPullFiles = (
 	repo: string,
 	pullNumber: number
 ) => {
+	// TODO: only the number of change files not greater than 100 are supported now!
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`
 	);

@@ -4,6 +4,10 @@
  */
 
 import * as vscode from 'vscode';
+import {
+	changedFileDecorationProvider,
+	submoduleDecorationProvider,
+} from '@/providers';
 import { RouterState } from '@/router/types';
 
 export const explorerRouterListener = (
@@ -21,5 +25,8 @@ export const explorerRouterListener = (
 		);
 		// TODO: maybe we should update the editors but not close it
 		vscode.commands.executeCommand('workbench.action.closeAllGroups');
+
+		changedFileDecorationProvider.updateDecorations();
+		submoduleDecorationProvider.updateDecorations();
 	}
 };

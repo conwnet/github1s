@@ -7,7 +7,7 @@
 import {
 	CancellationToken,
 	Disposable,
-	Event,
+	EventEmitter,
 	FileDecoration,
 	FileDecorationProvider,
 	ProviderResult,
@@ -45,10 +45,15 @@ export class GitHub1sChangedFileDecorationProvider
 	implements FileDecorationProvider, Disposable {
 	private readonly disposable: Disposable;
 
-	onDidChangeFileDecorations?: Event<Uri | Uri[]>;
+	private _onDidChangeFileDecorations = new EventEmitter<undefined>();
+	readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
 
 	dispose() {
 		this.disposable?.dispose();
+	}
+
+	updateDecorations() {
+		this._onDidChangeFileDecorations.fire(undefined);
 	}
 
 	provideFileDecoration(
