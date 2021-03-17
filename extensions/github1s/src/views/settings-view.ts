@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { getNonce, getWebviewOptions } from '@/helpers/util';
-import { commandClearToken } from '@/commands';
 import { validateToken } from '@/interfaces/github-api-rest';
 
 interface WebviewState {
@@ -17,7 +16,7 @@ interface WebviewState {
 }
 
 export class SettingsView implements vscode.WebviewViewProvider {
-	public static readonly viewType = 'github1s-settings';
+	public static readonly viewType = 'github1s.views.settings';
 	private readonly _extensionContext: vscode.ExtensionContext;
 	private _webviewView: vscode.WebviewView;
 
@@ -45,15 +44,17 @@ export class SettingsView implements vscode.WebviewViewProvider {
 					this.handleUpdateToken(data.payload);
 					break;
 				case 'clear-token':
-					commandClearToken().then((cleared) => {
-						cleared &&
-							this.updateWebviewState({
-								token: '',
-								pageType: 'EDIT',
-								valid: false,
-								validating: false,
-							});
-					});
+					vscode.commands
+						.executeCommand('github1s.clear-token')
+						.then((cleared) => {
+							cleared &&
+								this.updateWebviewState({
+									token: '',
+									pageType: 'EDIT',
+									valid: false,
+									validating: false,
+								});
+						});
 					break;
 				case 'welcome-page':
 					vscode.commands.executeCommand('workbench.action.showWelcomePage');

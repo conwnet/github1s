@@ -130,6 +130,13 @@ export const getGithubAllFiles = (
 	).catch(handleRequestError);
 };
 
+export const getGitHubPulls = (owner: string, repo: string) => {
+	// TODO: only recent 100 pull requests are supported now
+	return fetch(
+		`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&order=created&per_page=100`
+	).catch(handleRequestError);
+};
+
 export const getGitHubPullDetail = (
 	owner: string,
 	repo: string,
@@ -137,7 +144,7 @@ export const getGitHubPullDetail = (
 ) => {
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`
-	);
+	).catch(handleRequestError);
 };
 
 export const getGithubPullFiles = (
@@ -148,5 +155,5 @@ export const getGithubPullFiles = (
 	// TODO: only the number of change files not greater than 100 are supported now!
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`
-	);
+	).catch(handleRequestError);
 };
