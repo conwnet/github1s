@@ -70,9 +70,9 @@
       },
       {
         "command": "github1s.switch-to-pull",
-        "title": "Switch to Pull Request...",
+        "title": "Search a Pull Request",
         "category": "GitHub1s",
-        "icon": "$(keyboard)"
+        "icon": "$(search)"
       },
       {
         "command": "github1s.open-gitpod",

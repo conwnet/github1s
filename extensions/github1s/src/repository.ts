@@ -123,7 +123,7 @@ export class Repository {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
 			const key = `${owner}+${repo}`;
 
-			if (!this._pullsMap.has[key] || forceUpdate) {
+			if (!this._pullsMap.has(key) || forceUpdate) {
 				this._pullsMap.set(key, await getGitHubPulls(owner, repo));
 			}
 			return this._pullsMap.get(key);

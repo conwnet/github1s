@@ -37,11 +37,6 @@ const handleRequestError = (error: RequestError) => {
 		);
 	}
 	if (error instanceof RequestNotFoundError) {
-		throw vscode.FileSystemError.NoPermissions(
-			'Current OAuth Token Is Invalid, Please Change Another One.'
-		);
-	}
-	if (error instanceof RequestNotFoundError) {
 		throw vscode.FileSystemError.FileNotFound('GitHub Resource Not Found');
 	}
 	throw vscode.FileSystemError.Unavailable(
