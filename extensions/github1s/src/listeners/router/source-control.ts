@@ -18,4 +18,8 @@ export const sourceControlRouterListener = (
 	if (currentState.pullNumber !== previousState.pullNumber) {
 		updateSourceControlChanges();
 	}
+
+	if (currentState.commitSha !== previousState.commitSha) {
+		updateSourceControlChanges();
+	}
 };

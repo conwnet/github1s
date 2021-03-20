@@ -11,6 +11,7 @@ import {
 	getGithubTagRefs,
 	getGithubPullFiles,
 	getGitHubPulls,
+	getGitHubCommitDetail,
 } from '@/interfaces/github-api-rest';
 
 export interface RepositoryRef {
@@ -44,6 +45,16 @@ export interface RepositoryPull {
 	};
 }
 
+export interface RepositoryCommit {
+	sha: string;
+	author: {
+		login: string;
+		avatar_url: string;
+	};
+	parents: { sha: string }[];
+	files: RepositoryChangedFile[];
+}
+
 export enum FileChangeType {
 	ADDED = 'added',
 	REMOVED = 'removed',
@@ -61,9 +72,13 @@ export class Repository {
 	private static instance: Repository;
 	private _branchRefsMap: Map<string, RepositoryRef[]>;
 	private _tagRefsMap: Map<string, RepositoryRef[]>;
+
 	private _pullsMap: Map<string, RepositoryPull[]>;
 	private _pullMap: Map<string, RepositoryPull>;
 	private _pullFilesMap: Map<string, RepositoryChangedFile[]>;
+
+	private _commitMap: Map<string, RepositoryCommit>;
+	private _commitFilesMap: Map<string, RepositoryChangedFile[]>;
 
 	private constructor() {
 		this._branchRefsMap = new Map();
@@ -71,6 +86,8 @@ export class Repository {
 		this._pullsMap = new Map();
 		this._pullMap = new Map();
 		this._pullFilesMap = new Map();
+		this._commitMap = new Map();
+		this._commitFilesMap = new Map();
 	}
 
 	public static getInstance() {
@@ -163,6 +180,44 @@ export class Repository {
 				);
 			}
 			return this._pullFilesMap.get(key);
+		}
+	);
+
+	public getCommit = reuseable(
+		async (
+			commitSha: string,
+			forceUpdate: boolean = false
+		): Promise<RepositoryCommit> => {
+			const [owner, repo] = [this.getOwner(), this.getRepo()];
+			const key = `${owner}+${repo}+${commitSha}`;
+
+			if (!this._commitMap.has(key) || forceUpdate) {
+				const commitData = (await getGitHubCommitDetail(
+					owner,
+					repo,
+					commitSha
+				)) as RepositoryCommit;
+				this._commitMap.set(key, commitData);
+				this._commitFilesMap.set(key, commitData.files);
+			}
+
+			return this._commitMap.get(key);
+		}
+	);
+
+	public getCommitFiles = reuseable(
+		async (
+			commitSha: string,
+			forceUpdate: boolean = false
+		): Promise<RepositoryChangedFile[]> => {
+			const [owner, repo] = [this.getOwner(), this.getRepo()];
+			const key = `${owner}+${repo}+${commitSha}`;
+
+			if (!this._commitFilesMap.has(key) || forceUpdate) {
+				// the _commitFilesMap will be filled in this.getCommit
+				await this.getCommit(commitSha);
+			}
+			return this._commitFilesMap.get(key) || [];
 		}
 	);
 }

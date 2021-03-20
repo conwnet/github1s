@@ -152,3 +152,13 @@ export const getGithubPullFiles = (
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`
 	).catch(handleRequestError);
 };
+
+export const getGitHubCommitDetail = (
+	owner: string,
+	repo: string,
+	commitSha: string
+) => {
+	return fetch(
+		`https://api.github.com/repos/${owner}/${repo}/commits/${commitSha}`
+	).catch(handleRequestError);
+};
