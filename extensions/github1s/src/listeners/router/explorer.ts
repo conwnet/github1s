@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import {
 	changedFileDecorationProvider,
 	submoduleDecorationProvider,
+	fileSearchProvider,
 } from '@/providers';
 import { RouterState } from '@/router/types';
 
@@ -28,5 +29,6 @@ export const explorerRouterListener = (
 
 		changedFileDecorationProvider.updateDecorations();
 		submoduleDecorationProvider.updateDecorations();
+		fileSearchProvider.loadFuzeForCurrentAuthority();
 	}
 };
