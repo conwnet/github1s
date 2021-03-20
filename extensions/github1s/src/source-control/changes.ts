@@ -31,10 +31,9 @@ const getChangedFiles = async (): Promise<ChangedFile[]> => {
 		currentRootUri = currentRootUri.with({
 			query: `pull=${routerState.pullNumber}`,
 		});
-		const { owner, repo } = await router.getState();
 		const baseRef = (await repository.getPull(routerState.pullNumber)).base.sha;
 		const baseRootUri = currentRootUri.with({
-			authority: `${owner}+${repo}+${baseRef}`,
+			authority: `${routerState.owner}+${routerState.repo}+${baseRef}`,
 		});
 
 		const pullFiles = await repository.getPullFiles(routerState.pullNumber);
@@ -49,6 +48,36 @@ const getChangedFiles = async (): Promise<ChangedFile[]> => {
 				previousFileUri: vscode.Uri.joinPath(baseRootUri, previousFilePath),
 				currentFileUri: vscode.Uri.joinPath(currentRootUri, currentFilePath),
 				status: pullFile.status,
+			};
+		});
+	}
+	// github commit page
+	else if (routerState.pageType === PageType.COMMIT) {
+		const { owner, repo, commitSha } = routerState;
+		// record that current editor is opened by commit
+		currentRootUri = currentRootUri.with({
+			query: `commit=${commitSha}`,
+		});
+		// if the commit.parents is more than one element
+		// the parents[1].sha should be the merge source commitSha
+		// So we use the parents[0].sha as the parent commitSha
+		const baseRef = (await repository.getCommit(commitSha)).parents?.[0]?.sha;
+		const baseRootUri = currentRootUri.with({
+			authority: `${owner}+${repo}+${baseRef || 'HEAD'}`,
+		});
+		const commitFiles = await repository.getCommitFiles(commitSha);
+
+		return commitFiles.map((commitFile) => {
+			// the `previous_filename` field only exists in `RENAMED` file,
+			// fallback to `filename` otherwise
+			const previousFilePath =
+				commitFile.previous_filename || commitFile.filename;
+			const currentFilePath = commitFile.filename;
+
+			return {
+				previousFileUri: vscode.Uri.joinPath(baseRootUri, previousFilePath),
+				currentFileUri: vscode.Uri.joinPath(currentRootUri, currentFilePath),
+				status: commitFile.status,
 			};
 		});
 	}
