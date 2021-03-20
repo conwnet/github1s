@@ -10,6 +10,7 @@ import {
 	getGitHubPullDetail,
 	getGithubTagRefs,
 	getGithubPullFiles,
+	getGitHubPulls,
 } from '@/interfaces/github-api-rest';
 
 export interface RepositoryRef {
@@ -25,6 +26,16 @@ export interface RepositoryRef {
 }
 
 export interface RepositoryPull {
+	number: string;
+	title: string;
+	state: string;
+	created_at: string;
+	closed_at: string;
+	merged_at: string;
+	user: {
+		login: string;
+		avatar_url: string;
+	};
 	head: {
 		sha: string;
 	};
@@ -50,12 +61,14 @@ export class Repository {
 	private static instance: Repository;
 	private _branchRefsMap: Map<string, RepositoryRef[]>;
 	private _tagRefsMap: Map<string, RepositoryRef[]>;
+	private _pullsMap: Map<string, RepositoryPull[]>;
 	private _pullMap: Map<string, RepositoryPull>;
 	private _pullFilesMap: Map<string, RepositoryChangedFile[]>;
 
 	private constructor() {
 		this._branchRefsMap = new Map();
 		this._tagRefsMap = new Map();
+		this._pullsMap = new Map();
 		this._pullMap = new Map();
 		this._pullFilesMap = new Map();
 	}
@@ -102,6 +115,18 @@ export class Repository {
 				this._tagRefsMap.set(key, await getGithubTagRefs(owner, repo));
 			}
 			return this._tagRefsMap.get(key);
+		}
+	);
+
+	public getPulls = reuseable(
+		async (forceUpdate: boolean = false): Promise<RepositoryPull[]> => {
+			const [owner, repo] = [this.getOwner(), this.getRepo()];
+			const key = `${owner}+${repo}`;
+
+			if (!this._pullsMap.has(key) || forceUpdate) {
+				this._pullsMap.set(key, await getGitHubPulls(owner, repo));
+			}
+			return this._pullsMap.get(key);
 		}
 	);
 

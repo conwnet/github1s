@@ -128,7 +128,9 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 ### Chrome Extensions
 
-- [zulhfreelancer](https://github.com/zulhfreelancer)/[Open in VS Code](https://chrome.google.com/webstore/detail/open-in-vs-code-github1sc/neloiopjjeflfnecdlajhopdlojlkhll)
+- [chouglesaud/](https://github.com/chouglesaud)[repositree](https://github.com/chouglesaud/repositree) - [Chrome Web Store](https://chrome.google.com/webstore/detail/repositree/lafjldoccjnjlcmdhmniholdpjkbgajo)
+
+- [zulhfreelancer](https://github.com/zulhfreelancer)[Open in VS Code](https://chrome.google.com/webstore/detail/open-in-vs-code-github1sc/neloiopjjeflfnecdlajhopdlojlkhll)
 
 - [fhefh2015/GitHub1s_chrome_extension](https://github.com/fhefh2015/GitHub1s_chrome_extension) - [Chrome Web Store](https://chrome.google.com/webstore/detail/github1s/lodjfmkfbfkpdhnhkcdcoonghhghbkhe)
 
@@ -139,6 +141,8 @@ The continued development and maintenance of GitHub1s is made possible by these 
 - [katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut) - [Chrome Web Store](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo)
 
 ### Firefox Extensions
+
+- [chouglesaud/](https://github.com/chouglesaud)[repositree](https://github.com/chouglesaud/repositree) - [Firefox Browser Addons](https://addons.mozilla.org/en-US/firefox/addon/repositree/)
 
 - [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s-extension)
 - [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s/)

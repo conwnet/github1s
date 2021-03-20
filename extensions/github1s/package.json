@@ -15,6 +15,7 @@
     "onCommand:github1s.clear-token",
     "onCommand:github1s.get-current-authority",
     "onCommand:github1s.checkout-ref",
+    "onCommand:github1s.switch-to-pull",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -34,9 +35,15 @@
     "views": {
       "github1s": [
         {
-          "id": "github1s-settings",
+          "id": "github1s.views.settings",
           "name": "Settings",
           "type": "webview"
+        }
+      ],
+      "scm": [
+        {
+          "id": "github1s.views.pull-request-list",
+          "name": "Pull Requests"
         }
       ]
     },
@@ -60,6 +67,12 @@
         "command": "github1s.checkout-ref",
         "title": "Checkout to...",
         "category": "GitHub1s"
+      },
+      {
+        "command": "github1s.switch-to-pull",
+        "title": "Search a Pull Request",
+        "category": "GitHub1s",
+        "icon": "$(search)"
       },
       {
         "command": "github1s.open-gitpod",
@@ -104,7 +117,16 @@
           "highContrast": "#8db9e2"
         }
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "github1s.switch-to-pull",
+          "when": "view =~ /^github1s\\.views\\.pull-request-list/",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "clean": "rm -rf dist out",
@@ -117,6 +139,7 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/client": "^3.3.9",
+    "dayjs": "^1.10.4",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
     "history": "^5.0.0",

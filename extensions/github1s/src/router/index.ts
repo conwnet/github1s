@@ -24,11 +24,7 @@ export class Router extends EventEmitter<RouterState> {
 	}
 
 	// we should ensure the router has been initialized at first!
-	async initialize() {
-		// use the browser url initialize the history
-		const browserUrl = (await vscode.commands.executeCommand(
-			'github1s.vscode.get-browser-url'
-		)) as string;
+	async initialize(browserUrl: string) {
 		const { path, query, fragment } = vscode.Uri.parse(browserUrl);
 		const targetPath =
 			path + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
