@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { History, createMemoryHistory } from 'history';
+import { Barrier } from '@/helpers/async';
 import { parseGitHubUrl } from './parser';
 import { EventEmitter } from './events';
 import { RouterState } from './types';
@@ -12,6 +13,7 @@ import { RouterState } from './types';
 export class Router extends EventEmitter<RouterState> {
 	private static instance: Router;
 
+	private readyBarrier = new Barrier();
 	private _previousStatePromise: Promise<RouterState>;
 	private _currentStatePromise: Promise<RouterState>;
 	public history: History = createMemoryHistory();
@@ -31,6 +33,7 @@ export class Router extends EventEmitter<RouterState> {
 		this.history.replace(targetPath);
 		this._currentStatePromise = parseGitHubUrl(targetPath);
 		this._previousStatePromise = this._currentStatePromise;
+		this.readyBarrier.open();
 
 		this.history.listen(async ({ location }) => {
 			const targetPath = `${location.pathname}${location.search}${location.hash}`;
@@ -51,7 +54,7 @@ export class Router extends EventEmitter<RouterState> {
 
 	// get the routerState for current url
 	public async getState(): Promise<RouterState> {
-		return this._currentStatePromise;
+		return this.readyBarrier.wait().then(() => this._currentStatePromise);
 	}
 
 	// compute the file URI authority of current routerState

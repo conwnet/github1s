@@ -26,10 +26,21 @@ export class GitHub1sFileSearchProvider
 	private readonly disposable: Disposable;
 	private fuseMap: Map<string, Fuse<GithubRESTEntry>> = new Map();
 
-	constructor(private fsProvider: GitHub1sFileSystemProvider) {}
+	constructor(private fsProvider: GitHub1sFileSystemProvider) {
+		// Preload the fuze for better `ctrl/command + p` experience.
+		// Once we have loaded the fuze, it will also populate the files into
+		// fileSystemProvider's cache. So after that, you don't have to send
+		// a request when you open the new directory in explorer late
+		this.loadFuzeForCurrentAuthority();
+	}
 
 	dispose() {
 		this.disposable?.dispose();
+	}
+
+	// load the fuze for current authority
+	async loadFuzeForCurrentAuthority() {
+		return this.getFuse(await router.getAuthority());
 	}
 
 	/**
