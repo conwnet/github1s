@@ -10,11 +10,15 @@ import { GitHub1sFileSearchProvider } from '@/providers/fileSearchProvider';
 
 // current editor is recovered by vscode, but should be closed now
 const shouldClosedThisEditor = async (editor) => {
-	const { pullNumber } = await router.getState();
+	const { pullNumber, commitSha } = await router.getState();
 	const resourceUriQuery = editor?.document.uri.query;
 	const resourcePullNumber = resourceUriQuery?.match(/\bpull=(\d+)/)?.[1];
+	const resourceCommitSha = resourceUriQuery?.match(/\bcommit=([^&#]+)/)?.[1];
 
-	return resourcePullNumber && +resourcePullNumber !== pullNumber;
+	return (
+		(resourcePullNumber && +resourcePullNumber !== pullNumber) ||
+		(resourceCommitSha && resourceCommitSha !== commitSha)
+	);
 };
 
 export const registerVSCodeEventListeners = () => {
