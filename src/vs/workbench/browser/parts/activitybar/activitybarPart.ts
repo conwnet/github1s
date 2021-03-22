@@ -1558,12 +1558,12 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 	}
 
 	private set placeholderViewContainersValue(
-		placeholderViewContainesValue: string
+		placeholderViewContainsValue: string
 	) {
-		if (this.placeholderViewContainersValue !== placeholderViewContainesValue) {
-			this._placeholderViewContainersValue = placeholderViewContainesValue;
+		if (this.placeholderViewContainersValue !== placeholderViewContainsValue) {
+			this._placeholderViewContainersValue = placeholderViewContainsValue;
 			this.setStoredPlaceholderViewContainersValue(
-				placeholderViewContainesValue
+				placeholderViewContainsValue
 			);
 		}
 	}
