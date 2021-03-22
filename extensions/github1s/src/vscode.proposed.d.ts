@@ -1692,7 +1692,7 @@ declare module 'vscode' {
 
 		/**
 		 * Content providers should always use [file system providers](#FileSystemProvider) to
-		 * resolve the raw content for `uri` as the resouce is not necessarily a file on disk.
+		 * resolve the raw content for `uri` as the resource is not necessarily a file on disk.
 		 */
 		openNotebook(
 			uri: Uri,
