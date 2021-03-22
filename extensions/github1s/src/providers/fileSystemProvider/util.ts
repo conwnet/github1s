@@ -8,8 +8,8 @@ import {
 	File,
 	Directory,
 	Entry,
-	GithubRESTEntry,
-	GithubGraphQLEntry,
+	GitHubRESTEntry,
+	GitHubGraphQLEntry,
 } from './types';
 
 const textEncoder = new TextEncoder();
@@ -31,7 +31,7 @@ export const createEntry = (
 };
 
 export const insertGitHubRESTEntryToDirectory = (
-	githubEntry: GithubRESTEntry,
+	githubEntry: GitHubRESTEntry,
 	baseDirectory: Directory
 ) => {
 	const pathParts = githubEntry.path.split('/').filter(Boolean);
@@ -70,7 +70,7 @@ export const insertGitHubRESTEntryToDirectory = (
  * @param parentDirectory the parent Directory
  */
 export const insertGitHubGraphQLEntriesToDirectory = (
-	entries: GithubGraphQLEntry[],
+	entries: GitHubGraphQLEntry[],
 	parentDirectory: Directory
 ) => {
 	if (!entries) {

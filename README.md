@@ -41,11 +41,11 @@ _Note_: If you already closed the notification, you can find a "Develop your pro
 
 If you want to view non-public repositories, you need to add an OAuth token. The token is stored only in your browser, and only send to GitHub when fetching your repository's files. Click on the icon near the bottom of the left-hand row of icons, and the dialog box will prompt you for it, and even take you to your GitHub settings page to generate one, if needed.
 
-<img height="500px" src="https://raw.githubusercontent.com/timbaileyjones/github1s/master/resources/images/auth-token.png" />
+<img height="500px" src="https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/auth-token.png" />
 
 ## Screenshots
 
-![VS Code - GitHub1s](https://raw.githubusercontent.com/mohitjaisal/github1s/master/resources/images/Github1sDemo1.gif)
+![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/GitHub1sDemo1.gif)
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/demo.png)
 
@@ -136,22 +136,22 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 - [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer) - [Chrome Web Store](https://chrome.google.com/webstore/detail/github-code-viewer/ecddapgifccgblebfibdgkagfbdagjfn)
 
-- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Chrome Web Store](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe)
+- [Darkempire78/GitHub1s-Extension](https://github.com/Darkempire78/GitHub1s-Extension)
+- [zvizvi/GitHub Web IDE](https://github.com/zvizvi/github-web-ide) - [Chrome Web Store](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe)
 - [katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut) - [Chrome Web Store](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo)
 
 ### Firefox Extensions
 
 - [chouglesaud/](https://github.com/chouglesaud)[repositree](https://github.com/chouglesaud/repositree) - [Firefox Browser Addons](https://addons.mozilla.org/en-US/firefox/addon/repositree/)
 
-- [Darkempire78/Github1s-Extension](https://github.com/Darkempire78/Github1s-Extension) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s-extension)
+- [Darkempire78/GitHub1s-Extension](https://github.com/Darkempire78/GitHub1s-Extension) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s-extension)
 - [mcherifi/github1s-firefox-addon](https://github.com/mcherifi/github1s-firefox-addon) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github1s/)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github-web-ide/)
+- [zvizvi/GitHub Web IDE](https://github.com/zvizvi/github-web-ide) - [Firefox Browser Addons](https://addons.mozilla.org/firefox/addon/github-web-ide/)
 
 ### Microsoft Edge Extensions
 
 - [febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer)
-- [zvizvi/Github Web IDE](https://github.com/zvizvi/github-web-ide) - [Edge Add-ons Store](https://microsoftedge.microsoft.com/addons/detail/akjbkjciknacicbnkfjbnlaeednpadcf)
+- [zvizvi/GitHub Web IDE](https://github.com/zvizvi/github-web-ide) - [Edge Add-ons Store](https://microsoftedge.microsoft.com/addons/detail/akjbkjciknacicbnkfjbnlaeednpadcf)
 
 ### Tampermonkey scripts
 
