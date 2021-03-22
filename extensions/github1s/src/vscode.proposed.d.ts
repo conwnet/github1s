@@ -1064,7 +1064,7 @@ declare module 'vscode' {
 		 * Handle when the underlying resource for a custom editor is renamed.
 		 *
 		 * This allows the webview for the editor be preserved throughout the rename. If this method is not implemented,
-		 * VS Code will destory the previous custom editor and create a replacement one.
+		 * VS Code will destroy the previous custom editor and create a replacement one.
 		 *
 		 * @param newDocument New text document to use for the custom editor.
 		 * @param existingWebviewPanel Webview panel for the custom editor.
