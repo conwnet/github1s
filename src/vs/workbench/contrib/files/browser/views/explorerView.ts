@@ -1050,7 +1050,7 @@ export class ExplorerView extends ViewPane {
 		reveal = this.autoReveal,
 		retry = 0
 	): Promise<void> {
-		// do no retry more than once to prevent inifinite loops in cases of inconsistent model
+		// do no retry more than once to prevent infinite loops in cases of inconsistent model
 		if (retry === 2) {
 			return;
 		}
