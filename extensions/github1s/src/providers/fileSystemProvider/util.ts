@@ -64,7 +64,7 @@ export const insertGitHubRESTEntryToDirectory = (
 };
 
 /**
- * This funtion must be used for only GraphQL output
+ * This function must be used for only GraphQL output
  *
  * @param entries the entries of a GitObject
  * @param parentDirectory the parent Directory
