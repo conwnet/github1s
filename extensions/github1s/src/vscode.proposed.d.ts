@@ -2149,7 +2149,7 @@ declare module 'vscode' {
 		General activation events:
 			- `onLanguage:*` most test extensions will want to activate when their
 				language is opened to provide code lenses.
-			- `onTests:*` new activation event very simiular to `workspaceContains`,
+			- `onTests:*` new activation event very similar to `workspaceContains`,
 				but only fired when the user wants to run tests or opens the test explorer.
 	*/
 	export namespace test {
