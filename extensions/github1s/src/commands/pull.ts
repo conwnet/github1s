@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import repository from '@/repository';
+import { PullTreeItem } from '@/views/pull-list-view';
 
 export const commandSwitchToPull = async (pullNumber?: number) => {
 	const { owner, repo } = await router.getState();
@@ -55,4 +56,24 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 	}
 
 	pullNumber && router.replace(`/${owner}/${repo}/pull/${pullNumber}`);
+};
+
+// this command is used in `source control pull request view`
+export const commandViewItemSwitchToPull = (viewItem: PullTreeItem) => {
+	return commandSwitchToPull(viewItem?.pull?.number);
+};
+
+// this command is used in `source control pull request view`
+export const commandViewItemOpenPullOnGitHub = async (
+	viewItem: PullTreeItem
+) => {
+	const pullNumber = viewItem?.pull?.number;
+
+	if (pullNumber) {
+		const { owner, repo } = await router.getState();
+		return vscode.commands.executeCommand(
+			'vscode.open',
+			vscode.Uri.parse(`https://github.com/${owner}/${repo}/pull/${pullNumber}`)
+		);
+	}
 };

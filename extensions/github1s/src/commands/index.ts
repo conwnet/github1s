@@ -11,7 +11,11 @@ import {
 	commandClearToken,
 } from './token';
 import { commandGetCurrentAuthority, commandCheckoutRef } from './ref';
-import { commandSwitchToPull } from './pull';
+import {
+	commandSwitchToPull,
+	commandViewItemSwitchToPull,
+	commandViewItemOpenPullOnGitHub,
+} from './pull';
 import { commandOpenGitpod } from './gitpod';
 
 export const registerGitHub1sCommands = () => {
@@ -47,6 +51,16 @@ export const registerGitHub1sCommands = () => {
 		vscode.commands.registerCommand(
 			'github1s.switch-to-pull',
 			commandSwitchToPull
+		),
+		// switch to a pull request
+		vscode.commands.registerCommand(
+			'github1s.pull-view-item-switch-to-pull',
+			commandViewItemSwitchToPull
+		),
+		// switch to a pull request
+		vscode.commands.registerCommand(
+			'github1s.pull-view-item-open-on-github',
+			commandViewItemOpenPullOnGitHub
 		),
 
 		// open current repository on gitpod
