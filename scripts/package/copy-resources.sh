@@ -13,7 +13,7 @@ function main() {
 	else
 		cp resources/index-dev.html dist/index.html
 	fi
-	cp resources/favicon.ico dist
+	cp resources/*.ico dist
 	cp resources/manifest.json dist
 
 	echo "copy resources done!"
