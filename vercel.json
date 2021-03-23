@@ -12,8 +12,8 @@
       }
     },
     {
-      "src": "/(.*).ico",
-      "dest": "/$1.ico"
+      "src": "/favicon(-dark|-light)?.ico",
+      "dest": "/favicon$1.ico"
     },
     {
       "src": "/manifest.json",
