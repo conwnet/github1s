@@ -55,6 +55,12 @@ export const throttledReportNetworkError = throttle(
 	5000
 );
 
+export const getFetchOptions = (forceUpdate?: boolean): RequestInit => {
+	if (forceUpdate) {
+		return { cache: 'reload' };
+	}
+};
+
 const cache = new Map();
 
 export const fetch = async (url: string, options?: RequestInit) => {

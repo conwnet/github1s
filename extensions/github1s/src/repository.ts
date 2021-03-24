@@ -13,6 +13,7 @@ import {
 	getGitHubPulls,
 	getGitHubCommitDetail,
 } from '@/interfaces/github-api-rest';
+import { getFetchOptions } from './helpers/fetch';
 
 export interface RepositoryRef {
 	name: string;
@@ -94,9 +95,11 @@ export class Repository {
 	public getBranches = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return await getGithubBranchRefs(owner, repo, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return await getGithubBranchRefs(
+				owner,
+				repo,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -104,18 +107,14 @@ export class Repository {
 	public getTags = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGithubTagRefs(owner, repo, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return getGithubTagRefs(owner, repo, getFetchOptions(forceUpdate));
 		}
 	);
 
 	public getPulls = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryPull[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGitHubPulls(owner, repo, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return getGitHubPulls(owner, repo, getFetchOptions(forceUpdate));
 		}
 	);
 
@@ -125,9 +124,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryPull> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGitHubPullDetail(owner, repo, pullNumber, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return getGitHubPullDetail(
+				owner,
+				repo,
+				pullNumber,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -137,9 +139,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryChangedFile[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGithubPullFiles(owner, repo, pullNumber, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return getGithubPullFiles(
+				owner,
+				repo,
+				pullNumber,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -149,9 +154,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryCommit> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGitHubCommitDetail(owner, repo, commitSha, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			return getGitHubCommitDetail(
+				owner,
+				repo,
+				commitSha,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -161,9 +169,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryChangedFile[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const commitData = await getGitHubCommitDetail(owner, repo, commitSha, {
-				cache: forceUpdate ? 'reload' : 'force-cache',
-			});
+			const commitData = await getGitHubCommitDetail(
+				owner,
+				repo,
+				commitSha,
+				getFetchOptions(forceUpdate)
+			);
 			return commitData.files;
 		}
 	);
