@@ -12,8 +12,8 @@ import {
 	ProviderResult,
 	Uri,
 } from 'vscode';
-import { parseQuery } from '@/helpers/util';
 import router from '@/router';
+import * as queryString from 'query-string';
 import { changedFileDecorationDataMap } from './changedFileDecorationProvider';
 
 export class GitHub1sSourceControlDecorationProvider
@@ -38,16 +38,16 @@ export class GitHub1sSourceControlDecorationProvider
 		_token: CancellationToken
 	): ProviderResult<FileDecoration> {
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.fileSchema) {
-			const query = parseQuery(uri.query);
-			return changedFileDecorationDataMap[query.status];
+			const query = queryString.parse(uri.query);
+			return changedFileDecorationDataMap[query.status as string];
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.pullSchema) {
 			return router.getState().then((routerState) => {
-				const query = parseQuery(uri.query);
-				return {
-					badge: +routerState.pullNumber === +query.number ? '✔' : '',
-				};
+				const query = queryString.parse(uri.query);
+				return +routerState.pullNumber === +query.number
+					? { badge: '✔' }
+					: null;
 			});
 		}
 	}

@@ -7,42 +7,43 @@ import * as vscode from 'vscode';
 import { relativeTimeTo } from '@/helpers/date';
 import repository, { RepositoryPull } from '@/repository';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
+import * as queryString from 'query-string';
 import {
 	getChangedFileCommand,
 	getPullChangeFiles,
 } from '@/source-control/changes';
 
-enum PullStatus {
+enum PullState {
 	OPEN = 'open',
 	CLOSED = 'closed',
 	MERGED = 'merged',
 }
 
-const getPullStatus = (pull: RepositoryPull): PullStatus => {
+const getPullStatus = (pull: RepositoryPull): PullState => {
 	// current pull request is open
-	if (pull.state === 'open') {
-		return PullStatus.OPEN;
+	if (pull.state === PullState.OPEN) {
+		return PullState.OPEN;
 	}
 
 	// current pull request is merged
-	if (pull.state === 'closed' && pull.merged_at) {
-		return PullStatus.MERGED;
+	if (pull.state === PullState.CLOSED && pull.merged_at) {
+		return PullState.MERGED;
 	}
 
 	// current pull is closed
-	return PullStatus.CLOSED;
+	return PullState.CLOSED;
 };
 
 const getPullTreeItemDescription = (pull: RepositoryPull) => {
 	const pullStatus = getPullStatus(pull);
 
 	// current pull request is open
-	if (pullStatus === PullStatus.OPEN) {
+	if (pullStatus === PullState.OPEN) {
 		return `opened ${relativeTimeTo(pull.created_at)} by ${pull.user.login}`;
 	}
 
 	// current pull request is merged
-	if (pullStatus === PullStatus.MERGED) {
+	if (pullStatus === PullState.MERGED) {
 		return `by ${pull.user.login} was merged ${relativeTimeTo(pull.merged_at)}`;
 	}
 
@@ -51,9 +52,9 @@ const getPullTreeItemDescription = (pull: RepositoryPull) => {
 };
 
 const statusIconMap = {
-	[PullStatus.OPEN]: '🟢',
-	[PullStatus.CLOSED]: '🔴',
-	[PullStatus.MERGED]: '🟣',
+	[PullState.OPEN]: '🟢',
+	[PullState.CLOSED]: '🔴',
+	[PullState.MERGED]: '🟣',
 };
 
 export interface PullTreeItem extends vscode.TreeItem {
@@ -85,7 +86,7 @@ export class PullRequestTreeDataProvider
 				contextValue,
 				resourceUri: vscode.Uri.parse('').with({
 					scheme: GitHub1sSourceControlDecorationProvider.pullSchema,
-					query: `number=${pull.number}`,
+					query: queryString.stringify({ number: pull.number }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
@@ -106,7 +107,7 @@ export class PullRequestTreeDataProvider
 				description: true,
 				resourceUri: changeFile.headFileUri.with({
 					scheme: GitHub1sSourceControlDecorationProvider.fileSchema,
-					query: `status=${changeFile.status}`,
+					query: queryString.stringify({ status: changeFile.status }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
@@ -127,5 +128,15 @@ export class PullRequestTreeDataProvider
 		}
 		const pull = (element as PullTreeItem)?.pull;
 		return pull ? this.getPullFileItems(pull) : [];
+	}
+
+	// the tooltip of the `PullTreeItem` with `resourceUri` property won't show
+	// correctly if miss this resolveTreeItem, it seems a bug of current version
+	// vscode, and it has fixed in a newer version vscode
+	resolveTreeItem(
+		item: vscode.TreeItem,
+		_element: vscode.TreeItem
+	): vscode.ProviderResult<vscode.TreeItem> {
+		return item;
 	}
 }

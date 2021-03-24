@@ -78,12 +78,3 @@ export const encodeFilePath = (filePath: string): string => {
 		.map((segment) => encodeURIComponent(segment))
 		.join('/');
 };
-
-// parse the querystring simply: 'a=1&b=2&c=3'
-export const parseQuery = (query: string): { [key: string]: string } => {
-	const pairs = (query || '').split('&').filter(Boolean);
-	return pairs.reduce((prev, item) => {
-		const [key, value] = item.split('=');
-		return { ...prev, [key]: value };
-	}, {});
-};
