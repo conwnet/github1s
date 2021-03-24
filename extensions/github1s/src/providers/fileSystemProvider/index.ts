@@ -69,7 +69,9 @@ export class GitHub1sFileSystemProvider
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
 				if (entry.entries === null) {
-					await this.readDirectory(Uri.joinPath(entry.uri, entry.name));
+					await this.readDirectory(
+						Uri.joinPath(entry.uri, entry.name).with({ authority })
+					);
 				}
 				child = entry.entries.get(part);
 			}
@@ -246,12 +248,7 @@ export class GitHub1sFileSystemProvider
 			}
 			return parent.getNameTypePairs();
 		},
-		/**
-		 * Since we either use the uri.authority or call `router.getAuthority()` to get the authority,
-		 * And it uses the query to distinguish between files in different branch for diff view. It's safe
-		 * to ignore authority to deduplicate the redundant network calls.
-		 */
-		(uri) => uri.with({ authority: '' }).toString()
+		(uri) => uri.toString()
 	);
 
 	readFile = reuseable(
