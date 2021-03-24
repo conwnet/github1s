@@ -167,16 +167,8 @@ export class Repository {
 		async (
 			commitSha: string,
 			forceUpdate: boolean = false
-		): Promise<RepositoryChangedFile[]> => {
-			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const commitData = await getGitHubCommitDetail(
-				owner,
-				repo,
-				commitSha,
-				getFetchOptions(forceUpdate)
-			);
-			return commitData.files;
-		}
+		): Promise<RepositoryChangedFile[]> =>
+			(await this.getCommit(commitSha, forceUpdate)).files
 	);
 }
 
