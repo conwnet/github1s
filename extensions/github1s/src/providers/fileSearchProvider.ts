@@ -15,16 +15,16 @@ import {
 import Fuse from 'fuse.js';
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
-import { getGithubAllFiles } from '@/interfaces/github-api-rest';
+import { getGitHubAllFiles } from '@/interfaces/github-api-rest';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 import { insertGitHubRESTEntryToDirectory } from './fileSystemProvider/util';
-import { GithubRESTEntry } from './fileSystemProvider/types';
+import { GitHubRESTEntry } from './fileSystemProvider/types';
 
 export class GitHub1sFileSearchProvider
 	implements FileSearchProvider, Disposable {
 	static scheme = 'github1s';
 	private readonly disposable: Disposable;
-	private fuseMap: Map<string, Fuse<GithubRESTEntry>> = new Map();
+	private fuseMap: Map<string, Fuse<GitHubRESTEntry>> = new Map();
 
 	constructor(private fsProvider: GitHub1sFileSystemProvider) {
 		// Preload the fuze for better `ctrl/command + p` experience.
@@ -49,13 +49,13 @@ export class GitHub1sFileSearchProvider
 	 * if this is failed, the fuzzy search maybe not work fine
 	 */
 	getFuse = reuseable(
-		async (authority: string): Promise<Fuse<GithubRESTEntry>> => {
+		async (authority: string): Promise<Fuse<GitHubRESTEntry>> => {
 			if (this.fuseMap.has(authority)) {
 				return this.fuseMap.get(authority);
 			}
 			const [owner, repo, ref] = authority.split('+');
 
-			return getGithubAllFiles(owner, repo, ref).then(async (treeData) => {
+			return getGitHubAllFiles(owner, repo, ref).then(async (treeData) => {
 				if (!treeData.truncated) {
 					// the number of items in the tree array maybe exceeded maximum limit
 					// only update the rootDirectory if `treeData.truncated` is false
@@ -67,12 +67,12 @@ export class GitHub1sFileSearchProvider
 						}),
 						false
 					);
-					(treeData.tree || []).forEach((githubEntry: GithubRESTEntry) => {
+					(treeData.tree || []).forEach((githubEntry: GitHubRESTEntry) => {
 						insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
 					});
 				}
 				const fuse = new Fuse(
-					((treeData.tree || []) as GithubRESTEntry[]).filter(
+					((treeData.tree || []) as GitHubRESTEntry[]).filter(
 						(item) => item.type === 'blob'
 					),
 					{ keys: ['path'] }

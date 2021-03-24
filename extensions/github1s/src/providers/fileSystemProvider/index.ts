@@ -28,7 +28,7 @@ import {
 	readGitHubDirectory,
 	readGitHubFile,
 } from '@/interfaces/github-api-rest';
-import { File, Directory, Entry, GithubRESTEntry } from './types';
+import { File, Directory, Entry, GitHubRESTEntry } from './types';
 import {
 	createEntry,
 	insertGitHubRESTEntryToDirectory,
