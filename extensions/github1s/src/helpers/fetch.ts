@@ -63,7 +63,7 @@ export const fetch = async (url: string, options?: RequestInit) => {
 	const customHeaders = options && 'headers' in options ? options.headers : {};
 	if (
 		cache.has(url) &&
-		!['no-cache', 'no-store', 'reload'].includes(options.cache)
+		!['no-store', 'no-cache', 'reload'].includes(options.cache)
 	) {
 		return cache.get(url);
 	}
