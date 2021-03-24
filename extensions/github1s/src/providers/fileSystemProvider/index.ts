@@ -204,6 +204,7 @@ export class GitHub1sFileSystemProvider
 
 	readDirectory = reuseable(
 		async (uri: Uri): Promise<[string, FileType][]> => {
+			console.log('readDirectory', uri);
 			const parent = await this.lookupAsDirectory(uri, false);
 			if (parent.entries !== null) {
 				return parent.getNameTypePairs();

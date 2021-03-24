@@ -55,15 +55,24 @@ export const throttledReportNetworkError = throttle(
 	5000
 );
 
+const cache = new Map();
+
 export const fetch = async (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
+	if (
+		cache.has(url) &&
+		!['no-cache', 'no-store', 'reload'].includes(options.cache)
+	) {
+		return cache.get(url);
+	}
 
 	let response: Response;
 	try {
 		response = await self.fetch(url, {
 			mode: 'cors',
+			cache: 'force-cache',
 			...options,
 			headers: { ...authHeaders, ...customHeaders },
 		});
@@ -72,7 +81,8 @@ export const fetch = async (url: string, options?: RequestInit) => {
 		throw new RequestError('Request Failed, Maybe an Network Error', token);
 	}
 	if (response.status < 400) {
-		return response.json();
+		cache.set(url, response.json());
+		return cache.get(url);
 	}
 	if (response.status === 403) {
 		return response.json().then((data) => {
