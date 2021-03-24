@@ -89,7 +89,7 @@ export const validateToken = (token: string) => {
 // [List matching references](https://docs.github.com/en/rest/reference/git#list-matching-references)
 // can returned all branches for a request, and there is an issue for this API
 // https://github.com/github/docs/issues/3863
-export const getGithubBranchRefs = (owner: string, repo: string) => {
+export const getGitHubBranchRefs = (owner: string, repo: string) => {
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/heads`
 	)
@@ -100,8 +100,8 @@ export const getGithubBranchRefs = (owner: string, repo: string) => {
 		.catch(handleRequestError);
 };
 
-// It's similar to `getGithubBranchRefs`
-export const getGithubTagRefs = (owner: string, repo: string) => {
+// It's similar to `getGitHubBranchRefs`
+export const getGitHubTagRefs = (owner: string, repo: string) => {
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/tags`
 	)
@@ -112,7 +112,7 @@ export const getGithubTagRefs = (owner: string, repo: string) => {
 		.catch(handleRequestError);
 };
 
-export const getGithubAllFiles = (
+export const getGitHubAllFiles = (
 	owner: string,
 	repo: string,
 	ref: string,
@@ -142,7 +142,7 @@ export const getGitHubPullDetail = (
 	).catch(handleRequestError);
 };
 
-export const getGithubPullFiles = (
+export const getGitHubPullFiles = (
 	owner: string,
 	repo: string,
 	pullNumber: number

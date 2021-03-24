@@ -6,10 +6,10 @@
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import {
-	getGithubBranchRefs,
+	getGitHubBranchRefs,
 	getGitHubPullDetail,
-	getGithubTagRefs,
-	getGithubPullFiles,
+	getGitHubTagRefs,
+	getGitHubPullFiles,
 	getGitHubPulls,
 	getGitHubCommitDetail,
 } from '@/interfaces/github-api-rest';
@@ -116,7 +116,7 @@ export class Repository {
 			const key = `${owner}+${repo}`;
 
 			if (!this._branchRefsMap.has(key) || forceUpdate) {
-				this._branchRefsMap.set(key, await getGithubBranchRefs(owner, repo));
+				this._branchRefsMap.set(key, await getGitHubBranchRefs(owner, repo));
 			}
 			return this._branchRefsMap.get(key);
 		}
@@ -129,7 +129,7 @@ export class Repository {
 			const key = `${owner}+${repo}`;
 
 			if (!this._tagRefsMap.has(key) || forceUpdate) {
-				this._tagRefsMap.set(key, await getGithubTagRefs(owner, repo));
+				this._tagRefsMap.set(key, await getGitHubTagRefs(owner, repo));
 			}
 			return this._tagRefsMap.get(key);
 		}
@@ -176,7 +176,7 @@ export class Repository {
 			if (!this._pullFilesMap.has(key) || forceUpdate) {
 				this._pullFilesMap.set(
 					key,
-					await getGithubPullFiles(owner, repo, pullNumber)
+					await getGitHubPullFiles(owner, repo, pullNumber)
 				);
 			}
 			return this._pullFilesMap.get(key);

@@ -61,14 +61,14 @@ export class Directory implements FileStat {
 export type Entry = File | Directory;
 
 // TODO: rename
-export interface GithubRESTEntry {
+export interface GitHubRESTEntry {
 	path: string;
 	type: 'tree' | 'blob' | 'commit';
 	sha: string;
 	size?: number;
 }
 
-export interface GithubGraphQLEntry {
+export interface GitHubGraphQLEntry {
 	name: string;
 	oid: string;
 	path: string;

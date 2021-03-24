@@ -1064,7 +1064,7 @@ declare module 'vscode' {
 		 * Handle when the underlying resource for a custom editor is renamed.
 		 *
 		 * This allows the webview for the editor be preserved throughout the rename. If this method is not implemented,
-		 * VS Code will destory the previous custom editor and create a replacement one.
+		 * VS Code will destroy the previous custom editor and create a replacement one.
 		 *
 		 * @param newDocument New text document to use for the custom editor.
 		 * @param existingWebviewPanel Webview panel for the custom editor.
@@ -1329,13 +1329,13 @@ declare module 'vscode' {
 	export interface NotebookDocumentContentOptions {
 		/**
 		 * Controls if outputs change will trigger notebook document content change and if it will be used in the diff editor
-		 * Default to false. If the content provider doesn't persisit the outputs in the file document, this should be set to true.
+		 * Default to false. If the content provider doesn't persist the outputs in the file document, this should be set to true.
 		 */
 		transientOutputs: boolean;
 
 		/**
-		 * Controls if a meetadata property change will trigger notebook document content change and if it will be used in the diff editor
-		 * Default to false. If the content provider doesn't persisit a metadata property in the file document, it should be set to true.
+		 * Controls if a metadata property change will trigger notebook document content change and if it will be used in the diff editor
+		 * Default to false. If the content provider doesn't persist a metadata property in the file document, it should be set to true.
 		 */
 		transientMetadata: { [K in keyof NotebookCellMetadata]?: boolean };
 	}
@@ -1692,7 +1692,7 @@ declare module 'vscode' {
 
 		/**
 		 * Content providers should always use [file system providers](#FileSystemProvider) to
-		 * resolve the raw content for `uri` as the resouce is not necessarily a file on disk.
+		 * resolve the raw content for `uri` as the resource is not necessarily a file on disk.
 		 */
 		openNotebook(
 			uri: Uri,
@@ -2149,7 +2149,7 @@ declare module 'vscode' {
 		General activation events:
 			- `onLanguage:*` most test extensions will want to activate when their
 				language is opened to provide code lenses.
-			- `onTests:*` new activation event very simiular to `workspaceContains`,
+			- `onTests:*` new activation event very similar to `workspaceContains`,
 				but only fired when the user wants to run tests or opens the test explorer.
 	*/
 	export namespace test {

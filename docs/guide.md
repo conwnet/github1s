@@ -1,6 +1,6 @@
 # How it works
 
-Github1s is based on [VS Code 1.52.1](https://github.com/microsoft/vscode/tree/1.52.1) now. VS Code can be built for a browser version officially. I also used the code and got inspired by [Code Server](https://github.com/cdr/code-server).
+GitHub1s is based on [VS Code 1.52.1](https://github.com/microsoft/vscode/tree/1.52.1) now. VS Code can be built for a browser version officially. I also used the code and got inspired by [Code Server](https://github.com/cdr/code-server).
 
 Thanks to the very powerful and flexible extensibility of VS Code, we can easily implement a VS Code extension that provides the custom File IO ability using [FileSystemProvider API](https://code.visualstudio.com/api/references/vscode-api#FileSystemProvider). There is an official demo named [vscode-web-playground](https://github.com/microsoft/vscode-web-playground) which shows how it is used.
 
