@@ -6,10 +6,10 @@
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import {
-	getGithubBranchRefs,
+	getGitHubBranchRefs,
 	getGitHubPullDetail,
-	getGithubTagRefs,
-	getGithubPullFiles,
+	getGitHubTagRefs,
+	getGitHubPullFiles,
 	getGitHubPulls,
 	getGitHubCommitDetail,
 } from '@/interfaces/github-api-rest';
@@ -95,7 +95,7 @@ export class Repository {
 	public getBranches = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return await getGithubBranchRefs(
+			return await getGitHubBranchRefs(
 				owner,
 				repo,
 				getFetchOptions(forceUpdate)
@@ -107,7 +107,7 @@ export class Repository {
 	public getTags = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGithubTagRefs(owner, repo, getFetchOptions(forceUpdate));
+			return getGitHubTagRefs(owner, repo, getFetchOptions(forceUpdate));
 		}
 	);
 
@@ -139,7 +139,7 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryChangedFile[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGithubPullFiles(
+			return getGitHubPullFiles(
 				owner,
 				repo,
 				pullNumber,
