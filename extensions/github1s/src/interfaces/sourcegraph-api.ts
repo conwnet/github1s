@@ -113,19 +113,19 @@ const buildTextSearchQueryString = (
 		.filter(Boolean)
 		.join(' ');
 	// convert the pattern to adapt the sourcegraph API
-	let pattenString = query.pattern;
+	let patternString = query.pattern;
 
 	if (!query.isRegExp && !query.isWordMatch) {
-		pattenString = `"${pattenString}"`;
+		patternString = `"${patternString}"`;
 	} else if (!query.isRegExp && query.isWordMatch) {
-		pattenString = `/\\b${escapeRegexp(pattenString)}\\b/`;
+		patternString = `/\\b${escapeRegexp(patternString)}\\b/`;
 	} else if (query.isRegExp && !query.isWordMatch) {
-		pattenString = `/${pattenString}/`;
+		patternString = `/${patternString}/`;
 	} else if (query.isRegExp && query.isWordMatch) {
-		return `/\b${pattenString}\b/`;
+		return `/\b${patternString}\b/`;
 	}
 
-	return [repoStringWithRef, optionsString, pattenString]
+	return [repoStringWithRef, optionsString, patternString]
 		.filter(Boolean)
 		.join(' ');
 };

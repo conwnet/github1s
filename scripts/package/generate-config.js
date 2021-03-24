@@ -72,7 +72,7 @@ const scanBuiltinExtensions = () => {
 		.filter(Boolean);
 };
 
-const scanGithub1sExtensions = () => {
+const scanGitHub1sExtensions = () => {
 	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
 	return extensions
 		.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item)))
@@ -81,7 +81,7 @@ const scanGithub1sExtensions = () => {
 
 const main = () => {
 	const CONFIGURE_PATH = path.join(APP_ROOT, 'dist/static/configure');
-	const extensions = [...scanBuiltinExtensions(), ...scanGithub1sExtensions()];
+	const extensions = [...scanBuiltinExtensions(), ...scanGitHub1sExtensions()];
 
 	fs.ensureDirSync(CONFIGURE_PATH);
 	fs.writeFileSync(
