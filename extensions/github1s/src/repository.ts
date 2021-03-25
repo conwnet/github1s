@@ -13,6 +13,7 @@ import {
 	getGitHubPulls,
 	getGitHubCommitDetail,
 } from '@/interfaces/github-api-rest';
+import { getFetchOptions } from './helpers/fetch';
 
 export interface RepositoryRef {
 	name: string;
@@ -70,25 +71,6 @@ export interface RepositoryChangedFile {
 
 export class Repository {
 	private static instance: Repository;
-	private _branchRefsMap: Map<string, RepositoryRef[]>;
-	private _tagRefsMap: Map<string, RepositoryRef[]>;
-
-	private _pullsMap: Map<string, RepositoryPull[]>;
-	private _pullMap: Map<string, RepositoryPull>;
-	private _pullFilesMap: Map<string, RepositoryChangedFile[]>;
-
-	private _commitMap: Map<string, RepositoryCommit>;
-	private _commitFilesMap: Map<string, RepositoryChangedFile[]>;
-
-	private constructor() {
-		this._branchRefsMap = new Map();
-		this._tagRefsMap = new Map();
-		this._pullsMap = new Map();
-		this._pullMap = new Map();
-		this._pullFilesMap = new Map();
-		this._commitMap = new Map();
-		this._commitFilesMap = new Map();
-	}
 
 	public static getInstance() {
 		if (Repository.instance) {
@@ -113,12 +95,11 @@ export class Repository {
 	public getBranches = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}`;
-
-			if (!this._branchRefsMap.has(key) || forceUpdate) {
-				this._branchRefsMap.set(key, await getGitHubBranchRefs(owner, repo));
-			}
-			return this._branchRefsMap.get(key);
+			return await getGitHubBranchRefs(
+				owner,
+				repo,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -126,24 +107,14 @@ export class Repository {
 	public getTags = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}`;
-
-			if (!this._tagRefsMap.has(key) || forceUpdate) {
-				this._tagRefsMap.set(key, await getGitHubTagRefs(owner, repo));
-			}
-			return this._tagRefsMap.get(key);
+			return getGitHubTagRefs(owner, repo, getFetchOptions(forceUpdate));
 		}
 	);
 
 	public getPulls = reuseable(
 		async (forceUpdate: boolean = false): Promise<RepositoryPull[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}`;
-
-			if (!this._pullsMap.has(key) || forceUpdate) {
-				this._pullsMap.set(key, await getGitHubPulls(owner, repo));
-			}
-			return this._pullsMap.get(key);
+			return getGitHubPulls(owner, repo, getFetchOptions(forceUpdate));
 		}
 	);
 
@@ -153,15 +124,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryPull> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}+${pullNumber}`;
-
-			if (!this._pullMap.has(key) || forceUpdate) {
-				this._pullMap.set(
-					key,
-					await getGitHubPullDetail(owner, repo, pullNumber)
-				);
-			}
-			return this._pullMap.get(key);
+			return getGitHubPullDetail(
+				owner,
+				repo,
+				pullNumber,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -171,15 +139,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryChangedFile[]> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}+${pullNumber}`;
-
-			if (!this._pullFilesMap.has(key) || forceUpdate) {
-				this._pullFilesMap.set(
-					key,
-					await getGitHubPullFiles(owner, repo, pullNumber)
-				);
-			}
-			return this._pullFilesMap.get(key);
+			return getGitHubPullFiles(
+				owner,
+				repo,
+				pullNumber,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -189,19 +154,12 @@ export class Repository {
 			forceUpdate: boolean = false
 		): Promise<RepositoryCommit> => {
 			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}+${commitSha}`;
-
-			if (!this._commitMap.has(key) || forceUpdate) {
-				const commitData = (await getGitHubCommitDetail(
-					owner,
-					repo,
-					commitSha
-				)) as RepositoryCommit;
-				this._commitMap.set(key, commitData);
-				this._commitFilesMap.set(key, commitData.files);
-			}
-
-			return this._commitMap.get(key);
+			return getGitHubCommitDetail(
+				owner,
+				repo,
+				commitSha,
+				getFetchOptions(forceUpdate)
+			);
 		}
 	);
 
@@ -209,16 +167,8 @@ export class Repository {
 		async (
 			commitSha: string,
 			forceUpdate: boolean = false
-		): Promise<RepositoryChangedFile[]> => {
-			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			const key = `${owner}+${repo}+${commitSha}`;
-
-			if (!this._commitFilesMap.has(key) || forceUpdate) {
-				// the _commitFilesMap will be filled in this.getCommit
-				await this.getCommit(commitSha);
-			}
-			return this._commitFilesMap.get(key) || [];
-		}
+		): Promise<RepositoryChangedFile[]> =>
+			(await this.getCommit(commitSha, forceUpdate)).files
 	);
 }
 
