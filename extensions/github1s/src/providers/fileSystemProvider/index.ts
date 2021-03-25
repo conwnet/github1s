@@ -69,9 +69,7 @@ export class GitHub1sFileSystemProvider
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
 				if (entry.entries === null) {
-					await this.readDirectory(
-						Uri.joinPath(entry.uri, entry.name).with({ authority })
-					);
+					await this.readDirectory(Uri.joinPath(entry.uri, entry.name));
 				}
 				child = entry.entries.get(part);
 			}
