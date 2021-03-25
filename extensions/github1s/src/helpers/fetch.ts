@@ -75,7 +75,7 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	 */
 	if (
 		cache.has(url) &&
-		!['no-store', 'no-cache', 'reload'].includes(options.cache)
+		!['no-store', 'no-cache', 'reload'].includes(options?.cache)
 	) {
 		return cache.get(url);
 	}
@@ -93,7 +93,7 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 		throw new RequestError('Request Failed, Maybe an Network Error', token);
 	}
 	if (response.status < 400) {
-		cache.set(url, response.json());
+		cache.set(url, await response.json());
 		return cache.get(url);
 	}
 	if (response.status === 403) {
