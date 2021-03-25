@@ -28,7 +28,7 @@ export interface RepositoryRef {
 }
 
 export interface RepositoryPull {
-	number: string;
+	number: number;
 	title: string;
 	state: string;
 	created_at: string;

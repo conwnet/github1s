@@ -10,6 +10,7 @@ import { GitHub1sFileSearchProvider } from './fileSearchProvider';
 import { GitHub1sTextSearchProvider } from './textSearchProvider';
 import { GitHub1sSubmoduleDecorationProvider } from './submoduleDecorationProvider';
 import { GitHub1sChangedFileDecorationProvider } from './changedFileDecorationProvider';
+import { GitHub1sSourceControlDecorationProvider } from './sourceControlDecorationProvider';
 
 export const fileSystemProvider = new GitHub1sFileSystemProvider();
 export const fileSearchProvider = new GitHub1sFileSearchProvider(
@@ -20,6 +21,7 @@ export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvid
 	fileSystemProvider
 );
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
+export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
 
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
@@ -42,6 +44,9 @@ export const registerVSCodeProviders = () => {
 			textSearchProvider
 		),
 		vscode.window.registerFileDecorationProvider(submoduleDecorationProvider),
-		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider)
+		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider),
+		vscode.window.registerFileDecorationProvider(
+			sourceControlDecorationProvider
+		)
 	);
 };
