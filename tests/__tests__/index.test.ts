@@ -88,9 +88,15 @@ it('should show PR list', async () => {
 	await page.click('li[title="Source Control (⌃⇧G)"]');
 	await page.click('div[aria-label="Pull Requests Section"]');
 	await page.waitForSelector(
-		'div.monaco-list-row[role="treeitem"][data-index="3"][data-last-element="false"]'
+		'div.monaco-list-row[role="treeitem"][data-index="1"][data-last-element="false"]'
 	);
 	const container = await page.$('.tree-explorer-viewlet-tree-view');
-	const image = await container?.screenshot();
+	let image = await container?.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+	await page.click(
+		'.tree-explorer-viewlet-tree-view div.monaco-list-row[role="treeitem"][data-index="0"][data-last-element="false"]'
+	);
+	await page.waitForSelector('[aria-level="2"]');
+	image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
