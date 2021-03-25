@@ -31,13 +31,14 @@ export const registerVSCodeEventListeners = () => {
 			return;
 		}
 
-		if (await shouldClosedThisEditor(editor)) {
-			vscode.commands.executeCommand(
-				'workbench.action.closeActiveEditor',
-				activeFileUri
-			);
-			return;
-		}
+		// TODO: How to deal with opened editor?
+		// if (await shouldClosedThisEditor(editor)) {
+		// 	vscode.commands.executeCommand(
+		// 		'workbench.action.closeActiveEditor',
+		// 		activeFileUri
+		// 	);
+		// 	return;
+		// }
 
 		// only `tree/blob` page will replace url with the active editor change
 		if ([PageType.TREE, PageType.BLOB].includes(pageType)) {

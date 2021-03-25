@@ -1,7 +1,7 @@
 /**
- * @file GitHub1s Submodule FileDecorationProvider,
+ * @file GitHub1s ChangedFile FileDecorationProvider,
  * @author netcon
- * Decorate the directory which is a submodule in the file tree
+ * Decorate the file/directory that has changes
  */
 
 import {
@@ -17,8 +17,9 @@ import {
 import router from '@/router';
 import repository, { FileChangeType } from '@/repository';
 import { PageType } from '@/router/types';
+import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 
-const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
+export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeType.ADDED]: {
 		tooltip: 'Added',
 		badge: 'A',
@@ -60,6 +61,10 @@ export class GitHub1sChangedFileDecorationProvider
 		uri: Uri,
 		_token: CancellationToken
 	): ProviderResult<FileDecoration> {
+		if (uri.scheme !== GitHub1sFileSystemProvider.scheme) {
+			return null;
+		}
+
 		const currentFilePath = uri.path.slice(1);
 		return router.getState().then(async (routerState) => {
 			if (![PageType.PULL].includes(routerState.pageType)) {

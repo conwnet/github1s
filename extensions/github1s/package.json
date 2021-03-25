@@ -75,6 +75,18 @@
         "icon": "$(search)"
       },
       {
+        "command": "github1s.pull-view-item-switch-to-pull",
+        "title": "Switch to Pull Request",
+        "category": "GitHub1s",
+        "icon": "$(log-in)"
+      },
+      {
+        "command": "github1s.pull-view-item-open-on-github",
+        "title": "Open on GitHub",
+        "category": "GitHub1s",
+        "icon": "$(globe)"
+      },
+      {
         "command": "github1s.open-gitpod",
         "title": "Edit files in Gitpod",
         "category": "GitHub1s"
@@ -122,8 +134,20 @@
       "view/title": [
         {
           "command": "github1s.switch-to-pull",
-          "when": "view =~ /^github1s\\.views\\.pull-request-list/",
+          "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "github1s.pull-view-item-switch-to-pull",
+          "when": "viewItem =~ /^github1s:pull-request$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "github1s.pull-view-item-open-on-github",
+          "when": "viewItem =~ /^github1s:pull-request$/",
+          "group": "inline@2"
         }
       ]
     }
@@ -146,6 +170,7 @@
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
     "p-finally": "^2.0.1",
+    "query-string": "^7.0.0",
     "webpack-cli": "^4.4.0"
   },
   "devDependencies": {
