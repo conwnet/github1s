@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { throttle } from './func';
+import { reuseable, throttle } from './func';
 import { getExtensionContext } from './context';
 
 const getGitHubAuthToken = (): string => {
@@ -55,7 +55,7 @@ export const throttledReportNetworkError = throttle(
 	5000
 );
 
-export const fetch = async (url: string, options?: RequestInit) => {
+export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
@@ -91,4 +91,4 @@ export const fetch = async (url: string, options?: RequestInit) => {
 		`GitHub1s: Request got HTTP ${response.status} response`,
 		token
 	);
-};
+});

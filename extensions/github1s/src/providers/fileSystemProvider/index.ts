@@ -246,12 +246,7 @@ export class GitHub1sFileSystemProvider
 			}
 			return parent.getNameTypePairs();
 		},
-		/**
-		 * Since we either use the uri.authority or call `router.getAuthority()` to get the authority,
-		 * And it uses the query to distinguish between files in different branch for diff view. It's safe
-		 * to ignore authority to deduplicate the redundant network calls.
-		 */
-		(uri) => uri.with({ authority: '' }).toString()
+		(uri) => uri.toString()
 	);
 
 	readFile = reuseable(
