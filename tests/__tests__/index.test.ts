@@ -81,3 +81,16 @@ it('should open file correctly', async () => {
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
+
+it('should show PR list', async () => {
+	// Use a repo without future change to avoid snapshot update
+	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
+	await page.click('li[title="Source Control (⌃⇧G)"]');
+	await page.click('div[aria-label="Pull Requests Section"]');
+	await page.waitForSelector(
+		'div.monaco-list-row[role="treeitem"][data-index="3"][data-last-element="false"]'
+	);
+	const container = await page.$('.tree-explorer-viewlet-tree-view');
+	const image = await container?.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+});
