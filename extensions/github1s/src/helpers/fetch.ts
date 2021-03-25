@@ -67,6 +67,12 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
+	/**
+	 * We are reusing the same values from the https://developer.mozilla.org/en-US/docs/Web/API/Request/cache.
+	 * But the way is not the same because we couldn't control how the cache-control returns from external APIs.
+	 * Instead of relying on the browser caching stragety and API resposne header, we use an im-memory map to
+	 * cache all requests.
+	 */
 	if (
 		cache.has(url) &&
 		!['no-store', 'no-cache', 'reload'].includes(options.cache)
