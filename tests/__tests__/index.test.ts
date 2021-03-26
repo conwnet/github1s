@@ -103,6 +103,7 @@ it.only('should show PR list', async () => {
 			await action.click();
 		}
 	});
+	console.log('after click');
 	await page.click('div[aria-label="Pull Requests Section"]');
 	console.log(4);
 	await page.waitForSelector(
