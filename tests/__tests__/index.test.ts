@@ -85,12 +85,15 @@ it('should open file correctly', async () => {
 it.only('should show PR list', async () => {
 	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
+	console.log(1);
 
 	const ul = await page.waitForSelector(
 		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
 	);
+	console.log(2);
 	expect(ul).toBeTruthy();
 	const actions = await ul?.$$('li');
+	console.log(3);
 	expect(actions?.length).toBeGreaterThan(4);
 	actions?.forEach(async (action) => {
 		const label = await action.getAttribute('aria-label');
@@ -101,16 +104,22 @@ it.only('should show PR list', async () => {
 		}
 	});
 	await page.click('div[aria-label="Pull Requests Section"]');
+	console.log(4);
 	await page.waitForSelector(
 		'div.monaco-list-row[role="treeitem"][data-index="1"][data-last-element="false"]'
 	);
+	console.log(5);
 	const container = await page.$('.tree-explorer-viewlet-tree-view');
+	console.log(6);
 	let image = await container?.screenshot();
+	console.log(7);
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 	await page.click(
 		'.tree-explorer-viewlet-tree-view div.monaco-list-row[role="treeitem"][data-index="0"][data-last-element="false"]'
 	);
+	console.log(8);
 	await page.waitForSelector('[aria-level="2"]');
+	console.log(9);
 	image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
