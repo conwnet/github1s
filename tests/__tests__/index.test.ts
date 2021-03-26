@@ -85,7 +85,21 @@ it('should open file correctly', async () => {
 it.only('should show PR list', async () => {
 	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
-	await page.click('li[title="Source Control (⌃⇧G)"]');
+
+	const ul = await page.waitForSelector(
+		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
+	);
+	expect(ul).toBeTruthy();
+	const actions = await ul?.$$('li');
+	expect(actions?.length).toBeGreaterThan(4);
+	actions?.forEach(async (action) => {
+		const label = await action.getAttribute('aria-label');
+		console.log({ label });
+		if (label?.startsWith('Source Control')) {
+			console.log('click');
+			await action.click();
+		}
+	});
 	await page.click('div[aria-label="Pull Requests Section"]');
 	await page.waitForSelector(
 		'div.monaco-list-row[role="treeitem"][data-index="1"][data-last-element="false"]'
