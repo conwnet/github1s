@@ -82,7 +82,7 @@ it('should open file correctly', async () => {
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
 
-it('should show PR list', async () => {
+it.only('should show PR list', async () => {
 	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
 	await page.click('li[title="Source Control (⌃⇧G)"]');
