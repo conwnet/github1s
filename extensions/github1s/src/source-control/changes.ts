@@ -4,6 +4,7 @@
  */
 
 import * as vscode from 'vscode';
+import * as queryString from 'query-string';
 import repository, {
 	FileChangeType,
 	RepositoryCommit,
@@ -11,6 +12,7 @@ import repository, {
 } from '@/repository';
 import router from '@/router';
 import { basename } from '@/helpers/util';
+import { EMPTY_FILE_SCHEME } from '@/providers';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 import { PageType } from '@/router/types';
 
@@ -21,13 +23,12 @@ export interface ChangedFile {
 }
 
 // get the change files of a pull
-export const getPullChangeFiles = async (pull: RepositoryPull) => {
+export const getPullChangedFiles = async (pull: RepositoryPull) => {
 	const { owner, repo } = await router.getState();
 	const baseRootUri = vscode.Uri.parse('').with({
 		scheme: GitHub1sFileSystemProvider.scheme,
 		authority: `${owner}+${repo}+${pull.base.sha}`,
 		path: '/',
-		query: `pull=${pull.number}`,
 	});
 	const headRootUri = baseRootUri.with({
 		authority: `${owner}+${repo}+${pull.head.sha}`,
@@ -47,7 +48,7 @@ export const getPullChangeFiles = async (pull: RepositoryPull) => {
 	});
 };
 
-export const getCommitChangeFiles = async (commit: RepositoryCommit) => {
+export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
 	const { owner, repo } = await router.getState();
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
@@ -57,7 +58,6 @@ export const getCommitChangeFiles = async (commit: RepositoryCommit) => {
 		scheme: GitHub1sFileSystemProvider.scheme,
 		authority: `${owner}+${repo}+${baseRef || 'HEAD'}`,
 		path: '/',
-		query: `commit=${commit.sha}`,
 	});
 	const headRootUri = baseRootUri.with({
 		authority: `${owner}+${repo}+${commit.sha || 'HEAD'}`,
@@ -83,55 +83,69 @@ const getChangedFiles = async (): Promise<ChangedFile[]> => {
 	// github pull page
 	if (routerState.pageType === PageType.PULL) {
 		const pull = await repository.getPull(routerState.pullNumber);
-		return pull ? getPullChangeFiles(pull) : [];
+		return pull ? getPullChangedFiles(pull) : [];
 	}
 	// github commit page
 	else if (routerState.pageType === PageType.COMMIT) {
 		const commit = await repository.getCommit(routerState.commitSha);
-		return commit ? getCommitChangeFiles(commit) : [];
+		return commit ? getCommitChangedFiles(commit) : [];
 	}
 	return [];
 };
 
-export const getChangedFileCommand = (changedFile: ChangedFile) => {
+// get the title of the diff editor
+const getChangedFileDiffTitle = (changedFile: ChangedFile) => {
 	const baseFileUri = changedFile.baseFileUri;
 	const headFileUri = changedFile.headFileUri;
+	const baseFileName = basename(baseFileUri.path);
+	const headFileName = basename(headFileUri.path);
+	const [_owner, _repo, baseCommitSha] = baseFileUri.authority.split('+');
+	const [__owner, __repo, headCommitSha] = headFileUri.authority.split('+');
+	const baseFileLabel = `${baseFileName} (${baseCommitSha.slice(0, 7)})`;
+	const headFileLabel = `${headFileName} (${headCommitSha.slice(0, 7)})`;
 
 	if (changedFile.status === FileChangeType.ADDED) {
-		const title = `${basename(headFileUri.path)} (Added)`;
-		return {
-			title: 'Open',
-			command: 'vscode.open',
-			arguments: [headFileUri, {}, title],
-		};
+		return `${baseFileName} (added in ${headCommitSha.slice(0, 7)})`;
 	}
+
 	if (changedFile.status === FileChangeType.REMOVED) {
-		const title = `${basename(baseFileUri.path)} (Deleted)`;
-		return {
-			title: 'Open',
-			command: 'vscode.open',
-			arguments: [baseFileUri, {}, title],
-		};
+		return `${baseFileName} (deleted from ${baseCommitSha.slice(0, 7)})`;
 	}
-	if (changedFile.status === FileChangeType.MODIFIED) {
-		const title = `${basename(headFileUri.path)} (Modified)`;
-		return {
-			title: 'Diff',
-			command: 'vscode.diff',
-			arguments: [baseFileUri, headFileUri, title],
-		};
+
+	return `${baseFileLabel} ⟷ ${headFileLabel}`;
+};
+
+const emptyFileUri = vscode.Uri.parse('').with({
+	scheme: EMPTY_FILE_SCHEME,
+});
+
+export const getChangedFileCommand = (changedFile: ChangedFile) => {
+	const title = getChangedFileDiffTitle(changedFile);
+	let baseFileUri = changedFile.baseFileUri;
+	let headFileUri = changedFile.headFileUri;
+	const query = queryString.stringify({
+		base: baseFileUri.toString(),
+		head: headFileUri.toString(),
+		status: changedFile.status,
+	});
+
+	if (changedFile.status === FileChangeType.ADDED) {
+		baseFileUri = emptyFileUri;
 	}
-	if (changedFile.status === FileChangeType.RENAMED) {
-		const title = `${basename(baseFileUri.path)} -> ${basename(
-			headFileUri.path
-		)}`;
-		return {
-			title: 'Diff',
-			command: 'vscode.diff',
-			arguments: [baseFileUri, headFileUri, title],
-		};
+
+	if (changedFile.status === FileChangeType.REMOVED) {
+		headFileUri = emptyFileUri;
 	}
-	return undefined;
+
+	return {
+		title: 'Diff',
+		command: 'vscode.diff',
+		arguments: [
+			baseFileUri.with({ query }),
+			headFileUri.with({ query }),
+			title,
+		],
+	};
 };
 
 export const updateSourceControlChanges = (() => {

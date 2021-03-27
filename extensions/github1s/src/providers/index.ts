@@ -23,6 +23,8 @@ export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvid
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
 
+export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
+
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
 
@@ -47,6 +49,11 @@ export const registerVSCodeProviders = () => {
 		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider),
 		vscode.window.registerFileDecorationProvider(
 			sourceControlDecorationProvider
-		)
+		),
+
+		// provider a readonly empty file for diff
+		vscode.workspace.registerTextDocumentContentProvider(EMPTY_FILE_SCHEME, {
+			provideTextDocumentContent: () => '',
+		})
 	);
 };

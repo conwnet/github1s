@@ -59,12 +59,12 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 };
 
 // this command is used in `source control pull request view`
-export const commandViewItemSwitchToPull = (viewItem: PullTreeItem) => {
+export const commandPullViewItemSwitchToPull = (viewItem: PullTreeItem) => {
 	return commandSwitchToPull(viewItem?.pull?.number);
 };
 
 // this command is used in `source control pull request view`
-export const commandViewItemOpenPullOnGitHub = async (
+export const commandPullViewItemOpenPullOnGitHub = async (
 	viewItem: PullTreeItem
 ) => {
 	const pullNumber = viewItem?.pull?.number;

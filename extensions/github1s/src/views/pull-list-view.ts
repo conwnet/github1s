@@ -10,7 +10,7 @@ import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceContr
 import * as queryString from 'query-string';
 import {
 	getChangedFileCommand,
-	getPullChangeFiles,
+	getPullChangedFiles,
 } from '@/source-control/changes';
 
 enum PullState {
@@ -94,20 +94,20 @@ export class PullRequestTreeDataProvider
 	}
 
 	async getPullFileItems(pull: RepositoryPull): Promise<vscode.TreeItem[]> {
-		const changeFiles = await getPullChangeFiles(pull);
+		const changedFiles = await getPullChangedFiles(pull);
 
-		return changeFiles.map((changeFile) => {
-			const filePath = changeFile.headFileUri.path;
+		return changedFiles.map((changedFile) => {
+			const filePath = changedFile.headFileUri.path;
 			const id = `${pull.number} ${filePath}`;
-			const command = getChangedFileCommand(changeFile);
+			const command = getChangedFileCommand(changedFile);
 
 			return {
 				id,
 				command,
 				description: true,
-				resourceUri: changeFile.headFileUri.with({
+				resourceUri: changedFile.headFileUri.with({
 					scheme: GitHub1sSourceControlDecorationProvider.fileSchema,
-					query: queryString.stringify({ status: changeFile.status }),
+					query: queryString.stringify({ status: changedFile.status }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
