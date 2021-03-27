@@ -164,11 +164,11 @@
   "dependencies": {
     "@apollo/client": "^3.3.9",
     "dayjs": "^1.10.4",
-    "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
     "history": "^5.0.0",
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
+    "match-sorter": "^6.3.0",
     "p-finally": "^2.0.1",
     "query-string": "^7.0.0",
     "webpack-cli": "^4.4.0"
