@@ -31,6 +31,6 @@ export const explorerRouterListener = (
 		changedFileDecorationProvider.updateDecorations();
 		submoduleDecorationProvider.updateDecorations();
 		sourceControlDecorationProvider.updateDecorations();
-		fileSearchProvider.loadFuzeForCurrentAuthority();
+		fileSearchProvider.loadFilesForCurrentAuthority();
 	}
 };
