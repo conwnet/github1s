@@ -64,7 +64,7 @@ export const commandPullViewItemSwitchToPull = (viewItem: PullTreeItem) => {
 };
 
 // this command is used in `source control pull request view`
-export const commandPullViewItemOpenPullOnGitHub = async (
+export const commandPullViewItemOpenOnGitHub = async (
 	viewItem: PullTreeItem
 ) => {
 	const pullNumber = viewItem?.pull?.number;

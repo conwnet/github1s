@@ -6,6 +6,10 @@ import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { SettingsView } from './settings-view';
 import { PullRequestTreeDataProvider } from './pull-list-view';
+import { CommitTreeDataProvider } from './commit-list-view';
+
+export const commitTreeDataProvider = new CommitTreeDataProvider();
+export const pullRequestTreeDataProvider = new PullRequestTreeDataProvider();
 
 export const registerCustomViews = () => {
 	const context = getExtensionContext();
@@ -20,7 +24,13 @@ export const registerCustomViews = () => {
 		// register pull request view which is in source control panel
 		vscode.window.registerTreeDataProvider(
 			PullRequestTreeDataProvider.viewType,
-			new PullRequestTreeDataProvider()
+			pullRequestTreeDataProvider
+		),
+
+		// register commit view which is in source control panel
+		vscode.window.registerTreeDataProvider(
+			CommitTreeDataProvider.viewType,
+			commitTreeDataProvider
 		)
 	);
 };

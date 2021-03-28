@@ -12,6 +12,7 @@ import {
 	getGitHubPullFiles,
 	getGitHubPulls,
 	getGitHubCommitDetail,
+	getGitHubCommits,
 } from '@/interfaces/github-api-rest';
 import { getFetchOptions } from './helpers/fetch';
 
@@ -52,8 +53,16 @@ export interface RepositoryCommit {
 		login: string;
 		avatar_url: string;
 	};
+	commit: {
+		author: {
+			date: string;
+			email: string;
+			name: string;
+		};
+		message: string;
+	};
 	parents: { sha: string }[];
-	files: RepositoryChangedFile[];
+	files?: RepositoryChangedFile[];
 }
 
 export enum FileChangeType {
@@ -145,6 +154,16 @@ export class Repository {
 				pullNumber,
 				getFetchOptions(forceUpdate)
 			);
+		}
+	);
+
+	public getCommits = reuseable(
+		async (
+			sha: string,
+			forceUpdate: boolean = false
+		): Promise<RepositoryCommit[]> => {
+			const [owner, repo] = [this.getOwner(), this.getRepo()];
+			return getGitHubCommits(owner, repo, sha, getFetchOptions(forceUpdate));
 		}
 	);
 

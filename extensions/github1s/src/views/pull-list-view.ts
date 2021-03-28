@@ -65,10 +65,20 @@ export class PullRequestTreeDataProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.pull-request-list';
 
+	private forceUpdate = false;
+	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
+	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+	public updateTree() {
+		this.forceUpdate = true;
+		this._onDidChangeTreeData.fire(undefined);
+	}
+
 	async getPullItems(): Promise<PullTreeItem[]> {
 		// only recent 100 pull requests will be list here
 		// TODO: implement pagination
-		const repositoryPulls = await repository.getPulls();
+		const repositoryPulls = await repository.getPulls(this.forceUpdate);
+		this.forceUpdate = false;
 		return repositoryPulls.map((pull) => {
 			const statusIcon = statusIconMap[getPullStatus(pull)];
 			const label = `${statusIcon} #${pull.number} ${pull.title}`;

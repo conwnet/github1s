@@ -176,6 +176,18 @@ export const getGitHubPullFiles = (
 	).catch(handleRequestError);
 };
 
+export const getGitHubCommits = (
+	owner: string,
+	repo: string,
+	sha: string,
+	options?: ResponseInit
+) => {
+	return fetch(
+		`https://api.github.com/repos/${owner}/${repo}/commits?sha=${sha}&per_page=100`,
+		options
+	).catch(handleRequestError);
+};
+
 export const getGitHubCommitDetail = (
 	owner: string,
 	repo: string,
