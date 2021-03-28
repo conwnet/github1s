@@ -16,6 +16,8 @@
     "onCommand:github1s.get-current-authority",
     "onCommand:github1s.checkout-ref",
     "onCommand:github1s.switch-to-pull",
+    "onCommand:github1s.diff-view-open-left-file",
+    "onCommand:github1s.diff-view-open-right-file",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -75,6 +77,11 @@
         "icon": "$(search)"
       },
       {
+        "command": "github1s.open-gitpod",
+        "title": "Edit files in Gitpod",
+        "category": "GitHub1s"
+      },
+      {
         "command": "github1s.pull-view-item-switch-to-pull",
         "title": "Switch to Pull Request",
         "category": "GitHub1s",
@@ -87,9 +94,22 @@
         "icon": "$(globe)"
       },
       {
-        "command": "github1s.open-gitpod",
-        "title": "Edit files in Gitpod",
-        "category": "GitHub1s"
+        "command": "github1s.diff-view-open-left-file",
+        "title": "Open Left File",
+        "category": "GitHub1s",
+        "icon": {
+          "dark": "assets/icons/dark/open-left-file.svg",
+          "light": "assets/icons/light/open-left-file.svg"
+        }
+      },
+      {
+        "command": "github1s.diff-view-open-right-file",
+        "title": "Open Right File",
+        "category": "GitHub1s",
+        "icon": {
+          "dark": "assets/icons/dark/open-right-file.svg",
+          "light": "assets/icons/light/open-right-file.svg"
+        }
       }
     ],
     "colors": [
@@ -131,6 +151,24 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "github1s.pull-view-item-switch-to-pull",
+          "when": "false"
+        },
+        {
+          "command": "github1s.pull-view-item-open-on-github",
+          "when": "false"
+        },
+        {
+          "command": "github1s.diff-view-open-left-file",
+          "when": "false"
+        },
+        {
+          "command": "github1s.diff-view-open-right-file",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "github1s.switch-to-pull",
@@ -148,6 +186,18 @@
           "command": "github1s.pull-view-item-open-on-github",
           "when": "viewItem =~ /^github1s:pull-request$/",
           "group": "inline@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "github1s.diff-view-open-left-file",
+          "when": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^[^?]*\\?[^#]*status(=|%3D|%3d)(?!added)/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s.diff-view-open-right-file",
+          "when": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^[^?]*\\?[^#]*status(=|%3D|%3d)(?!removed)/",
+          "group": "navigation@2"
         }
       ]
     }
