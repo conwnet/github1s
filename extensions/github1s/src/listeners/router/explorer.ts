@@ -10,19 +10,46 @@ import {
 	sourceControlDecorationProvider,
 	fileSearchProvider,
 } from '@/providers';
-import { RouterState } from '@/router/types';
+import { PageType, RouterState } from '@/router/types';
+
+const sortedEqual = (source: any[], target: any[]) => {
+	const sortedSource = source.sort();
+	const sortedTarget = target.sort();
+	return sortedSource.every((item, index) => item === sortedTarget[index]);
+};
+
+const shouldRefreshExplorerState = (
+	currentState: RouterState,
+	previousState: RouterState
+) => {
+	if (
+		['owner', 'repo', 'ref'].find(
+			(key) => currentState[key] !== previousState[key]
+		)
+	) {
+		return true;
+	}
+
+	if (
+		currentState.pageType !== previousState.pageType &&
+		// when the pageType transform to each other between TREE and BLOB,
+		// don't refresh the explorer state
+		!sortedEqual(
+			[currentState.pageType, previousState.pageType],
+			[PageType.TREE, PageType.BLOB]
+		)
+	) {
+		return true;
+	}
+
+	return false;
+};
 
 export const explorerRouterListener = (
 	currentState: RouterState,
 	previousState: RouterState
 ) => {
-	if (
-		currentState.owner !== previousState.owner ||
-		currentState.repo !== previousState.repo ||
-		currentState.ref !== previousState.ref ||
-		currentState.pageType !== previousState.pageType
-	) {
-		// should update the explorer
+	if (shouldRefreshExplorerState(currentState, previousState)) {
 		vscode.commands.executeCommand(
 			'workbench.files.action.refreshFilesExplorer'
 		);
