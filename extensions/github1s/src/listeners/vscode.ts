@@ -8,15 +8,6 @@ import router from '@/router';
 import { PageType } from '@/router/types';
 import { GitHub1sFileSearchProvider } from '@/providers/fileSearchProvider';
 
-// current editor is recovered by vscode, but should be closed now
-const shouldClosedThisEditor = async (editor) => {
-	const { pullNumber } = await router.getState();
-	const resourceUriQuery = editor?.document.uri.query;
-	const resourcePullNumber = resourceUriQuery?.match(/\bpull=(\d+)/)?.[1];
-
-	return resourcePullNumber && +resourcePullNumber !== pullNumber;
-};
-
 export const registerVSCodeEventListeners = () => {
 	// replace current url when user change active editor
 	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
@@ -24,14 +15,6 @@ export const registerVSCodeEventListeners = () => {
 		const activeFileUri = editor?.document.uri;
 
 		if (activeFileUri?.scheme !== GitHub1sFileSearchProvider.scheme) {
-			return;
-		}
-
-		if (await shouldClosedThisEditor(editor)) {
-			vscode.commands.executeCommand(
-				'workbench.action.closeActiveEditor',
-				activeFileUri
-			);
 			return;
 		}
 

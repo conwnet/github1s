@@ -7,6 +7,8 @@ import * as vscode from 'vscode';
 import {
 	changedFileDecorationProvider,
 	submoduleDecorationProvider,
+	sourceControlDecorationProvider,
+	fileSearchProvider,
 } from '@/providers';
 import { RouterState } from '@/router/types';
 
@@ -17,7 +19,8 @@ export const explorerRouterListener = (
 	if (
 		currentState.owner !== previousState.owner ||
 		currentState.repo !== previousState.repo ||
-		currentState.ref !== previousState.ref
+		currentState.ref !== previousState.ref ||
+		currentState.pageType !== previousState.pageType
 	) {
 		// should update the explorer
 		vscode.commands.executeCommand(
@@ -28,5 +31,7 @@ export const explorerRouterListener = (
 
 		changedFileDecorationProvider.updateDecorations();
 		submoduleDecorationProvider.updateDecorations();
+		sourceControlDecorationProvider.updateDecorations();
+		fileSearchProvider.loadFilesForCurrentAuthority();
 	}
 };

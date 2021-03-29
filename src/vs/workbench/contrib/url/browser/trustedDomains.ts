@@ -73,9 +73,9 @@ export async function configureOpenerTrustedDomainsHandler(
 	clipboardService: IClipboardService
 ) {
 	const parsedDomainToConfigure = URI.parse(domainToConfigure);
-	const toplevelDomainSegements = parsedDomainToConfigure.authority.split('.');
-	const domainEnd = toplevelDomainSegements
-		.slice(toplevelDomainSegements.length - 2)
+	const toplevelDomainSegments = parsedDomainToConfigure.authority.split('.');
+	const domainEnd = toplevelDomainSegments
+		.slice(toplevelDomainSegments.length - 2)
 		.join('.');
 	const topLevelDomain = '*.' + domainEnd;
 	const options: ConfigureTrustedDomainsQuickPickItem[] = [];
@@ -93,8 +93,8 @@ export async function configureOpenerTrustedDomainsHandler(
 	});
 
 	const isIP =
-		toplevelDomainSegements.length === 4 &&
-		toplevelDomainSegements.every(
+		toplevelDomainSegments.length === 4 &&
+		toplevelDomainSegments.every(
 			(segment) =>
 				Number.isInteger(+segment) || Number.isInteger(+segment.split(':')[0])
 		);

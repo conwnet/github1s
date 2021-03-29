@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { throttle } from './func';
+import { reuseable, throttle } from './func';
 import { getExtensionContext } from './context';
 
 const getGitHubAuthToken = (): string => {
@@ -55,15 +55,36 @@ export const throttledReportNetworkError = throttle(
 	5000
 );
 
-export const fetch = async (url: string, options?: RequestInit) => {
+export const getFetchOptions = (forceUpdate?: boolean): RequestInit => {
+	if (forceUpdate) {
+		return { cache: 'reload' };
+	}
+};
+
+const cache = new Map();
+
+export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	const token = getGitHubAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
+	/**
+	 * We are reusing the same values from the https://developer.mozilla.org/en-US/docs/Web/API/Request/cache.
+	 * But the way is not the same because we couldn't control how the cache-control returns from external APIs.
+	 * Instead of relying on the browser caching stragety and API resposne header, we use an im-memory map to
+	 * cache all requests.
+	 */
+	if (
+		cache.has(url) &&
+		!['no-store', 'no-cache', 'reload'].includes(options?.cache)
+	) {
+		return cache.get(url);
+	}
 
 	let response: Response;
 	try {
 		response = await self.fetch(url, {
 			mode: 'cors',
+			cache: 'force-cache',
 			...options,
 			headers: { ...authHeaders, ...customHeaders },
 		});
@@ -72,7 +93,8 @@ export const fetch = async (url: string, options?: RequestInit) => {
 		throw new RequestError('Request Failed, Maybe an Network Error', token);
 	}
 	if (response.status < 400) {
-		return response.json();
+		cache.set(url, await response.json());
+		return cache.get(url);
 	}
 	if (response.status === 403) {
 		return response.json().then((data) => {
@@ -91,4 +113,4 @@ export const fetch = async (url: string, options?: RequestInit) => {
 		`GitHub1s: Request got HTTP ${response.status} response`,
 		token
 	);
-};
+});
