@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
+import { pullRequestTreeDataProvider, commitTreeDataProvider } from '@/views';
 import {
 	commandValidateToken,
 	commandUpdateToken,
@@ -14,8 +15,13 @@ import { commandGetCurrentAuthority, commandCheckoutRef } from './ref';
 import {
 	commandSwitchToPull,
 	commandPullViewItemSwitchToPull,
-	commandPullViewItemOpenPullOnGitHub,
+	commandPullViewItemOpenOnGitHub,
 } from './pull';
+import {
+	commandSwitchToCommit,
+	commandCommitViewItemSwitchToCommit,
+	commandCommitViewItemOpenOnGitHub,
+} from './commit';
 import { commandOpenGitpod } from './gitpod';
 import {
 	commandDiffViewOpenLeftFile,
@@ -35,12 +41,23 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// checkout to other branch/tag/commit
 	{ id: 'github1s.checkout-ref', callback: commandCheckoutRef },
 
-	// switch to a pull request
+	// switch to a pull request & input pull number manually
 	{ id: 'github1s.switch-to-pull', callback: commandSwitchToPull },
-	// switch to a pull request
+	// update the pull request list in the pull requests view
+	{ id: 'github1s.pull-view-refresh-pull-list', callback: () => pullRequestTreeDataProvider.updateTree() }, // prettier-ignore
+	// switch to a pull request in the pull requests view
 	{ id: 'github1s.pull-view-item-switch-to-pull', callback: commandPullViewItemSwitchToPull }, // prettier-ignore
-	// switch to a pull request
-	{ id: 'github1s.pull-view-item-open-on-github', callback: commandPullViewItemOpenPullOnGitHub }, // prettier-ignore
+	// open pull on github in the pull requests view
+	{ id: 'github1s.pull-view-item-open-on-github', callback: commandPullViewItemOpenOnGitHub }, // prettier-ignore
+
+	// switch to a commit & input pull number manually
+	{ id: 'github1s.switch-to-commit', callback: commandSwitchToCommit },
+	// update the commit list in the commits view
+	{ id: 'github1s.commit-view-refresh-commit-list', callback: () => commitTreeDataProvider.updateTree() }, // prettier-ignore
+	// switch to a commit in the commits view
+	{ id: 'github1s.commit-view-item-switch-to-commit', callback: commandCommitViewItemSwitchToCommit }, // prettier-ignore
+	// open commit on github in the commits view
+	{ id: 'github1s.commit-view-item-open-on-github', callback: commandCommitViewItemOpenOnGitHub }, // prettier-ignore
 
 	// open current repository on gitpod
 	{ id: 'github1s.open-gitpod', callback: commandOpenGitpod },

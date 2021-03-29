@@ -16,6 +16,7 @@
     "onCommand:github1s.get-current-authority",
     "onCommand:github1s.checkout-ref",
     "onCommand:github1s.switch-to-pull",
+    "onCommand:github1s.switch-to-commit",
     "onCommand:github1s.diff-view-open-left-file",
     "onCommand:github1s.diff-view-open-right-file",
     "onView:github1s"
@@ -46,6 +47,10 @@
         {
           "id": "github1s.views.pull-request-list",
           "name": "Pull Requests"
+        },
+        {
+          "id": "github1s.views.commit-list",
+          "name": "Commits"
         }
       ]
     },
@@ -71,15 +76,21 @@
         "category": "GitHub1s"
       },
       {
+        "command": "github1s.open-gitpod",
+        "title": "Edit files in Gitpod",
+        "category": "GitHub1s"
+      },
+      {
         "command": "github1s.switch-to-pull",
         "title": "Search a Pull Request",
         "category": "GitHub1s",
         "icon": "$(search)"
       },
       {
-        "command": "github1s.open-gitpod",
-        "title": "Edit files in Gitpod",
-        "category": "GitHub1s"
+        "command": "github1s.pull-view-refresh-pull-list",
+        "title": "Refresh",
+        "category": "GitHub1s",
+        "icon": "$(refresh)"
       },
       {
         "command": "github1s.pull-view-item-switch-to-pull",
@@ -89,6 +100,30 @@
       },
       {
         "command": "github1s.pull-view-item-open-on-github",
+        "title": "Open on GitHub",
+        "category": "GitHub1s",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "github1s.switch-to-commit",
+        "title": "Search a Commit",
+        "category": "GitHub1s",
+        "icon": "$(search)"
+      },
+      {
+        "command": "github1s.commit-view-refresh-commit-list",
+        "title": "Refresh",
+        "category": "GitHub1s",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "github1s.commit-view-item-switch-to-commit",
+        "title": "Switch to Commit",
+        "category": "GitHub1s",
+        "icon": "$(log-in)"
+      },
+      {
+        "command": "github1s.commit-view-item-open-on-github",
         "title": "Open on GitHub",
         "category": "GitHub1s",
         "icon": "$(globe)"
@@ -148,16 +183,41 @@
           "dark": "#8db9e2",
           "highContrast": "#8db9e2"
         }
+      },
+      {
+        "id": "github1s.colors.selectedViewItem",
+        "description": "selected view item color",
+        "defaults": {
+          "light": "#1890ff",
+          "dark": "#1890ff",
+          "highContrast": "#1890ff"
+        }
       }
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "github1s.pull-view-refresh-pull-list",
+          "when": "false"
+        },
         {
           "command": "github1s.pull-view-item-switch-to-pull",
           "when": "false"
         },
         {
           "command": "github1s.pull-view-item-open-on-github",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-refresh-commit-list",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-item-switch-to-commit",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-item-open-on-github",
           "when": "false"
         },
         {
@@ -171,9 +231,24 @@
       ],
       "view/title": [
         {
+          "command": "github1s.pull-view-refresh-pull-list",
+          "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
+          "group": "navigation@1"
+        },
+        {
           "command": "github1s.switch-to-pull",
           "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "github1s.commit-view-refresh-commit-list",
+          "when": "view =~ /^github1s\\.views\\.commit-list$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s.switch-to-commit",
+          "when": "view =~ /^github1s\\.views\\.commit-list$/",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -185,6 +260,16 @@
         {
           "command": "github1s.pull-view-item-open-on-github",
           "when": "viewItem =~ /^github1s:pull-request$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "github1s.commit-view-item-switch-to-commit",
+          "when": "viewItem =~ /^github1s:commit$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "github1s.commit-view-item-open-on-github",
+          "when": "viewItem =~ /^github1s:commit$/",
           "group": "inline@2"
         }
       ],

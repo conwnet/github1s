@@ -19,7 +19,8 @@ export const explorerRouterListener = (
 	if (
 		currentState.owner !== previousState.owner ||
 		currentState.repo !== previousState.repo ||
-		currentState.ref !== previousState.ref
+		currentState.ref !== previousState.ref ||
+		currentState.pageType !== previousState.pageType
 	) {
 		// should update the explorer
 		vscode.commands.executeCommand(
