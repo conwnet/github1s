@@ -15,6 +15,7 @@ import { basename } from '@/helpers/util';
 import { EMPTY_FILE_SCHEME } from '@/providers';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 import { PageType } from '@/router/types';
+import { GitHub1sQuickDiffProvider } from './quickDiffProviders';
 
 export interface ChangedFile {
 	baseFileUri: vscode.Uri;
@@ -151,6 +152,7 @@ export const getChangedFileCommand = (changedFile: ChangedFile) => {
 export const updateSourceControlChanges = (() => {
 	const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s');
 	const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
+	sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
 
 	return async () => {
 		const changedFiles = await getChangedFiles();

@@ -15,7 +15,10 @@ import {
 	ThemeColor,
 } from 'vscode';
 import router from '@/router';
-import repository, { FileChangeType } from '@/repository';
+import repository, {
+	FileChangeType,
+	RepositoryChangedFile,
+} from '@/repository';
 import { PageType } from '@/router/types';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 
@@ -42,6 +45,48 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	},
 };
 
+const getFileDecorationFromChangeFiles = (
+	uri: Uri,
+	changedFiles: RepositoryChangedFile[]
+): FileDecoration => {
+	const changedFile = changedFiles?.find(
+		(changedFile) => changedFile.filename === uri.path.slice(1)
+	);
+
+	if (changedFile) {
+		return changedFileDecorationDataMap[changedFile.status];
+	}
+	// we have to determine the changed folder manually rather then use
+	// the `propagate` property of FileDecoration, because the file tree
+	// in the file explorer is lazy load
+	const includeChangedFile = changedFiles?.find((changedFile) =>
+		changedFile.filename.startsWith(`${uri.path.slice(1)}/`)
+	);
+	if (includeChangedFile) {
+		return {
+			...changedFileDecorationDataMap[includeChangedFile.status],
+			badge: '\u29bf',
+		};
+	}
+	return null;
+};
+
+const getFileDecorationForPull = async (
+	uri: Uri,
+	pullNumber: number
+): Promise<FileDecoration> => {
+	const changedFiles = await repository.getPullFiles(pullNumber);
+	return getFileDecorationFromChangeFiles(uri, changedFiles);
+};
+
+const getFileDecorationForCommit = async (
+	uri: Uri,
+	commitSha: string
+): Promise<FileDecoration> => {
+	const changedFiles = await repository.getCommitFiles(commitSha);
+	return getFileDecorationFromChangeFiles(uri, changedFiles);
+};
+
 export class GitHub1sChangedFileDecorationProvider
 	implements FileDecorationProvider, Disposable {
 	private readonly disposable: Disposable;
@@ -65,26 +110,12 @@ export class GitHub1sChangedFileDecorationProvider
 			return null;
 		}
 
-		const currentFilePath = uri.path.slice(1);
-		return router.getState().then(async (routerState) => {
-			if (![PageType.PULL].includes(routerState.pageType)) {
-				return null;
+		return router.getState().then((routerState) => {
+			if (routerState.pageType === PageType.PULL) {
+				return getFileDecorationForPull(uri, routerState.pullNumber);
 			}
-
-			const changedFiles = await repository.getPullFiles(
-				routerState.pullNumber
-			);
-			const changedFile = changedFiles?.find(
-				(changedFile) => changedFile.filename === currentFilePath
-			);
-			if (changedFile) {
-				return changedFileDecorationDataMap[changedFile.status];
-			}
-			const includeChangedFile = changedFiles?.find((changedFile) =>
-				changedFile.filename.startsWith(`${currentFilePath}/`)
-			);
-			if (includeChangedFile) {
-				return changedFileDecorationDataMap[FileChangeType.MODIFIED];
+			if (routerState.pageType === PageType.COMMIT) {
+				return getFileDecorationForCommit(uri, routerState.commitSha);
 			}
 			return null;
 		});
