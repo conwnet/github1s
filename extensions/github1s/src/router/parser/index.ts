@@ -8,6 +8,7 @@ import { parseTreeUrl } from './tree';
 import { parseBlobUrl } from './blob';
 import { parsePullsUrl } from './pulls';
 import { parsePullUrl } from './pull';
+import { parseCommitsUrl } from './commits';
 import { parseCommitUrl } from './commit';
 import { PageType, RouterState } from '../types';
 
@@ -19,8 +20,7 @@ const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 		pulls: PageType.PULL_LIST,
 		pull: PageType.PULL,
 		commit: PageType.COMMIT,
-		// TODO: implements below types
-		// commits: PageType.COMMIT_LIST,
+		commits: PageType.COMMIT_LIST,
 	};
 	return PAGE_TYPE_MAP[pathParts[2]] || PageType.TREE;
 };
@@ -40,6 +40,8 @@ export const parseGitHubUrl = async (path: string): Promise<RouterState> => {
 			return parsePullsUrl(path);
 		case PageType.COMMIT:
 			return parseCommitUrl(path);
+		case PageType.COMMIT_LIST:
+			return parseCommitsUrl(path);
 	}
 
 	// fallback to default
