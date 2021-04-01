@@ -26,6 +26,9 @@ function main() {
 	# git clone --depth 1 -b 1.52.1 https://github.com/microsoft/vscode.git vscode
 	# cd vscode
 	# yarn --frozen-lockfile
+
+	cd "${APP_ROOT}/vscode-web-github1s"
+	yarn --frozen-lockfile
 }
 
 main "$@"
