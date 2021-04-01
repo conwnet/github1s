@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "${0}")/../.."
+cd "$(dirname "${0}")/.."
 APP_ROOT=$(pwd)
+echo $APP_ROOT
 
 # sync src/* to vscode
 function main() {

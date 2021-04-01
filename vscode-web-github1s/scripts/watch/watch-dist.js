@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 const cp = require('child_process');
 const util = require('util');
 
-const APP_ROOT = path.join(__dirname, '../..');
+const APP_ROOT = path.join(__dirname, '../../..');
 
 const debounce = (func, delay) => {
 	let timer = null;
@@ -22,9 +22,9 @@ const debounce = (func, delay) => {
 	};
 };
 
-const autoSyncGitHub1sExtension = async () => {
-	const SOURCE = path.join(APP_ROOT, 'extensions');
-	const TARGET = path.join(APP_ROOT, 'dist/static/extensions');
+const autoSyncVscodeOut = async () => {
+	const SOURCE = path.join(APP_ROOT, 'vscode-web-github1s/lib/vscode/out');
+	const TARGET = path.join(APP_ROOT, 'dist/static/vscode');
 
 	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
 
@@ -40,7 +40,7 @@ const autoSyncGitHub1sExtension = async () => {
 const main = () => {
 	fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'));
 
-	autoSyncGitHub1sExtension();
+	autoSyncVscodeOut();
 };
 
 main();

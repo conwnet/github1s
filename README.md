@@ -59,15 +59,38 @@ You can start an online development environment with [Gitpod](https://www.gitpod
 
 ### Local development
 
-You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development.
+```bash
+git clone git@github.com:conwnet/github1s.git
+cd github1s
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+```
+
+#### Local development with full VS Code build
+
+You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development with full VS Code build.
+Please make sure you could build VS Code locally before the watch mode.
+
+To verify the build:
 
 ```bash
-$ git clone git@github.com:conwnet/github1s.git
-$ cd github1s
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+cd github1s
+cd vscode-web-github1s
+yarn
+yarn clone
+yarn build
+```
+
+After the inital successful build, you could use the watch mode:
+
+```bash
+cd github1s
+yarn
+yarn watch-with-vscode
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### ... or ... VS Code + Docker Development

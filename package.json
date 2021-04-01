@@ -7,6 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
+    "@github1s/vscode-web": "0.0.3",
     "@typescript-eslint/eslint-plugin": "^4.15.0",
     "@typescript-eslint/parser": "^4.15.0",
     "chokidar": "^3.5.1",
@@ -34,11 +35,11 @@
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
+    "watch-with-vscode": "run-p watch watch-vscode",
+    "watch-vscode": "cd vscode-web-github1s && yarn watch",
     "watch:setup": "./scripts/watch.sh",
-    "watch:vscode": "cd lib/vscode && yarn watch",
-    "watch:github1s-extension": "cd extensions/github1s && yarn dev",
-    "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js",
+    "watch:github1s-extension": "cd extensions/github1s && yarn dev",
     "serve": "node ./scripts/serve-dist.js",
     "format": "prettier --write .",
     "eslint": "eslint --ext .ts --ext .js .",
