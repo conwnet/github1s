@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": "https://github.com/conwnet/github1s/issues/257",
   "scripts": {
-    "build": "./scripts/build-vscode.sh && run-p copy:*",
+    "clone": "./scripts/clone.sh",
+    "build": "yarn sync && ./scripts/build-vscode.sh && run-p copy:*",
     "copy:vscode": "./scripts/copy-vscode.sh",
     "copy:extension": "./scripts/copy-extensions.sh",
-    "clone": "./scripts/clone.sh",
     "sync": "./scripts/sync-code.sh",
-    "watch": "run-p watch:*",
+    "watch": "yarn clone && run-p watch:*",
     "watch:vscode": "cd lib/vscode && yarn watch",
     "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js"
