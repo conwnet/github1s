@@ -4,12 +4,10 @@
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
-  "repository": "conwnet/github1s",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
-  "jsnext:main": "dist/index.es.js",
+  "repository": "https://github.com/conwnet/github1s/issues/257",
   "scripts": {
   },
+  "private": false,
   "files": ["/dist"],
   "keywords": [
     "vscode",
