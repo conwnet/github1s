@@ -10,7 +10,7 @@ const VSCODE_PATH = path.join(
 );
 const enableExtensions = require(path.join(
 	APP_ROOT,
-	'resources/builtin-extensions.json'
+	'vscode-web-github1s/resources/builtin-extensions.json'
 ));
 
 /**

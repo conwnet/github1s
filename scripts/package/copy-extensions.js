@@ -4,8 +4,6 @@ const path = require('path');
 const fs = require('fs-extra');
 
 const APP_ROOT = path.join(__dirname, '../..');
-const enableExtensions =
-	require(path.join(APP_ROOT, 'resources/builtin-extensions.json')) || [];
 
 const main = () => {
 	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
