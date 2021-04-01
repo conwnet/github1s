@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs-extra');
 
 const APP_ROOT = path.join(__dirname, '../..');
-const TARGET_DIR = path.join(APP_ROOT, 'dist/static/extensions');
+const TARGET_DIR = path.join(APP_ROOT, 'vscode-web-github1s/dist/extensions');
 const enableExtensions =
 	require(path.join(APP_ROOT, 'resources/builtin-extensions.json')) || [];
 
