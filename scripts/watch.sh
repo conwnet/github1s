@@ -13,7 +13,7 @@ function main() {
 	node ./package/generate-config.js
 
 	echo 'please waiting...'
-	while [ ! -e "${APP_ROOT}/lib/vscode/out" ]
+	while [ ! -e "${APP_ROOT}/vscode-web-github1s/lib/vscode/out" ]
 	do
 		echo "waiting for vscode build..."
 		sleep 3
