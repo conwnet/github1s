@@ -19,11 +19,12 @@ const main = () => {
 		);
 	});
 
+	// TODO: Split this from vscode built in
 	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
 	extensions.forEach((extension) => {
 		fs.copySync(
 			path.join(APP_ROOT, 'extensions', extension),
-			path.join(TARGET_DIR, extension),
+			path.join(path.join(APP_ROOT, 'dist/static/extensions'), extension),
 			{ filter: (src) => !src.includes('node_modules') }
 		);
 	});
