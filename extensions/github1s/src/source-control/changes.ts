@@ -5,14 +5,15 @@
 
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
-import repository, {
+import repository from '@/repository';
+import {
 	FileChangeType,
 	RepositoryCommit,
 	RepositoryPull,
-} from '@/repository';
+} from '@/repository/types';
 import router from '@/router';
 import { basename } from '@/helpers/util';
-import { EMPTY_FILE_SCHEME } from '@/providers';
+import { emptyFileUri } from '@/providers';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 import { PageType } from '@/router/types';
 import { GitHub1sQuickDiffProvider } from './quickDiffProviders';
@@ -95,48 +96,48 @@ const getChangedFiles = async (): Promise<ChangedFile[]> => {
 };
 
 // get the title of the diff editor
-const getChangedFileDiffTitle = (changedFile: ChangedFile) => {
-	const baseFileUri = changedFile.baseFileUri;
-	const headFileUri = changedFile.headFileUri;
+export const getChangedFileDiffTitle = (
+	baseFileUri: vscode.Uri,
+	headFileUri: vscode.Uri,
+	status: FileChangeType
+) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
 	const [_owner, _repo, baseCommitSha] = baseFileUri.authority.split('+');
 	const [__owner, __repo, headCommitSha] = headFileUri.authority.split('+');
-	const baseFileLabel = `${baseFileName} (${baseCommitSha.slice(0, 7)})`;
-	const headFileLabel = `${headFileName} (${headCommitSha.slice(0, 7)})`;
+	const baseFileLabel = `${baseFileName} (${baseCommitSha?.slice(0, 7)})`;
+	const headFileLabel = `${headFileName} (${headCommitSha?.slice(0, 7)})`;
 
-	if (changedFile.status === FileChangeType.ADDED) {
-		return `${baseFileName} (added in ${headCommitSha.slice(0, 7)})`;
+	if (status === FileChangeType.ADDED) {
+		return `${headFileName} (added in ${headCommitSha.slice(0, 7)})`;
 	}
 
-	if (changedFile.status === FileChangeType.REMOVED) {
+	if (status === FileChangeType.REMOVED) {
 		return `${baseFileName} (deleted from ${baseCommitSha.slice(0, 7)})`;
 	}
 
 	return `${baseFileLabel} ⟷ ${headFileLabel}`;
 };
 
-const emptyFileUri = vscode.Uri.parse('').with({
-	scheme: EMPTY_FILE_SCHEME,
-});
-
 export const getChangedFileCommand = (changedFile: ChangedFile) => {
-	const title = getChangedFileDiffTitle(changedFile);
 	let baseFileUri = changedFile.baseFileUri;
 	let headFileUri = changedFile.headFileUri;
-	const query = queryString.stringify({
-		base: baseFileUri.toString(),
-		head: headFileUri.toString(),
-		status: changedFile.status,
-	});
+	const status = changedFile.status;
 
-	if (changedFile.status === FileChangeType.ADDED) {
+	if (status === FileChangeType.ADDED) {
 		baseFileUri = emptyFileUri;
 	}
 
-	if (changedFile.status === FileChangeType.REMOVED) {
+	if (status === FileChangeType.REMOVED) {
 		headFileUri = emptyFileUri;
 	}
+
+	const title = getChangedFileDiffTitle(baseFileUri, headFileUri, status);
+	const query = queryString.stringify({
+		status,
+		base: baseFileUri.with({ query: '' }).toString(),
+		head: headFileUri.with({ query: '' }).toString(),
+	});
 
 	return {
 		title: 'Diff',
