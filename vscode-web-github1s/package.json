@@ -1,11 +1,16 @@
 {
   "name": "@github1s/vscode-web",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
   "repository": "https://github.com/conwnet/github1s/issues/257",
-  "scripts": {},
+  "scripts": {
+    "build": "./scripts/build-vscode.sh",
+    "bundle": "./scripts/copy-vscode.sh && ./scripts/copy-extensions.sh",
+    "clone": "./scripts/clone.sh",
+    "sync": "./scripts/sync-code.sh"
+  },
   "private": false,
   "files": [
     "/dist"

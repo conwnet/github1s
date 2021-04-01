@@ -4,7 +4,10 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const APP_ROOT = path.join(__dirname, '../..');
-const VSCODE_PATH = path.join(APP_ROOT, 'lib/vscode');
+const VSCODE_PATH = path.join(
+	APP_ROOT,
+	'node_modules/@github1s/vscode-web/dist'
+);
 const enableExtensions = require(path.join(
 	APP_ROOT,
 	'resources/builtin-extensions.json'

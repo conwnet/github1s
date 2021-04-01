@@ -22,20 +22,20 @@ const debounce = (func, delay) => {
 	};
 };
 
-// const autoSyncVscodeOut = async () => {
-// 	const SOURCE = path.join(APP_ROOT, 'lib/vscode/out');
-// 	const TARGET = path.join(APP_ROOT, 'dist/static/vscode');
+const autoSyncVscodeOut = async () => {
+	const SOURCE = path.join(APP_ROOT, 'vscode-web-github1s/lib/vscode/out');
+	const TARGET = path.join(APP_ROOT, 'dist/static/vscode');
 
-// 	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
+	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
 
-// 	chokidar.watch(SOURCE).on(
-// 		'all',
-// 		debounce((_, path) => {
-// 			cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
-// 			console.log(`sync ${path}`);
-// 		}, 300)
-// 	);
-// };
+	chokidar.watch(SOURCE).on(
+		'all',
+		debounce((_, path) => {
+			cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
+			console.log(`sync ${path}`);
+		}, 300)
+	);
+};
 
 const autoSyncGitHub1sExtension = async () => {
 	const SOURCE = path.join(APP_ROOT, 'extensions');

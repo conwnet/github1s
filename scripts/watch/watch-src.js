@@ -7,8 +7,8 @@ const cp = require('child_process');
 const APP_ROOT = path.join(__dirname, '../..');
 
 const main = () => {
-	const SOURCE = path.join(APP_ROOT, 'src');
-	const TARGET = path.join(APP_ROOT, 'lib/vscode/src');
+	const SOURCE = path.join(APP_ROOT, 'vscode-web-github1s/src');
+	const TARGET = path.join(APP_ROOT, 'vscode-web-github1s/lib/vscode/src');
 	const watcher = chokidar.watch(SOURCE);
 
 	watcher.on('all', () => {
