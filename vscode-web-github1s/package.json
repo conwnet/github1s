@@ -1,0 +1,19 @@
+{
+  "name": "@github1s/vscode-web",
+  "version": "0.0.1",
+  "description": "VS Code web for GitHub1s",
+  "author": "github1s",
+  "license": "MIT",
+  "repository": "conwnet/github1s",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "jsnext:main": "dist/index.es.js",
+  "scripts": {
+  },
+  "files": ["/dist"],
+  "keywords": [
+    "vscode",
+    "vscode-web",
+    "github1s"
+  ]
+}

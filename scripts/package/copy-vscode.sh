@@ -6,8 +6,10 @@ APP_ROOT=$(pwd)
 
 function main() {
 	cd ${APP_ROOT}
-	mkdir -p dist/static
-	rsync -a --del lib/vscode/out-vscode-min/ dist/static/vscode
+	TARGET="vscode-web-github1s/dist/"
+	rm -rf ${TARGET}
+	mkdir -p ${TARGET}
+	rsync -a --del lib/vscode/out-vscode-min/ ${TARGET}
 
 	echo "copy vscode done!"
 }

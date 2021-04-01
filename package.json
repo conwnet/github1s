@@ -35,7 +35,7 @@
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
     "watch:setup": "./scripts/watch.sh",
-    "watch:vscode": "cd lib/vscode && yarn watch",
+    "_watch:vscode": "cd lib/vscode && yarn watch",
     "watch:github1s-extension": "cd extensions/github1s && yarn dev",
     "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js",
@@ -56,5 +56,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@github1s/vscode-web": "file:.yalc/@github1s/vscode-web"
+  }
 }
