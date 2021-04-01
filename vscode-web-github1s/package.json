@@ -6,8 +6,9 @@
   "license": "MIT",
   "repository": "https://github.com/conwnet/github1s/issues/257",
   "scripts": {
-    "build": "./scripts/build-vscode.sh",
-    "bundle": "./scripts/copy-vscode.sh && ./scripts/copy-extensions.sh",
+    "build": "./scripts/build-vscode.sh && run-p copy:*",
+    "copy:vscode": "./scripts/copy-vscode.sh",
+    "copy:extension": "./scripts/copy-extensions.sh",
     "clone": "./scripts/clone.sh",
     "sync": "./scripts/sync-code.sh",
     "watch": "run-p watch:*",
