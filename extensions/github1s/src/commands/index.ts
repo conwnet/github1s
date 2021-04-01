@@ -26,6 +26,8 @@ import { commandOpenGitpod } from './gitpod';
 import {
 	commandDiffViewOpenLeftFile,
 	commandDiffViewOpenRightFile,
+	commandEditorViewOpenNextRevision,
+	commandEditorViewOpenPrevRevision,
 } from './editor';
 
 const commands: { id: string; callback: (...args: any[]) => any }[] = [
@@ -66,6 +68,10 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	{ id: 'github1s.diff-view-open-left-file', callback: commandDiffViewOpenLeftFile }, // prettier-ignore
 	// open the right file in diff editor
 	{ id: 'github1s.diff-view-open-right-file', callback: commandDiffViewOpenRightFile }, // prettier-ignore
+	// open the previous revision of a file
+	{ id: 'github1s.editor-view-open-prev-revision', callback: commandEditorViewOpenPrevRevision }, // prettier-ignore
+	// open the next revision of a file
+	{ id: 'github1s.editor-view-open-next-revision', callback: commandEditorViewOpenNextRevision }, // prettier-ignore
 ];
 
 export const registerGitHub1sCommands = () => {

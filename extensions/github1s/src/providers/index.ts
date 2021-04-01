@@ -24,6 +24,9 @@ export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationPr
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
+export const emptyFileUri = vscode.Uri.parse('').with({
+	scheme: EMPTY_FILE_SCHEME,
+});
 
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();

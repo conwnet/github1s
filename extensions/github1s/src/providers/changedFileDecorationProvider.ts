@@ -15,10 +15,8 @@ import {
 	ThemeColor,
 } from 'vscode';
 import router from '@/router';
-import repository, {
-	FileChangeType,
-	RepositoryChangedFile,
-} from '@/repository';
+import repository from '@/repository';
+import { FileChangeType, RepositoryChangedFile } from '@/repository/types';
 import { PageType } from '@/router/types';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 

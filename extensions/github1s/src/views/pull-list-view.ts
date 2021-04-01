@@ -5,7 +5,8 @@
 
 import * as vscode from 'vscode';
 import { relativeTimeTo } from '@/helpers/date';
-import repository, { RepositoryPull } from '@/repository';
+import repository from '@/repository';
+import { RepositoryPull } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import * as queryString from 'query-string';
 import {
