@@ -79,7 +79,7 @@ export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
 	});
 };
 
-const getChangedFiles = async (): Promise<ChangedFile[]> => {
+export const getChangedFiles = async (): Promise<ChangedFile[]> => {
 	const routerState = await router.getState();
 
 	// github pull page

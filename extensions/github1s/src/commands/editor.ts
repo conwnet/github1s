@@ -9,8 +9,39 @@ import router from '@/router';
 import repository from '@/repository';
 import { emptyFileUri } from '@/providers';
 import { basename } from '@/helpers/util';
-import { getChangedFileDiffTitle } from '@/source-control/changes';
+import {
+	ChangedFile,
+	getChangedFiles,
+	getChangedFileCommand,
+	getChangedFileDiffTitle,
+} from '@/source-control/changes';
 import { FileChangeType } from '@/repository/types';
+
+export const getChangedFileFromSourceControl = async (
+	fileUri: vscode.Uri
+): Promise<ChangedFile | undefined> => {
+	// the file should belong to current workspace
+	if (fileUri.authority) {
+		return;
+	}
+
+	return (await getChangedFiles()).find((changedFile) => {
+		return changedFile.headFileUri.path === fileUri.path;
+	});
+};
+
+// open the diff editor of a file, such as click it in source-control-panel,
+// only work when we can found the corresponding file in source-control-panel
+export const commandEditorViewOpenChanges = async (fileUri: vscode.Uri) => {
+	const changedFile = await getChangedFileFromSourceControl(fileUri);
+
+	if (!changedFile) {
+		return;
+	}
+
+	const command = await getChangedFileCommand(changedFile);
+	vscode.commands.executeCommand(command.command, ...command.arguments);
+};
 
 const openFileToEditor = async (fileUri) => {
 	const isCurrentAuthority =

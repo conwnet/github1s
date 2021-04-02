@@ -129,6 +129,12 @@
         "icon": "$(globe)"
       },
       {
+        "command": "github1s.editor-view-open-changes",
+        "title": "Open Changes",
+        "category": "GitHub1s",
+        "icon": "$(compare-changes)"
+      },
+      {
         "command": "github1s.diff-view-open-left-file",
         "title": "Open Left File",
         "category": "GitHub1s",
@@ -237,6 +243,10 @@
           "when": "false"
         },
         {
+          "command": "github1s.editor-view-open-changes",
+          "when": "false"
+        },
+        {
           "command": "github1s.diff-view-open-left-file",
           "when": "false"
         },
@@ -299,14 +309,19 @@
       ],
       "editor/title": [
         {
+          "command": "github1s.editor-view-open-changes",
+          "when": "!isInDiffEditor && github1s.context.showOpenChangesInEditorTitle",
+          "group": "navigation@1"
+        },
+        {
           "command": "github1s.diff-view-open-left-file",
           "when": "isInDiffEditor",
-          "group": "navigation@1"
+          "group": "navigation@2"
         },
         {
           "command": "github1s.diff-view-open-right-file",
           "when": "isInDiffEditor",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "github1s.editor-view-open-prev-revision",
