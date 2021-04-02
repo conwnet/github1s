@@ -1,4 +1,4 @@
-name: Test with VS Code build
+name: Build & Test with VS Code build
 
 on:
   push:
