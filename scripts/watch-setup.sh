@@ -6,12 +6,11 @@ APP_ROOT=$(pwd)
 
 # execute all necessary tasks
 function main() {
-	rm -rf "${APP_ROOT}/dist"
 	cd "${APP_ROOT}/scripts"
-	./build/build-github1s-extensions.sh
-	./package.sh
-
-	echo "all build done!"
+	./package/copy-resources.sh
+	./package/copy-node_modules.sh
+	./package/copy-extensions.sh
+	node ./package/generate-config.js
 }
 
 main "$@"
