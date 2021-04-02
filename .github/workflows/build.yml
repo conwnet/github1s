@@ -37,7 +37,6 @@ jobs:
 
       - run: yarn --frozen-lockfile
       - run: yarn eslint
-      - run: yarn global add yalc
       - run: cd vscode-web-github1s && yarn build && cd ..
       - run: yarn yalc && yarn build
       - uses: microsoft/playwright-github-action@v1
