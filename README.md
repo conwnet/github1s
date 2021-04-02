@@ -77,10 +77,7 @@ To verify the build:
 
 ```bash
 cd github1s
-cd vscode-web-github1s
-yarn
-yarn clone
-yarn build
+yarn build:vscode
 ```
 
 After the inital successful build, you could use the watch mode:
