@@ -33,6 +33,7 @@
     "clean": "./scripts/clean.sh",
     "build": "./scripts/build.sh",
     "yalc": "yalc publish vscode-web-github1s && yalc add -D @github1s/vscode-web",
+    "build:vscode": "cd vscode-web-github1s && yarn build",
     "vercel-build": "yarn build && yarn hash && mv dist public",
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",

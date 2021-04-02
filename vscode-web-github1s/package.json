@@ -8,11 +8,11 @@
   "scripts": {
     "clone": "./scripts/clone.sh",
     "sync": "./scripts/sync-code.sh",
+    "build": "run-s clone sync build:vscode run-p copy:*",
     "build:vscode": "./scripts/build-vscode.sh",
-    "build": "run-s clone sync build:vscode && run-p copy:*",
     "copy:vscode": "./scripts/copy-vscode.sh",
     "copy:extension": "./scripts/copy-extensions.sh",
-    "watch": "yarn clone && run-p watch:*",
+    "watch": "run-s clone sync && run-p watch:*",
     "watch:vscode": "cd lib/vscode && yarn watch",
     "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js"
