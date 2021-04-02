@@ -8,7 +8,7 @@
   "scripts": {
     "clone": "./scripts/clone.sh",
     "sync": "./scripts/sync-code.sh",
-    "build": "run-s clone sync build:vscode run-p copy:*",
+    "build": "run-s clone sync build:vscode copy:*",
     "build:vscode": "./scripts/build-vscode.sh",
     "copy:vscode": "./scripts/copy-vscode.sh",
     "copy:extension": "./scripts/copy-extensions.sh",
