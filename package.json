@@ -23,6 +23,7 @@
     "prettier": "^2.2.1",
     "serve-handler": "^6.1.3",
     "start-server-and-test": "^1.12.0",
+    "yalc": "^1.0.0-pre.50",
     "typescript": "^4.1.3"
   },
   "scripts": {
@@ -31,6 +32,7 @@
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
     "build": "./scripts/build.sh",
+    "yalc": "yalc publish vscode-web-github1s && yalc add -D @github1s/vscode-web",
     "vercel-build": "yarn build && yarn hash && mv dist public",
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
