@@ -20,13 +20,10 @@ Then run the following commands:
 
 ```sh
 cd github1s
-cd vscode-web-github1s
-yarn build
-yalc publish
+yarn build:vscode # Build the VS Code
+yarn yalc # Install local package via yalc
 
-cd ..
-yalc add -D @github1s/vscode-web
-yarn build
+yarn build # Build the GitHub1s & other extensions
 yarn serve
 ```
 
