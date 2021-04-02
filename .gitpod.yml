@@ -4,9 +4,6 @@ tasks:
   - init: |
       yarn
       yarn build
-      mkdir -p lib/vscode/out
-      sed -i 's/The Web Worker Extension Host did not start in 10s/The Web Worker Extension Host did not start in 60s/g' ./lib/vscode/src/vs/workbench/services/extensions/browser/webWorkerExtensionHost.ts
-      sed -i 's/}, 10000);/}, 60000);/g' ./lib/vscode/src/vs/workbench/services/extensions/browser/webWorkerExtensionHost.ts
     command: |
       echo "======================="
       echo "Please run 'yarn watch'"
