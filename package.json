@@ -38,7 +38,7 @@
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
-    "watch-with-vscode": "export DEV_VSCODE=true && run-p watch watch-vscode",
+    "watch-with-vscode": "DEV_VSCODE=true run-p watch watch-vscode",
     "watch-vscode": "cd vscode-web-github1s && yarn watch",
     "watch:setup": "./scripts/watch-setup.sh",
     "watch:dist": "cd scripts/watch && node watch-dist.js",
