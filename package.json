@@ -7,6 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
+    "@github1s/vscode-web": "0.0.3",
     "@typescript-eslint/eslint-plugin": "^4.15.0",
     "@typescript-eslint/parser": "^4.15.0",
     "chokidar": "^3.5.1",
@@ -22,6 +23,7 @@
     "prettier": "^2.2.1",
     "serve-handler": "^6.1.3",
     "start-server-and-test": "^1.12.0",
+    "yalc": "^1.0.0-pre.50",
     "typescript": "^4.1.3"
   },
   "scripts": {
@@ -30,15 +32,17 @@
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
     "build": "./scripts/build.sh",
+    "yalc": "yalc publish vscode-web-github1s && yalc add -D @github1s/vscode-web",
+    "build:vscode": "cd vscode-web-github1s && yarn build",
     "vercel-build": "yarn build && yarn hash && mv dist public",
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
+    "watch-with-vscode": "run-p watch watch-vscode",
+    "watch-vscode": "cd vscode-web-github1s && yarn watch",
     "watch:setup": "./scripts/watch.sh",
-    "watch:vscode": "cd lib/vscode && yarn watch",
-    "watch:github1s-extension": "cd extensions/github1s && yarn dev",
-    "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js",
+    "watch:github1s-extension": "cd extensions/github1s && yarn dev",
     "serve": "node ./scripts/serve-dist.js",
     "format": "prettier --write .",
     "eslint": "eslint --ext .ts --ext .js .",

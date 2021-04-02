@@ -188,6 +188,19 @@ export const getGitHubCommits = (
 	).catch(handleRequestError);
 };
 
+export const getGitHubFileCommits = (
+	owner: string,
+	repo: string,
+	filePath: string,
+	sha: string,
+	options?: ResponseInit
+) => {
+	return fetch(
+		`https://api.github.com/repos/${owner}/${repo}/commits?path=${filePath.slice(1)}&sha=${sha}&per_page=100`, // prettier-ignore
+		options
+	).catch(handleRequestError);
+};
+
 export const getGitHubCommitDetail = (
 	owner: string,
 	repo: string,

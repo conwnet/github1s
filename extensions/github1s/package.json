@@ -129,13 +129,20 @@
         "icon": "$(globe)"
       },
       {
+        "command": "github1s.editor-view-open-changes",
+        "title": "Open Changes",
+        "category": "GitHub1s",
+        "icon": "$(compare-changes)"
+      },
+      {
         "command": "github1s.diff-view-open-left-file",
         "title": "Open Left File",
         "category": "GitHub1s",
         "icon": {
           "dark": "assets/icons/dark/open-left-file.svg",
           "light": "assets/icons/light/open-left-file.svg"
-        }
+        },
+        "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
       },
       {
         "command": "github1s.diff-view-open-right-file",
@@ -144,7 +151,22 @@
         "icon": {
           "dark": "assets/icons/dark/open-right-file.svg",
           "light": "assets/icons/light/open-right-file.svg"
-        }
+        },
+        "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)head(=|%3D|%3d)github1s-empty-file)/"
+      },
+      {
+        "command": "github1s.editor-view-open-prev-revision",
+        "title": "Open Previous Revision",
+        "category": "GitHub1s",
+        "icon": "$(arrow-left)",
+        "enablement": "resourceScheme =~ /^github1s$/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
+      },
+      {
+        "command": "github1s.editor-view-open-next-revision",
+        "title": "Open Next Revision",
+        "category": "GitHub1s",
+        "icon": "$(arrow-right)",
+        "enablement": "resource =~ /^[^?]*\\?[^#]*(%26|\\b)hasNextRevision(=|%3D|%3d)true/"
       }
     ],
     "colors": [
@@ -221,11 +243,23 @@
           "when": "false"
         },
         {
+          "command": "github1s.editor-view-open-changes",
+          "when": "false"
+        },
+        {
           "command": "github1s.diff-view-open-left-file",
           "when": "false"
         },
         {
           "command": "github1s.diff-view-open-right-file",
+          "when": "false"
+        },
+        {
+          "command": "github1s.editor-view-open-prev-revision",
+          "when": "false"
+        },
+        {
+          "command": "github1s.editor-view-open-next-revision",
           "when": "false"
         }
       ],
@@ -275,14 +309,29 @@
       ],
       "editor/title": [
         {
-          "command": "github1s.diff-view-open-left-file",
-          "when": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^[^?]*\\?[^#]*status(=|%3D|%3d)(?!added)/",
+          "command": "github1s.editor-view-open-changes",
+          "when": "!isInDiffEditor && github1s.context.showOpenChangesInEditorTitle",
           "group": "navigation@1"
         },
         {
-          "command": "github1s.diff-view-open-right-file",
-          "when": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^[^?]*\\?[^#]*status(=|%3D|%3d)(?!removed)/",
+          "command": "github1s.diff-view-open-left-file",
+          "when": "isInDiffEditor",
           "group": "navigation@2"
+        },
+        {
+          "command": "github1s.diff-view-open-right-file",
+          "when": "isInDiffEditor",
+          "group": "navigation@3"
+        },
+        {
+          "command": "github1s.editor-view-open-prev-revision",
+          "when": "resourceScheme =~ /^github1s/",
+          "group": "navigation@98"
+        },
+        {
+          "command": "github1s.editor-view-open-next-revision",
+          "when": "resourceScheme =~ /^github1s/",
+          "group": "navigation@99"
         }
       ]
     }

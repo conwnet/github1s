@@ -5,12 +5,11 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import repository, { FileChangeType } from '@/repository';
+import repository from '@/repository';
+import { FileChangeType } from '@/repository/types';
 import { PageType } from '@/router/types';
-import { EMPTY_FILE_SCHEME } from '@/providers';
+import { emptyFileUri } from '@/providers';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
-
-const emptyFileUri = vscode.Uri.parse('').with({ scheme: EMPTY_FILE_SCHEME });
 
 // get the original source uri when the `routerState.pageType` is `PageType.PULL`
 const getOriginalResourceForPull = async (

@@ -59,15 +59,35 @@ You can start an online development environment with [Gitpod](https://www.gitpod
 
 ### Local development
 
-You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development.
+```bash
+git clone git@github.com:conwnet/github1s.git
+cd github1s
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+```
+
+#### Local development with full VS Code build
+
+You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development with full VS Code build.
+Please make sure you could build VS Code locally before the watch mode.
+
+To verify the build:
 
 ```bash
-$ git clone git@github.com:conwnet/github1s.git
-$ cd github1s
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+cd github1s
+yarn build:vscode
+```
+
+After the inital successful build, you could use the watch mode:
+
+```bash
+cd github1s
+yarn
+yarn watch-with-vscode
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### ... or ... VS Code + Docker Development
@@ -84,10 +104,10 @@ You can use the VS Code plugin [Remote-Containers](https://marketplace.visualstu
 5. Open a new VS Code Terminal, then you can run the `yarn` commands listed above.
 
 ```bash
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### Format all codes
@@ -101,8 +121,8 @@ It uses `prettier` to format all possible codes.
 ## Build
 
 ```bash
-$ yarn
-$ yarn build
+yarn
+yarn build
 ```
 
 ## Feedback

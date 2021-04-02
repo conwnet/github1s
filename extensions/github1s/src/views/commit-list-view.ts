@@ -6,7 +6,8 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import { relativeTimeTo } from '@/helpers/date';
-import repository, { RepositoryCommit } from '@/repository';
+import repository from '@/repository';
+import { RepositoryCommit } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import {
 	getChangedFileCommand,

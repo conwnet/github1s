@@ -41,15 +41,15 @@ Now you can visit http://localhost:5000 in the browser. If you get a 404 error f
 
 ## Watch Mode
 
-What happens after you run `yarn watch`?
+What happens after you run `yarn watch-with-vscode`?
 
 1. Copy some necessary resources (`index.html`, extensions config, libraries, etc.) to the `dist` directory.
 
-2. Go to `lib/vscode` and run `yarn gulp compile-web` to build the necessary extensions, then copy it to the `dist/extensions` directory.
+2. Go to `vscode-web-github1s/lib/vscode` and run `yarn gulp compile-web` to build the necessary extensions, then copy it to the `dist/extensions` directory.
 
-3. Go to `lib/vscode` and run `yarn watch` (the native watch of vscode), it will trigger a new build if something in it has been changed.
+3. Go to `vscode-web-github1s/lib/vscode` and run `yarn watch` (the native watch of vscode), it will trigger a new build if something in it has been changed.
 
-4. Watch the `src` directory, merge it in to `lib/vscode/src` if something in it has been changed. (When a new file is merged into `lib/vscode/src`, it will trigger the watcher that is described in Step 3)
+4. Watch the `vscode-web-github1s/src` directory, merge it in to `vscode-web-github1s/lib/vscode/src` if something in it has been changed. (When a new file is merged into `lib/vscode/src`, it will trigger the watcher that is described in Step 3)
 
 5. Go to `extensions/github1s` and run `yarn watch`, it will trigger a new build if something has been changed.
 
@@ -58,6 +58,10 @@ What happens after you run `yarn watch`?
 Note that since we have modified the source code of VS Code, it may get into trouble when merging a newer version VS Code.
 
 It is a little laborious to complete the watch process, but I didn't think of a better solution.
+
+What happens after you run `yarn watch`?
+
+It's the same procedure as `yarn watch-with-vscode` without the step 2, 3, and 4. Instead of the local VS Code, it uses the prebuilt [@github1s/vscode-web](https://www.npmjs.com/package/@github1s/vscode-web) version.
 
 ## Build mode
 
