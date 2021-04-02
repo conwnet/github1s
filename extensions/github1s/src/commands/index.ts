@@ -24,6 +24,7 @@ import {
 } from './commit';
 import { commandOpenGitpod } from './gitpod';
 import {
+	commandEditorViewOpenChanges,
 	commandDiffViewOpenLeftFile,
 	commandDiffViewOpenRightFile,
 	commandEditorViewOpenNextRevision,
@@ -64,6 +65,8 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// open current repository on gitpod
 	{ id: 'github1s.open-gitpod', callback: commandOpenGitpod },
 
+	// open the changes of a file
+	{ id: 'github1s.editor-view-open-changes', callback: commandEditorViewOpenChanges }, // prettier-ignore
 	// open the left file in diff editor
 	{ id: 'github1s.diff-view-open-left-file', callback: commandDiffViewOpenLeftFile }, // prettier-ignore
 	// open the right file in diff editor
