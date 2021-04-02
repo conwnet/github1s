@@ -1,4 +1,4 @@
-name: Test with VS Code build
+name: Build & Test
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-yarn-${{ matrix.node-version }}
 
       - run: yarn --frozen-lockfile
-      - run: yarn build:vscode
-      - run: yarn yalc && yarn build
+      - run: yarn eslint
+      - run: yarn build
       - uses: microsoft/playwright-github-action@v1
       - run: yarn test:ci
