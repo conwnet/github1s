@@ -24,7 +24,7 @@ yarn build:vscode # Build the VS Code
 yarn yalc # Install local package via yalc
 
 yarn build # Build the GitHub1s & other extensions
-yarn serve # in another shell
+yarn serve
 ```
 
 And visit the http://localhost:5000 to verify the change. Please revert any changes related to `yalc` before commit, i.e. the `package.json`, the `.yalc/` and `yalc.lock` files.

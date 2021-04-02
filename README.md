@@ -104,10 +104,10 @@ You can use the VS Code plugin [Remote-Containers](https://marketplace.visualstu
 5. Open a new VS Code Terminal, then you can run the `yarn` commands listed above.
 
 ```bash
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### Format all codes
@@ -121,8 +121,8 @@ It uses `prettier` to format all possible codes.
 ## Build
 
 ```bash
-$ yarn
-$ yarn build
+yarn
+yarn build
 ```
 
 ## Feedback
