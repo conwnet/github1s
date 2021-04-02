@@ -39,7 +39,7 @@ jobs:
       - run: yarn eslint
       - run: yarn global add yalc
       - run: cd vscode-web-github1s && yarn build && yalc publish
-      - run: yalc add @github1s/vscode-web
+      - run: yalc add -D @github1s/vscode-web
       - run: yarn build
       - uses: microsoft/playwright-github-action@v1
       - run: yarn test:ci
