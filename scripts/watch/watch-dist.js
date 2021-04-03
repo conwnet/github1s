@@ -37,10 +37,25 @@ const autoSyncGitHub1sExtension = async () => {
 	);
 };
 
+// regenerate the config when `extensions/github1s/packages.json` has changed
+const autoRegenerateConfig = async () => {
+	const packagePath = path.join(APP_ROOT, 'extensions/github1s/package.json');
+	const scriptPath = path.join(APP_ROOT, 'scripts/package/generate-config.js');
+
+	chokidar.watch(packagePath).on(
+		'all',
+		debounce(() => {
+			cp.exec(`node ${scriptPath}`);
+			console.log(`the config has updated`);
+		}, 300)
+	);
+};
+
 const main = () => {
 	fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'));
 
 	autoSyncGitHub1sExtension();
+	autoRegenerateConfig();
 };
 
 main();

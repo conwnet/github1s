@@ -3,7 +3,6 @@ set -euo pipefail
 
 cd "$(dirname "${0}")/.."
 APP_ROOT=$(pwd)
-export IS_BUILD="true"
 
 # execute all necessary tasks
 function main() {
