@@ -6,14 +6,12 @@
 import { escape } from 'vs/base/common/strings';
 import { localize } from 'vs/nls';
 
-// prettier-ignore
+// below codes are changed by github1s
 export default () => `
 <div class="welcomePageContainer">
 	<div class="welcomePage" role="document">
 		<div class="title">
-			<h1 class="caption">${escape(
-				localize('welcomePage.vscode', 'Visual Studio Code')
-			)}</h1>
+			<h1 class="caption">${escape(localize('welcomePage.vscode', "Visual Studio Code"))}</h1>
 			<p class="subtitle detail">
 				One second to read GitHub code with VS Code
 			</p>
@@ -22,7 +20,7 @@ export default () => `
 			<div class="splash">
 				<div class="section rate-limit-info">
 					<h2 class="caption">Rate limit Info: <span class="refresh-button codicon codicon-refresh"></span></h2>
-					<ul class="rate-limit-info">
+					<ul class="rate-limit-info>
 						<li>Status: <span class="rate-limit-status"></span></li>
 						<li>------------------------------</li>
 						<li>X-RateLimit-Limit: <span class="x-rate-limit-limit"></span></li>
@@ -34,7 +32,7 @@ export default () => `
 					</ul>
 				</div>
 				<div class="section help">
-					<h2 class="caption">${escape(localize('welcomePage.help', 'Help'))}</h2>
+					<h2 class="caption">${escape(localize('welcomePage.help', "Help"))}</h2>
 					<ul>
 						<li><a href="https://github.com/conwnet/github1s" target="_blank">GitHub1s Repository</a></li>
 						<li><a href="https://github.com/microsoft/vscode" target="_blank">VS Code Repository</a></li>
@@ -43,41 +41,22 @@ export default () => `
 						<li><a href="https://github.com/conwnet/github1s/issues" target="_blank">Advices and Issues</a></li>
 					</ul>
 				</div>
-				<p class="showOnStartup"><input type="checkbox" id="showOnStartup" class="checkbox"/> <label class="caption" for="showOnStartup">${escape(
-					localize('welcomePage.showOnStartup', 'Show welcome page on startup')
-				)}</label></p>
+				<p class="showOnStartup"><input type="checkbox" id="showOnStartup" class="checkbox"/> <label class="caption" for="showOnStartup">${escape(localize('welcomePage.showOnStartup', "Show welcome page on startup"))}</label></p>
 			</div>
 			<div class="commands">
 				<div class="section authentication">
-					<h2 class="caption">Authentication</h2>
-					<div class="list">
-						<div class="item"><button class="update-oauth-token"><h3 class="caption">Update OAuth Token</h3><span class="detail">Use a <a href="https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header" target="_blank">GitHub OAuth token</a> to increase your rate limit</span></button></div>
-						<div class="item"><button class="create-new-token"><h3 class="caption">Create New Token</h3><span class="detail">Create a new Token from your GitHub account</span></button></div>
-						<div class="item"><button class="clear-oauth-token"><h3 class="caption">Clear Saved Token</h3><span class="detail">Clear the saved GitHub OAuth token for security</span></button></div>
-					</div>
+				<h2 class="caption">Authentication</h2>
+				<div class="list">
+					<div class="item"><button class="update-oauth-token"><h3 class="caption">Update OAuth Token</h3><span class="detail">Use a <a href="https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header" target="_blank">GitHub OAuth token</a> to increase your rate limit</span></button></div>
+					<div class="item"><button class="create-new-token"><h3 class="caption">Create New Token</h3><span class="detail">Create a new Token from your GitHub account</span></button></div>
+					<div class="item"><button class="clear-oauth-token"><h3 class="caption">Clear Saved Token</h3><span class="detail">Clear the saved GitHub OAuth token for security</span></button></div>
+				</div>
 				</div>
 				<div class="section learn">
-					<h2 class="caption">${escape(localize('welcomePage.learn', 'Learn'))}</h2>
+					<h2 class="caption">${escape(localize('welcomePage.learn', "Learn"))}</h2>
 					<div class="list">
-						<div class="item showCommands"><button data-href="command:workbench.action.showCommands"><h3 class="caption">${escape(
-							localize('welcomePage.showCommands', 'Find and run all commands')
-						)}</h3> <span class="detail">${escape(
-							localize(
-								'welcomePage.showCommandsDescription',
-								'Rapidly access and search commands from the Command Palette ({0})'
-							)
-						).replace(
-							'{0}',
-							'<span class="shortcut" data-command="workbench.action.showCommands"></span>'
-						)}</span></button></div>
-						<div class="item showInterfaceOverview"><button data-href="command:workbench.action.showInterfaceOverview"><h3 class="caption">${escape(
-							localize('welcomePage.interfaceOverview', 'Interface overview')
-						)}</h3> <span class="detail">${escape(
-							localize(
-								'welcomePage.interfaceOverviewDescription',
-								'Get a visual overlay highlighting the major components of the UI'
-							)
-						)}</span></button></div>
+						<div class="item showCommands"><button data-href="command:workbench.action.showCommands"><h3 class="caption">${escape(localize('welcomePage.showCommands', "Find and run all commands"))}</h3> <span class="detail">${escape(localize('welcomePage.showCommandsDescription', "Rapidly access and search commands from the Command Palette ({0})")).replace('{0}', '<span class="shortcut" data-command="workbench.action.showCommands"></span>')}</span></button></div>
+						<div class="item showInterfaceOverview"><button data-href="command:workbench.action.showInterfaceOverview"><h3 class="caption">${escape(localize('welcomePage.interfaceOverview', "Interface overview"))}</h3> <span class="detail">${escape(localize('welcomePage.interfaceOverviewDescription', "Get a visual overlay highlighting the major components of the UI"))}</span></button></div>
 					</div>
 				</div>
 			</div>
@@ -85,3 +64,4 @@ export default () => `
 	</div>
 </div>
 `;
+// above codes are changed by github1s

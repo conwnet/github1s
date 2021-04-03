@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script>
-			globalThis.MonacoPerformanceMarks =
-				globalThis.MonacoPerformanceMarks || [];
-			globalThis.MonacoPerformanceMarks.push('renderer/started', Date.now());
-		</script>
 		<meta charset="utf-8" />
 		<!-- Disable pinch zooming -->
 		<meta
@@ -56,9 +51,6 @@
 		};
 	</script>
 	<script src="/static/vscode/vs/loader.js"></script>
-	<script>
-		globalThis.MonacoPerformanceMarks.push('willLoadWorkbenchMain', Date.now());
-	</script>
 	<script>
 		fetch('/static/configure/extensions.json')
 			.then((response) => response.text())

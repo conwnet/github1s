@@ -13,16 +13,15 @@
  *   onIframeLoaded?: (iframe: HTMLIFrameElement) => void,
  *   fakeLoad?: boolean,
  *   rewriteCSP: (existingCSP: string, endpoint?: string) => string,
- *   onElectron?: boolean
+ *   onElectron?: boolean,
+ *   useParentPostMessage: boolean,
  * }} WebviewHost
  */
 
 (function () {
 	'use strict';
 
-	const isSafari =
-		navigator.vendor &&
-		navigator.vendor.indexOf('Apple') > -1 &&
+	const isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
 		navigator.userAgent &&
 		navigator.userAgent.indexOf('CriOS') === -1 &&
 		navigator.userAgent.indexOf('FxiOS') === -1;
@@ -52,16 +51,14 @@
 	};
 
 	const getActiveFrame = () => {
-		return /** @type {HTMLIFrameElement} */ (document.getElementById(
-			'active-frame'
-		));
+		return /** @type {HTMLIFrameElement} */ (document.getElementById('active-frame'));
 	};
 
 	const getPendingFrame = () => {
-		return /** @type {HTMLIFrameElement} */ (document.getElementById(
-			'pending-frame'
-		));
+		return /** @type {HTMLIFrameElement} */ (document.getElementById('pending-frame'));
 	};
+
+	const vscodePostMessageFuncName = '__vscode_post_message__';
 
 	const defaultCssRules = `
 	html {
@@ -147,22 +144,25 @@
 
 	/**
 	 * @param {boolean} allowMultipleAPIAcquire
+	 * @param {boolean} useParentPostMessage
 	 * @param {*} [state]
 	 * @return {string}
 	 */
-	function getVsCodeApiScript(allowMultipleAPIAcquire, state) {
+	function getVsCodeApiScript(allowMultipleAPIAcquire, useParentPostMessage, state) {
 		const encodedState = state ? encodeURIComponent(state) : undefined;
 		return `
 			globalThis.acquireVsCodeApi = (function() {
-				const originalPostMessage = window.parent.postMessage.bind(window.parent);
-				const targetOrigin = '*';
+				const originalPostMessage = window.parent['${useParentPostMessage ? 'postMessage' : vscodePostMessageFuncName}'].bind(window.parent);
+				const doPostMessage = (channel, data) => {
+					${useParentPostMessage
+				? `originalPostMessage({ command: channel, data: data }, '*');`
+				: `originalPostMessage(channel, data);`
+			}
+				};
+
 				let acquired = false;
 
-				let state = ${
-					state
-						? `JSON.parse(decodeURIComponent("${encodedState}"))`
-						: undefined
-				};
+				let state = ${state ? `JSON.parse(decodeURIComponent("${encodedState}"))` : undefined};
 
 				return () => {
 					if (acquired && !${allowMultipleAPIAcquire}) {
@@ -171,11 +171,11 @@
 					acquired = true;
 					return Object.freeze({
 						postMessage: function(msg) {
-							return originalPostMessage({ command: 'onmessage', data: msg }, targetOrigin);
+							doPostMessage('onmessage', msg);
 						},
 						setState: function(newState) {
 							state = newState;
-							originalPostMessage({ command: 'do-update-state', data: JSON.stringify(newState) }, targetOrigin);
+							doPostMessage('do-update-state', JSON.stringify(newState));
 							return newState;
 						},
 						getState: function() {
@@ -213,11 +213,7 @@
 			}
 
 			if (body) {
-				body.classList.remove(
-					'vscode-light',
-					'vscode-dark',
-					'vscode-high-contrast'
-				);
+				body.classList.remove('vscode-light', 'vscode-dark', 'vscode-high-contrast');
 				body.classList.add(initData.activeTheme);
 
 				body.dataset.vscodeThemeKind = initData.activeTheme;
@@ -259,14 +255,8 @@
 				if (node.tagName && node.tagName.toLowerCase() === 'a' && node.href) {
 					if (node.getAttribute('href') === '#') {
 						event.view.scrollTo(0, 0);
-					} else if (
-						node.hash &&
-						(node.getAttribute('href') === node.hash ||
-							(baseElement && node.href.indexOf(baseElement.href) >= 0))
-					) {
-						let scrollTarget = event.view.document.getElementById(
-							node.hash.substr(1, node.hash.length - 1)
-						);
+					} else if (node.hash && (node.getAttribute('href') === node.hash || (baseElement && node.href.indexOf(baseElement.href) >= 0))) {
+						let scrollTarget = event.view.document.getElementById(node.hash.substr(1, node.hash.length - 1));
 						if (scrollTarget) {
 							scrollTarget.scrollIntoView();
 						}
@@ -283,34 +273,36 @@
 		/**
 		 * @param {MouseEvent} event
 		 */
-		const handleAuxClick = (event) => {
-			// Prevent middle clicks opening a broken link in the browser
-			if (!event.view || !event.view.document) {
-				return;
-			}
-
-			if (event.button === 1) {
-				let node = /** @type {any} */ (event.target);
-				while (node) {
-					if (node.tagName && node.tagName.toLowerCase() === 'a' && node.href) {
-						event.preventDefault();
-						break;
-					}
-					node = node.parentNode;
+		const handleAuxClick =
+			(event) => {
+				// Prevent middle clicks opening a broken link in the browser
+				if (!event.view || !event.view.document) {
+					return;
 				}
-			}
-		};
+
+				if (event.button === 1) {
+					let node = /** @type {any} */ (event.target);
+					while (node) {
+						if (node.tagName && node.tagName.toLowerCase() === 'a' && node.href) {
+							event.preventDefault();
+							break;
+						}
+						node = node.parentNode;
+					}
+				}
+			};
 
 		/**
 		 * @param {KeyboardEvent} e
 		 */
 		const handleInnerKeydown = (e) => {
+			// below codes are changed by github1s
 			// If the keypress would trigger a browser event, such as copy or paste or fuzzy,
 			// make sure we block the browser from dispatching it. Instead VS Code
 			// handles these events and will dispatch a copy/paste/fuzzy back to the webview
 			// if needed
-			// modify-by-github1s, preventDefault when press ctrl/cmd+p
 			if (isUndoRedo(e) || isFuzzySearch(e)) {
+				// above codes are changed by github1s
 				e.preventDefault();
 			} else if (isCopyPasteOrCut(e)) {
 				if (host.onElectron) {
@@ -328,7 +320,22 @@
 				altKey: e.altKey,
 				ctrlKey: e.ctrlKey,
 				metaKey: e.metaKey,
-				repeat: e.repeat,
+				repeat: e.repeat
+			});
+		};
+		/**
+		 * @param {KeyboardEvent} e
+		 */
+		const handleInnerUp = (e) => {
+			host.postMessage('did-keyup', {
+				key: e.key,
+				keyCode: e.keyCode,
+				code: e.code,
+				shiftKey: e.shiftKey,
+				altKey: e.altKey,
+				ctrlKey: e.ctrlKey,
+				metaKey: e.metaKey,
+				repeat: e.repeat
 			});
 		};
 
@@ -338,7 +345,8 @@
 		 */
 		function isCopyPasteOrCut(e) {
 			const hasMeta = e.ctrlKey || e.metaKey;
-			return hasMeta && ['c', 'v', 'x'].includes(e.key);
+			const shiftInsert = e.shiftKey && e.key.toLowerCase() === 'insert';
+			return (hasMeta && ['c', 'v', 'x'].includes(e.key.toLowerCase())) || shiftInsert;
 		}
 
 		/**
@@ -347,9 +355,10 @@
 		 */
 		function isUndoRedo(e) {
 			const hasMeta = e.ctrlKey || e.metaKey;
-			return hasMeta && ['z', 'y'].includes(e.key);
+			return hasMeta && ['z', 'y'].includes(e.key.toLowerCase());
 		}
 
+		// below codes are changed by github1s
 		/**
 		 * @param {KeyboardEvent} e
 		 * @return {boolean}
@@ -359,6 +368,7 @@
 			const hasMeta = e.ctrlKey || e.metaKey;
 			return hasMeta && ['p'].includes(e.key);
 		}
+		// above codes are changed by github1s
 
 		let isHandlingScroll = false;
 
@@ -373,7 +383,7 @@
 				deltaY: event.deltaY,
 				deltaZ: event.deltaZ,
 				detail: event.detail,
-				type: event.type,
+				type: event.type
 			});
 		};
 
@@ -385,8 +395,7 @@
 				return;
 			}
 
-			const progress =
-				event.currentTarget.scrollY / event.target.body.clientHeight;
+			const progress = event.currentTarget.scrollY / event.target.body.clientHeight;
 			if (isNaN(progress)) {
 				return;
 			}
@@ -410,7 +419,7 @@
 			const text = data.contents;
 			const newDocument = new DOMParser().parseFromString(text, 'text/html');
 
-			newDocument.querySelectorAll('a').forEach((a) => {
+			newDocument.querySelectorAll('a').forEach(a => {
 				if (!a.title) {
 					a.title = a.getAttribute('href');
 				}
@@ -420,10 +429,7 @@
 			if (options.allowScripts) {
 				const defaultScript = newDocument.createElement('script');
 				defaultScript.id = '_vscodeApiScript';
-				defaultScript.textContent = getVsCodeApiScript(
-					options.allowMultipleAPIAcquire,
-					data.state
-				);
+				defaultScript.textContent = getVsCodeApiScript(options.allowMultipleAPIAcquire, host.useParentPostMessage, data.state);
 				newDocument.head.prepend(defaultScript);
 			}
 
@@ -436,17 +442,12 @@
 			applyStyles(newDocument, newDocument.body);
 
 			// Check for CSP
-			const csp = newDocument.querySelector(
-				'meta[http-equiv="Content-Security-Policy"]'
-			);
+			const csp = newDocument.querySelector('meta[http-equiv="Content-Security-Policy"]');
 			if (!csp) {
 				host.postMessage('no-csp-found');
 			} else {
 				try {
-					csp.setAttribute(
-						'content',
-						host.rewriteCSP(csp.getAttribute('content'), data.endpoint)
-					);
+					csp.setAttribute('content', host.rewriteCSP(csp.getAttribute('content'), data.endpoint));
 				} catch (e) {
 					console.error(`Could not rewrite csp: ${e}`);
 				}
@@ -483,6 +484,8 @@
 			host.onMessage('focus', () => {
 				const activeFrame = getActiveFrame();
 				if (!activeFrame || !activeFrame.contentWindow) {
+					// Focus the top level webview instead
+					window.focus();
 					return;
 				}
 
@@ -516,18 +519,12 @@
 					setInitialScrollPosition = (body, window) => {
 						if (!isNaN(initData.initialScrollProgress)) {
 							if (window.scrollY === 0) {
-								window.scroll(
-									0,
-									body.clientHeight * initData.initialScrollProgress
-								);
+								window.scroll(0, body.clientHeight * initData.initialScrollProgress);
 							}
 						}
 					};
 				} else {
-					const scrollY =
-						frame && frame.contentDocument && frame.contentDocument.body
-							? frame.contentWindow.scrollY
-							: 0;
+					const scrollY = frame && frame.contentDocument && frame.contentDocument.body ? frame.contentWindow.scrollY : 0;
 					setInitialScrollPosition = (body, window) => {
 						if (window.scrollY === 0) {
 							window.scroll(0, scrollY);
@@ -548,21 +545,18 @@
 				const newFrame = document.createElement('iframe');
 				newFrame.setAttribute('id', 'pending-frame');
 				newFrame.setAttribute('frameborder', '0');
-				newFrame.setAttribute(
-					'sandbox',
-					options.allowScripts
-						? 'allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-downloads'
-						: 'allow-same-origin allow-pointer-lock'
-				);
+				newFrame.setAttribute('sandbox', options.allowScripts ? 'allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-downloads' : 'allow-same-origin allow-pointer-lock');
+				newFrame.setAttribute('allow', options.allowScripts ? 'clipboard-read; clipboard-write;' : '');
 				if (host.fakeLoad) {
 					// We should just be able to use srcdoc, but I wasn't
 					// seeing the service worker applying properly.
 					// Fake load an empty on the correct origin and then write real html
 					// into it to get around this.
 					newFrame.src = `./fake.html?id=${ID}`;
+				} else {
+					newFrame.src = `about:blank?webviewFrame`;
 				}
-				newFrame.style.cssText =
-					'display: block; margin: 0; overflow: hidden; position: absolute; width: 100%; height: 100%; visibility: hidden';
+				newFrame.style.cssText = 'display: block; margin: 0; overflow: hidden; position: absolute; width: 100%; height: 100%; visibility: hidden';
 				document.body.appendChild(newFrame);
 
 				if (!host.fakeLoad) {
@@ -604,10 +598,8 @@
 						}
 					}, 10);
 				} else {
-					newFrame.contentWindow.addEventListener('DOMContentLoaded', (e) => {
-						const contentDocument = e.target
-							? /** @type {HTMLDocument} */ (e.target)
-							: undefined;
+					newFrame.contentWindow.addEventListener('DOMContentLoaded', e => {
+						const contentDocument = e.target ? (/** @type {HTMLDocument} */ (e.target)) : undefined;
 						onFrameLoaded(contentDocument);
 					});
 				}
@@ -624,20 +616,13 @@
 					}
 
 					const newFrame = getPendingFrame();
-					if (
-						newFrame &&
-						newFrame.contentDocument &&
-						newFrame.contentDocument === contentDocument
-					) {
+					if (newFrame && newFrame.contentDocument && newFrame.contentDocument === contentDocument) {
 						const oldActiveFrame = getActiveFrame();
 						if (oldActiveFrame) {
 							document.body.removeChild(oldActiveFrame);
 						}
 						// Styles may have changed since we created the element. Make sure we re-style
-						applyStyles(
-							newFrame.contentDocument,
-							newFrame.contentDocument.body
-						);
+						applyStyles(newFrame.contentDocument, newFrame.contentDocument.body);
 						newFrame.setAttribute('id', 'active-frame');
 						newFrame.style.visibility = 'visible';
 						if (host.focusIframeOnCreate) {
@@ -646,6 +631,10 @@
 
 						contentWindow.addEventListener('scroll', handleInnerScroll);
 						contentWindow.addEventListener('wheel', handleWheel);
+
+						if (document.hasFocus()) {
+							contentWindow.focus();
+						}
 
 						pendingMessages.forEach((data) => {
 							contentWindow.postMessage(data, '*');
@@ -681,13 +670,9 @@
 					// Bubble out various events
 					newFrame.contentWindow.addEventListener('click', handleInnerClick);
 					newFrame.contentWindow.addEventListener('auxclick', handleAuxClick);
-					newFrame.contentWindow.addEventListener(
-						'keydown',
-						handleInnerKeydown
-					);
-					newFrame.contentWindow.addEventListener('contextmenu', (e) =>
-						e.preventDefault()
-					);
+					newFrame.contentWindow.addEventListener('keydown', handleInnerKeydown);
+					newFrame.contentWindow.addEventListener('keyup', handleInnerUp);
+					newFrame.contentWindow.addEventListener('contextmenu', e => e.preventDefault());
 
 					if (host.onIframeLoaded) {
 						host.onIframeLoaded(newFrame);
@@ -733,8 +718,17 @@
 
 			trackFocus({
 				onFocus: () => host.postMessage('did-focus'),
-				onBlur: () => host.postMessage('did-blur'),
+				onBlur: () => host.postMessage('did-blur')
 			});
+
+			(/** @type {any} */ (window))[vscodePostMessageFuncName] = (command, data) => {
+				switch (command) {
+					case 'onmessage':
+					case 'do-update-state':
+						host.postMessage(command, data);
+						break;
+				}
+			};
 
 			// signal ready
 			host.postMessage('webview-ready', {});
@@ -744,6 +738,6 @@
 	if (typeof module !== 'undefined') {
 		module.exports = createWebviewManager;
 	} else {
-		/** @type {any} */ (window).createWebviewManager = createWebviewManager;
+		(/** @type {any} */ (window)).createWebviewManager = createWebviewManager;
 	}
-})();
+}());
