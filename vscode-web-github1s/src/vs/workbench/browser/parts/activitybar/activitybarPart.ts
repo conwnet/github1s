@@ -8,7 +8,9 @@ import { localize } from 'vs/nls';
 import { ActionsOrientation, ActionBar } from 'vs/base/browser/ui/actionbar/actionbar';
 import { GLOBAL_ACTIVITY_ID, IActivity, ACCOUNTS_ACTIVITY_ID } from 'vs/workbench/common/activity';
 import { Part } from 'vs/workbench/browser/part';
-import { GlobalActivityActionViewItem, ViewContainerActivityAction, PlaceHolderToggleCompositePinnedAction, PlaceHolderViewContainerActivityAction, AccountsActivityActionViewItem } from 'vs/workbench/browser/parts/activitybar/activitybarActions';
+// below codes are changed by github1s
+import { GlobalActivityActionViewItem, ViewContainerActivityAction, PlaceHolderToggleCompositePinnedAction, PlaceHolderViewContainerActivityAction, AccountsActivityActionViewItem, HomeActivityActionViewItem } from 'vs/workbench/browser/parts/activitybar/activitybarActions';
+// above codes are changed by github1s
 import { IBadge, NumberBadge } from 'vs/workbench/services/activity/common/activity';
 import { IWorkbenchLayoutService, Parts } from 'vs/workbench/services/layout/browser/layoutService';
 import { IInstantiationService, ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
@@ -93,6 +95,11 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 	//#endregion
 
 	private content: HTMLElement | undefined;
+
+	// below codes are changed by github1s
+	private homeBar: ActionBar | undefined;
+	private homeBarContainer: HTMLElement | undefined;
+	// above codes are changed by github1s
 
 	private menuBar: CustomMenubarControl | undefined;
 	private menuBarContainer: HTMLElement | undefined;
@@ -440,7 +447,13 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.menuBarContainer.classList.add('menubar');
 
 		const content = assertIsDefined(this.content);
-		content.prepend(this.menuBarContainer);
+		// below codes are changed by github1s
+		if (this.homeBarContainer) {
+			content.insertBefore(this.menuBarContainer, this.homeBarContainer.nextSibling);
+		} else {
+			content.prepend(this.menuBarContainer);
+		}
+		// above codes are changed by github1s
 
 		// Menubar: install a custom menu bar depending on configuration
 		this.menuBar = this._register(this.instantiationService.createInstance(CustomMenubarControl));
@@ -455,6 +468,10 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.content = document.createElement('div');
 		this.content.classList.add('content');
 		parent.appendChild(this.content);
+
+		// below codes are changed by github1s
+		this.createHomeBar(Codicon.github);
+		// above codes are changed by github1s
 
 		// Install menubar if compact
 		if (getMenuBarVisibility(this.configurationService) === 'compact') {
@@ -519,6 +536,36 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 			}));
 		}
 	}
+
+	// below codes are changed by github1s
+	private createHomeBar(icon: Codicon): void {
+		this.homeBarContainer = document.createElement('div');
+		this.homeBarContainer.setAttribute('aria-label', localize('homeIndicator', "Home"));
+		this.homeBarContainer.setAttribute('role', 'toolbar');
+		this.homeBarContainer.classList.add('home-bar');
+
+		this.homeBar = this._register(new ActionBar(this.homeBarContainer, {
+			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme)),
+			orientation: ActionsOrientation.VERTICAL,
+			ariaLabel: localize('home', "Home"),
+			animated: false,
+			preventLoopNavigation: true,
+		}));
+
+		const homeBarIconBadge = document.createElement('div');
+		homeBarIconBadge.classList.add('home-bar-icon-badge');
+		this.homeBarContainer.appendChild(homeBarIconBadge);
+
+		this.homeBar.push(this._register(new ActivityAction({
+			id: 'workbench.actions.home',
+			name: localize('home', "Home"),
+			cssClass: icon.classNames
+		})));
+
+		const content = assertIsDefined(this.content);
+		content.appendChild(this.homeBarContainer);
+	}
+	// above codes are changed by github1s
 
 	private createGlobalActivityActionBar(container: HTMLElement): void {
 		this.globalActivityActionBar = this._register(new ActionBar(container, {
@@ -989,6 +1036,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 
 	private get accountsVisibilityPreference(): boolean {
 		// below codes are changed by github1s
+		// hide the account button in menubar
 		return false;
 		// above codes are changed by github1s
 	}

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IWorkbenchConstructionOptions, create, ICredentialsProvider, IURLCallbackProvider, IWorkspaceProvider, IWorkspace, IWindowIndicator, IHomeIndicator, IProductQualityChangeHandler, ISettingsSyncOptions } from 'vs/workbench/workbench.web.api';
+import { IWorkbenchConstructionOptions, create, ICredentialsProvider, IURLCallbackProvider, IWorkspaceProvider, IWorkspace, IWindowIndicator, IProductQualityChangeHandler, ISettingsSyncOptions } from 'vs/workbench/workbench.web.api';
 import { URI, UriComponents } from 'vs/base/common/uri';
 import { Event, Emitter } from 'vs/base/common/event';
 import { generateUuid } from 'vs/base/common/uuid';
@@ -19,7 +19,9 @@ import { Schemas } from 'vs/base/common/network';
 import product from 'vs/platform/product/common/product';
 import { parseLogLevel } from 'vs/platform/log/common/log';
 // below codes are changed by github1s
+// eslint-disable-next-line
 import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
+// eslint-disable-next-line
 import { renderNotification } from 'vs/github1s/notification';
 
 // custom vs code commands defined by github1s
@@ -494,12 +496,12 @@ class WindowIndicator implements IWindowIndicator {
 
 	// Home Indicator
 	// below codes are changed by github1s
-	const [repoOwner = 'conwnet', repoName = 'github1s'] = (URI.parse(window.location.href).path || '').split('/').filter(Boolean);
-	const homeIndicator: IHomeIndicator = {
-		href: `https://github.com/${repoOwner}/${repoName}`,
-		icon: 'github',
-		title: localize('home', "Home")
-	};
+	// remove the default home indicator
+	// const homeIndicator: IHomeIndicator = {
+	// 	href: 'https://github.com/microsoft/vscode',
+	// 	icon: 'code',
+	// 	title: localize('home', "Home")
+	// };
 	// above codes are changed by github1s
 
 	// Window indicator (unless connected to a remote)
@@ -549,7 +551,9 @@ class WindowIndicator implements IWindowIndicator {
 		// above codes are changed by github1s
 		logLevel: logLevel ? parseLogLevel(logLevel) : undefined,
 		settingsSyncOptions,
-		homeIndicator,
+		// below codes are changed by github1s
+		// homeIndicator,
+		// above codes are changed by github1s
 		windowIndicator,
 		productQualityChangeHandler,
 		workspaceProvider,

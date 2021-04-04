@@ -96,6 +96,10 @@
 }
 
 /* below codes are changed by github1s */
+.monaco-workbench .activitybar > .content > .home-bar .action-label {
+	color: #fff !important;
+}
+
 .monaco-workbench .activitybar > .content > .home-bar:hover {
 	opacity: 0.7;
 }
