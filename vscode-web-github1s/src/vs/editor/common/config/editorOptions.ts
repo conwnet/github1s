@@ -4070,8 +4070,9 @@ export const EditorOptions = {
 		EditorOption.disableMonospaceOptimizations, 'disableMonospaceOptimizations', false
 	)),
 	domReadOnly: register(new EditorBooleanOption(
-		// TODO: default disabled on mobile
-		EditorOption.domReadOnly, 'domReadOnly', false,
+		// below codes are changed by github1s
+		EditorOption.domReadOnly, 'domReadOnly', !!platform.isMobile,
+		// above codes are changed by github1s
 	)),
 	dragAndDrop: register(new EditorBooleanOption(
 		EditorOption.dragAndDrop, 'dragAndDrop', true,
