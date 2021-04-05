@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
-    "@github1s/vscode-web": "0.0.3",
+    "@github1s/vscode-web": "0.1.2",
     "@typescript-eslint/eslint-plugin": "^4.15.0",
     "@typescript-eslint/parser": "^4.15.0",
     "chokidar": "^3.5.1",
@@ -23,8 +23,8 @@
     "prettier": "^2.2.1",
     "serve-handler": "^6.1.3",
     "start-server-and-test": "^1.12.0",
-    "yalc": "^1.0.0-pre.50",
-    "typescript": "^4.1.3"
+    "typescript": "^4.1.3",
+    "yalc": "^1.0.0-pre.50"
   },
   "scripts": {
     "preinstall": "./scripts/pre-install.sh",
