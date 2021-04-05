@@ -100,6 +100,10 @@
     "path": "extensions/json-language-features"
   },
   {
+    "name": "julia",
+    "path": "extensions/julia"
+  },
+  {
     "name": "less",
     "path": "extensions/less"
   },
@@ -130,6 +134,10 @@
   {
     "name": "microsoft-authentication",
     "path": "extensions/microsoft-authentication"
+  },
+  {
+    "name": "notebook-markdown-extensions",
+    "path": "extensions/notebook-markdown-extensions"
   },
   {
     "name": "npm",
@@ -190,6 +198,10 @@
   {
     "name": "shellscript",
     "path": "extensions/shellscript"
+  },
+  {
+    "name": "simple-browser",
+    "path": "extensions/simple-browser"
   },
   {
     "name": "sql",

@@ -105,9 +105,10 @@ export class TelemetryService implements ITelemetryService {
 		let sessionId = values['sessionID'];
 		let instanceId = values['common.instanceId'];
 		let machineId = values['common.machineId'];
+		let firstSessionDate = values['common.firstSessionDate'];
 		let msftInternal = values['common.msftInternal'];
 
-		return { sessionId, instanceId, machineId, msftInternal };
+		return { sessionId, instanceId, machineId, firstSessionDate, msftInternal };
 	}
 
 	dispose(): void {
@@ -186,7 +187,7 @@ export class TelemetryService implements ITelemetryService {
 				if (!result) {
 					break;
 				}
-				// Anonymize user file paths that do not need to be retained or cleaned up.
+				// Anoynimize user file paths that do not need to be retained or cleaned up.
 				if (!nodeModulesRegex.test(result[0]) && cleanUpIndexes.every(([x, y]) => result.index < x || result.index >= y)) {
 					updatedStack += stack.substring(lastIndex, result.index) + '<REDACTED: user-file-path>';
 					lastIndex = fileRegex.lastIndex;

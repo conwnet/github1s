@@ -15,7 +15,14 @@ const main = () => {
 		fs.copySync(
 			path.join(APP_ROOT, 'lib/vscode', extension.path),
 			path.join(TARGET_DIR, path.basename(extension.path)),
-			{ filter: (src) => !src.includes('node_modules') }
+			{
+				filter: (src) => {
+					// we don't have to copy `node_modules` because the browser version's
+					// vscode won't use the file in it. we also should not copy the .gitignore
+					// file because it will make some necessary files won't publish to npm
+					return !src.includes('node_modules') && !src.endsWith('.gitignore');
+				},
+			}
 		);
 	});
 };

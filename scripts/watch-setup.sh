@@ -11,13 +11,6 @@ function main() {
 	./package/copy-node_modules.sh
 	./package/copy-extensions.sh
 	node ./package/generate-config.js
-
-	echo 'please waiting...'
-	while [ ! -e "${APP_ROOT}/vscode-web-github1s/lib/vscode/out" ]
-	do
-		echo "waiting for vscode build..."
-		sleep 3
-	done
 }
 
 main "$@"

@@ -1,6 +1,6 @@
 {
   "name": "@github1s/vscode-web",
-  "version": "0.0.3",
+  "version": "0.1.2",
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "build": "run-s clone sync build:vscode copy:*",
     "build:vscode": "./scripts/build-vscode.sh",
     "copy:vscode": "./scripts/copy-vscode.sh",
-    "copy:extension": "./scripts/copy-extensions.sh",
+    "copy:extensions": "./scripts/copy-extensions.sh",
     "watch": "run-s clone sync && run-p watch:*",
     "watch:vscode": "cd lib/vscode && yarn watch",
     "watch:src": "cd scripts/watch && node watch-src.js",

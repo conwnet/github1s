@@ -10,6 +10,7 @@ function ensureBuiltinExtensitions() {
 	then
 		echo "compile vscode builtin extensions..."
 		yarn gulp compile-web
+		yarn gulp compile-extension-media
 	fi
 }
 
