@@ -80,69 +80,25 @@ it('should open file correctly', async () => {
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
 
-// test.jestPlaywrightDebug('should show PR list', async () => {
 it('should show PR list', async () => {
-	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
-	console.log(1);
-
 	await page.waitForSelector(
 		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
 	);
 	await page.press('body', 'Control+Shift+G');
-	// await page.press('body', 'Control+Shift+P');
-	// await page.press('body', 'Control+p');
 	await page.press('body', 'Tab');
 	await page.press('body', 'Tab');
 	await page.press('body', ' ');
 	await page.press('body', 'Shift+Tab');
 	await page.press('body', ' ');
-	await page.waitForTimeout(3000);
+	await page.waitForSelector('#list_id_2_1');
+
 	const container = await page.$('[id="workbench.parts.sidebar"]');
 	let image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
-	// const image = await page.screenshot();
-	// expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 
-	// console.log(2);
-	// expect(ul).toBeTruthy();
-	// const actions = await ul?.$$('li');
-	// console.log(3);
-	// expect(actions?.length).toBeGreaterThan(4);
-	// actions?.forEach(async (action) => {
-	// 	const label = await action.getAttribute('aria-label');
-	// 	console.log({ label });
-	// 	if (label?.startsWith('Source Control')) {
-	// 		console.log('click');
-	// 		await action.click();
-	// 	}
-	// });
-	// console.log('after click');
-	// await page.click('div[aria-label="Pull Requests Section"]');
-	// await page.click('h3[title="Commits"]');
-	// console.log(4);
-	// await page.waitForSelector(
-	// 	'div[role="treeitem"][data-index="1"][data-last-element="false"]'
-	// );
 	await page.click('#list_id_2_1');
-	await page.click('#list_id_3_1');
 	await page.waitForTimeout(3000);
-	// console.log(5);
-	// // const container = await page.$('.tree-explorer-viewlet-tree-view');
-
-	// console.log(6);
-	// console.log(7);
-	// console.log(container);
-
-	// let image = await container?.screenshot();
-	// console.log(8);
-	// await page.click(
-	// 	'.tree-explorer-viewlet-tree-view div.monaco-list-row[role="treeitem"][data-index="0"][data-last-element="false"]'
-	// );
-	// console.log(8);
-	// await page.waitForSelector('[aria-level="2"]');
-	// console.log(9);
 	image = await container?.screenshot();
-	// // image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
