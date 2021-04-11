@@ -15,7 +15,9 @@ import {
 } from '@/source-control/changes';
 import router from '@/router';
 
-const getCommitTreeItemDescription = (commit: RepositoryCommit): string => {
+export const getCommitTreeItemDescription = (
+	commit: RepositoryCommit
+): string => {
 	return [
 		commit.sha.slice(0, 7),
 		commit.commit.author.name,

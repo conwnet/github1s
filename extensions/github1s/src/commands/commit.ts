@@ -6,7 +6,10 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import repository from '@/repository';
-import { CommitTreeItem } from '@/views/commit-list-view';
+import {
+	CommitTreeItem,
+	getCommitTreeItemDescription,
+} from '@/views/commit-list-view';
 
 export const commandSwitchToCommit = async (commitSha?: string) => {
 	const { owner, repo } = await router.getState();
@@ -23,10 +26,12 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 			await repository.getCommits((await router.getState()).ref)
 		).map((commit) => ({
 			commitSha: commit.sha,
-			label: `(${commit.sha.slice(0, 7)}) ${commit.commit.message}`,
+			label: commit.commit.message,
+			description: getCommitTreeItemDescription(commit),
 		}));
 
 		const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+		quickPick.matchOnDescription = true;
 		quickPick.items = [inputCommitShaItem, ...commitItems];
 		quickPick.show();
 
