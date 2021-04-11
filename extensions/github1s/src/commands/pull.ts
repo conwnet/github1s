@@ -11,6 +11,20 @@ import {
 	getPullTreeItemLabel,
 	getPullTreeItemDescription,
 } from '@/views/pull-list-view';
+import { RequestNotFoundError } from '@/helpers/fetch';
+
+const checkPullExists = async (pullNumber: number) => {
+	try {
+		return !!(await repository.getPull(pullNumber));
+	} catch (e) {
+		vscode.window.showErrorMessage(
+			e instanceof RequestNotFoundError
+				? `No pull request found for number: ${pullNumber}`
+				: e.message
+		);
+		return false;
+	}
+};
 
 export const commandSwitchToPull = async (pullNumber?: number) => {
 	const { owner, repo } = await router.getState();
@@ -61,7 +75,8 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 		}
 	}
 
-	pullNumber && router.replace(`/${owner}/${repo}/pull/${pullNumber}`);
+	(await checkPullExists(pullNumber)) &&
+		router.replace(`/${owner}/${repo}/pull/${pullNumber}`);
 };
 
 // this command is used in `source control pull request view`

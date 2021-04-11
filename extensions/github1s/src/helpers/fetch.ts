@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { reuseable, throttle } from './func';
 import { getExtensionContext } from './context';
+import { noop } from './util';
 
 const getGitHubAuthToken = (): string => {
 	const context = getExtensionContext();
@@ -109,7 +110,8 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 		throw new RequestNotFoundError('Not Found', token);
 	}
 	throw new RequestError(
-		`GitHub1s: Request got HTTP ${response.status} response`,
+		(await response.json().catch(noop))?.message ||
+			`GitHub1s: Request got HTTP ${response.status} response`,
 		token
 	);
 });

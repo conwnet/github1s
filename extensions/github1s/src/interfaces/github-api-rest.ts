@@ -20,7 +20,7 @@ export interface UriState {
 	path: string;
 }
 
-const handleRequestError = (error: RequestError) => {
+const handleFileSystemRequestError = (error: RequestError) => {
 	if (error instanceof RequestRateLimitError) {
 		if (!error.token) {
 			throw vscode.FileSystemError.NoPermissions(
@@ -56,7 +56,7 @@ export const readGitHubDirectory = (
 			path
 		).replace(/^\//, ':')}`,
 		options
-	).catch(handleRequestError);
+	).catch(handleFileSystemRequestError);
 };
 
 export const readGitHubFile = (
@@ -68,7 +68,7 @@ export const readGitHubFile = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/git/blobs/${fileSha}`,
 		options
-	).catch(handleRequestError);
+	).catch(handleFileSystemRequestError);
 };
 
 export const validateToken = (token: string) => {
@@ -101,12 +101,10 @@ export const getGitHubBranchRefs = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/heads`,
 		options
-	)
-		.then((branchRefs) => {
-			// the field in branchRef will looks like `refs/heads/<branch>`, we add a name field here
-			return branchRefs.map((item) => ({ ...item, name: item.ref.slice(11) }));
-		})
-		.catch(handleRequestError);
+	).then((branchRefs) => {
+		// the field in branchRef will looks like `refs/heads/<branch>`, we add a name field here
+		return branchRefs.map((item) => ({ ...item, name: item.ref.slice(11) }));
+	});
 };
 
 // It's similar to `getGithubBranchRefs`
@@ -118,12 +116,10 @@ export const getGitHubTagRefs = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/tags`,
 		options
-	)
-		.then((tagRefs) => {
-			// the field in tagRef will looks like `refs/tags/<tag>`, we add a name field here
-			return tagRefs.map((item) => ({ ...item, name: item.ref.slice(10) }));
-		})
-		.catch(handleRequestError);
+	).then((tagRefs) => {
+		// the field in tagRef will looks like `refs/tags/<tag>`, we add a name field here
+		return tagRefs.map((item) => ({ ...item, name: item.ref.slice(10) }));
+	});
 };
 
 export const getGitHubAllFiles = (
@@ -136,7 +132,7 @@ export const getGitHubAllFiles = (
 		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(
 			path
 		).replace(/^\//, ':')}?recursive=1`
-	).catch(handleRequestError);
+	).catch(handleFileSystemRequestError);
 };
 
 export const getGitHubPulls = (
@@ -148,7 +144,7 @@ export const getGitHubPulls = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&order=created&per_page=100`,
 		options
-	).catch(handleRequestError);
+	);
 };
 
 export const getGitHubPullDetail = (
@@ -160,7 +156,7 @@ export const getGitHubPullDetail = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`,
 		options
-	).catch(handleRequestError);
+	);
 };
 
 export const getGitHubPullFiles = (
@@ -173,7 +169,7 @@ export const getGitHubPullFiles = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`,
 		options
-	).catch(handleRequestError);
+	);
 };
 
 export const getGitHubCommits = (
@@ -185,7 +181,7 @@ export const getGitHubCommits = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/commits?sha=${sha}&per_page=100`,
 		options
-	).catch(handleRequestError);
+	);
 };
 
 export const getGitHubFileCommits = (
@@ -198,7 +194,7 @@ export const getGitHubFileCommits = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/commits?path=${filePath.slice(1)}&sha=${sha}&per_page=100`, // prettier-ignore
 		options
-	).catch(handleRequestError);
+	);
 };
 
 export const getGitHubCommitDetail = (
@@ -210,5 +206,5 @@ export const getGitHubCommitDetail = (
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/commits/${commitSha}`,
 		options
-	).catch(handleRequestError);
+	);
 };
