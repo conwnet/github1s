@@ -89,48 +89,61 @@ it.only('should show PR list', async () => {
 	const ul = await page.waitForSelector(
 		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
 	);
-	console.log(2);
-	expect(ul).toBeTruthy();
-	const actions = await ul?.$$('li');
-	console.log(3);
-	expect(actions?.length).toBeGreaterThan(4);
-	actions?.forEach(async (action) => {
-		const label = await action.getAttribute('aria-label');
-		console.log({ label });
-		if (label?.startsWith('Source Control')) {
-			console.log('click');
-			await action.click();
-		}
-	});
-	page.waitForTimeout(2000);
-	console.log('after click');
-	await page.click('div[aria-label="Pull Requests Section"]');
-	await page.click('h3[title="Commits"]');
-	console.log(4);
-	await page.waitForSelector(
-		'div[role="treeitem"][data-index="1"][data-last-element="false"]'
-	);
-	// await page.click('#list_id_2_1')
-	console.log(5);
-	// const container = await page.$('.tree-explorer-viewlet-tree-view');
+	console.log(ul);
+	await page.press('body', 'Control+Shift+G');
+	// await page.press('body', 'Control+Shift+P');
+	// await page.press('body', 'Control+p');
+	await page.press('body', 'Tab');
+	await page.press('body', 'Tab');
+	await page.press('body', ' ');
+	await page.press('body', 'Shift+Tab');
+	await page.press('body', ' ');
+	await page.waitForTimeout(3000);
 	const container = await page.$('[id="workbench.parts.sidebar"]');
-
-	console.log(6);
-	// let image = await container?.screenshot();
-	// await page.click('#list_id_3_1')
-	console.log(7);
-	console.log(container);
-
 	let image = await container?.screenshot();
-	console.log(8);
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
-	await page.click(
-		'.tree-explorer-viewlet-tree-view div.monaco-list-row[role="treeitem"][data-index="0"][data-last-element="false"]'
-	);
-	console.log(8);
-	await page.waitForSelector('[aria-level="2"]');
-	console.log(9);
-	image = await container?.screenshot();
-	// image = await page.screenshot();
-	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+	// const image = await page.screenshot();
+	// expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+
+	// console.log(2);
+	// expect(ul).toBeTruthy();
+	// const actions = await ul?.$$('li');
+	// console.log(3);
+	// expect(actions?.length).toBeGreaterThan(4);
+	// actions?.forEach(async (action) => {
+	// 	const label = await action.getAttribute('aria-label');
+	// 	console.log({ label });
+	// 	if (label?.startsWith('Source Control')) {
+	// 		console.log('click');
+	// 		await action.click();
+	// 	}
+	// });
+	// page.waitForTimeout(2000);
+	// console.log('after click');
+	// await page.click('div[aria-label="Pull Requests Section"]');
+	// await page.click('h3[title="Commits"]');
+	// console.log(4);
+	// await page.waitForSelector(
+	// 	'div[role="treeitem"][data-index="1"][data-last-element="false"]'
+	// );
+	// // await page.click('#list_id_2_1')
+	// console.log(5);
+	// // const container = await page.$('.tree-explorer-viewlet-tree-view');
+
+	// console.log(6);
+	// // await page.click('#list_id_3_1')
+	// console.log(7);
+	// console.log(container);
+
+	// let image = await container?.screenshot();
+	// console.log(8);
+	// await page.click(
+	// 	'.tree-explorer-viewlet-tree-view div.monaco-list-row[role="treeitem"][data-index="0"][data-last-element="false"]'
+	// );
+	// console.log(8);
+	// await page.waitForSelector('[aria-level="2"]');
+	// console.log(9);
+	// image = await container?.screenshot();
+	// // image = await page.screenshot();
+	// expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
