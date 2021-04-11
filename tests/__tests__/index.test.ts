@@ -35,7 +35,7 @@ afterEach(async () => {
 
 it('should load successfully', async () => {
 	await page.goto(BASE_URL);
-	expect(await page.title()).toBe('GitHub1s');
+	expect(await page.title()).toMatch(/.*GitHub1s/);
 
 	// Make sure the VS Code loads
 	await page.click('div[role="application"]');
@@ -74,6 +74,7 @@ it('should open file correctly', async () => {
 	await page.goto(BASE_URL);
 	await page.click('[title="~/tsconfig.json"]');
 	await page.click('[data-resource-name="tsconfig.json"]');
+	await page.waitForTimeout(3000);
 
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
