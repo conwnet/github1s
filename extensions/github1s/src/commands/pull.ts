@@ -6,7 +6,25 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import repository from '@/repository';
-import { PullTreeItem } from '@/views/pull-list-view';
+import {
+	PullTreeItem,
+	getPullTreeItemLabel,
+	getPullTreeItemDescription,
+} from '@/views/pull-list-view';
+import { RequestNotFoundError } from '@/helpers/fetch';
+
+const checkPullExists = async (pullNumber: number) => {
+	try {
+		return !!(await repository.getPull(pullNumber));
+	} catch (e) {
+		vscode.window.showErrorMessage(
+			e instanceof RequestNotFoundError
+				? `No pull request found for number: ${pullNumber}`
+				: e.message
+		);
+		return false;
+	}
+};
 
 export const commandSwitchToPull = async (pullNumber?: number) => {
 	const { owner, repo } = await router.getState();
@@ -23,10 +41,12 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 			await repository.getPulls()
 		).map((pull) => ({
 			pullNumber: pull.number,
-			label: `#${pull.number} ${pull.title}`,
+			label: getPullTreeItemLabel(pull),
+			description: getPullTreeItemDescription(pull),
 		}));
 
 		const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+		quickPick.matchOnDescription = true;
 		quickPick.items = [inputPullNumberItem, ...pullRequestItems];
 		quickPick.show();
 
@@ -55,7 +75,8 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 		}
 	}
 
-	pullNumber && router.replace(`/${owner}/${repo}/pull/${pullNumber}`);
+	(await checkPullExists(pullNumber)) &&
+		router.replace(`/${owner}/${repo}/pull/${pullNumber}`);
 };
 
 // this command is used in `source control pull request view`

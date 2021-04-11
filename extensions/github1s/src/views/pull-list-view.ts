@@ -35,7 +35,18 @@ const getPullStatus = (pull: RepositoryPull): PullState => {
 	return PullState.CLOSED;
 };
 
-const getPullTreeItemDescription = (pull: RepositoryPull) => {
+const statusIconMap = {
+	[PullState.OPEN]: '🟢',
+	[PullState.CLOSED]: '🔴',
+	[PullState.MERGED]: '🟣',
+};
+
+export const getPullTreeItemLabel = (pull: RepositoryPull) => {
+	const statusIcon = statusIconMap[getPullStatus(pull)];
+	return `${statusIcon} #${pull.number} ${pull.title}`;
+};
+
+export const getPullTreeItemDescription = (pull: RepositoryPull) => {
 	const pullStatus = getPullStatus(pull);
 
 	// current pull request is open
@@ -50,12 +61,6 @@ const getPullTreeItemDescription = (pull: RepositoryPull) => {
 
 	// current pull is closed
 	return `by ${pull.user.login} was closed ${relativeTimeTo(pull.closed_at)}`;
-};
-
-const statusIconMap = {
-	[PullState.OPEN]: '🟢',
-	[PullState.CLOSED]: '🔴',
-	[PullState.MERGED]: '🟣',
 };
 
 export interface PullTreeItem extends vscode.TreeItem {
@@ -81,8 +86,7 @@ export class PullRequestTreeDataProvider
 		const repositoryPulls = await repository.getPulls(this.forceUpdate);
 		this.forceUpdate = false;
 		return repositoryPulls.map((pull) => {
-			const statusIcon = statusIconMap[getPullStatus(pull)];
-			const label = `${statusIcon} #${pull.number} ${pull.title}`;
+			const label = getPullTreeItemLabel(pull);
 			const description = getPullTreeItemDescription(pull);
 			const tooltip = `${label} (${description})`;
 			const iconPath = vscode.Uri.parse(pull.user.avatar_url);
