@@ -79,6 +79,7 @@ it('should open file correctly', async () => {
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
 
+// test.jestPlaywrightDebug('should show PR list', async () => {
 it.only('should show PR list', async () => {
 	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
@@ -104,7 +105,7 @@ it.only('should show PR list', async () => {
 	await page.click('div[aria-label="Pull Requests Section"]');
 	console.log(4);
 	await page.waitForSelector(
-		'div.monaco-list-row[role="treeitem"][data-index="1"][data-last-element="false"]'
+		'div[role="treeitem"][data-index="1"][data-last-element="false"]'
 	);
 	console.log(5);
 	const container = await page.$('.tree-explorer-viewlet-tree-view');
