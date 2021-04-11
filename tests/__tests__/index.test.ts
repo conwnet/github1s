@@ -81,15 +81,14 @@ it('should open file correctly', async () => {
 });
 
 // test.jestPlaywrightDebug('should show PR list', async () => {
-it.only('should show PR list', async () => {
+it('should show PR list', async () => {
 	// Use a repo without future change to avoid snapshot update
 	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
 	console.log(1);
 
-	const ul = await page.waitForSelector(
+	await page.waitForSelector(
 		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
 	);
-	console.log(ul);
 	await page.press('body', 'Control+Shift+G');
 	// await page.press('body', 'Control+Shift+P');
 	// await page.press('body', 'Control+p');
@@ -118,7 +117,6 @@ it.only('should show PR list', async () => {
 	// 		await action.click();
 	// 	}
 	// });
-	// page.waitForTimeout(2000);
 	// console.log('after click');
 	// await page.click('div[aria-label="Pull Requests Section"]');
 	// await page.click('h3[title="Commits"]');
@@ -126,12 +124,13 @@ it.only('should show PR list', async () => {
 	// await page.waitForSelector(
 	// 	'div[role="treeitem"][data-index="1"][data-last-element="false"]'
 	// );
-	// // await page.click('#list_id_2_1')
+	await page.click('#list_id_2_1');
+	await page.click('#list_id_3_1');
+	await page.waitForTimeout(3000);
 	// console.log(5);
 	// // const container = await page.$('.tree-explorer-viewlet-tree-view');
 
 	// console.log(6);
-	// // await page.click('#list_id_3_1')
 	// console.log(7);
 	// console.log(container);
 
@@ -143,7 +142,7 @@ it.only('should show PR list', async () => {
 	// console.log(8);
 	// await page.waitForSelector('[aria-level="2"]');
 	// console.log(9);
-	// image = await container?.screenshot();
+	image = await container?.screenshot();
 	// // image = await page.screenshot();
-	// expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
