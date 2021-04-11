@@ -91,13 +91,15 @@ it('should show PR list', async () => {
 	await page.press('body', ' ');
 	await page.press('body', 'Shift+Tab');
 	await page.press('body', ' ');
-	await page.waitForSelector('#list_id_2_1');
+	await page.waitForSelector('#list_id_3_1');
+	await page.waitForSelector('#list_id_4_1');
 
 	const container = await page.$('[id="workbench.parts.sidebar"]');
 	let image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 
-	await page.click('#list_id_2_1');
+	await page.click('#list_id_3_1');
+	await page.click('#list_id_4_1');
 	await page.waitForTimeout(3000);
 	image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
