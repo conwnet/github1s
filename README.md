@@ -24,11 +24,7 @@ javascript: window.location.href = window.location.href.replace(/github(1s)?.com
 
 ### Develop in the cloud
 
-To edit files, run Docker containers, create pull requests and more, click the "[Gitpod](https://www.gitpod.io) ready-to-code" button at the bottom of your browser once you open your project with github1s.
-
-![Gitpod Notification](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/gitpod-notification.png)
-
-_Note_: If you already closed the notification, you can find a "Develop your project on Gitpod" button in the status bar. You can also open the Command Palette (default shortcut `Ctrl+Shift+P`) and choose `GitHub1s: Edit files in Gitpod`.
+To edit files, run Docker containers, create pull requests and more, click the "Develop your project on [Gitpod](https://www.gitpod.io)" button in the status bar. You can also open the Command Palette (default shortcut `Ctrl+Shift+P`) and choose `GitHub1s: Edit files in Gitpod`.
 
 ![Gitpod Status Bar](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/gitpod-statusbar.png)
 
@@ -59,15 +55,35 @@ You can start an online development environment with [Gitpod](https://www.gitpod
 
 ### Local development
 
-You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development.
+```bash
+git clone git@github.com:conwnet/github1s.git
+cd github1s
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+```
+
+#### Local development with full VS Code build
+
+You need [these prerequisites (the same ones as for VS Code)](https://github.com/microsoft/vscode/wiki/How-to-Contribute#prerequisites) for development with full VS Code build.
+Please make sure you could build VS Code locally before the watch mode.
+
+To verify the build:
 
 ```bash
-$ git clone git@github.com:conwnet/github1s.git
-$ cd github1s
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+cd github1s
+yarn build:vscode
+```
+
+After the inital successful build, you could use the watch mode:
+
+```bash
+cd github1s
+yarn
+yarn watch-with-vscode
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### ... or ... VS Code + Docker Development
@@ -84,10 +100,10 @@ You can use the VS Code plugin [Remote-Containers](https://marketplace.visualstu
 5. Open a new VS Code Terminal, then you can run the `yarn` commands listed above.
 
 ```bash
-$ yarn
-$ yarn watch
-$ yarn serve # in another shell
-$ # Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
+yarn
+yarn watch
+yarn serve # in another shell
+# Then visit http://localhost:5000 or http://localhost:5000/conwnet/github1s once the build is completed.
 ```
 
 ### Format all codes
@@ -101,8 +117,8 @@ It uses `prettier` to format all possible codes.
 ## Build
 
 ```bash
-$ yarn
-$ yarn build
+yarn
+yarn build
 ```
 
 ## Feedback

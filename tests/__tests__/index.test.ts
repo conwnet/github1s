@@ -43,10 +43,7 @@ it('should load successfully', async () => {
 	// Make sure the repo loads
 	await page.click('div[role="tab"]');
 	// GitHub repo Link available
-	await page.$eval(
-		'a[title="Repository"][aria-label="Repository"]',
-		(el) => el.innerHTML
-	);
+	await page.$eval('a[title="Home"][aria-label="Home"]', (el) => el.innerHTML);
 	// File explorer available
 	await page.$eval(
 		'div[role="tree"][aria-label="Files Explorer"]',

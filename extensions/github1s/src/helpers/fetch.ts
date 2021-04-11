@@ -84,7 +84,6 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	try {
 		response = await self.fetch(url, {
 			mode: 'cors',
-			cache: 'force-cache',
 			...options,
 			headers: { ...authHeaders, ...customHeaders },
 		});

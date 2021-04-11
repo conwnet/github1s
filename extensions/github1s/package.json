@@ -16,6 +16,9 @@
     "onCommand:github1s.get-current-authority",
     "onCommand:github1s.checkout-ref",
     "onCommand:github1s.switch-to-pull",
+    "onCommand:github1s.switch-to-commit",
+    "onCommand:github1s.diff-view-open-left-file",
+    "onCommand:github1s.diff-view-open-right-file",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -44,6 +47,10 @@
         {
           "id": "github1s.views.pull-request-list",
           "name": "Pull Requests"
+        },
+        {
+          "id": "github1s.views.commit-list",
+          "name": "Commits"
         }
       ]
     },
@@ -69,10 +76,21 @@
         "category": "GitHub1s"
       },
       {
+        "command": "github1s.open-gitpod",
+        "title": "Edit files in Gitpod",
+        "category": "GitHub1s"
+      },
+      {
         "command": "github1s.switch-to-pull",
         "title": "Search a Pull Request",
         "category": "GitHub1s",
         "icon": "$(search)"
+      },
+      {
+        "command": "github1s.pull-view-refresh-pull-list",
+        "title": "Refresh",
+        "category": "GitHub1s",
+        "icon": "$(refresh)"
       },
       {
         "command": "github1s.pull-view-item-switch-to-pull",
@@ -87,9 +105,68 @@
         "icon": "$(globe)"
       },
       {
-        "command": "github1s.open-gitpod",
-        "title": "Edit files in Gitpod",
-        "category": "GitHub1s"
+        "command": "github1s.switch-to-commit",
+        "title": "Search a Commit",
+        "category": "GitHub1s",
+        "icon": "$(search)"
+      },
+      {
+        "command": "github1s.commit-view-refresh-commit-list",
+        "title": "Refresh",
+        "category": "GitHub1s",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "github1s.commit-view-item-switch-to-commit",
+        "title": "Switch to Commit",
+        "category": "GitHub1s",
+        "icon": "$(log-in)"
+      },
+      {
+        "command": "github1s.commit-view-item-open-on-github",
+        "title": "Open on GitHub",
+        "category": "GitHub1s",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "github1s.editor-view-open-changes",
+        "title": "Open Changes",
+        "category": "GitHub1s",
+        "icon": "$(compare-changes)"
+      },
+      {
+        "command": "github1s.diff-view-open-left-file",
+        "title": "Open Left File",
+        "category": "GitHub1s",
+        "icon": {
+          "dark": "assets/icons/dark/open-left-file.svg",
+          "light": "assets/icons/light/open-left-file.svg"
+        },
+        "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
+      },
+      {
+        "command": "github1s.diff-view-open-right-file",
+        "title": "Open Right File",
+        "category": "GitHub1s",
+        "icon": {
+          "dark": "assets/icons/dark/open-right-file.svg",
+          "light": "assets/icons/light/open-right-file.svg"
+        },
+        "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)head(=|%3D|%3d)github1s-empty-file)/"
+      },
+      {
+        "command": "github1s.editor-view-open-prev-revision",
+        "title": "Open Previous Revision",
+        "category": "GitHub1s",
+        "icon": "$(arrow-left)",
+        "enablement": "resourceScheme =~ /^github1s$/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
+      },
+      {
+        "command": "github1s.editor-view-open-next-revision",
+        "title": "Open Next Revision",
+        "category": "GitHub1s",
+        "icon": "$(arrow-right)",
+        "enablement": "resource =~ /^[^?]*\\?[^#]*(%26|\\b)hasNextRevision(=|%3D|%3d)true/"
       }
     ],
     "colors": [
@@ -128,14 +205,84 @@
           "dark": "#8db9e2",
           "highContrast": "#8db9e2"
         }
+      },
+      {
+        "id": "github1s.colors.selectedViewItem",
+        "description": "selected view item color",
+        "defaults": {
+          "light": "#1890ff",
+          "dark": "#1890ff",
+          "highContrast": "#1890ff"
+        }
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "github1s.pull-view-refresh-pull-list",
+          "when": "false"
+        },
+        {
+          "command": "github1s.pull-view-item-switch-to-pull",
+          "when": "false"
+        },
+        {
+          "command": "github1s.pull-view-item-open-on-github",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-refresh-commit-list",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-item-switch-to-commit",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commit-view-item-open-on-github",
+          "when": "false"
+        },
+        {
+          "command": "github1s.editor-view-open-changes",
+          "when": "false"
+        },
+        {
+          "command": "github1s.diff-view-open-left-file",
+          "when": "false"
+        },
+        {
+          "command": "github1s.diff-view-open-right-file",
+          "when": "false"
+        },
+        {
+          "command": "github1s.editor-view-open-prev-revision",
+          "when": "false"
+        },
+        {
+          "command": "github1s.editor-view-open-next-revision",
+          "when": "false"
+        }
+      ],
       "view/title": [
+        {
+          "command": "github1s.pull-view-refresh-pull-list",
+          "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
+          "group": "navigation@1"
+        },
         {
           "command": "github1s.switch-to-pull",
           "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "github1s.commit-view-refresh-commit-list",
+          "when": "view =~ /^github1s\\.views\\.commit-list$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s.switch-to-commit",
+          "when": "view =~ /^github1s\\.views\\.commit-list$/",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -148,6 +295,43 @@
           "command": "github1s.pull-view-item-open-on-github",
           "when": "viewItem =~ /^github1s:pull-request$/",
           "group": "inline@2"
+        },
+        {
+          "command": "github1s.commit-view-item-switch-to-commit",
+          "when": "viewItem =~ /^github1s:commit$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "github1s.commit-view-item-open-on-github",
+          "when": "viewItem =~ /^github1s:commit$/",
+          "group": "inline@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "github1s.editor-view-open-changes",
+          "when": "!isInDiffEditor && github1s.context.showOpenChangesInEditorTitle",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s.diff-view-open-left-file",
+          "when": "isInDiffEditor",
+          "group": "navigation@2"
+        },
+        {
+          "command": "github1s.diff-view-open-right-file",
+          "when": "isInDiffEditor",
+          "group": "navigation@3"
+        },
+        {
+          "command": "github1s.editor-view-open-prev-revision",
+          "when": "resourceScheme =~ /^github1s/",
+          "group": "navigation@98"
+        },
+        {
+          "command": "github1s.editor-view-open-next-revision",
+          "when": "resourceScheme =~ /^github1s/",
+          "group": "navigation@99"
         }
       ]
     }
@@ -160,23 +344,24 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@apollo/client": "^3.3.9",
     "dayjs": "^1.10.4",
-    "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",
     "history": "^5.0.0",
     "js-base64": "^3.6.0",
     "json-stable-stringify": "^1.0.1",
+    "match-sorter": "^6.3.0",
     "p-finally": "^2.0.1",
+    "process": "^0.11.10",
     "query-string": "^7.0.0",
-    "webpack-cli": "^4.4.0"
+    "webpack-cli": "^4.6.0"
   },
   "devDependencies": {
-    "@types/vscode": "^1.52.0",
-    "ts-loader": "^8.0.14",
-    "typescript": "^4.1.3",
-    "webpack": "^4.46.0"
+    "@types/vscode": "1.55.0",
+    "ts-loader": "^8.1.0",
+    "typescript": "^4.2.3",
+    "webpack": "^5.30.0"
   }
 }

@@ -8,6 +8,7 @@
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
+const webpack = require('webpack');
 
 const path = require('path');
 
@@ -58,4 +59,9 @@ module.exports = /** @type WebpackConfig */ {
 		libraryTarget: 'commonjs',
 	},
 	devtool: 'source-map',
+	plugins: [
+		new webpack.ProvidePlugin({
+			process: 'process/browser.js',
+		}),
+	],
 };

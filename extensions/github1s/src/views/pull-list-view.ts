@@ -5,12 +5,13 @@
 
 import * as vscode from 'vscode';
 import { relativeTimeTo } from '@/helpers/date';
-import repository, { RepositoryPull } from '@/repository';
+import repository from '@/repository';
+import { RepositoryPull } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import * as queryString from 'query-string';
 import {
 	getChangedFileCommand,
-	getPullChangeFiles,
+	getPullChangedFiles,
 } from '@/source-control/changes';
 
 enum PullState {
@@ -65,10 +66,20 @@ export class PullRequestTreeDataProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.pull-request-list';
 
+	private forceUpdate = false;
+	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
+	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+	public updateTree() {
+		this.forceUpdate = true;
+		this._onDidChangeTreeData.fire(undefined);
+	}
+
 	async getPullItems(): Promise<PullTreeItem[]> {
 		// only recent 100 pull requests will be list here
 		// TODO: implement pagination
-		const repositoryPulls = await repository.getPulls();
+		const repositoryPulls = await repository.getPulls(this.forceUpdate);
+		this.forceUpdate = false;
 		return repositoryPulls.map((pull) => {
 			const statusIcon = statusIconMap[getPullStatus(pull)];
 			const label = `${statusIcon} #${pull.number} ${pull.title}`;
@@ -94,20 +105,20 @@ export class PullRequestTreeDataProvider
 	}
 
 	async getPullFileItems(pull: RepositoryPull): Promise<vscode.TreeItem[]> {
-		const changeFiles = await getPullChangeFiles(pull);
+		const changedFiles = await getPullChangedFiles(pull);
 
-		return changeFiles.map((changeFile) => {
-			const filePath = changeFile.headFileUri.path;
+		return changedFiles.map((changedFile) => {
+			const filePath = changedFile.headFileUri.path;
 			const id = `${pull.number} ${filePath}`;
-			const command = getChangedFileCommand(changeFile);
+			const command = getChangedFileCommand(changedFile);
 
 			return {
 				id,
 				command,
 				description: true,
-				resourceUri: changeFile.headFileUri.with({
+				resourceUri: changedFile.headFileUri.with({
 					scheme: GitHub1sSourceControlDecorationProvider.fileSchema,
-					query: queryString.stringify({ status: changeFile.status }),
+					query: queryString.stringify({ status: changedFile.status }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};

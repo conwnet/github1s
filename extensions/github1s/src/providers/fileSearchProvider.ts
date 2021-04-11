@@ -12,7 +12,7 @@ import {
 	ProviderResult,
 	Uri,
 } from 'vscode';
-import Fuse from 'fuse.js';
+import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import { getGitHubAllFiles } from '@/interfaces/github-api-rest';
@@ -24,62 +24,61 @@ export class GitHub1sFileSearchProvider
 	implements FileSearchProvider, Disposable {
 	static scheme = 'github1s';
 	private readonly disposable: Disposable;
-	private fuseMap: Map<string, Fuse<GitHubRESTEntry>> = new Map();
+	private fileUrisMap: Map<string, Uri[]> = new Map();
 
 	constructor(private fsProvider: GitHub1sFileSystemProvider) {
-		// Preload the fuze for better `ctrl/command + p` experience.
-		// Once we have loaded the fuze, it will also populate the files into
-		// fileSystemProvider's cache. So after that, you don't have to send
+		// Preload the files for better `ctrl/command + p` experience.
+		// Once we have loaded the files, it will also populate the files into
+		// fileSystemProvider's cache. So after that, we don't have to send
 		// a request when you open the new directory in explorer late
-		this.loadFuzeForCurrentAuthority();
+		this.loadFilesForCurrentAuthority();
 	}
 
 	dispose() {
 		this.disposable?.dispose();
 	}
 
-	// load the fuze for current authority
-	async loadFuzeForCurrentAuthority() {
-		return this.getFuse(await router.getAuthority());
+	// load the files for current authority
+	async loadFilesForCurrentAuthority() {
+		return this.getFileUris(await router.getAuthority());
 	}
 
 	/**
-	 * getFuse for fuzzy file search,
-	 * it maybe take longer time, so we just run it in backend
-	 * if this is failed, the fuzzy search maybe not work fine
+	 * Get all files for the repo with specified by `authority`.
+	 * The response of corresponding API maybe truncated, if so,
+	 * we should not insert the response to the fileSystemProvider's
+	 * cache, and the fuzzy search maybe not work fine
 	 */
-	getFuse = reuseable(
-		async (authority: string): Promise<Fuse<GitHubRESTEntry>> => {
-			if (this.fuseMap.has(authority)) {
-				return this.fuseMap.get(authority);
+	getFileUris = reuseable(
+		async (authority: string): Promise<Uri[]> => {
+			if (this.fileUrisMap.has(authority)) {
+				return this.fileUrisMap.get(authority);
 			}
 			const [owner, repo, ref] = authority.split('+');
-
-			return getGitHubAllFiles(owner, repo, ref).then(async (treeData) => {
-				if (!treeData.truncated) {
-					// the number of items in the tree array maybe exceeded maximum limit
-					// only update the rootDirectory if `treeData.truncated` is false
-					const rootDirectory = await this.fsProvider.lookupAsDirectory(
-						Uri.parse('').with({
-							scheme: GitHub1sFileSystemProvider.scheme,
-							authority,
-							path: '/',
-						}),
-						false
-					);
-					(treeData.tree || []).forEach((githubEntry: GitHubRESTEntry) => {
-						insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
-					});
-				}
-				const fuse = new Fuse(
-					((treeData.tree || []) as GitHubRESTEntry[]).filter(
-						(item) => item.type === 'blob'
-					),
-					{ keys: ['path'] }
-				);
-				this.fuseMap.set(authority, fuse);
-				return fuse;
+			const treeData = await getGitHubAllFiles(owner, repo, ref);
+			const rootDirectoryUri = Uri.parse('').with({
+				scheme: GitHub1sFileSystemProvider.scheme,
+				authority,
+				path: '/',
 			});
+
+			// the number of items in the tree array maybe exceeded maximum limit, only
+			// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
+			if (!treeData.truncated) {
+				const rootDirectory = await this.fsProvider.lookupAsDirectory(
+					rootDirectoryUri,
+					false
+				);
+				(treeData.tree || []).forEach((githubEntry: GitHubRESTEntry) => {
+					insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
+				});
+			}
+
+			const fileUris = ((treeData.tree || []) as GitHubRESTEntry[])
+				.filter((item) => item.type === 'blob')
+				.map((item) => Uri.joinPath(rootDirectoryUri, item.path));
+			this.fileUrisMap.set(authority, fileUris);
+			return fileUris;
 		}
 	);
 
@@ -89,14 +88,7 @@ export class GitHub1sFileSearchProvider
 		_token: CancellationToken
 	): ProviderResult<Uri[]> {
 		return router.getAuthority().then(async (authority) => {
-			const fuse = await this.getFuse(authority);
-			return fuse.search(query.pattern).map((result) => {
-				return Uri.parse('').with({
-					authority,
-					scheme: GitHub1sFileSystemProvider.scheme,
-					path: `/${result.item.path}`,
-				});
-			});
+			return matchSorter(await this.getFileUris(authority), query.pattern);
 		});
 	}
 }

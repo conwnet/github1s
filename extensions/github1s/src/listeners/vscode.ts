@@ -6,49 +6,58 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { PageType } from '@/router/types';
-import { GitHub1sFileSearchProvider } from '@/providers/fileSearchProvider';
+import { getChangedFileFromSourceControl } from '@/commands/editor';
+import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 
-// current editor is recovered by vscode, but should be closed now
-const shouldClosedThisEditor = async (editor) => {
-	const { pullNumber, commitSha } = await router.getState();
-	const resourceUriQuery = editor?.document.uri.query;
-	const resourcePullNumber = resourceUriQuery?.match(/\bpull=(\d+)/)?.[1];
-	const resourceCommitSha = resourceUriQuery?.match(/\bcommit=([^&#]+)/)?.[1];
+const handleRouterOnActiveEditorChange = async (
+	editor: vscode.TextEditor | undefined
+) => {
+	// replace current url when user change active editor
+	const { owner, repo, ref, pageType } = await router.getState();
+	const activeFileUri = editor?.document.uri;
 
-	return (
-		(resourcePullNumber && +resourcePullNumber !== pullNumber) ||
-		(resourceCommitSha && resourceCommitSha !== commitSha)
+	// only `tree/blob` page will replace url with the active editor change
+	if (![PageType.TREE, PageType.BLOB].includes(pageType)) {
+		return;
+	}
+
+	// if the file which not belong to current workspace is opened, or no file
+	// is opened, only retain `owner` and `repo` (and `ref` if need) in browser url
+	if (
+		!activeFileUri ||
+		activeFileUri?.authority ||
+		activeFileUri?.scheme !== GitHub1sFileSystemProvider.scheme
+	) {
+		const browserPath =
+			ref.toUpperCase() === 'HEAD'
+				? `/${owner}/${repo}`
+				: `/${owner}/${repo}/tree/${ref}`;
+		router.history.replace(browserPath);
+		return;
+	}
+
+	const browserPath = `/${owner}/${repo}/blob/${ref}${activeFileUri.path}`;
+	router.history.replace(browserPath);
+};
+
+// if the `Open Changes` Button should show in editor title
+const handleOpenChangesContextOnActiveEditorChange = async (
+	editor: vscode.TextEditor | undefined
+) => {
+	const changedFile = editor?.document.uri
+		? await getChangedFileFromSourceControl(editor.document.uri)
+		: undefined;
+
+	return vscode.commands.executeCommand(
+		'setContext',
+		'github1s.context.showOpenChangesInEditorTitle',
+		!!changedFile
 	);
 };
 
 export const registerVSCodeEventListeners = () => {
-	// replace current url when user change active editor
 	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-		const { owner, repo, ref, pageType, pullNumber } = await router.getState();
-		const activeFileUri = editor?.document.uri;
-
-		if (activeFileUri?.scheme !== GitHub1sFileSearchProvider.scheme) {
-			return;
-		}
-
-		// TODO: How to deal with opened editor?
-		// if (await shouldClosedThisEditor(editor)) {
-		// 	vscode.commands.executeCommand(
-		// 		'workbench.action.closeActiveEditor',
-		// 		activeFileUri
-		// 	);
-		// 	return;
-		// }
-
-		// only `tree/blob` page will replace url with the active editor change
-		if ([PageType.TREE, PageType.BLOB].includes(pageType)) {
-			const filePath = activeFileUri?.path || '';
-			// if no file opened and the branch is HEAD current, only retain owner and repo in url
-			const browserPath =
-				!filePath && ref.toUpperCase() === 'HEAD'
-					? `/${owner}/${repo}`
-					: `/${owner}/${repo}/${filePath ? 'blob' : 'tree'}/${ref}${filePath}`;
-			router.history.replace(browserPath);
-		}
+		handleRouterOnActiveEditorChange(editor);
+		handleOpenChangesContextOnActiveEditorChange(editor);
 	});
 };

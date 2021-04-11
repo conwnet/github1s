@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script>
-			globalThis.MonacoPerformanceMarks =
-				globalThis.MonacoPerformanceMarks || [];
-			globalThis.MonacoPerformanceMarks.push('renderer/started', Date.now());
-		</script>
 		<meta charset="utf-8" />
 		<!-- Disable pinch zooming -->
 		<meta
@@ -19,7 +14,8 @@
 		<!-- Workbench Icon/Manifest/CSS -->
 		<link rel="icon" media="(prefers-color-scheme:light)" href="/favicon-light.ico" type="image/x-icon">
 		<link rel="icon" media="(prefers-color-scheme:dark)" href="/favicon-dark.ico" type="image/x-icon">
-		<script src="https://unpkg.com/favicon-switcher@1.2.2/dist/index.js" crossorigin="anonymous" type="application/javascript"></script>
+		<link rel="preload" href="/static/vscode/vs/workbench/workbench.web.api.css" as="style">
+		<link rel="preload" href="/static/vscode/vs/code/browser/workbench/workbench.css" as="style">
 		<link rel="manifest" href="/manifest.json" />
 		<title>GitHub1s</title>
 		<style>
@@ -166,9 +162,6 @@
 	<script src="/static/vscode/vs/loader.js"></script>
 	<script src="/static/vscode/vs/workbench/workbench.web.api.js"></script>
 	<script>
-		globalThis.MonacoPerformanceMarks.push('willLoadWorkbenchMain', Date.now());
-	</script>
-	<script>
 		fetch('/static/configure/extensions.json')
 			.then((response) => response.text())
 			.then((extensionsJson) => {
@@ -194,4 +187,5 @@
 				require(['vs/code/browser/workbench/workbench'], function () {});
 			});
 	</script>
+	<script src="https://unpkg.com/favicon-switcher@1.2.2/dist/index.js" crossorigin="anonymous" type="application/javascript" async="async"></script>
 </html>
