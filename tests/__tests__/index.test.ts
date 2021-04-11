@@ -108,9 +108,10 @@ it.only('should show PR list', async () => {
 		'div[role="treeitem"][data-index="1"][data-last-element="false"]'
 	);
 	console.log(5);
-	const container = await page.$('.tree-explorer-viewlet-tree-view');
+	// const container = await page.$('.tree-explorer-viewlet-tree-view');
 	console.log(6);
-	let image = await container?.screenshot();
+	// let image = await container?.screenshot();
+	let image = await page.screenshot();
 	console.log(7);
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 	await page.click(
@@ -119,6 +120,7 @@ it.only('should show PR list', async () => {
 	console.log(8);
 	await page.waitForSelector('[aria-level="2"]');
 	console.log(9);
-	image = await container?.screenshot();
+	// image = await container?.screenshot();
+	image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
