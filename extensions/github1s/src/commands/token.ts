@@ -4,13 +4,12 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionContext } from '@/helpers/context';
+import { getExtensionContext, getOAuthToken } from '@/helpers/context';
 import { validateToken } from '@/interfaces/github-api-rest';
+import { GITHUB_OAUTH_TOKEN } from '@/helpers/constants';
 
 export const commandValidateToken = (silent: boolean = false) => {
-	const context = getExtensionContext();
-	const oAuthToken =
-		(context.globalState.get('github-oauth-token') as string) || '';
+	const oAuthToken = getOAuthToken();
 	return validateToken(oAuthToken).then((tokenStatus) => {
 		if (!silent) {
 			const remaining = tokenStatus.remaining;
@@ -52,7 +51,7 @@ export const commandUpdateToken = (silent: boolean = false) => {
 				return;
 			}
 			return getExtensionContext()!
-				.globalState.update('github-oauth-token', token || '')
+				.globalState.update(GITHUB_OAUTH_TOKEN, token || '')
 				.then(() => {
 					// we don't need wait validate, so we don't `return`
 					validateToken(token).then((tokenStatus) => {
@@ -91,7 +90,7 @@ export const commandClearToken = (silent: boolean = false) => {
 		.then((choose) => {
 			if (choose === 'Confirm') {
 				return getExtensionContext()!
-					.globalState.update('github-oauth-token', '')
+					.globalState.update(GITHUB_OAUTH_TOKEN, '')
 					.then(() => {
 						!silent &&
 							vscode.window.showInformationMessage(
