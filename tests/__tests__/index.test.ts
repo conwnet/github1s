@@ -79,3 +79,28 @@ it('should open file correctly', async () => {
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
+
+it('should show PR list', async () => {
+	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
+	await page.waitForSelector(
+		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
+	);
+	await page.press('body', 'Control+Shift+G');
+	await page.press('body', 'Tab');
+	await page.press('body', 'Tab');
+	await page.press('body', ' ');
+	await page.press('body', 'Shift+Tab');
+	await page.press('body', ' ');
+	await page.waitForSelector('#list_id_3_1');
+	await page.waitForSelector('#list_id_4_1');
+
+	const container = await page.$('[id="workbench.parts.sidebar"]');
+	let image = await container?.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+
+	await page.click('#list_id_3_1');
+	await page.click('#list_id_4_1');
+	await page.waitForTimeout(3000);
+	image = await container?.screenshot();
+	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
+});
