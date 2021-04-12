@@ -5,13 +5,8 @@
 
 import * as vscode from 'vscode';
 import { reuseable, throttle } from './func';
-import { getExtensionContext } from './context';
+import { getOAuthToken } from './context';
 import { noop } from './util';
-
-const getGitHubAuthToken = (): string => {
-	const context = getExtensionContext();
-	return context?.globalState.get('github-oauth-token') || '';
-};
 
 export class RequestError extends Error {
 	constructor(message: string, public token: string) {
@@ -65,7 +60,7 @@ export const getFetchOptions = (forceUpdate?: boolean): RequestInit => {
 const cache = new Map();
 
 export const fetch = reuseable(async (url: string, options?: RequestInit) => {
-	const token = getGitHubAuthToken();
+	const token = getOAuthToken();
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
 	/**
