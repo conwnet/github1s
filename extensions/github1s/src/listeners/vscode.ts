@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { PageType } from '@/router/types';
+import { setVSCodeContext } from '@/helpers/vscode';
 import { getChangedFileFromSourceControl } from '@/commands/editor';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 
@@ -48,16 +49,21 @@ const handleOpenChangesContextOnActiveEditorChange = async (
 		? await getChangedFileFromSourceControl(editor.document.uri)
 		: undefined;
 
-	return vscode.commands.executeCommand(
-		'setContext',
+	return setVSCodeContext(
 		'github1s.context.showOpenChangesInEditorTitle',
 		!!changedFile
 	);
+};
+
+// set the `gutterBlameOpening` to false when the active editor changed
+const handleGutterBlameOpeningContextOnActiveEditorChange = async () => {
+	return setVSCodeContext('github1s.context.gutterBlameOpening', false);
 };
 
 export const registerVSCodeEventListeners = () => {
 	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
 		handleRouterOnActiveEditorChange(editor);
 		handleOpenChangesContextOnActiveEditorChange(editor);
+		handleGutterBlameOpeningContextOnActiveEditorChange();
 	});
 };

@@ -82,19 +82,18 @@ export const commandCommitViewItemSwitchToCommit = (
 	return commandSwitchToCommit(viewItem?.commit?.sha);
 };
 
+export const commandOpenCommitOnGitHub = async (commitSha: string) => {
+	const { owner, repo } = await router.getState();
+	return vscode.commands.executeCommand(
+		'vscode.open',
+		vscode.Uri.parse(`https://github.com/${owner}/${repo}/commit/${commitSha}`)
+	);
+};
+
 // this command is used in `source control commit list view`
 export const commandCommitViewItemOpenOnGitHub = async (
 	viewItem: CommitTreeItem
 ) => {
 	const commitSha = viewItem?.commit?.sha;
-
-	if (commitSha) {
-		const { owner, repo } = await router.getState();
-		return vscode.commands.executeCommand(
-			'vscode.open',
-			vscode.Uri.parse(
-				`https://github.com/${owner}/${repo}/commit/${commitSha}`
-			)
-		);
-	}
+	commitSha && commandOpenCommitOnGitHub(commitSha);
 };

@@ -19,6 +19,7 @@ import {
 } from './pull';
 import {
 	commandSwitchToCommit,
+	commandOpenCommitOnGitHub,
 	commandCommitViewItemSwitchToCommit,
 	commandCommitViewItemOpenOnGitHub,
 } from './commit';
@@ -30,6 +31,11 @@ import {
 	commandEditorViewOpenNextRevision,
 	commandEditorViewOpenPrevRevision,
 } from './editor';
+import {
+	commandToggleEditorGutterBlame,
+	commandOpenEditorGutterBlame,
+	commandCloseEditorGutterBlame,
+} from './blame';
 
 const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// validate GitHub OAuth Token
@@ -55,6 +61,8 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 
 	// switch to a commit & input pull number manually
 	{ id: 'github1s.switch-to-commit', callback: commandSwitchToCommit },
+	// open a commit on GitHub's website
+	{ id: 'github1s.open-commit-on-github', callback: commandOpenCommitOnGitHub },
 	// update the commit list in the commits view
 	{ id: 'github1s.commit-view-refresh-commit-list', callback: () => commitTreeDataProvider.updateTree() }, // prettier-ignore
 	// switch to a commit in the commits view
@@ -75,6 +83,13 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	{ id: 'github1s.editor-view-open-prev-revision', callback: commandEditorViewOpenPrevRevision }, // prettier-ignore
 	// open the next revision of a file
 	{ id: 'github1s.editor-view-open-next-revision', callback: commandEditorViewOpenNextRevision }, // prettier-ignore
+
+	// toggle the gutter blame of a editor
+	{ id: 'github1s.toggle-editor-gutter-blame', callback: commandToggleEditorGutterBlame }, // prettier-ignore
+	// open the gutter blame of a editor
+	{ id: 'github1s.open-editor-gutter-blame', callback: commandOpenEditorGutterBlame }, // prettier-ignore
+	// close the gutter blame of a editor
+	{ id: 'github1s.close-editor-gutter-blame', callback: commandCloseEditorGutterBlame }, // prettier-ignore
 ];
 
 export const registerGitHub1sCommands = () => {
@@ -85,4 +100,8 @@ export const registerGitHub1sCommands = () => {
 			vscode.commands.registerCommand(command.id, command.callback)
 		)
 	);
+
+	vscode.commands.registerCommand('github1s.dev-test', () => {
+		console.log(vscode.window.activeTextEditor);
+	});
 };
