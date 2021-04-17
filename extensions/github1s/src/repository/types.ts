@@ -64,3 +64,19 @@ export interface RepositoryChangedFile {
 	previous_filename?: string;
 	status: FileChangeType;
 }
+
+export interface BlameRange {
+	age: number;
+	startingLine: number;
+	endingLine: number;
+	commit: {
+		sha: string;
+		message: string;
+		authoredDate: string;
+		author: {
+			avatarUrl: string;
+			name: string;
+			email: string;
+		};
+	};
+}

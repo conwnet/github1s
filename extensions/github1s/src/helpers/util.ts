@@ -51,6 +51,10 @@ export const prop = (obj: object, path: (string | number)[] = []): any => {
 	return cur;
 };
 
+export const last = <T>(array: readonly T[]): T => {
+	return array[array.length - 1];
+};
+
 export const getNonce = (): string => {
 	let text: string = '';
 	const possible =
