@@ -15,6 +15,8 @@ import {
 	getGitHubCommits,
 	getGitHubFileCommits,
 } from '@/interfaces/github-api-rest';
+import { apolloClient } from '@/interfaces/client';
+import { githubFileBlameQuery } from '@/interfaces/github-api-gql';
 import { getFetchOptions } from '@/helpers/fetch';
 import { LinkedList, LinkedListDirection } from './linked-list';
 import {
@@ -22,6 +24,7 @@ import {
 	RepositoryCommit,
 	RepositoryPull,
 	RepositoryRef,
+	BlameRange,
 } from './types';
 
 export class Repository {
@@ -29,6 +32,7 @@ export class Repository {
 	private _fileCommitIdListMap: Map<string, LinkedList>;
 	private _pullMap: Map<number, RepositoryPull>;
 	private _commitMap: Map<string, RepositoryCommit>;
+	private _fileBlameMap: Map<string, BlameRange[]>;
 
 	public static getInstance() {
 		if (Repository.instance) {
@@ -41,6 +45,7 @@ export class Repository {
 		this._fileCommitIdListMap = new Map();
 		this._pullMap = new Map();
 		this._commitMap = new Map();
+		this._fileBlameMap = new Map();
 	}
 
 	// get current repo owner
@@ -240,6 +245,24 @@ export class Repository {
 			return this._fileCommitIdListMap
 				.get(filePath)
 				?.getNodeId(commitSha, LinkedListDirection.NEXT);
+		}
+	);
+
+	public getFileBlame = reuseable(
+		async (filePath: string, commitSha: string): Promise<BlameRange[]> => {
+			const cacheKey = `${commitSha}:${filePath}`;
+
+			if (!this._fileBlameMap.has(cacheKey)) {
+				const [owner, repo] = [this.getOwner(), this.getRepo()];
+				const response = await apolloClient.query({
+					query: githubFileBlameQuery,
+					variables: { owner, repo, ref: commitSha, path: filePath.slice(1) },
+				});
+				const blameRanges =
+					response.data?.repository?.object?.blame?.ranges || [];
+				this._fileBlameMap.set(cacheKey, blameRanges);
+			}
+			return this._fileBlameMap.get(cacheKey);
 		}
 	);
 }

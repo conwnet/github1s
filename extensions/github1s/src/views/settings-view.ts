@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { getNonce, getWebviewOptions } from '@/helpers/util';
 import { validateToken } from '@/interfaces/github-api-rest';
+import { GITHUB_OAUTH_TOKEN } from '@/helpers/constants';
 
 interface WebviewState {
 	token?: string;
@@ -62,7 +63,7 @@ export class SettingsView implements vscode.WebviewViewProvider {
 				default:
 					const oauthToken =
 						(this._extensionContext.globalState.get(
-							'github-oauth-token'
+							GITHUB_OAUTH_TOKEN
 						) as string) || '';
 					(oauthToken
 						? validateToken(oauthToken).then(
@@ -136,7 +137,7 @@ export class SettingsView implements vscode.WebviewViewProvider {
 						validating: false,
 					});
 					this._extensionContext.globalState
-						.update('github-oauth-token', token || '')
+						.update(GITHUB_OAUTH_TOKEN, token || '')
 						.then(() => {
 							vscode.commands.executeCommand(
 								'workbench.files.action.refreshFilesExplorer'

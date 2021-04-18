@@ -88,3 +88,39 @@ export const githubObjectQuery = gql`
 		}
 	}
 `;
+
+/**
+ * GraphQL to get git blame data of a file
+ */
+export const githubFileBlameQuery = gql`
+	query fileBlameQuery(
+		$owner: String!
+		$repo: String!
+		$ref: String!
+		$path: String!
+	) {
+		repository(owner: $owner, name: $repo) {
+			object(expression: $ref) {
+				... on Commit {
+					blame(path: $path) {
+						ranges {
+							age
+							startingLine
+							endingLine
+							commit {
+								sha: oid
+								message
+								authoredDate
+								author {
+									avatarUrl
+									name
+									email
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+`;

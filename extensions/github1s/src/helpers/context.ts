@@ -4,6 +4,7 @@
  */
 
 import * as vscode from 'vscode';
+import { GITHUB_OAUTH_TOKEN } from './constants';
 
 let extensionContext: vscode.ExtensionContext | null = null;
 
@@ -23,7 +24,7 @@ export const getExtensionContext = (): vscode.ExtensionContext => {
 
 export const getOAuthToken = () => {
 	const context = getExtensionContext();
-	return (context.globalState.get('github-oauth-token') as string) || '';
+	return (context.globalState.get(GITHUB_OAUTH_TOKEN) as string) || '';
 };
 
 export const hasValidToken = () => getOAuthToken() !== '';
