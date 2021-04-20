@@ -4,10 +4,6 @@
 
 One second to read GitHub code with VS Code.
 
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)
-
 ## Usage
 
 Just add `1s` after `github` and press `Enter` in the browser address bar for any repository you want to read.
@@ -177,7 +173,11 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
 
-### Maintainers! :blush:
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)
+
+## Maintainers! :blush:
 
 <table>
   <tbody><tr>
