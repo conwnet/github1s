@@ -4,6 +4,10 @@
 
 One second to read GitHub code with VS Code.
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)
+
 ## Usage
 
 Just add `1s` after `github` and press `Enter` in the browser address bar for any repository you want to read.
