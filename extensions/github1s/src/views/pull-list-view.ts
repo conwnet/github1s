@@ -67,6 +67,16 @@ export interface PullTreeItem extends vscode.TreeItem {
 	pull: RepositoryPull;
 }
 
+const loadMorePullItem: vscode.TreeItem = {
+	label: 'Load more',
+	tooltip: 'Load more pull requests',
+	command: {
+		title: 'Load more pull requests',
+		command: 'github1s.pull-view-load-more-pulls',
+		tooltip: 'Load more pull requests',
+	},
+};
+
 export class PullRequestTreeDataProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.pull-request-list';
@@ -75,17 +85,17 @@ export class PullRequestTreeDataProvider
 	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-	public updateTree() {
-		this.forceUpdate = true;
+	public updateTree(forceUpdate = true) {
+		this.forceUpdate = forceUpdate;
 		this._onDidChangeTreeData.fire(undefined);
 	}
 
-	async getPullItems(): Promise<PullTreeItem[]> {
-		// only recent 100 pull requests will be list here
-		// TODO: implement pagination
-		const repositoryPulls = await repository.getPulls(this.forceUpdate);
+	async getPullItems(): Promise<vscode.TreeItem[]> {
+		const repositoryPulls = await repository
+			.getPullManager()
+			.getList(this.forceUpdate);
 		this.forceUpdate = false;
-		return repositoryPulls.map((pull) => {
+		const pullTreeItems = repositoryPulls.map((pull) => {
 			const label = getPullTreeItemLabel(pull);
 			const description = getPullTreeItemDescription(pull);
 			const tooltip = `${label} (${description})`;
@@ -106,6 +116,9 @@ export class PullRequestTreeDataProvider
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
+		return (await repository.getPullManager().hasMore())
+			? [...pullTreeItems, loadMorePullItem]
+			: pullTreeItems;
 	}
 
 	async getPullFileItems(pull: RepositoryPull): Promise<vscode.TreeItem[]> {

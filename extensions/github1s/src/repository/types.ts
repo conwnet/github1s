@@ -80,3 +80,23 @@ export interface BlameRange {
 		};
 	};
 }
+
+export interface ObjectManager<T> {
+	getList(...args: any[]): T[] | Promise<T[]>;
+	getItem(...args: any[]): T | Promise<T>;
+	// return boolean indicate that if there are more results
+	loadMore(...args: any[]): boolean | Promise<boolean>;
+}
+
+export interface PullManager extends ObjectManager<RepositoryPull> {
+	getPullFiles(
+		...args: any[]
+	): RepositoryChangedFile[] | Promise<RepositoryChangedFile[]>;
+}
+
+export interface CommitManager extends ObjectManager<RepositoryCommit> {
+	getCommitFiles(
+		...args: any[]
+	): RepositoryChangedFile[] | Promise<RepositoryChangedFile[]>;
+	getFileCommitSha(...args: any[]);
+}

@@ -73,7 +73,9 @@ const getFileDecorationForPull = async (
 	uri: Uri,
 	pullNumber: number
 ): Promise<FileDecoration> => {
-	const changedFiles = await repository.getPullFiles(pullNumber);
+	const changedFiles = await repository
+		.getPullManager()
+		.getPullFiles(pullNumber);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
@@ -81,7 +83,9 @@ const getFileDecorationForCommit = async (
 	uri: Uri,
 	commitSha: string
 ): Promise<FileDecoration> => {
-	const changedFiles = await repository.getCommitFiles(commitSha);
+	const changedFiles = await repository
+		.getCommitManager()
+		.getCommitFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 

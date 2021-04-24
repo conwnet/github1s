@@ -35,7 +35,7 @@ export const getPullChangedFiles = async (pull: RepositoryPull) => {
 	const headRootUri = baseRootUri.with({
 		authority: `${owner}+${repo}+${pull.head.sha}`,
 	});
-	const pullFiles = await repository.getPullFiles(pull.number);
+	const pullFiles = await repository.getPullManager().getPullFiles(pull.number);
 
 	return pullFiles.map((pullFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -64,7 +64,9 @@ export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
 	const headRootUri = baseRootUri.with({
 		authority: `${owner}+${repo}+${commit.sha || 'HEAD'}`,
 	});
-	const commitFiles = await repository.getCommitFiles(commit.sha);
+	const commitFiles = await repository
+		.getCommitManager()
+		.getCommitFiles(commit.sha);
 
 	return commitFiles.map((commitFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -84,12 +86,16 @@ export const getChangedFiles = async (): Promise<ChangedFile[]> => {
 
 	// github pull page
 	if (routerState.pageType === PageType.PULL) {
-		const pull = await repository.getPull(routerState.pullNumber);
+		const pull = await repository
+			.getPullManager()
+			.getItem(routerState.pullNumber);
 		return pull ? getPullChangedFiles(pull) : [];
 	}
 	// github commit page
 	else if (routerState.pageType === PageType.COMMIT) {
-		const commit = await repository.getCommit(routerState.commitSha);
+		const commit = await repository
+			.getCommitManager()
+			.getItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
 	return [];

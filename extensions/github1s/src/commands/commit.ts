@@ -10,11 +10,12 @@ import {
 	CommitTreeItem,
 	getCommitTreeItemDescription,
 } from '@/views/commit-list-view';
+import { commitTreeDataProvider } from '@/views';
 import { RequestNotFoundError } from '@/helpers/fetch';
 
 const checkCommitExists = async (commitSha: string) => {
 	try {
-		return !!(await repository.getCommit(commitSha));
+		return !!(await repository.getCommitManager().getItem(commitSha));
 	} catch (e) {
 		vscode.window.showErrorMessage(
 			e instanceof RequestNotFoundError
@@ -37,7 +38,7 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 		};
 		// use the commit list as the candidates
 		const commitItems: vscode.QuickPickItem[] = (
-			await repository.getCommits((await router.getState()).ref)
+			await repository.getCommitManager().getList((await router.getState()).ref)
 		).map((commit) => ({
 			commitSha: commit.sha,
 			label: commit.commit.message,
@@ -96,4 +97,14 @@ export const commandCommitViewItemOpenOnGitHub = async (
 ) => {
 	const commitSha = viewItem?.commit?.sha;
 	commitSha && commandOpenCommitOnGitHub(commitSha);
+};
+
+export const commandCommitViewRefreshCommitList = (forceUpdate = true) => {
+	return commitTreeDataProvider.updateTree(forceUpdate);
+};
+
+export const commandCommitViewLoadMoreCommits = async () => {
+	const { ref } = await router.getState();
+	repository.getCommitManager().loadMore(ref);
+	return commandCommitViewRefreshCommitList(false);
 };
