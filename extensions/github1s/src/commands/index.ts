@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
-import { pullRequestTreeDataProvider, commitTreeDataProvider } from '@/views';
 import {
 	commandValidateToken,
 	commandUpdateToken,
@@ -40,6 +39,7 @@ import {
 	commandOpenEditorGutterBlame,
 	commandCloseEditorGutterBlame,
 } from './blame';
+import { commandOpenOnGitHub } from './global';
 
 const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// validate GitHub OAuth Token
@@ -98,6 +98,9 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	{ id: 'github1s.open-editor-gutter-blame', callback: commandOpenEditorGutterBlame }, // prettier-ignore
 	// close the gutter blame of a editor
 	{ id: 'github1s.close-editor-gutter-blame', callback: commandCloseEditorGutterBlame }, // prettier-ignore
+
+	// open current page on GitHub
+	{ id: 'github1s.open-on-github', callback: commandOpenOnGitHub },
 ];
 
 export const registerGitHub1sCommands = () => {

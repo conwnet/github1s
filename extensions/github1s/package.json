@@ -19,6 +19,7 @@
     "onCommand:github1s.switch-to-commit",
     "onCommand:github1s.diff-view-open-left-file",
     "onCommand:github1s.diff-view-open-right-file",
+    "onCommand:github1s.open-on-github",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -198,6 +199,11 @@
           "light": "assets/icons/light/close-blame.svg"
         },
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
+      },
+      {
+        "command": "github1s.open-on-github",
+        "title": "Open on GitHub",
+        "category": "GitHub1s"
       }
     ],
     "colors": [
