@@ -29,6 +29,16 @@ export interface CommitTreeItem extends vscode.TreeItem {
 	commit: RepositoryCommit;
 }
 
+const loadMoreCommitItem: vscode.TreeItem = {
+	label: 'Load more',
+	tooltip: 'Load more commits',
+	command: {
+		title: 'Load more commits',
+		command: 'github1s.commit-view-load-more-commits',
+		tooltip: 'Load more commits',
+	},
+};
+
 export class CommitTreeDataProvider
 	implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.commit-list';
@@ -37,21 +47,18 @@ export class CommitTreeDataProvider
 	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-	public updateTree() {
-		this.forceUpdate = true;
+	public updateTree(forceUpdate = true) {
+		this.forceUpdate = forceUpdate;
 		this._onDidChangeTreeData.fire(undefined);
 	}
 
-	async getCommitItems(): Promise<CommitTreeItem[]> {
+	async getCommitItems(): Promise<vscode.TreeItem[]> {
 		const { ref } = await router.getState();
-		// only recent 100 commits will be list here
-		// TODO: implement pagination
-		const repositoryCommits = await repository.getCommits(
-			ref,
-			this.forceUpdate
-		);
+		const repositoryCommits = await repository
+			.getCommitManager()
+			.getList(ref, this.forceUpdate);
 		this.forceUpdate = false;
-		return repositoryCommits.map((commit) => {
+		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = `${commit.commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
@@ -74,6 +81,9 @@ export class CommitTreeDataProvider
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
+		return (await repository.getCommitManager().hasMore())
+			? [...commitTreeItems, loadMoreCommitItem]
+			: commitTreeItems;
 	}
 
 	async getCommitFileItems(

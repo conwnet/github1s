@@ -28,8 +28,15 @@ const detectRefFormPathParts = async (pathParts: string[]): Promise<string> => {
 	if (!pathParts[3] || pathParts[3].toUpperCase() === 'HEAD') {
 		return 'HEAD';
 	}
-	const branchRefs = await repository.getBranches();
-	const tagRefs = await repository.getTags();
+	// the ref will be pathParts[3] if there is no other parts after it
+	if (!pathParts[4]) {
+		return pathParts[3];
+	}
+	// use Promise.all to fetch all refs in parallel as soon as possible
+	const [branchRefs, tagRefs] = await Promise.all([
+		repository.getBranches(),
+		repository.getTags(),
+	]);
 	const refNames = [...branchRefs, ...tagRefs].map((item) => item.name);
 	// fallback to pathParts[3] because it also can be a commit ID
 	return findMatchedBranchOrTag(refNames, pathParts) || pathParts[3];

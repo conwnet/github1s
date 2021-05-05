@@ -16,7 +16,9 @@ const getOriginalResourceForPull = async (
 	uri: vscode.Uri,
 	pullNumber: number
 ): Promise<vscode.Uri> => {
-	const changedFiles = await repository.getPullFiles(pullNumber);
+	const changedFiles = await repository
+		.getPullManager()
+		.getPullFiles(pullNumber);
 	const changedFile = changedFiles?.find(
 		(changedFile) => changedFile.filename === uri.path.slice(1)
 	);
@@ -29,7 +31,7 @@ const getOriginalResourceForPull = async (
 		return emptyFileUri;
 	}
 
-	const pull = await repository.getPull(pullNumber);
+	const pull = await repository.getPullManager().getItem(pullNumber);
 	const { owner, repo } = await router.getState();
 	const originalAuthority = `${owner}+${repo}+${pull.base.sha}`;
 	const originalPath = changedFile.previous_filename
@@ -44,7 +46,9 @@ const getOriginalResourceForCommit = async (
 	uri: vscode.Uri,
 	commitSha: string
 ) => {
-	const changedFiles = await repository.getCommitFiles(commitSha);
+	const changedFiles = await repository
+		.getCommitManager()
+		.getCommitFiles(commitSha);
 	const changedFile = changedFiles?.find(
 		(changedFile) => changedFile.filename === uri.path.slice(1)
 	);
@@ -57,7 +61,7 @@ const getOriginalResourceForCommit = async (
 		return emptyFileUri;
 	}
 
-	const commit = await repository.getCommit(commitSha);
+	const commit = await repository.getCommitManager().getItem(commitSha);
 	const { owner, repo } = await router.getState();
 	const parentCommitSha = commit.parents?.[0]?.sha;
 

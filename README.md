@@ -173,7 +173,7 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
 
-### Maintainers! :blush:
+## Maintainers! :blush:
 
 <table>
   <tbody><tr>
@@ -182,3 +182,7 @@ The continued development and maintenance of GitHub1s is made possible by these 
     <td align="center"><a href="https://github.com/Siddhant-K-code"><img alt="" src="https://avatars.githubusercontent.com/Siddhant-K-code" width="100px;"><br><sub><b>Siddhant Khare</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=Siddhant-K-code" title="Code">💻 🖋</a></td> </a></td>
   </tr>
 </tbody></table>
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)

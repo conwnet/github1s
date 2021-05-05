@@ -94,7 +94,9 @@ const getLatestFileUri = async (fileUri: vscode.Uri) => {
 	// to router.getAuthority() in this case
 	const fileAuthority = fileUri.authority || (await router.getAuthority());
 	const [owner, repo, ref] = fileAuthority.split('+').filter(Boolean);
-	const latestCommitSha = await repository.getFileCommitSha(fileUri.path, ref);
+	const latestCommitSha = await repository
+		.getCommitManager()
+		.getFileCommitSha(fileUri.path, ref);
 
 	return fileUri.with({
 		authority: `${owner}+${repo}+${latestCommitSha}`,
@@ -116,10 +118,9 @@ export const commandEditorViewOpenPrevRevision = async (
 	const [owner, repo, rightCommitSha] = rightFileUri.authority
 		.split('+')
 		.filter(Boolean);
-	const leftCommitSha = await repository.getFilePrevCommitSha(
-		rightFileUri.path,
-		rightCommitSha
-	);
+	const leftCommitSha = await repository
+		.getCommitManager()
+		.getFilePrevCommitSha(rightFileUri.path, rightCommitSha);
 
 	// if we can't find prevCommitSha, use the the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommitSha
@@ -130,10 +131,9 @@ export const commandEditorViewOpenPrevRevision = async (
 		? FileChangeType.MODIFIED
 		: FileChangeType.ADDED;
 
-	const hasNextRevision = !!(await repository.getFileNextCommitSha(
-		rightFileUri.path,
-		rightCommitSha
-	));
+	const hasNextRevision = !!(await repository
+		.getCommitManager()
+		.getFileNextCommitSha(rightFileUri.path, rightCommitSha));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
@@ -166,10 +166,9 @@ export const commandEditorViewOpenNextRevision = async (
 	const [owner, repo, leftCommitSha] = leftFileUri.authority
 		.split('+')
 		.filter(Boolean);
-	const rightCommitSha = await repository.getFileNextCommitSha(
-		leftFileUri.path,
-		leftCommitSha
-	);
+	const rightCommitSha = await repository
+		.getCommitManager()
+		.getFileNextCommitSha(leftFileUri.path, leftCommitSha);
 
 	if (!rightCommitSha) {
 		return vscode.window.showInformationMessage(
@@ -181,10 +180,9 @@ export const commandEditorViewOpenNextRevision = async (
 		authority: `${owner}+${repo}+${rightCommitSha}`,
 	});
 
-	const hasNextRevision = !!(await repository.getFileNextCommitSha(
-		rightFileUri.path,
-		rightCommitSha
-	));
+	const hasNextRevision = !!(await repository
+		.getCommitManager()
+		.getFileNextCommitSha(rightFileUri.path, rightCommitSha));
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
 		head: rightFileUri.with({ query: '' }).toString(),

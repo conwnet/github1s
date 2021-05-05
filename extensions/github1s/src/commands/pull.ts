@@ -11,11 +11,12 @@ import {
 	getPullTreeItemLabel,
 	getPullTreeItemDescription,
 } from '@/views/pull-list-view';
+import { pullRequestTreeDataProvider } from '@/views';
 import { RequestNotFoundError } from '@/helpers/fetch';
 
 const checkPullExists = async (pullNumber: number) => {
 	try {
-		return !!(await repository.getPull(pullNumber));
+		return !!(await repository.getPullManager().getItem(pullNumber));
 	} catch (e) {
 		vscode.window.showErrorMessage(
 			e instanceof RequestNotFoundError
@@ -38,7 +39,7 @@ export const commandSwitchToPull = async (pullNumber?: number) => {
 		};
 		// use the pull list as the candidates
 		const pullRequestItems: vscode.QuickPickItem[] = (
-			await repository.getPulls()
+			await repository.getPullManager().getList()
 		).map((pull) => ({
 			pullNumber: pull.number,
 			label: getPullTreeItemLabel(pull),
@@ -97,4 +98,13 @@ export const commandPullViewItemOpenOnGitHub = async (
 			vscode.Uri.parse(`https://github.com/${owner}/${repo}/pull/${pullNumber}`)
 		);
 	}
+};
+
+export const commandPullViewRefreshPullList = (forceUpdate = true) => {
+	return pullRequestTreeDataProvider.updateTree(forceUpdate);
+};
+
+export const commandPullViewLoadMorePulls = () => {
+	repository.getPullManager().loadMore();
+	return commandPullViewRefreshPullList(false);
 };
