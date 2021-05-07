@@ -1,0 +1,50 @@
+.github1s-authorizing-mask {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 99999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, .52);
+}
+
+.github1s-overlay-visible {
+	overflow: hidden;
+}
+
+.github1s-overlay-visible .monaco-workbench {
+	filter: blur(2px);
+}
+
+.github1s-authorizing-dialog {
+	color: #ccc;
+	font-family: Inter, sans-serif;
+	width: 650px;
+	height: 400px;
+	background-color: #101010;
+	border-radius: 8px;
+	border: 1px solid #666;
+	text-align: center;
+}
+
+.github1s-dialog-title {
+	font-size: 23px;
+	text-align: center;
+	line-height: 45px;
+}
+
+.github1s-text-warning {
+	color: #ffe58f;
+}
+
+.github1s-documentation-link {
+	color: #ccc;
+	font-size: 14px;
+}
+
+.github1s-dialog-description {
+	text-align: center;
+}
