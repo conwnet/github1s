@@ -28,23 +28,65 @@
 	border-radius: 8px;
 	border: 1px solid #666;
 	text-align: center;
+	position: relative;
+}
+
+.github1s-dialog-close-button:hover {
+	color: #3794ff;
 }
 
 .github1s-dialog-title {
 	font-size: 23px;
-	text-align: center;
-	line-height: 45px;
-}
-
-.github1s-text-warning {
-	color: #ffe58f;
-}
-
-.github1s-documentation-link {
-	color: #ccc;
-	font-size: 14px;
+    margin-top: 40px;
 }
 
 .github1s-dialog-description {
-	text-align: center;
+	font-size: 16px;
+    margin-top: 24px;
+}
+
+.github1s-dialog-authorizing-area {
+	margin-top: 36px;
+    display: inline-block;
+    text-align: left;
+}
+
+.github1s-dialog-documentation-area {
+	margin-top: 24px;
+	font-size: 13px;
+}
+
+.github1s-dialog-documentation-link {
+	color: #3794ff;
+}
+
+.github1s-dialog-authorizing-button {
+	height: 40px;
+    width: 300px;
+    outline: none;
+	display: flex;
+	align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-style: none;
+    border-radius: 4px;
+    font-size: 16px;
+	cursor: pointer;
+	transition: all .1s;
+}
+
+.github1s-github-authorizing-logo {
+	height: 24px;
+	margin-right: 8px;
+}
+
+.github1s-dialog-authorizing-button:hover {
+	transform: scale(1.05);
+}
+
+.github1s-manual-input-link {
+	font-size: 12px;
+	color: #3794ff;
+	margin-top: 8px;
+	cursor: pointer;
 }
