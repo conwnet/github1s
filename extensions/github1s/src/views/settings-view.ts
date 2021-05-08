@@ -301,6 +301,14 @@ button.secondary:hover {
 	margin-bottom: 0;
 }
 
+.authorizing-method-block {
+	margin-bottom: 8px;
+}
+
+.authorizing-method-title {
+	margin-bottom: 8px;
+}
+
 .token-link {
 	margin-bottom: 10px;
 }
@@ -316,13 +324,20 @@ button.secondary:hover {
 			<div>For unauthenticated requests, the rate limit of GitHub allows for up to 60 requests per hour.</div>
 			<div>For API requests using Authentication, you can make up to 5,000 requests per hour.</div>
 		</div>
-		<div class="token-link">
-			<a href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s" target="_blank">
-				Generate New OAuth Token
-			</a>
+		<div class="authorizing-method-block">
+			<h3 class="authorizing-method-title">Authorizing OAuth App</h3>
+			<div><button id="authorizing-button">Connect to GitHub</button></div>
 		</div>
-		<div><input id="token-input" name="token" autocomplete="off" /></div>
-		<div><button id="save-button">Save</button></div>
+		<div class="authorizing-method-block">
+			<h3 class="authorizing-method-title">Offer an OAuth Token</h3>
+			<div class="token-link">
+				<a href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s" target="_blank">
+					Generate New OAuth Token
+				</a>
+			</div>
+			<div><input id="token-input" name="token" autocomplete="off" /></div>
+			<div><button id="save-button">Save</button></div>
+		</div>
 		<div><button id="preview-button">Cancel</button></div>
 	</div>
 	<div class="container preview-page">
