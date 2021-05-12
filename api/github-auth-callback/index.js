@@ -7,13 +7,16 @@ const got = require('got');
 
 const CLIENT_ID = process.env.GITHUB_OAUTH_ID || '';
 const CLIENT_SECRET = process.env.GITHUB_OAUTH_SECRET || '';
-const APP_ORIGIN = process.env.APP_ORIGIN || '';
+// allow origins should split by ','
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS || '';
 
 // return the data to the opener window by postMessage API,
 // and close current window then
 const getResponseHtml = (dataStr) => `
 <script>
-window.opener && window.opener.postMessage(${dataStr}, '${APP_ORIGIN}' || window.location.origin);
+'${ALLOWED_ORIGINS}'.split(',').forEach(function(allowedOrigin) {
+	window.opener.postMessage(${dataStr}, allowedOrigin);
+});
 setTimeout(() => window.close(), 50);
 </script>
 `;
