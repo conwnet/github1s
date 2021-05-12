@@ -102,3 +102,30 @@ export const commandClearToken = (silent: boolean = false) => {
 			return false;
 		});
 };
+
+type AuthMessageData =
+	| { access_token: string; token_type: string; scope: string }
+	| { error: string; error_description: string; error_uri?: string };
+
+export const commandAuthorizingGithub = async (
+	silent: boolean = false
+): Promise<string | void> => {
+	// vscode-web-github1s/src/vs/github1s/authorizing-github.ts
+	const data: AuthMessageData = await vscode.commands.executeCommand(
+		'github1s.vscode.get-github-access-token'
+	);
+
+	if ('access_token' in data) {
+		// update the access_token into extension context
+		await getExtensionContext()!.globalState.update(
+			GITHUB_OAUTH_TOKEN,
+			data.access_token
+		);
+		return data.access_token;
+	} else if ('error' in data && !silent) {
+		const seeMoreLinkText = data.error_uri ? ` [See more](data.error_uri)` : '';
+		vscode.window.showErrorMessage(
+			`${data.error_description}${seeMoreLinkText}`
+		);
+	}
+};

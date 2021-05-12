@@ -60,6 +60,9 @@ export class SettingsView implements vscode.WebviewViewProvider {
 				case 'welcome-page':
 					vscode.commands.executeCommand('workbench.action.showWelcomePage');
 					break;
+				case 'authorizing-github':
+					this.handleAuthorizingGithub();
+					break;
 				default:
 					const oauthToken =
 						(this._extensionContext.globalState.get(
@@ -146,6 +149,21 @@ export class SettingsView implements vscode.WebviewViewProvider {
 				}
 			})
 			.catch(() => this.updateWebviewState({ token, validating: false }));
+	}
+
+	async handleAuthorizingGithub() {
+		const token: string = await vscode.commands.executeCommand(
+			'github1s.authorizing-github'
+		);
+		if (!token) {
+			return;
+		}
+		this.updateWebviewState({
+			token,
+			valid: true,
+			pageType: 'PREVIEW',
+			validating: false,
+		});
 	}
 
 	_getHtmlForWebview(webview): string {
@@ -329,7 +347,7 @@ button.secondary:hover {
 			<div><button id="authorizing-button">Connect to GitHub</button></div>
 		</div>
 		<div class="authorizing-method-block">
-			<h3 class="authorizing-method-title">Offer an OAuth Token</h3>
+			<h3 class="authorizing-method-title">Use OAuth Token</h3>
 			<div class="token-link">
 				<a href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s" target="_blank">
 					Generate New OAuth Token
@@ -406,6 +424,10 @@ button.secondary:hover {
 
 	delegate(document.body, '#welcome-button', 'click', () => {
 		vscode.postMessage({ type: 'welcome-page' });
+	});
+
+	delegate(document.body, '#authorizing-button', 'click', () => {
+		vscode.postMessage({ type: 'authorizing-github' })
 	});
 
 	const updatePage = () => {

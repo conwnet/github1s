@@ -9,6 +9,7 @@ import {
 	commandValidateToken,
 	commandUpdateToken,
 	commandClearToken,
+	commandAuthorizingGithub,
 } from './token';
 import { commandGetCurrentAuthority, commandCheckoutRef } from './ref';
 import {
@@ -48,6 +49,8 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	{ id: 'github1s.update-token', callback: commandUpdateToken },
 	// clear GitHub OAuth Token
 	{ id: 'github1s.clear-token', callback: commandClearToken },
+	// authorizing github with `Web application flow`
+	{ id: 'github1s.authorizing-github', callback: commandAuthorizingGithub },
 
 	// get current authority (`${owner}+${repo}+${ref}`)
 	{ id: 'github1s.get-current-authority', callback: commandGetCurrentAuthority }, // prettier-ignore
