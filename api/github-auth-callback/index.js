@@ -7,7 +7,7 @@ const got = require('got');
 
 const CLIENT_ID = process.env.GITHUB_OAUTH_ID || '';
 const CLIENT_SECRET = process.env.GITHUB_OAUTH_SECRET || '';
-const APP_ORIGIN = process.env.APP_ORIGIN || 'https://github1s.com';
+const APP_ORIGIN = process.env.APP_ORIGIN || window.location.origin;
 
 // return the data to the opener window by postMessage API,
 // and close current window then
