@@ -23,6 +23,8 @@ import { parseLogLevel } from 'vs/platform/log/common/log';
 import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
 // eslint-disable-next-line
 import { renderNotification } from 'vs/github1s/notification';
+// eslint-disable-next-line
+import { getGitHubAccessToken } from 'vs/github1s/authorizing-github';
 
 // custom vs code commands defined by github1s
 const getGitHub1sCustomCommands: () => {
@@ -31,6 +33,7 @@ const getGitHub1sCustomCommands: () => {
 }[] = () => [
 	{ id: 'github1s.vscode.get-browser-url', handler: getBrowserUrl },
 	{ id: 'github1s.vscode.replace-browser-url', handler: replaceBrowserUrl },
+	{ id: 'github1s.vscode.get-github-access-token', handler: getGitHubAccessToken },
 ];
 // above codes are changed by github1s
 

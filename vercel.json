@@ -20,6 +20,10 @@
       "dest": "/manifest.json"
     },
     {
+      "src": "/api/github-auth-callback",
+      "dest": "/api/github-auth-callback"
+    },
+    {
       "src": ".*",
       "dest": "/index.html"
     }

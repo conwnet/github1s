@@ -41,43 +41,50 @@ export const commandValidateToken = (silent: boolean = false) => {
 	});
 };
 
-export const commandUpdateToken = (silent: boolean = false) => {
-	return vscode.window
-		.showInputBox({
+export const commandUpdateToken = async (
+	token: string,
+	silent: boolean = false
+) => {
+	if (!token) {
+		// if the token isn't passed by arguments,
+		// open an input box and request user input it
+		token = await vscode.window.showInputBox({
 			placeHolder: 'Please input the GitHub OAuth Token',
-		})
-		.then((token) => {
-			if (!token) {
-				return;
-			}
-			return getExtensionContext()!
-				.globalState.update(GITHUB_OAUTH_TOKEN, token || '')
-				.then(() => {
-					// we don't need wait validate, so we don't `return`
-					validateToken(token).then((tokenStatus) => {
-						if (!silent) {
-							if (!tokenStatus.valid) {
-								vscode.window.showErrorMessage(
-									'GitHub OAuth Token have updated, but it is invalid.'
-								);
-							} else if (tokenStatus.remaining <= 0) {
-								vscode.window.showWarningMessage(
-									'GitHub OAuth Token have updated, but the rate limit is exceeded.'
-								);
-							} else {
-								vscode.window.showInformationMessage(
-									'GitHub OAuth Token have updated.'
-								);
-							}
-						}
-						tokenStatus.valid &&
-							tokenStatus.remaining > 0 &&
-							vscode.commands.executeCommand(
-								'workbench.files.action.refreshFilesExplorer'
-							);
-					});
-				});
 		});
+	}
+
+	if (!token) {
+		return;
+	}
+
+	await getExtensionContext()!.globalState.update(
+		GITHUB_OAUTH_TOKEN,
+		token || ''
+	);
+
+	// we don't need wait validate, so we don't `return`
+	validateToken(token).then((tokenStatus) => {
+		if (!silent) {
+			if (!tokenStatus.valid) {
+				vscode.window.showErrorMessage(
+					'GitHub OAuth Token have updated, but it is invalid.'
+				);
+			} else if (tokenStatus.remaining <= 0) {
+				vscode.window.showWarningMessage(
+					'GitHub OAuth Token have updated, but the rate limit is exceeded.'
+				);
+			} else {
+				vscode.window.showInformationMessage(
+					'GitHub OAuth Token have updated.'
+				);
+			}
+		}
+		tokenStatus.valid &&
+			tokenStatus.remaining > 0 &&
+			vscode.commands.executeCommand(
+				'workbench.files.action.refreshFilesExplorer'
+			);
+	});
 };
 
 export const commandClearToken = (silent: boolean = false) => {
@@ -101,4 +108,28 @@ export const commandClearToken = (silent: boolean = false) => {
 			}
 			return false;
 		});
+};
+
+type AuthMessageData =
+	| { access_token: string; token_type: string; scope: string }
+	| { error: string; error_description: string; error_uri?: string };
+
+export const commandAuthorizingGithub = async (
+	silent: boolean = false
+): Promise<string | void> => {
+	// vscode-web-github1s/src/vs/github1s/authorizing-github.ts
+	const data: AuthMessageData = await vscode.commands.executeCommand(
+		'github1s.vscode.get-github-access-token'
+	);
+
+	if ('access_token' in data) {
+		// update the access_token into extension context
+		await commandUpdateToken(data.access_token);
+		return data.access_token;
+	} else if ('error' in data && !silent) {
+		const seeMoreLinkText = data.error_uri ? ` [See more](data.error_uri)` : '';
+		vscode.window.showErrorMessage(
+			`${data.error_description}${seeMoreLinkText}`
+		);
+	}
 };
