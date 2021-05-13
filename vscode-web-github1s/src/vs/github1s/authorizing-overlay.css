@@ -1,0 +1,248 @@
+.github1s-authorizing-mask {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 99999;
+	background-color: rgba(0, 0, 0, .52);
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+}
+
+.github1s-authorizing-visible {
+	overflow: hidden;
+}
+
+.github1s-overlay-visible .monaco-workbench {
+	filter: blur(2px);
+}
+
+@keyframes authorizingDialogBouncedIn {
+	from { opacity: 0; transform: scale(0); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+.github1s-authorizing-dialog {
+	color: #ccc;
+	font-family: Inter, sans-serif;
+	width: 80%;
+	max-width: 520px;
+	background-color: #101010;
+	border-radius: 8px;
+	border: 1px solid #666;
+	text-align: center;
+	padding: 40px 20px 52px;
+	position: absolute;
+	margin-top: 20vh;
+	animation-name: authorizingDialogBouncedIn;
+	animation-duration: 0.1s;
+	transform: scale(0);
+	transition: transform .1s;
+}
+
+.github1s-authorizing-dialog.visible {
+	transform: scale(1);
+}
+
+.github1s-authorizing-dialog .link {
+	color: #1890ff;
+}
+
+.github1s-authorizing-dialog .link:hover {
+	color: #40a9ff;
+}
+
+.github1s-authorizing-dialog .link:active {
+	color: #096dd9;
+}
+
+.github1s-authorizing-dialog .close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 20px;
+	cursor: pointer;
+	transition: color 0.1s;
+}
+
+.github1s-authorizing-dialog .close-button::after {
+	content: '×';
+}
+
+.github1s-authorizing-dialog .close-button:hover {
+	color: #ff4d4f;
+}
+
+.github1s-authorizing-dialog .close-button:active {
+	color: #d9363e;
+}
+
+.github1s-authorizing-dialog .header-title {
+	font-size: 23px;
+	margin-bottom: 20px;
+}
+
+.github1s-authorizing-dialog .feature-list {
+	list-style: none;
+	font-size: 14px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	margin: 0 0 20px;
+}
+
+.github1s-authorizing-dialog .features-description .feature-item {
+	margin-right: 12px;
+	white-space: nowrap;
+	line-height: 20px;
+}
+
+.github1s-authorizing-dialog .feature-item a {
+	color: #ccc;
+	text-decoration: none;
+}
+
+
+.github1s-authorizing-dialog .features-description .feature-item::before {
+	content: '✓';
+	color: #32d74b;
+	margin-right: 4px;
+}
+
+.github1s-authorizing-dialog .features-description .feature-item:last-child {
+	margin-right: 0;
+}
+
+.github1s-authorizing-dialog .github-documentation {
+	font-size: 13px;
+	margin-bottom: 32px;
+}
+
+.github1s-authorizing-dialog .authorizing-methods {
+	display: inline-block;
+	width: 85%;
+	max-width: 320px;
+}
+
+.github1s-authorizing-dialog .authorizing-button {
+	height: 40px;
+	width: 100%;
+    outline: none;
+	margin: 0 auto;
+	display: flex;
+	align-items: center;
+    justify-content: center;
+    background-color: #fff;
+	box-shadow: rgba(255, 255, 255, 0.2) 0px 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+	transition: all 0.1s;
+	cursor: pointer;
+}
+
+.github1s-authorizing-dialog .authorizing-button:hover {
+	transform: scale(1.03);
+	box-shadow: rgba(255, 255, 255, 0.25) 0px 2px 8px;
+}
+
+.github1s-authorizing-dialog .authorizing-button:active {
+	transform: scale(0.98);
+}
+
+.github1s-authorizing-dialog .authorizing-button .github-logo {
+	height: 24px;
+	margin-right: 8px;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .split-line {
+	height: 0;
+	border: 1px solid #ccc;
+	margin: 28px 0;
+	position: relative;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .split-line::after {
+	content: 'OR';
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateY(-50%) translateX(-50%);
+	border: 2px solid #ccc;
+	padding: 4px 16px;
+	border-radius: 8px;
+	background-color: #000;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form {
+	display: flex;
+	height: 32px;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .create-token-link {
+	font-size: 12px;
+	text-align: left;
+	margin-top: 8px;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .input-box {
+	flex: 1;
+	outline: none;
+	color: #ccc;
+	border: 1px solid #3c3c3c;
+	background-color: #3c3c3c;
+	border-radius: 4px;
+	padding: 0 8px;
+	margin-right: 8px;
+	font-size: 14px;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .input-box:focus {
+	border: 1px solid #096dd9;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button {
+	border-style: none;
+	outline: none;
+	width: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	color: #fff;
+	background-color: #09639c;
+	cursor: pointer;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:hover {
+	background-color: #1177bb;
+}
+
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:active {
+	color: #ccc;
+	background-color: #0867ab;
+}
+
+@media (max-width: 550px) {
+	.github1s-authorizing-dialog .feature-list {
+		flex-direction: column;
+	}
+
+	.github1s-authorizing-dialog .features-description .feature-item {
+		width: 180px;
+		text-align: left;
+		margin-right: 0;
+	}
+}
