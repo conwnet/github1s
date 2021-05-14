@@ -8,8 +8,13 @@ import { getExtensionContext, getOAuthToken } from '@/helpers/context';
 import { validateToken } from '@/interfaces/github-api-rest';
 import { GITHUB_OAUTH_TOKEN } from '@/helpers/constants';
 
-export const commandValidateToken = (silent: boolean = false) => {
-	const oAuthToken = getOAuthToken();
+export const commandValidateToken = (
+	token: string,
+	silent: boolean = false
+) => {
+	// if we can not get a token from arguments,
+	// just verify current token which has been saved
+	const oAuthToken = token || getOAuthToken();
 	return validateToken(oAuthToken).then((tokenStatus) => {
 		if (!silent) {
 			const remaining = tokenStatus.remaining;
@@ -61,29 +66,25 @@ export const commandUpdateToken = async (
 		GITHUB_OAUTH_TOKEN,
 		token || ''
 	);
+	vscode.commands.executeCommand('workbench.files.action.refreshFilesExplorer');
+
+	if (silent) {
+		return;
+	}
 
 	// we don't need wait validate, so we don't `return`
 	validateToken(token).then((tokenStatus) => {
-		if (!silent) {
-			if (!tokenStatus.valid) {
-				vscode.window.showErrorMessage(
-					'GitHub OAuth Token have updated, but it is invalid.'
-				);
-			} else if (tokenStatus.remaining <= 0) {
-				vscode.window.showWarningMessage(
-					'GitHub OAuth Token have updated, but the rate limit is exceeded.'
-				);
-			} else {
-				vscode.window.showInformationMessage(
-					'GitHub OAuth Token have updated.'
-				);
-			}
-		}
-		tokenStatus.valid &&
-			tokenStatus.remaining > 0 &&
-			vscode.commands.executeCommand(
-				'workbench.files.action.refreshFilesExplorer'
+		if (!tokenStatus.valid) {
+			vscode.window.showErrorMessage(
+				'GitHub OAuth Token have updated, but it is invalid.'
 			);
+		} else if (tokenStatus.remaining <= 0) {
+			vscode.window.showWarningMessage(
+				'GitHub OAuth Token have updated, but the rate limit is exceeded.'
+			);
+		} else {
+			vscode.window.showInformationMessage('GitHub OAuth Token have updated.');
+		}
 	});
 };
 
@@ -122,14 +123,36 @@ export const commandAuthorizingGithub = async (
 		'github1s.vscode.get-github-access-token'
 	);
 
+	// if we can't open the authorizing window (the browser may block it),
+	// just try open the overlay on the page and try again
+	if ('error' in data && data.error === 'unable_to_open_window') {
+		return commandAuthorizingGithubWithOverlay();
+	}
+
 	if ('access_token' in data) {
 		// update the access_token into extension context
 		await commandUpdateToken(data.access_token);
 		return data.access_token;
-	} else if ('error' in data && !silent) {
+	}
+
+	if ('error' in data && !silent) {
 		const seeMoreLinkText = data.error_uri ? ` [See more](data.error_uri)` : '';
 		vscode.window.showErrorMessage(
 			`${data.error_description}${seeMoreLinkText}`
 		);
 	}
+	return '';
+};
+
+// open the overlay on the page, and get the access_token from it
+export const commandAuthorizingGithubWithOverlay = async () => {
+	const data: AuthMessageData = await vscode.commands.executeCommand(
+		'github1s.vscode.get-github-access-token-with-overlay'
+	);
+
+	if ('access_token' in data) {
+		await commandUpdateToken(data.access_token);
+		return data.access_token;
+	}
+	return '';
 };

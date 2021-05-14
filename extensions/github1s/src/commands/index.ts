@@ -10,6 +10,7 @@ import {
 	commandUpdateToken,
 	commandClearToken,
 	commandAuthorizingGithub,
+	commandAuthorizingGithubWithOverlay,
 } from './token';
 import { commandGetCurrentAuthority, commandCheckoutRef } from './ref';
 import {
@@ -51,6 +52,8 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	{ id: 'github1s.clear-token', callback: commandClearToken },
 	// authorizing github with `Web application flow`
 	{ id: 'github1s.authorizing-github', callback: commandAuthorizingGithub },
+	// open the overlay on the page and authorizing github with `Web application flow`
+	{ id: 'github1s.authorizing-github-with-overlay', callback: commandAuthorizingGithubWithOverlay }, // prettier-ignore
 
 	// get current authority (`${owner}+${repo}+${ref}`)
 	{ id: 'github1s.get-current-authority', callback: commandGetCurrentAuthority }, // prettier-ignore

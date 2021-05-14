@@ -12,3 +12,19 @@ export const replaceBrowserUrl = (url: string) => {
 		window.history.replaceState(null, '', url);
 	}
 };
+
+export const delegate = <K extends keyof HTMLElementEventMap>(
+	element: HTMLElement,
+	selector: string,
+	eventName: K,
+	handler: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any
+): void => {
+	return element?.addEventListener(eventName, function (event) {
+		const children = element.querySelectorAll(selector);
+		for (let i = 0, len = children.length; i < len; i++) {
+			if (children[i] === event.target) {
+				handler.call(this, event);
+			}
+		}
+	});
+};

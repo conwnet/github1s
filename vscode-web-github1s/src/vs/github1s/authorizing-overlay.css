@@ -5,7 +5,7 @@
 	bottom: 0;
 	left: 0;
 	z-index: 99999;
-	background-color: rgba(0, 0, 0, .52);
+	background-color: rgba(0, 0, 0, .6);
 	display: flex;
 	justify-content: center;
 	align-items: flex-start;
@@ -24,6 +24,11 @@
 	to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes authorizingDialogBouncedOut {
+	from { opacity: 1; transform: scale(1); }
+	to { opacity: 0; transform: scale(0); }
+}
+
 .github1s-authorizing-dialog {
 	color: #ccc;
 	font-family: Inter, sans-serif;
@@ -37,25 +42,40 @@
 	position: absolute;
 	margin-top: 20vh;
 	animation-name: authorizingDialogBouncedIn;
-	animation-duration: 0.1s;
-	transform: scale(0);
-	transition: transform .1s;
+	animation-duration: 0.2s;
+	animation-iteration-count: 1;
 }
 
-.github1s-authorizing-dialog.visible {
-	transform: scale(1);
+.github1s-authorizing-dialog.exiting {
+	animation-name: authorizingDialogBouncedOut;
 }
 
-.github1s-authorizing-dialog .link {
+.github1s-authorizing-dialog a.link {
 	color: #1890ff;
 }
 
-.github1s-authorizing-dialog .link:hover {
+.github1s-authorizing-dialog a.link:hover {
 	color: #40a9ff;
 }
 
-.github1s-authorizing-dialog .link:active {
+.github1s-authorizing-dialog a.link:active {
 	color: #096dd9;
+}
+
+.github1s-authorizing-dialog [disabled] {
+	opacity: 0.7;
+	cursor: not-allowed !important;
+}
+
+.github1s-authorizing-dialog .error-message {
+	text-align: left;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ff4d4f;
+}
+
+.github1s-authorizing-dialog .error-message .link {
+	margin-left: 4px;
 }
 
 .github1s-authorizing-dialog .close-button {
@@ -86,6 +106,7 @@
 }
 
 .github1s-authorizing-dialog .header-title {
+	color: #fff;
 	font-size: 23px;
 	margin-bottom: 20px;
 }
@@ -106,7 +127,7 @@
 	line-height: 20px;
 }
 
-.github1s-authorizing-dialog .feature-item a {
+.github1s-authorizing-dialog li.feature-item a {
 	color: #ccc;
 	text-decoration: none;
 }
@@ -150,12 +171,12 @@
 	cursor: pointer;
 }
 
-.github1s-authorizing-dialog .authorizing-button:hover {
+.github1s-authorizing-dialog .authorizing-button:not([disabled]):hover {
 	transform: scale(1.03);
 	box-shadow: rgba(255, 255, 255, 0.25) 0px 2px 8px;
 }
 
-.github1s-authorizing-dialog .authorizing-button:active {
+.github1s-authorizing-dialog .authorizing-button:not([disabled]):active {
 	transform: scale(0.98);
 }
 
@@ -226,11 +247,11 @@
 	cursor: pointer;
 }
 
-.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:hover {
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:not([disabled]):hover {
 	background-color: #1177bb;
 }
 
-.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:active {
+.github1s-authorizing-dialog .authorizing-methods .input-oauth-token-form .submit-button:not([disabled]):active {
 	color: #ccc;
 	background-color: #0867ab;
 }
