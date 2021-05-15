@@ -34,7 +34,8 @@ module.exports = async (req, res) => {
 	const code = req.query.code;
 	const sendResponseHtml = (status, data) => {
 		res.status(status);
-		res.send(getResponseHtml(JSON.stringify(data)));
+		const responseData = { type: 'authorizing', payload: data };
+		res.send(getResponseHtml(JSON.stringify(responseData)));
 	};
 
 	if (!code) {

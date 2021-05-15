@@ -535,7 +535,7 @@ class WelcomePage extends Disposable {
 	}
 
 	getGitHubTokenStatus() {
-		return this.commandService.executeCommand('github1s.validate-token', true);
+		return this.commandService.executeCommand('github1s.validate-token', '', true);
 	}
 
 	refreshGitHubTokenStatus(container: HTMLElement) {
