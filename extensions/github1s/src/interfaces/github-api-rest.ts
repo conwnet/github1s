@@ -74,7 +74,7 @@ export const readGitHubFile = (
 export const validateToken = (token: string) => {
 	const authHeaders = token ? { Authorization: `token ${token}` } : {};
 	return self
-		.fetch(`https://api.github.com`, { headers: { ...authHeaders } })
+		.fetch(`https://api.github.com/`, { headers: { ...authHeaders } })
 		.then((response) => ({
 			token: !!token, // if the token is not empty
 			valid: response.status !== 401 ? true : false, // if the request is valid
