@@ -119,15 +119,11 @@ export const commandAuthorizingGithub = async (
 	silent: boolean = false
 ): Promise<string | void> => {
 	// vscode-web-github1s/src/vs/github1s/authorizing-github.ts
+	// retry with authorizing overlay if browser blocked opening authorizing window
 	const data: AuthMessageData = await vscode.commands.executeCommand(
-		'github1s.vscode.get-github-access-token'
+		'github1s.vscode.get-github-access-token',
+		true
 	);
-
-	// if we can't open the authorizing window (the browser may block it),
-	// just try open the overlay on the page and try again
-	if ('error' in data && data.error === 'unable_to_open_window') {
-		return commandAuthorizingGithubWithOverlay();
-	}
 
 	if ('access_token' in data) {
 		// update the access_token into extension context

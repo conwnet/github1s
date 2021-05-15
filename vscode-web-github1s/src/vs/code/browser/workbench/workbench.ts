@@ -26,7 +26,7 @@ import { renderNotification } from 'vs/github1s/notification';
 // eslint-disable-next-line
 import { getGitHubAccessToken } from 'vs/github1s/authorizing-github';
 // eslint-disable-next-line
-import { getGitHubAccessTokenWithOverlay } from 'vs/github1s/authorizing-overlay';
+import { getGitHubAccessTokenWithOverlay, hideAuthorizingOverlay } from 'vs/github1s/authorizing-overlay';
 
 // custom vs code commands defined by github1s
 const getGitHub1sCustomCommands: () => {
@@ -37,6 +37,7 @@ const getGitHub1sCustomCommands: () => {
 	{ id: 'github1s.vscode.replace-browser-url', handler: replaceBrowserUrl },
 	{ id: 'github1s.vscode.get-github-access-token', handler: getGitHubAccessToken },
 	{ id: 'github1s.vscode.get-github-access-token-with-overlay', handler: getGitHubAccessTokenWithOverlay },
+	{ id: 'github1s.vscode.hide-authorizing-overlay', handler: hideAuthorizingOverlay },
 ];
 // above codes are changed by github1s
 
