@@ -108,6 +108,10 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	}
 	if (response.status === 401) {
 		return response.json().then((data) => {
+			// current token is invalid
+			if (data.message === 'Bad credentials') {
+				vscode.commands.executeCommand('github1s.views.settings.focus');
+			}
 			throw new RequestInvalidTokenError(data.message, token);
 		});
 	}
