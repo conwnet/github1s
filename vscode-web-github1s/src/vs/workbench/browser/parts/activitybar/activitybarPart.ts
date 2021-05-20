@@ -540,14 +540,14 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 	// below codes are changed by github1s
 	private createHomeBar(icon: Codicon): void {
 		this.homeBarContainer = document.createElement('div');
-		this.homeBarContainer.setAttribute('aria-label', localize('homeIndicator', "Home"));
+		this.homeBarContainer.setAttribute('aria-label', localize('homeIndicator', "Open on GitHub"));
 		this.homeBarContainer.setAttribute('role', 'toolbar');
 		this.homeBarContainer.classList.add('home-bar');
 
 		this.homeBar = this._register(new ActionBar(this.homeBarContainer, {
 			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme)),
 			orientation: ActionsOrientation.VERTICAL,
-			ariaLabel: localize('home', "Home"),
+			ariaLabel: localize('home', "Open on GitHub"),
 			animated: false,
 			preventLoopNavigation: true,
 		}));
@@ -558,7 +558,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 
 		this.homeBar.push(this._register(new ActivityAction({
 			id: 'workbench.actions.home',
-			name: localize('home', "Home"),
+			name: localize('home', "Open on GitHub"),
 			cssClass: icon.classNames
 		})));
 
