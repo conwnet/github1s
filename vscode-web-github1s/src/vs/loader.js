@@ -698,10 +698,10 @@ var AMDLoader;
                 }).then(function (text) {
                     text = text + "\n//# sourceURL=" + scriptSrc;
                     var func = (trustedTypesPolicy
-						// below codes are changed by github1s
-						// fix error in webworker for old browsers
+                        // below codes are changed by github1s
+                        // fix error in webworker for old browsers
                         ? self.eval(trustedTypesPolicy.createScript('', text).toString())
-						// above codes are changed by github1s
+                        // above codes are changed by github1s
                         : new Function(text));
                     func.call(self);
                     callback();
