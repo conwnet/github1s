@@ -9,6 +9,10 @@
       "destination": "/api/github-auth-callback"
     },
     {
+      "source": "/static/(.*)",
+      "destination": "/api/static-fallback"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
