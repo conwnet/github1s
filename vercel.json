@@ -1,31 +1,45 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/sourcegraph",
-      "dest": "https://sourcegraph.com/.api/graphql"
+      "source": "/api/sourcegraph",
+      "destination": "https://sourcegraph.com/.api/graphql"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1",
-      "headers": {
-        "Cache-Control": "max-age=604800"
-      }
+      "source": "/api/github-auth-callback",
+      "destination": "/api/github-auth-callback"
     },
     {
-      "src": "/favicon(-dark|-light)?.ico",
-      "dest": "/favicon$1.ico"
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, immutable"
+        }
+      ]
     },
     {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
+      "source": "/favicon(-dark|-light)?.ico",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
     },
     {
-      "src": "/api/github-auth-callback",
-      "dest": "/api/github-auth-callback"
-    },
-    {
-      "src": ".*",
-      "dest": "/index.html"
+      "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
     }
   ]
 }
