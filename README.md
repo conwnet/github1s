@@ -164,6 +164,11 @@ The continued development and maintenance of GitHub1s is made possible by these 
 - [github-code-viewer](https://microsoftedge.microsoft.com/addons/detail/githubcodeviewer/jaaaapanahkknbgdbglnlchbjfhhjlpi) ([febaoshan/edge-extensions-github-code-viewer](https://github.com/febaoshan/edge-extensions-github-code-viewer))
 - [Github Web IDE](https://microsoftedge.microsoft.com/addons/detail/akjbkjciknacicbnkfjbnlaeednpadcf) ([zvizvi/Github-Web-IDE](https://github.com/zvizvi/Github-Web-IDE))
 
+### Safari Extension
+
+- [GitHub1s-For-Safari-Extension](https://github.com/code4you2021/GitHub1s-For-Safari-Extension) ([code4you2021/GitHub1s-For-Safari-Extension](https://github.com/code4you2021/GitHub1s-For-Safari-Extension))
+
+
 ### Tampermonkey scripts
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
