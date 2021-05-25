@@ -166,8 +166,7 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 ### Safari Extension
 
-- [GitHub1s-For-Safari-Extension](https://github.com/code4you2021/GitHub1s-For-Safari-Extension) ([code4you2021/GitHub1s-For-Safari-Extension](https://github.com/code4you2021/GitHub1s-For-Safari-Extension))
-
+- GitHub1s-For-Safari-Extension ([code4you2021/GitHub1s-For-Safari-Extension](https://github.com/code4you2021/GitHub1s-For-Safari-Extension))
 
 ### Tampermonkey scripts
 
