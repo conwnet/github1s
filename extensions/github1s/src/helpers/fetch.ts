@@ -59,9 +59,12 @@ export const getFetchOptions = (forceUpdate?: boolean): RequestInit => {
 
 const cache = new Map();
 
+const isGitHubApi = (url: string) => url.startsWith('https://api.github.com/');
+
 export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 	const token = getOAuthToken();
-	const authHeaders = token ? { Authorization: `token ${token}` } : {};
+	const authHeaders =
+		token && isGitHubApi(url) ? { Authorization: `token ${token}` } : {};
 	const customHeaders = options && 'headers' in options ? options.headers : {};
 	/**
 	 * We are reusing the same values from the https://developer.mozilla.org/en-US/docs/Web/API/Request/cache.
@@ -92,12 +95,23 @@ export const fetch = reuseable(async (url: string, options?: RequestInit) => {
 		return cache.get(url);
 	}
 	if (response.status === 403) {
+		// if there is no token saved and the rate limit exceeded,
+		// open the authorizing overly for requesting a access token
+		if (!token && isGitHubApi(url)) {
+			vscode.commands.executeCommand(
+				'github1s.authorizing-github-with-overlay'
+			);
+		}
 		return response.json().then((data) => {
 			throw new RequestRateLimitError(data.message, token);
 		});
 	}
 	if (response.status === 401) {
 		return response.json().then((data) => {
+			// current token is invalid
+			if (data.message?.includes('Bad credentials')) {
+				vscode.commands.executeCommand('github1s.views.settings.focus');
+			}
 			throw new RequestInvalidTokenError(data.message, token);
 		});
 	}

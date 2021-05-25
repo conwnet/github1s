@@ -1,6 +1,6 @@
 {
   "name": "@github1s/vscode-web",
-  "version": "0.1.2",
+  "version": "0.1.8",
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
@@ -38,6 +38,7 @@
     "xterm-addon-webgl": "0.10.0-beta.1"
   },
   "devDependencies": {
+    "@types/trusted-types": "^2.0.0",
     "npm-run-all": "^4.1.5"
   }
 }

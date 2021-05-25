@@ -515,7 +515,7 @@ class WelcomePage extends Disposable {
 	registerGitHub1sListeners(container: HTMLElement) {
 		container.querySelector('.refresh-button')?.addEventListener('click', () => this.refreshGitHubTokenStatus(container));
 		container.querySelector('.create-new-token')?.addEventListener('click', () => window?.open('https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s'));
-		container.querySelector('.update-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.update-token').then(() => this.refreshGitHubTokenStatus(container)));
+		container.querySelector('.update-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.authorizing-github-with-overlay').then(() => this.refreshGitHubTokenStatus(container)));
 		container.querySelector('.clear-oauth-token')?.addEventListener('click', () => this.commandService.executeCommand('github1s.clear-token').then(() => this.refreshGitHubTokenStatus(container)));
 	}
 
@@ -535,7 +535,7 @@ class WelcomePage extends Disposable {
 	}
 
 	getGitHubTokenStatus() {
-		return this.commandService.executeCommand('github1s.validate-token', true);
+		return this.commandService.executeCommand('github1s.validate-token', '', true);
 	}
 
 	refreshGitHubTokenStatus(container: HTMLElement) {
