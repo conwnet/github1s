@@ -11,6 +11,7 @@ import { GitHub1sTextSearchProvider } from './textSearchProvider';
 import { GitHub1sSubmoduleDecorationProvider } from './submoduleDecorationProvider';
 import { GitHub1sChangedFileDecorationProvider } from './changedFileDecorationProvider';
 import { GitHub1sSourceControlDecorationProvider } from './sourceControlDecorationProvider';
+import { GitHub1sDefinitionProvider } from './definitionProvider';
 
 export const fileSystemProvider = new GitHub1sFileSystemProvider();
 export const fileSearchProvider = new GitHub1sFileSearchProvider(
@@ -22,6 +23,7 @@ export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvid
 );
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
+export const definitionProvider = new GitHub1sDefinitionProvider();
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
 export const emptyFileUri = vscode.Uri.parse('').with({
@@ -52,6 +54,13 @@ export const registerVSCodeProviders = () => {
 		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider),
 		vscode.window.registerFileDecorationProvider(
 			sourceControlDecorationProvider
+		),
+
+		vscode.languages.registerDefinitionProvider(
+			{
+				scheme: GitHub1sDefinitionProvider.scheme,
+			},
+			definitionProvider
 		),
 
 		// provider a readonly empty file for diff

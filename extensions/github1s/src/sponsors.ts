@@ -4,21 +4,26 @@
  */
 
 import * as vscode from 'vscode';
+import router from '@/router';
 
-const sponsors = [
-	{
-		name: 'Vercel',
-		link: 'https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss',
-		description: 'Develop. Preview. Ship.',
-	},
-	{
-		name: 'Sourcegraph',
-		link: 'https://sourcegraph.com',
-		description: 'Universal code search',
-	},
-];
+const resolveSponsors = async () => {
+	const { owner, repo, ref } = await router.getState();
 
-export const showSponsors = () => {
+	return [
+		{
+			name: 'Vercel',
+			link: 'https://vercel.com/?utm_source=vscode-github1s&utm_campaign=oss',
+			description: 'Develop. Preview. Ship.',
+		},
+		{
+			name: 'Sourcegraph',
+			link: `https://sourcegraph.com/github.com/${owner}/${repo}@${ref}`,
+			description: 'Universal code search',
+		},
+	];
+};
+
+export const showSponsors = async () => {
 	const titleItem = vscode.window.createStatusBarItem(
 		vscode.StatusBarAlignment.Left,
 		0
@@ -26,7 +31,7 @@ export const showSponsors = () => {
 	titleItem.text = '  $(heart) Sponsors:';
 	titleItem.show();
 
-	sponsors.forEach((sponsor) => {
+	(await resolveSponsors()).forEach((sponsor) => {
 		const sponsorItem = vscode.window.createStatusBarItem(
 			vscode.StatusBarAlignment.Left,
 			0
