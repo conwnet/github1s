@@ -146,8 +146,8 @@ const searchDefinitionsQuery = gql`
 	}
 `;
 
-// get symbol definitions base search
-const getSearchDefinitions = async (
+// get symbol definitions base on search
+export const getSearchDefinitions = async (
 	owner: string,
 	repo: string,
 	ref: string,

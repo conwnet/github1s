@@ -4,6 +4,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getSourcegraphUrl } from '@/helpers/urls';
 
 export const showSourcegraphSearchMessage = (() => {
 	let alreadyShown = false;
@@ -35,7 +36,7 @@ export const showSourcegraphSymbolMessage = (() => {
 			return;
 		}
 		alreadyShown = true;
-		const url = `https://sourcegraph.com/github.com/${owner}/${repo}@${ref}/-/blob${path}#L${line}:${character}`;
+		const url = getSourcegraphUrl(owner, repo, ref, path, line, character);
 		vscode.window.showInformationMessage(
 			`The results is provided by [Sourcegraph](${url})`
 		);
