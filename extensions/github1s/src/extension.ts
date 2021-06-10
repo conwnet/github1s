@@ -17,7 +17,7 @@ import { registerEventListeners } from '@/listeners';
 import { PageType } from './router/types';
 
 export async function activate(context: vscode.ExtensionContext) {
-	const browserUrl = (await await vscode.commands.executeCommand(
+	const browserUrl = (await vscode.commands.executeCommand(
 		'github1s.vscode.get-browser-url'
 	)) as string;
 
@@ -40,17 +40,37 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// sponsors in Status Bar
 	showSponsors();
-	await showGitpod();
+	showGitpod();
 
-	// open corresponding editor if there is a filePath specified in browser url
-	const { filePath, pageType } = await router.getState();
-	if (filePath && [PageType.TREE, PageType.BLOB].includes(pageType)) {
+	// initialize the VSCode's state
+	initialVSCodeState();
+}
+
+// initialize the VSCode's state according to the router url
+const initialVSCodeState = async () => {
+	const routerState = await router.getState();
+	const { filePath, pageType } = routerState;
+	const scheme = GitHub1sFileSystemProvider.scheme;
+
+	if (filePath && pageType === PageType.TREE) {
 		vscode.commands.executeCommand(
-			pageType === PageType.TREE ? 'revealInExplorer' : 'vscode.open',
-			vscode.Uri.parse('').with({
-				scheme: GitHub1sFileSystemProvider.scheme,
-				path: filePath,
-			})
+			'revealInExplorer',
+			vscode.Uri.parse('').with({ scheme, path: filePath })
+		);
+	} else if (filePath && pageType === PageType.BLOB) {
+		const { startLineNumber, endLineNumber } = routerState;
+		const start = new vscode.Position(startLineNumber - 1, 0);
+		const end = new vscode.Position(endLineNumber - 1, 999999);
+		const documentShowOptions: vscode.TextDocumentShowOptions = startLineNumber
+			? { selection: new vscode.Range(start, end) }
+			: {};
+
+		// TODO: the selection of the opening file may be cleared
+		// when editor try to restore previous state in the same file
+		vscode.commands.executeCommand(
+			'vscode.open',
+			vscode.Uri.parse('').with({ scheme, path: filePath }),
+			documentShowOptions
 		);
 	} else if (pageType === PageType.PULL_LIST) {
 		vscode.commands.executeCommand('github1s.views.pull-request-list.focus');
@@ -59,4 +79,4 @@ export async function activate(context: vscode.ExtensionContext) {
 	} else if ([PageType.PULL, PageType.COMMIT].includes(pageType)) {
 		vscode.commands.executeCommand('workbench.scm.focus');
 	}
-}
+};

@@ -42,6 +42,17 @@ export const throttle = <T extends (...args: any[]) => any>(
 	};
 };
 
+export const debounce = <T extends (...args: any[]) => any>(
+	func: T,
+	wait: number
+) => {
+	let timer = null;
+	return function (...args: Parameters<T>): void {
+		timer && clearTimeout(timer);
+		timer = setTimeout(() => func.call(this, ...args), timer);
+	};
+};
+
 // debounce an async func. once an async func canceled, it throws a exception
 export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(
 	func: T,
