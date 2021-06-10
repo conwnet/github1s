@@ -52,6 +52,11 @@ export interface RouterState {
 	// current file path
 	filePath?: string;
 
+	// the one-based line numbers specified which lines should focus
+	// after opening the file, only exists when pageType is `BLOB`
+	startLineNumber?: number;
+	endLineNumber?: number;
+
 	// only exists when the page type is PULL
 	pullNumber?: number;
 

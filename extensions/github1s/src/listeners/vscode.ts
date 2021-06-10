@@ -9,6 +9,7 @@ import { PageType } from '@/router/types';
 import { setVSCodeContext } from '@/helpers/vscode';
 import { getChangedFileFromSourceControl } from '@/commands/editor';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
+import { debounce } from '@/helpers/func';
 
 const handleRouterOnActiveEditorChange = async (
 	editor: vscode.TextEditor | undefined
@@ -33,12 +34,12 @@ const handleRouterOnActiveEditorChange = async (
 			ref.toUpperCase() === 'HEAD'
 				? `/${owner}/${repo}`
 				: `/${owner}/${repo}/tree/${ref}`;
-		router.history.replace(browserPath);
+		router.history.replace({ pathname: browserPath, hash: '' });
 		return;
 	}
 
 	const browserPath = `/${owner}/${repo}/blob/${ref}${activeFileUri.path}`;
-	router.history.replace(browserPath);
+	router.history.replace({ pathname: browserPath, hash: '' });
 };
 
 // if the `Open Changes` Button should show in editor title
@@ -60,10 +61,51 @@ const handleGutterBlameOpeningContextOnActiveEditorChange = async () => {
 	return setVSCodeContext('github1s.context.gutterBlameOpening', false);
 };
 
+// get the line anchor hash (`#L27-L39`) from the editor.selection
+const getAnchorHashFromSelection = (selection: vscode.Selection) => {
+	const { start, end } = selection;
+
+	// the cursor move to somewhere but nothing is selected
+	if (start.line === end.line && start.character === end.character) {
+		return '';
+	}
+	if (start.line === end.line) {
+		return `#L${start.line + 1}`;
+	}
+	return `#L${start.line + 1}-L${end.line + 1}`;
+};
+
+// add the line number anchor when user selection lines in a editor
+const handleRouterOnTextEditorSelectionChange = async (
+	editor: vscode.TextEditor
+) => {
+	const { owner, repo, ref, pageType } = await router.getState();
+
+	// only add the line number anchor when pageType is PageType.BLOB
+	if (pageType !== PageType.BLOB || !editor.selection) {
+		return;
+	}
+
+	const activeFileUri = editor?.document.uri;
+	const anchorText = getAnchorHashFromSelection(editor.selection);
+	const browserPath = `/${owner}/${repo}/blob/${ref}${activeFileUri.path}`;
+
+	router.history.replace({ pathname: browserPath, hash: anchorText });
+};
+
 export const registerVSCodeEventListeners = () => {
-	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		handleRouterOnActiveEditorChange(editor);
 		handleOpenChangesContextOnActiveEditorChange(editor);
 		handleGutterBlameOpeningContextOnActiveEditorChange();
+	});
+
+	// debounce to update the browser url
+	const debouncedSelectionChangeRouterHandler = debounce(
+		handleRouterOnTextEditorSelectionChange,
+		100
+	);
+	vscode.window.onDidChangeTextEditorSelection((event) => {
+		debouncedSelectionChangeRouterHandler(event.textEditor);
 	});
 };
