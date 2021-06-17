@@ -1,5 +1,5 @@
 /**
- * @file Sourcegraph definition api
+ * @file Sourcegraph reference api
  * @author netcon
  */
 
@@ -7,7 +7,7 @@ import { gql } from '@apollo/client/core';
 import { sourcegraphClient } from './common';
 import { getSymbolPositions } from './position';
 
-export interface SymbolDefinition {
+export interface SymbolReference {
 	precise: boolean;
 	owner: string;
 	repo: string;
@@ -25,7 +25,7 @@ export interface SymbolDefinition {
 	};
 }
 
-const LSIFDefinitionsQuery = gql`
+const LSIFReferencesQuery = gql`
 	query(
 		$repository: String!
 		$ref: String!
@@ -37,7 +37,7 @@ const LSIFDefinitionsQuery = gql`
 			commit(rev: $ref) {
 				blob(path: $path) {
 					lsif {
-						definitions(line: $line, character: $character) {
+						references(line: $line, character: $character) {
 							nodes {
 								resource {
 									path
@@ -67,18 +67,18 @@ const LSIFDefinitionsQuery = gql`
 	}
 `;
 
-// find definitions with Sourcegraph LSIF
+// find references with Sourcegraph LSIF
 // https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence
-const getLSIFDefinitions = async (
+const getLSIFReferences = async (
 	owner: string,
 	repo: string,
 	ref: string,
 	path: string,
 	line: number,
 	character: number
-): Promise<SymbolDefinition[]> => {
+): Promise<SymbolReference[]> => {
 	const response = await sourcegraphClient.query({
-		query: LSIFDefinitionsQuery,
+		query: LSIFReferencesQuery,
 		variables: {
 			repository: `github.com/${owner}/${repo}`,
 			ref,
@@ -87,9 +87,9 @@ const getLSIFDefinitions = async (
 			character,
 		},
 	});
-	const definitionNodes =
-		response?.data?.repository?.commit?.blob?.lsif?.definitions?.nodes;
-	return (definitionNodes || []).map(({ resource, range }) => {
+	const referenceNodes =
+		response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
+	return (referenceNodes || []).map(({ resource, range }) => {
 		const [owner, repo] = resource.repository.name
 			.split('/')
 			.filter(Boolean)
@@ -105,7 +105,7 @@ const getLSIFDefinitions = async (
 	});
 };
 
-export const getSymbolDefinitions = (
+export const getSymbolReferences = (
 	owner: string,
 	repo: string,
 	ref: string,
@@ -113,12 +113,12 @@ export const getSymbolDefinitions = (
 	line: number,
 	character: number,
 	symbol: string
-): Promise<SymbolDefinition[]> => {
-	// if failed to find definitions from LSIF,
-	// fallback to search-based definitions, using
+): Promise<SymbolReference[]> => {
+	// if failed to find references from LSIF,
+	// fallback to search-based references, using
 	// two promise instead of `await` to request in
 	// parallel for getting result as soon as possible
-	const LSIFDefinitionsPromise = getLSIFDefinitions(
+	const LSIFReferencesPromise = getLSIFReferences(
 		owner,
 		repo,
 		ref,
@@ -126,12 +126,12 @@ export const getSymbolDefinitions = (
 		line,
 		character
 	);
-	const searchDefinitionsPromise = getSymbolPositions(owner, repo, ref, symbol);
+	const searchReferencesPromise = getSymbolPositions(owner, repo, ref, symbol);
 
-	return LSIFDefinitionsPromise.then((LSIFDefinitions) => {
-		if (LSIFDefinitions.length) {
-			return LSIFDefinitions;
+	return LSIFReferencesPromise.then((LSIFReferences) => {
+		if (LSIFReferences.length) {
+			return LSIFReferences;
 		}
-		return searchDefinitionsPromise as Promise<SymbolDefinition[]>;
+		return searchReferencesPromise as Promise<SymbolReference[]>;
 	});
 };
