@@ -6,21 +6,21 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { getSymbolHover, SymbolHover } from '@/interfaces/sourcegraph/hover';
-import { getSearchDefinitions } from '@/interfaces/sourcegraph/definition';
+import { getSymbolPositions } from '@/interfaces/sourcegraph/position';
 import { getSourcegraphUrl } from '@/helpers/urls';
 
 const getSemanticMarkdownSuffix = (sourcegraphUrl: String) => `
 
 ---
 
-[SEMANTIC](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provide by [Sourcegraph](${sourcegraphUrl})
+[Semantic](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provided by [Sourcegraph](${sourcegraphUrl})
 `;
 
 const getSearchBasedMarkdownSuffix = (sourcegraphUrl: String) => `
 
 ---
 
-[SEARCH-BASED](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provide by [Sourcegraph](${sourcegraphUrl})
+[Search-based](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provided by [Sourcegraph](${sourcegraphUrl})
 `;
 
 export class GitHub1sHoverProvider implements vscode.HoverProvider {
@@ -32,7 +32,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider {
 	): Promise<SymbolHover | null> {
 		const authority = document.uri.authority || (await router.getAuthority());
 		const [owner, repo, ref] = authority.split('+').filter(Boolean);
-		const definitions = await getSearchDefinitions(owner, repo, ref, symbol);
+		const definitions = await getSymbolPositions(owner, repo, ref, symbol);
 
 		if (!definitions.length) {
 			return null;
