@@ -39,10 +39,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@github1s/vscode-web@0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.1.8.tgz#85305b867a86c8308e9200d0ac2fa8403b66377e"
-  integrity sha512-dOzlbpUL+pLqqb6DtH7WwVmlRqzSpY0NXOxbJCg5jHu8XsrLsV1cIRDcnmLk16EsNmeU2egtgPGZsYPhwL2feg==
+"@github1s/vscode-web@0.1.10":
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.1.10.tgz#65237bd929aa4426cbf10b28239444170b53cd03"
+  integrity sha512-q8xTuE1MlKyUsBtQG6+mpQKVF4cohKCbqvHoqiIDalCP+XFdeBTWvTMnHnn+x/36a+Ae+1dzMqQGxo1/kq9qOA==
   dependencies:
     iconv-lite-umd "0.6.8"
     jschardet "2.2.1"
@@ -938,9 +938,9 @@ get-stream@^5.0.0:
     pump "^3.0.0"
 
 glob-parent@^5.0.0, glob-parent@^5.1.0, glob-parent@~5.1.0:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.1.tgz#b6c1ef417c4e5663ea498f1c45afac6916bbc229"
-  integrity sha512-FnI+VGOpnlGHWZxthPGR+QhR78fuiK0sNLkHQv+bL9fQi57lNNdquIbna/WrfROrolq8GK5Ek6BiMwqL/voRYQ==
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
+  integrity sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==
   dependencies:
     is-glob "^4.0.1"
 

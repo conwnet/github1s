@@ -17,7 +17,7 @@ import {
 	Uri,
 } from 'vscode';
 import router from '@/router';
-import { getTextSearchResults } from '@/interfaces/sourcegraph-api';
+import { getTextSearchResults } from '@/interfaces/sourcegraph/search';
 import { showSourcegraphSearchMessage } from '@/messages';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 

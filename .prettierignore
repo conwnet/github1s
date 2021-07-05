@@ -2,4 +2,5 @@ lib
 dist
 out
 node_modules
-**/src/vs/**
+vscode-web-github1s/src/vs
+vscode-web-github1s/extensions
