@@ -151,6 +151,7 @@ The continued development and maintenance of GitHub1s is made possible by these 
 - Github1s Extension ([Darkempire78/GitHub1s-Extension](https://github.com/Darkempire78/GitHub1s-Extension))
 - [Github Web IDE](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe) ([zvizvi/Github-Web-IDE](https://github.com/zvizvi/Github-Web-IDE))
 - [shortcut to github1s](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo) ([katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut))
+- [Github1s Shortut - Open source](https://github.com/Fauzdar1/Github1s) 
 
 ### Firefox Extensions
 
