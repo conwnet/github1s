@@ -84,19 +84,16 @@ declare module 'github1s' {
 		ref: string
 	}
 
-	interface TextSearchResult {
-		files: {
-			// we can set `scope` to marked that current
-			// result is referenced to another repository
-			scope?: ResourceScope
-			path: string;
-			ranges: Range[];
-		}[],
-		truncated: boolean;
+	interface CodeLocation {
+		// we can set `scope` to marked that current
+		// result is referenced to another repository
+		scope?: ResourceScope,
+		path: string;
+		ranges: Range[];
 	}
 
 	enum CodeReviewStatus {
-		Waiting = 'Waiting', // icon: 🟢
+		Opening = 'Opening', // icon: 🟢
 		Approved = 'Approved', // icon: ✅
 		Denied = 'Denied', // icon: ❎
 		Merged = 'Merged', // icon: 🟣
@@ -132,6 +129,9 @@ declare module 'github1s' {
 		commit: Commit;
 	}
 
+	// the string will be rendered use markdown format
+	type MarkdownString = string;
+
 	abstract class DataSourceProvider {
 		// if `recursive` is true, it should try to return all subtrees
 		provideDirectory(repo: string, ref: string, path: string, recursive: boolean): ReturnType<Directory[]>;
@@ -156,12 +156,18 @@ declare module 'github1s' {
 		provideCommit(repo: string, ref: string): ReturnType<Commit | null>;
 
 		// use `report` to populate search results gradually
-		provideTextSearchResults(repo: string, ref: string, query: string, options: CodeSearchOptions, report: (results: TextSearchResult) => void): ReturnType<{ limitHit: boolean }>;
+		provideTextSearchResults(repo: string, ref: string, query: string, options: CodeSearchOptions, report: (results: CodeLocation[]) => void): ReturnType<{ limitHit: boolean }>;
 
 		provideCodeReviews(repo: string, offset: number, limit: number): ReturnType<CodeReview[]>;
 
 		provideCodeReview(repo: string, id: number): ReturnType<CodeReview | null>;
 
 		provideFileBlameRanges(repo: string, ref: string, path: string): ReturnType<FileBlameRange[]>;
+
+		provideCodeDefinition(repo: string, ref: string, path: string, line: number, character: number): ReturnType<CodeLocation | CodeLocation[]>;
+
+		provideCodeReferences(repo: string, ref: string, path: string, line: number, character: number): ReturnType<CodeLocation[]>;
+
+		provideCodeHover(repo: string, ref: string, path: string, line: number, character: number): ReturnType<MarkdownString>;
 	}
 }
