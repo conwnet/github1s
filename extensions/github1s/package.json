@@ -429,6 +429,7 @@
     "p-finally": "^2.0.1",
     "process": "^0.11.10",
     "query-string": "^7.0.0",
+    "url": "^0.11.0",
     "webpack-cli": "^4.6.0"
   },
   "devDependencies": {
