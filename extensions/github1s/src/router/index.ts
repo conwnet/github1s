@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { History, createMemoryHistory } from 'history';
+import platformAdapterManager from '@/adapters/manager';
 import { Barrier } from '@/helpers/async';
 import { parseGitHubUrl } from './parser';
 import { EventEmitter } from './events';
@@ -27,9 +28,12 @@ export class Router extends EventEmitter<RouterState> {
 
 	// we should ensure the router has been initialized at first!
 	async initialize(browserUrl: string) {
+		const schema = vscode.workspace.workspaceFolders.length
+			? vscode.workspace.workspaceFolders[0].uri.scheme
+			: 'UNKNOWN';
+
 		const { path, query, fragment } = vscode.Uri.parse(browserUrl);
-		const targetPath =
-			path + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
+		const targetPath = path + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 		this.history.replace(targetPath);
 		this._currentStatePromise = parseGitHubUrl(targetPath);
 		this._previousStatePromise = this._currentStatePromise;
@@ -41,14 +45,8 @@ export class Router extends EventEmitter<RouterState> {
 			this._currentStatePromise = parseGitHubUrl(targetPath);
 
 			// sync path to browser
-			vscode.commands.executeCommand(
-				'github1s.vscode.replace-browser-url',
-				targetPath
-			);
-			this.notifyListeners(
-				await this._previousStatePromise,
-				await this._currentStatePromise
-			);
+			vscode.commands.executeCommand('github1s.vscode.replace-browser-url', targetPath);
+			this.notifyListeners(await this._previousStatePromise, await this._currentStatePromise);
 		});
 	}
 

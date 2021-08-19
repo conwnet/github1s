@@ -3,9 +3,9 @@
  * @author netcon
  */
 
+import { PageType, RouterState } from 'github1s';
 import { parsePath } from 'history';
 import repository from '@/repository';
-import { PageType, RouterState } from '../types';
 
 // try to find corresponding ref from branchNames or tagNames
 const findMatchedBranchOrTag = (branchOrTagNames: string[], pathParts: string[]): string => {
@@ -42,5 +42,5 @@ export const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const ref = await detectRefFormPathParts(pathParts);
 	const filePath = pathParts.slice(3).join('/').slice(ref.length);
 
-	return { pageType: PageType.TREE, owner, repo, ref, filePath };
+	return { type: PageType.TREE, repo, ref, filePath };
 };

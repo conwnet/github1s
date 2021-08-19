@@ -229,6 +229,16 @@ declare module 'github1s' {
 		buildCodeReviewPath(repo: string, codeReviewId: string): Promisable<string>;
 
 		// convert giving path to the external link (using for jumping back to origin platform)
-		buildExternalLink(path: string): Promise<string | null>;
+		buildExternalLink(path: string): Promisable<string | null>;
+	}
+
+	export interface PlatformAdapter {
+		// specify which schema of workspace should current adapter should work with
+		readonly schema: string;
+		// platform name, using for displaying text such as: `open on **GitHub**`
+		readonly name: string;
+
+		resolveDataSourceProvider(): Promisable<DataSourceProvider>;
+		resolveRouterParser(): Promisable<RouterParser>;
 	}
 }

@@ -8,9 +8,7 @@ import { GITHUB_OAUTH_TOKEN } from './constants';
 
 let extensionContext: vscode.ExtensionContext | null = null;
 
-export const setExtensionContext = (
-	_extensionContext: vscode.ExtensionContext
-) => {
+export const setExtensionContext = (_extensionContext: vscode.ExtensionContext) => {
 	extensionContext = _extensionContext;
 };
 

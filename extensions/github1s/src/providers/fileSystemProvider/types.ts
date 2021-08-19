@@ -44,14 +44,11 @@ export class Directory implements FileStat {
 		this.entries = null;
 		this.sha = options && 'sha' in options ? options.sha : '';
 		this.size = options && 'size' in options ? options.size : 0;
-		this.isSubmodule =
-			options && 'isSubmodule' in options ? options.isSubmodule : false;
+		this.isSubmodule = options && 'isSubmodule' in options ? options.isSubmodule : false;
 	}
 
 	getNameTypePairs(): [string, FileType][] {
-		return Array.from(
-			this.entries?.entries() || []
-		).map(([name, item]: [string, Entry]) => [
+		return Array.from(this.entries?.entries() || []).map(([name, item]: [string, Entry]) => [
 			name,
 			item instanceof Directory ? FileType.Directory : FileType.File,
 		]);

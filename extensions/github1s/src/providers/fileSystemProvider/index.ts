@@ -20,26 +20,14 @@ import { noop, trimStart } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
 import { apolloClient } from '@/interfaces/client';
-import {
-	githubObjectQuery,
-	isGraphQLEnabled,
-} from '@/interfaces/github-api-gql';
-import {
-	readGitHubDirectory,
-	readGitHubFile,
-} from '@/interfaces/github-api-rest';
+import { githubObjectQuery, isGraphQLEnabled } from '@/interfaces/github-api-gql';
+import { readGitHubDirectory, readGitHubFile } from '@/interfaces/github-api-rest';
 import { File, Directory, Entry, GitHubRESTEntry } from './types';
-import {
-	createEntry,
-	insertGitHubRESTEntryToDirectory,
-	insertGitHubGraphQLEntriesToDirectory,
-} from './util';
+import { createEntry, insertGitHubRESTEntryToDirectory, insertGitHubGraphQLEntriesToDirectory } from './util';
 
 const textDecoder = new TextDecoder();
 
-export class GitHub1sFileSystemProvider
-	implements FileSystemProvider, Disposable {
-	static scheme = 'github1s';
+export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposable {
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
 	private root: Map<string, Directory | File> = new Map();
@@ -59,10 +47,7 @@ export class GitHub1sFileSystemProvider
 		// if the authority of uri is empty, we should use `current authority`
 		const authority = uri.authority || (await router.getAuthority());
 		if (!this.root.has(authority)) {
-			this.root.set(
-				authority,
-				createEntry('tree', uri.with({ authority, path: '/' }), '')
-			);
+			this.root.set(authority, createEntry('tree', uri.with({ authority, path: '/' }), ''));
 		}
 		let entry = this.root.get(authority);
 		for (const part of parts) {
@@ -85,10 +70,7 @@ export class GitHub1sFileSystemProvider
 		return entry;
 	}
 
-	public async lookupAsDirectory(
-		uri: Uri,
-		silent: boolean
-	): Promise<Directory> {
+	public async lookupAsDirectory(uri: Uri, silent: boolean): Promise<Directory> {
 		const entry = await this.lookup(uri, silent);
 		if (entry instanceof Directory) {
 			return entry;
@@ -108,10 +90,7 @@ export class GitHub1sFileSystemProvider
 		}
 	}
 
-	watch(
-		uri: Uri,
-		options: { recursive: boolean; excludes: string[] }
-	): Disposable {
+	watch(uri: Uri, options: { recursive: boolean; excludes: string[] }): Disposable {
 		return new Disposable(noop);
 	}
 
@@ -157,40 +136,21 @@ export class GitHub1sFileSystemProvider
 			if (!directory.isSubmodule || directory.entries) {
 				return directory.getNameTypePairs() || [];
 			}
-			const parentRepositoryRoot = await this.lookupAsDirectory(
-				directory.uri.with({ path: '/' }),
-				false
-			);
-			if (
-				!parentRepositoryRoot.entries ||
-				!parentRepositoryRoot.entries.has('.gitmodules')
-			) {
+			const parentRepositoryRoot = await this.lookupAsDirectory(directory.uri.with({ path: '/' }), false);
+			if (!parentRepositoryRoot.entries || !parentRepositoryRoot.entries.has('.gitmodules')) {
 				throw FileSystemError.FileNotFound('.gitmodules can not be found');
 			}
 			const submodulesFileContent = textDecoder.decode(
-				await this.readFile(
-					Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules')
-				)
+				await this.readFile(Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules'))
 			);
 			// the path should declared in .gitmodules file
-			const submodulePath = trimStart(
-				Uri.joinPath(directory.uri, directory.name).path,
-				'/'
-			);
-			const gitmoduleData = parseGitmodules(submodulesFileContent).find(
-				(item) => item.path === submodulePath
-			);
+			const submodulePath = trimStart(Uri.joinPath(directory.uri, directory.name).path, '/');
+			const gitmoduleData = parseGitmodules(submodulesFileContent).find((item) => item.path === submodulePath);
 			if (!gitmoduleData) {
-				throw FileSystemError.FileNotFound(
-					`can't found corresponding declare in .gitmodules`
-				);
+				throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
 			}
-			const [submoduleOwner, submoduleRepo] = parseSubmoduleUrl(
-				gitmoduleData.url
-			);
-			const submoduleAuthority = `${submoduleOwner}+${submoduleRepo}+${
-				directory.sha || 'HEAD'
-			}`;
+			const [submoduleOwner, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
+			const submoduleAuthority = `${submoduleOwner}+${submoduleRepo}+${directory.sha || 'HEAD'}`;
 			directory.name = ''; // update the name field to '' to indicated it is an root directory
 			// update the uri field to indicated it is belong the `submodule repository`
 			directory.uri = directory.uri.with({
@@ -219,10 +179,7 @@ export class GitHub1sFileSystemProvider
 						variables: {
 							owner,
 							repo,
-							expression: `${ref}:${Uri.joinPath(
-								parent.uri,
-								parent.name
-							).path.slice(1)}`,
+							expression: `${ref}:${Uri.joinPath(parent.uri, parent.name).path.slice(1)}`,
 						},
 					})
 					.then((response) => {
@@ -234,12 +191,7 @@ export class GitHub1sFileSystemProvider
 						return parent.getNameTypePairs();
 					});
 			}
-			const data = await readGitHubDirectory(
-				owner,
-				repo,
-				ref,
-				Uri.joinPath(parent.uri, parent.name).path
-			);
+			const data = await readGitHubDirectory(owner, repo, ref, Uri.joinPath(parent.uri, parent.name).path);
 			// create new Entry to `parent.entries` only if `parent.entries.get(item.path)` is nil
 			for (const item of data.tree || []) {
 				insertGitHubRESTEntryToDirectory(item, parent);
@@ -272,11 +224,7 @@ export class GitHub1sFileSystemProvider
 		return;
 	}
 
-	async writeFile(
-		uri: Uri,
-		content: Uint8Array,
-		options: { create: boolean; overwrite: boolean }
-	): Promise<void> {
+	async writeFile(uri: Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
 		return;
 	}
 
@@ -284,19 +232,11 @@ export class GitHub1sFileSystemProvider
 		return;
 	}
 
-	async rename(
-		oldUri: Uri,
-		newUri: Uri,
-		options: { overwrite: boolean }
-	): Promise<void> {
+	async rename(oldUri: Uri, newUri: Uri, options: { overwrite: boolean }): Promise<void> {
 		return;
 	}
 
-	async copy?(
-		source: Uri,
-		destination: Uri,
-		options: { overwrite: boolean }
-	): Promise<void> {
+	async copy?(source: Uri, destination: Uri, options: { overwrite: boolean }): Promise<void> {
 		return;
 	}
 }

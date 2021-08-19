@@ -15,14 +15,10 @@ import { GitHub1sDefinitionProvider } from './definitionProvider';
 import { GitHub1sReferenceProvider } from './referenceProvider';
 import { GitHub1sHoverProvider } from './hoverProvider';
 
-export const fileSystemProvider = new GitHub1sFileSystemProvider();
-export const fileSearchProvider = new GitHub1sFileSearchProvider(
-	fileSystemProvider
-);
+export const fileSystemProvider = new GitHub1sFileSystemProvider({} as any);
+export const fileSearchProvider = new GitHub1sFileSearchProvider(fileSystemProvider);
 export const textSearchProvider = new GitHub1sTextSearchProvider();
-export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider(
-	fileSystemProvider
-);
+export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider(fileSystemProvider);
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
 export const definitionProvider = new GitHub1sDefinitionProvider();
@@ -38,37 +34,19 @@ export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
 
 	context.subscriptions.push(
-		vscode.workspace.registerFileSystemProvider(
-			GitHub1sFileSystemProvider.scheme,
-			fileSystemProvider,
-			{ isCaseSensitive: true, isReadonly: true }
-		),
-		vscode.workspace.registerFileSearchProvider(
-			GitHub1sFileSearchProvider.scheme,
-			fileSearchProvider
-		),
-		vscode.workspace.registerTextSearchProvider(
-			GitHub1sTextSearchProvider.scheme,
-			textSearchProvider
-		),
+		vscode.workspace.registerFileSystemProvider(GitHub1sFileSystemProvider.scheme, fileSystemProvider, {
+			isCaseSensitive: true,
+			isReadonly: true,
+		}),
+		vscode.workspace.registerFileSearchProvider(GitHub1sFileSearchProvider.scheme, fileSearchProvider),
+		vscode.workspace.registerTextSearchProvider(GitHub1sTextSearchProvider.scheme, textSearchProvider),
 		vscode.window.registerFileDecorationProvider(submoduleDecorationProvider),
 		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider),
-		vscode.window.registerFileDecorationProvider(
-			sourceControlDecorationProvider
-		),
+		vscode.window.registerFileDecorationProvider(sourceControlDecorationProvider),
 
-		vscode.languages.registerDefinitionProvider(
-			{ scheme: GitHub1sDefinitionProvider.scheme },
-			definitionProvider
-		),
-		vscode.languages.registerReferenceProvider(
-			{ scheme: GitHub1sReferenceProvider.scheme },
-			referenceProvider
-		),
-		vscode.languages.registerHoverProvider(
-			{ scheme: GitHub1sHoverProvider.scheme },
-			hoverProvider
-		),
+		vscode.languages.registerDefinitionProvider({ scheme: GitHub1sDefinitionProvider.scheme }, definitionProvider),
+		vscode.languages.registerReferenceProvider({ scheme: GitHub1sReferenceProvider.scheme }, referenceProvider),
+		vscode.languages.registerHoverProvider({ scheme: GitHub1sHoverProvider.scheme }, hoverProvider),
 
 		// provider a readonly empty file for diff
 		vscode.workspace.registerTextDocumentContentProvider(EMPTY_FILE_SCHEME, {

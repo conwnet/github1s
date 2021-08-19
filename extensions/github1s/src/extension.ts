@@ -14,12 +14,14 @@ import { showGitpod } from '@/gitpod';
 import router from '@/router';
 import { activateSourceControl } from '@/source-control';
 import { registerEventListeners } from '@/listeners';
+import { registerPlatformAdapters } from './adapters';
 import { PageType } from './router/types';
 
 export async function activate(context: vscode.ExtensionContext) {
-	const browserUrl = (await vscode.commands.executeCommand(
-		'github1s.vscode.get-browser-url'
-	)) as string;
+	const browserUrl = (await vscode.commands.executeCommand('github1s.vscode.get-browser-url')) as string;
+
+	// register platform adapters
+	registerPlatformAdapters();
 
 	// set the global context for convenient
 	setExtensionContext(context);
@@ -50,13 +52,10 @@ export async function activate(context: vscode.ExtensionContext) {
 const initialVSCodeState = async () => {
 	const routerState = await router.getState();
 	const { filePath, pageType } = routerState;
-	const scheme = GitHub1sFileSystemProvider.scheme;
+	const scheme = 'github1s';
 
 	if (filePath && pageType === PageType.TREE) {
-		vscode.commands.executeCommand(
-			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: filePath })
-		);
+		vscode.commands.executeCommand('revealInExplorer', vscode.Uri.parse('').with({ scheme, path: filePath }));
 	} else if (filePath && pageType === PageType.BLOB) {
 		const { startLineNumber, endLineNumber } = routerState;
 		const start = new vscode.Position(startLineNumber - 1, 0);

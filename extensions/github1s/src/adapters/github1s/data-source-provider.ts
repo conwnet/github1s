@@ -37,13 +37,8 @@ const encodeFilePath = (filePath: string): string => {
 export class GitHub1sDataSourceProvider implements DataSourceProvider {
 	private octokit = new Octokit();
 
-	async provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
-		const requestParams = {
-			ref,
-			recursive,
-			path: encodeFilePath(path),
-			...parseRepoFullName(repo),
-		};
+	async provideDirectory(repoFullName: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
+		const requestParams = { ref, recursive, path: encodeFilePath(path), ...parseRepoFullName(repoFullName) };
 		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
 		const parseTreeItem = (treeItem): DirectoryEntity => ({
 			path: treeItem.path,
@@ -57,10 +52,9 @@ export class GitHub1sDataSourceProvider implements DataSourceProvider {
 		};
 	}
 
-	provideFile(repoName: string, ref: string, path: string): Promisable<File> {
-		const { owner, repo } = parseRepoFullName(repoName);
-		const FETCH_URL = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${encodeFilePath(path)}`;
-		return fetch(FETCH_URL)
+	provideFile(repoFullName: string, ref: string, path: string): Promisable<File> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		return fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${encodeFilePath(path)}`)
 			.then((response) => response.arrayBuffer())
 			.then((buffer) => ({ content: buffer }));
 	}
