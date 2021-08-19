@@ -3,8 +3,7 @@
  * @author netcon
  */
 
-/* eslint-disable prettier/prettier */
-
+/* eslint-disable max-len */
 // prettier-ignore
 declare module 'github1s' {
 	type Promisable<T> = PromiseLike<T> | T;
@@ -15,21 +14,19 @@ declare module 'github1s' {
 		Link = 'Link',
 	}
 
+	type DirectoryEntity = (
+		{ type: FileType.Directory, path: string } | // for director or link
+		{ type: FileType.File, path: string, size?: number } // for a file
+	);
+
 	interface Directory {
-		path: string;
-		entries: {
-			path: string;
-			commitSha: string;
-			type: FileType;
-		}[];
-		// entries doesn't contains all results if `truncated` is true
+		entities: DirectoryEntity[];
+		// entities doesn't contains all results if `truncated` is true
 		truncated: boolean;
 	}
 
 	interface File {
-		path: string;
-		commitSha: string;
-		content: Uint8Array;
+		content: ArrayBuffer;
 	}
 
 	interface Branch {
@@ -131,7 +128,7 @@ declare module 'github1s' {
 
 	export interface DataSourceProvider {
 		// if `recursive` is true, it should try to return all subtrees
-		provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory[]>;
+		provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory>;
 
 		// the ref here may be a commitSha, branch, tag, or 'HEAD'
 		provideFile(repo: string, ref: string, path: string): Promisable<File>;

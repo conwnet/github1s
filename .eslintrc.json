@@ -8,6 +8,7 @@
   "extends": ["plugin:prettier/recommended"],
   "plugins": ["@typescript-eslint", "jsdoc"],
   "rules": {
+    "max-len": ["error", { "code": 120 }],
     "constructor-super": "warn",
     "curly": "warn",
     "eqeqeq": "warn",
