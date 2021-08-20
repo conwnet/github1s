@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import * as github1s from 'github1s';
+import * as github1s from '../types';
 
 export class GitHub1sRouterParser implements github1s.RouterParser {
 	parsePath(path: string): Promise<github1s.RouterState> {

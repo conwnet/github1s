@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import { DataSourceProvider, PlatformAdapter, Promisable, RouterParser } from 'github1s';
+import { DataSourceProvider, PlatformAdapter, Promisable, RouterParser } from '../types';
 import { GitHub1sDataSourceProvider } from './data-source-provider';
 import { GitHub1sRouterParser } from './router-parser';
 

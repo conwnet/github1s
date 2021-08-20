@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import { PageType, RouterState } from 'github1s';
+import { PageType, RouterState } from '@/adapters/types';
 import { parsePath } from 'history';
 import { parseTreeUrl } from './tree';
 import { parseBlobUrl } from './blob';

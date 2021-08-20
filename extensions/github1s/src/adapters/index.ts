@@ -3,9 +3,9 @@
  * @author netcon
  */
 
-import platformAdapterManager from '@/adapters/manager';
-import { GitHub1sPlatformAdapter } from '@/adapters/github1s';
+import platformAdapterManager from './manager';
+import { GitHub1sPlatformAdapter } from './github1s';
 
-export const registerPlatformAdapters = (): void => {
-	platformAdapterManager.registerAdapter(new GitHub1sPlatformAdapter());
+export const registerPlatformAdapters = async (): Promise<void> => {
+	await platformAdapterManager.registerAdapter(new GitHub1sPlatformAdapter());
 };

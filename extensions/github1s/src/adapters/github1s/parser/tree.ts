@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import { PageType, RouterState } from 'github1s';
+import { PageType, RouterState } from '../../types';
 import { parsePath } from 'history';
 import repository from '@/repository';
 

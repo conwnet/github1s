@@ -4,7 +4,7 @@
  */
 
 import { parsePath } from 'history';
-import { RouterState, PageType } from '../types';
+import { RouterState, PageType } from '../../types';
 
 export const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname.split('/').filter(Boolean);

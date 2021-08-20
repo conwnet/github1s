@@ -19,7 +19,8 @@ import {
 	FileType,
 	Promisable,
 	Tag,
-} from 'github1s';
+} from '../types';
+(self as any).global = self;
 import { Octokit } from '@octokit/core';
 
 const parseRepoFullName = (repoFullName: string) => {

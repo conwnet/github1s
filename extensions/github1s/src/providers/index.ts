@@ -15,7 +15,7 @@ import { GitHub1sDefinitionProvider } from './definitionProvider';
 import { GitHub1sReferenceProvider } from './referenceProvider';
 import { GitHub1sHoverProvider } from './hoverProvider';
 
-export const fileSystemProvider = new GitHub1sFileSystemProvider({} as any);
+export const fileSystemProvider = new GitHub1sFileSystemProvider();
 export const fileSearchProvider = new GitHub1sFileSearchProvider(fileSystemProvider);
 export const textSearchProvider = new GitHub1sTextSearchProvider();
 export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider(fileSystemProvider);
