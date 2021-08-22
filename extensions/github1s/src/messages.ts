@@ -38,7 +38,7 @@ export const showSourcegraphSymbolMessage = (() => {
 		alreadyShown = true;
 		const url = getSourcegraphUrl(owner, repo, ref, path, line, character);
 		vscode.window.showInformationMessage(
-			`The results is provided by [Sourcegraph](${url})`
+			`The results are provided by [Sourcegraph](${url})`
 		);
 	};
 })();
