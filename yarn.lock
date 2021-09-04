@@ -39,10 +39,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@github1s/vscode-web@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.2.0.tgz#15484bf69ba3d06beb95a3b68548a8837adc9122"
-  integrity sha512-8y7aJLfSiVTonJ6nqsI/Is8LTPnwhjWYl6xaJFnQPuDHtPKNM0o0qdcVHpY3ZI884yut1yzJcRb6VaHtwVNwqA==
+"@github1s/vscode-web@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.2.1.tgz#513aa78f8f933e1c92e9d66203115cdacbb572ab"
+  integrity sha512-+TPlM0CNagT2mHCAaMXR/hVWB9pHxSZnEy+LsEMV4ZYWaVzfiCjqSc8SvDsabrLUWMSPfAeXRzo2Y1fodr5/kA==
   dependencies:
     iconv-lite-umd "0.6.8"
     jschardet "2.2.1"
