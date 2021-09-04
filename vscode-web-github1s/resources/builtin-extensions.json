@@ -32,6 +32,10 @@
     "path": "extensions/css-language-features"
   },
   {
+    "name": "dart",
+    "path": "extensions/dart"
+  },
+  {
     "name": "docker",
     "path": "extensions/docker"
   },
@@ -84,6 +88,10 @@
     "path": "extensions/ini"
   },
   {
+    "name": "ipynb",
+    "path": "extensions/ipynb"
+  },
+  {
     "name": "java",
     "path": "extensions/java"
   },
@@ -128,16 +136,16 @@
     "path": "extensions/markdown-language-features"
   },
   {
+    "name": "markdown-math",
+    "path": "extensions/markdown-math"
+  },
+  {
     "name": "merge-conflict",
     "path": "extensions/merge-conflict"
   },
   {
     "name": "microsoft-authentication",
     "path": "extensions/microsoft-authentication"
-  },
-  {
-    "name": "notebook-markdown-extensions",
-    "path": "extensions/notebook-markdown-extensions"
   },
   {
     "name": "npm",
