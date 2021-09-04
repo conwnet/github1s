@@ -33,7 +33,9 @@ import { updateColorThemeConfigurationSchemas, updateFileIconThemeConfigurationS
 import { ProductIconThemeData, DEFAULT_PRODUCT_ICON_THEME_ID } from 'vs/workbench/services/themes/browser/productIconThemeData';
 import { registerProductIconThemeSchemas } from 'vs/workbench/services/themes/common/productIconThemeSchema';
 import { ILogService } from 'vs/platform/log/common/log';
-import { isWeb } from 'vs/base/common/platform';
+// below codes are changed by github1s
+// import { isWeb } from 'vs/base/common/platform';
+// above codes are changed by github1s
 import { ColorScheme } from 'vs/platform/theme/common/theme';
 import { IHostColorSchemeService } from 'vs/workbench/services/themes/common/hostColorSchemeService';
 import { RunOnceScheduler, Sequencer } from 'vs/base/common/async';

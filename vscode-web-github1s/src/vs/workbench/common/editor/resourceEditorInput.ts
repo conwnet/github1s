@@ -171,12 +171,9 @@ export abstract class AbstractResourceEditorInput extends EditorInput implements
 	}
 
 	private decorateLabel(label: string): string {
-		const readonly = this.hasCapability(EditorInputCapabilities.Readonly);
-		const orphaned = this.isOrphaned();
-
 		// below codes are changed by github1s
 		// remove read-only tips
-		return decorateFileEditorLabel(label, { orphaned, readonly: false });
+		return decorateFileEditorLabel(label, { orphaned: false, readonly: false });
 		// above codes are changed by github1s
 	}
 
