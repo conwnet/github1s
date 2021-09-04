@@ -47,6 +47,9 @@ else if (typeof require?.__$__nodeRequire === 'function') {
 
 // Web environment or unknown
 else {
+	// below codes are changed by github1s
+	const currentOrigin = window.location.origin;
+	// above codes are changed by github1s
 
 	// Built time configuration (do NOT modify)
 	product = { /*BUILD->INSERT_PRODUCT_CONFIGURATION*/ } as IProductConfiguration;
@@ -75,12 +78,12 @@ else {
 			],
 			// below codes are changed by github1s
 			extensionsGallery: {
-				serviceUrl:"https://marketplace.visualstudio.com/_apis/public/gallery",
-				cacheUrl:"https://vscode.blob.core.windows.net/gallery/index",
-				itemUrl:"https://marketplace.visualstudio.com/items",
-				resourceUrlTemplate:"https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",
-				controlUrl:"https://az764295.vo.msecnd.net/extensions/marketplace.json",
-				recommendationsUrl:"https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz"
+				serviceUrl: 'https://marketplace.visualstudio.com/_apis/public/gallery',
+				cacheUrl: 'https://vscode.blob.core.windows.net/gallery/index',
+				itemUrl: 'https://marketplace.visualstudio.com/items',
+				resourceUrlTemplate: `${currentOrigin}/api/vscode-unpkg/{publisher}/{name}/{version}/{path}`,
+				controlUrl: 'https://az764295.vo.msecnd.net/extensions/marketplace.json',
+				recommendationsUrl: 'https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz'
 			},
 			linkProtectionTrustedDomains: [
 				'*.github.com',
