@@ -12,7 +12,7 @@ import { Part } from 'vs/workbench/browser/part';
 import { GlobalActivityActionViewItem, ViewContainerActivityAction, PlaceHolderToggleCompositePinnedAction, PlaceHolderViewContainerActivityAction, AccountsActivityActionViewItem, HomeActivityActionViewItem } from 'vs/workbench/browser/parts/activitybar/activitybarActions';
 // above codes are changed by github1s
 import { IBadge, NumberBadge } from 'vs/workbench/services/activity/common/activity';
-import { IWorkbenchLayoutService, Parts } from 'vs/workbench/services/layout/browser/layoutService';
+import { IWorkbenchLayoutService, Parts, Position } from 'vs/workbench/services/layout/browser/layoutService';
 import { IInstantiationService, ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
 import { IDisposable, toDisposable, DisposableStore, Disposable } from 'vs/base/common/lifecycle';
 import { ToggleActivityBarVisibilityAction, ToggleSidebarPositionAction } from 'vs/workbench/browser/actions/layoutActions';
@@ -24,7 +24,7 @@ import { Dimension, createCSSRule, asCSSUrl, addDisposableListener, EventType } 
 import { IStorageService, StorageScope, IStorageValueChangeEvent, StorageTarget } from 'vs/platform/storage/common/storage';
 import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
 import { URI, UriComponents } from 'vs/base/common/uri';
-import { ToggleCompositePinnedAction, ICompositeBarColors, ActivityAction, ICompositeActivity } from 'vs/workbench/browser/parts/compositeBarActions';
+import { ToggleCompositePinnedAction, ICompositeBarColors, ActivityAction, ICompositeActivity, IActivityHoverOptions } from 'vs/workbench/browser/parts/compositeBarActions';
 import { IViewDescriptorService, ViewContainer, IViewContainerModel, ViewContainerLocation, IViewsService, getEnabledViewContainerContextKey } from 'vs/workbench/common/views';
 import { IContextKeyService, ContextKeyExpr, IContextKey } from 'vs/platform/contextkey/common/contextkey';
 import { assertIsDefined, isString } from 'vs/base/common/types';
@@ -45,6 +45,7 @@ import { Action2, registerAction2 } from 'vs/platform/actions/common/actions';
 import { CATEGORIES } from 'vs/workbench/common/actions';
 import { registerIcon } from 'vs/platform/theme/common/iconRegistry';
 import { StringSHA1 } from 'vs/base/common/hash';
+import { HoverPosition } from 'vs/base/browser/ui/hover/hoverWidget';
 
 interface IPlaceholderViewContainer {
 	readonly id: string;
@@ -163,6 +164,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		return this._register(this.instantiationService.createInstance(CompositeBar, cachedItems, {
 			icon: true,
 			orientation: ActionsOrientation.VERTICAL,
+			activityHoverOptions: this.getActivityHoverOptions(),
 			preventLoopNavigation: true,
 			openComposite: compositeId => this.viewsService.openViewContainer(compositeId, true),
 			getActivityAction: compositeId => this.getCompositeActions(compositeId).activityAction,
@@ -174,16 +176,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 				// Menu
 				const menuBarVisibility = getMenuBarVisibility(this.configurationService);
 				if (menuBarVisibility === 'compact' || menuBarVisibility === 'hidden' || menuBarVisibility === 'toggle') {
-					topActions.push({
-						id: 'toggleMenuVisibility',
-						label: localize('menu', "Menu"),
-						class: undefined,
-						tooltip: localize('menu', "Menu"),
-						checked: menuBarVisibility === 'compact',
-						enabled: true,
-						run: async () => this.configurationService.updateValue('window.menuBarVisibility', menuBarVisibility === 'compact' ? 'toggle' : 'compact'),
-						dispose: () => { }
-					});
+					topActions.push(toAction({ id: 'toggleMenuVisibility', label: localize('menu', "Menu"), checked: menuBarVisibility === 'compact', run: () => this.configurationService.updateValue('window.menuBarVisibility', menuBarVisibility === 'compact' ? 'toggle' : 'compact') }));
 				}
 
 				if (topActions.length) {
@@ -192,26 +185,14 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 
 				// Accounts
 				actions.push(new Separator());
-				actions.push({
-					id: 'toggleAccountsVisibility',
-					label: localize('accounts', "Accounts"),
-					class: undefined,
-					tooltip: localize('accounts', "Accounts"),
-					checked: this.accountsVisibilityPreference,
-					enabled: true,
-					run: async () => this.accountsVisibilityPreference = !this.accountsVisibilityPreference,
-					dispose: () => { }
-				});
-
+				actions.push(toAction({ id: 'toggleAccountsVisibility', label: localize('accounts', "Accounts"), checked: this.accountsVisibilityPreference, run: () => this.accountsVisibilityPreference = !this.accountsVisibilityPreference }));
 				actions.push(new Separator());
 
 				// Toggle Sidebar
-				actions.push(this.instantiationService.createInstance(ToggleSidebarPositionAction, ToggleSidebarPositionAction.ID, ToggleSidebarPositionAction.getLabel(this.layoutService)));
+				actions.push(toAction({ id: ToggleSidebarPositionAction.ID, label: ToggleSidebarPositionAction.getLabel(this.layoutService), run: () => this.instantiationService.invokeFunction(accessor => new ToggleSidebarPositionAction().run(accessor)) }));
 
 				// Toggle Activity Bar
-				// below codes are changed by github1s typo
-				actions.push(toAction({ id: ToggleActivityBarVisibilityAction.ID, label: localize('hideActivityBar', "Hide Activity Bar"), run: async () => this.instantiationService.invokeFunction(accessor => new ToggleActivityBarVisibilityAction().run(accessor)) }));
-				// above codes are changed by github1s
+				actions.push(toAction({ id: ToggleActivityBarVisibilityAction.ID, label: localize('hideActivitBar', "Hide Activity Bar"), run: () => this.instantiationService.invokeFunction(accessor => new ToggleActivityBarVisibilityAction().run(accessor)) }));
 			},
 			getContextMenuActionsForComposite: compositeId => this.getContextMenuActionsForComposite(compositeId),
 			getDefaultCompositeId: () => this.viewDescriptorService.getDefaultViewContainer(this.location)!.id,
@@ -225,6 +206,12 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 			colors: (theme: IColorTheme) => this.getActivitybarItemColors(theme),
 			overflowActionSize: ActivitybarPart.ACTION_HEIGHT
 		}));
+	}
+
+	private getActivityHoverOptions(): IActivityHoverOptions {
+		return {
+			position: () => this.layoutService.getSideBarPosition() === Position.LEFT ? HoverPosition.RIGHT : HoverPosition.LEFT,
+		};
 	}
 
 	private getContextMenuActionsForComposite(compositeId: string): IAction[] {
@@ -278,7 +265,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		}));
 	}
 
-	private onDidChangeViewContainers(added: ReadonlyArray<{ container: ViewContainer, location: ViewContainerLocation; }>, removed: ReadonlyArray<{ container: ViewContainer, location: ViewContainerLocation; }>) {
+	private onDidChangeViewContainers(added: readonly { container: ViewContainer, location: ViewContainerLocation; }[], removed: readonly { container: ViewContainer, location: ViewContainerLocation; }[]) {
 		removed.filter(({ location }) => location === ViewContainerLocation.Sidebar).forEach(({ container }) => this.onDidDeregisterViewContainer(container));
 		this.onDidRegisterViewContainers(added.filter(({ location }) => location === ViewContainerLocation.Sidebar).map(({ container }) => container));
 	}
@@ -462,7 +449,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.registerKeyboardNavigationListeners();
 	}
 
-	createContentArea(parent: HTMLElement): HTMLElement {
+	override createContentArea(parent: HTMLElement): HTMLElement {
 		this.element = parent;
 
 		this.content = document.createElement('div');
@@ -545,7 +532,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.homeBarContainer.classList.add('home-bar');
 
 		this.homeBar = this._register(new ActionBar(this.homeBarContainer, {
-			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme)),
+			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme), this.getActivityHoverOptions()),
 			orientation: ActionsOrientation.VERTICAL,
 			ariaLabel: localize('home', "Open on GitHub"),
 			animated: false,
@@ -571,11 +558,11 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.globalActivityActionBar = this._register(new ActionBar(container, {
 			actionViewItemProvider: action => {
 				if (action.id === 'workbench.actions.manage') {
-					return this.instantiationService.createInstance(GlobalActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme));
+					return this.instantiationService.createInstance(GlobalActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme), this.getActivityHoverOptions());
 				}
 
 				if (action.id === 'workbench.actions.accounts') {
-					return this.instantiationService.createInstance(AccountsActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme));
+					return this.instantiationService.createInstance(AccountsActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme), this.getActivityHoverOptions());
 				}
 
 				throw new Error(`No view item for action '${action.id}'`);
@@ -647,7 +634,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		return compositeActions;
 	}
 
-	private onDidRegisterViewContainers(viewContainers: ReadonlyArray<ViewContainer>): void {
+	private onDidRegisterViewContainers(viewContainers: readonly ViewContainer[]): void {
 		for (const viewContainer of viewContainers) {
 			this.addComposite(viewContainer);
 
@@ -814,7 +801,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.compositeBar.focus();
 	}
 
-	updateStyles(): void {
+	override updateStyles(): void {
 		super.updateStyles();
 
 		const container = assertIsDefined(this.getContainer());
@@ -839,7 +826,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		};
 	}
 
-	layout(width: number, height: number): void {
+	override layout(width: number, height: number): void {
 		if (!this.layoutService.isVisible(Parts.ACTIVITYBAR_PART)) {
 			return;
 		}
@@ -863,7 +850,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		return viewContainer && this.viewDescriptorService.getViewContainerLocation(viewContainer) === this.location ? viewContainer : undefined;
 	}
 
-	private getViewContainers(): ReadonlyArray<ViewContainer> {
+	private getViewContainers(): readonly ViewContainer[] {
 		return this.viewDescriptorService.getViewContainersByLocation(this.location);
 	}
 
@@ -1017,14 +1004,12 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		return this._placeholderViewContainersValue;
 	}
 
-	// below codes are changed by github1s typo
-	private set placeholderViewContainersValue(placeholderViewContainsValue: string) {
-		if (this.placeholderViewContainersValue !== placeholderViewContainsValue) {
-			this._placeholderViewContainersValue = placeholderViewContainsValue;
-			this.setStoredPlaceholderViewContainersValue(placeholderViewContainsValue);
+	private set placeholderViewContainersValue(placeholderViewContainesValue: string) {
+		if (this.placeholderViewContainersValue !== placeholderViewContainesValue) {
+			this._placeholderViewContainersValue = placeholderViewContainesValue;
+			this.setStoredPlaceholderViewContainersValue(placeholderViewContainesValue);
 		}
 	}
-	// above codes are changed by github1s
 
 	private getStoredPlaceholderViewContainersValue(): string {
 		return this.storageService.get(ActivitybarPart.PLACEHOLDER_VIEW_CONTAINERS, StorageScope.GLOBAL, '[]');

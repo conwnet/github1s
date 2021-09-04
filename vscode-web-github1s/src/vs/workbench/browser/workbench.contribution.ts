@@ -10,9 +10,10 @@ import { isMacintosh, isWindows, isLinux, isWeb, isNative } from 'vs/base/common
 import { workbenchConfigurationNodeBase } from 'vs/workbench/common/configuration';
 import { isStandalone } from 'vs/base/browser/browser';
 
+const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
+
 // Configuration
 (function registerConfiguration(): void {
-	const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
 
 	// Workbench
 	registry.registerConfiguration({
@@ -88,9 +89,15 @@ import { isStandalone } from 'vs/base/browser/browser';
 			},
 			'workbench.editor.untitled.hint': {
 				'type': 'string',
-				'enum': ['text', 'button', 'hidden', 'default'],
-				'default': 'default',
+				'enum': ['text', 'hidden'],
+				'default': 'text',
 				'markdownDescription': localize({ comment: ['This is the description for a setting. Values surrounded by single quotes are not to be translated.'], key: 'untitledHint' }, "Controls if the untitled hint should be inline text in the editor or a floating button or hidden.")
+			},
+			'workbench.editor.languageDetection': {
+				type: 'boolean',
+				default: true,
+				description: localize('workbench.editor.languageDetection', "Controls whether the language in a text editor is automatically detected unless the language has been explicitly set by the language picker. This can also be scoped by language so you can specify which languages you do not want to be switched off of. This is useful for languages like Markdown that often contain other languages that might trick language detection into thinking it's the embedded language and not Markdown."),
+				scope: ConfigurationScope.LANGUAGE_OVERRIDABLE
 			},
 			'workbench.editor.tabCloseButton': {
 				'type': 'string',
@@ -181,6 +188,19 @@ import { isStandalone } from 'vs/base/browser/browser';
 				'description': localize('closeEmptyGroups', "Controls the behavior of empty editor groups when the last tab in the group is closed. When enabled, empty groups will automatically close. When disabled, empty groups will remain part of the grid."),
 				'default': true
 			},
+			'workbench.editor.experimentalAutoLockGroups': {
+				'type': 'object',
+				'description': localize('workbench.editor.experimentalAutoLockGroups', "Experimental: If an editor matching one of the listed types is opened as the first in an editor group and more than one group is open, the group is automatically locked. Locked groups will only be used for opening editors when explicitly chosen by user gesture (e.g. drag and drop), but not by default. Consequently the active editor in a locked group is less likely to be replaced accidentally with a different editor."),
+				'default': {
+					'terminalEditor': true,
+					'mainThreadWebview-markdown.preview': false,
+					'default': false
+				},
+				'additionalProperties': {
+					'type': 'boolean',
+					'enum': [true, false]
+				},
+			},
 			'workbench.editor.revealIfOpen': {
 				'type': 'boolean',
 				'description': localize('revealIfOpen', "Controls whether an editor is revealed in any of the visible groups if opened. If disabled, an editor will prefer to open in the currently active editor group. If enabled, an already opened editor will be revealed instead of opened again in the currently active editor group. Note that there are some cases where this setting is ignored, e.g. when forcing an editor to open in a specific group or to the side of the currently active group."),
@@ -193,9 +213,14 @@ import { isStandalone } from 'vs/base/browser/browser';
 			},
 			'workbench.editor.restoreViewState': {
 				'type': 'boolean',
-				'description': localize('restoreViewState', "Restores the last view state (e.g. scroll position) when re-opening textual editors after they have been closed."),
+				'markdownDescription': localize('restoreViewState', "Restores the last editor view state (e.g. scroll position) when re-opening editors after they have been closed. Editor view state is stored per editor group and discarded when a group closes. Use the `#workbench.editor.sharedViewState#` setting to use the last known view state across all editor groups in case no previous view state was found for a editor group."),
 				'default': true,
 				'scope': ConfigurationScope.LANGUAGE_OVERRIDABLE
+			},
+			'workbench.editor.sharedViewState': {
+				'type': 'boolean',
+				'description': localize('sharedViewState', "Preserves the most recent editor view state (e.g. scroll position) across all editor groups and restores that if no specific editor view state is found for the editor group."),
+				'default': false
 			},
 			'workbench.editor.centeredLayoutAutoResize': {
 				'type': 'boolean',

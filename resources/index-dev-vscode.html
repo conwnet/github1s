@@ -11,6 +11,8 @@
 		<meta id="vscode-workbench-web-configuration" data-settings="" />
 		<!-- VS Code Extensions Configuration -->
 		<meta id="vscode-workbench-builtin-extensions" data-settings="[]" />
+		<!-- VS Code Product Configuration -->
+		<meta id="vscode-product-configuration" data-settings="{}" />
 		<!-- Workbench Icon/Manifest/CSS -->
 		<link rel="icon" media="(prefers-color-scheme:light)" href="/favicon-light.svg" type="image/svg+xml">
 		<link rel="icon" media="(prefers-color-scheme:dark)" href="/favicon-dark.svg" type="image/svg+xml">
@@ -28,14 +30,14 @@
 		self.require = {
 			baseUrl: `${window.location.origin}/static/vscode`,
 			recordStats: true,
-			trustedTypesPolicy: window.trustedTypes?.createPolicy('amdLoader', {
+			trustedTypesPolicy: window.trustedTypes ? window.trustedTypes.createPolicy('amdLoader', {
 				createScriptURL(value) {
 					if (value.startsWith(window.location.origin)) {
 						return value;
 					}
 					throw new Error(`Invalid script url: ${value}`);
 				},
-			}),
+			}) : undefined,
 			paths: {
 				'vscode-textmate': `${window.location.origin}/static/node_modules/vscode-textmate/release/main`,
 				'vscode-oniguruma': `${window.location.origin}/static/node_modules/vscode-oniguruma/release/main`,
@@ -73,6 +75,21 @@
 				document
 					.getElementById('vscode-workbench-builtin-extensions')
 					.setAttribute('data-settings', extensionsJson);
+				document
+					.getElementById('vscode-product-configuration')
+					.setAttribute('data-settings', {
+						nameShort: 'GitHub1s',
+						nameLong: 'GitHub1s',
+						extensionsGallery: {serviceUrl:"https://marketplace.visualstudio.com/_apis/public/gallery",cacheUrl:"https://vscode.blob.core.windows.net/gallery/index",itemUrl:"https://marketplace.visualstudio.com/items",resourceUrlTemplate:"https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",controlUrl:"https://az764295.vo.msecnd.net/extensions/marketplace.json",recommendationsUrl:"https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz"},
+						linkProtectionTrustedDomains: [
+							'*.github.com',
+							'*.microsoft.com',
+							'*.github1s.com',
+							'*.vercel.com',
+							'*.sourcegraph.com',
+							'*.gitpod.io',
+						]
+					});
 				require(['vs/code/browser/workbench/workbench'], function () {});
 			});
 	</script>
