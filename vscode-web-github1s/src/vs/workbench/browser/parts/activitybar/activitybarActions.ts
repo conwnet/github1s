@@ -190,25 +190,20 @@ class MenuActivityActionViewItem extends ActivityActionViewItem {
 
 // below codes are changed by github1s
 // Add a button to the top of menubar which is used to jump back to GitHub
-export class HomeActivityActionViewItem extends MenuActivityActionViewItem {
+export class HomeActivityActionViewItem extends ActivityActionViewItem {
 
 	static readonly HOME_BAR_VISIBILITY_PREFERENCE = 'workbench.activity.showHomeIndicator';
 
 	constructor(
 		action: ActivityAction,
-		contextMenuActionsProvider: () => IAction[],
 		colors: (theme: IColorTheme) => ICompositeBarColors,
-		activityHoverOptions: IActivityHoverOptions,
+		hoverOptions: IActivityHoverOptions,
 		@IThemeService themeService: IThemeService,
 		@IHoverService hoverService: IHoverService,
-		@IContextMenuService contextMenuService: IContextMenuService,
-		@IMenuService menuService: IMenuService,
-		@IContextKeyService contextKeyService: IContextKeyService,
-		@IWorkbenchEnvironmentService environmentService: IWorkbenchEnvironmentService,
 		@IConfigurationService configurationService: IConfigurationService,
 		@IKeybindingService keybindingService: IKeybindingService,
 	) {
-		super(MenuId.AccountsContext, action, contextMenuActionsProvider, colors, activityHoverOptions, themeService, hoverService, menuService, contextMenuService, contextKeyService, configurationService, environmentService, keybindingService);
+		super(action, { draggable: false, colors, icon: true, hasPopup: true, hoverOptions }, themeService, hoverService, configurationService, keybindingService);
 	}
 
 	override render(container: HTMLElement): void {

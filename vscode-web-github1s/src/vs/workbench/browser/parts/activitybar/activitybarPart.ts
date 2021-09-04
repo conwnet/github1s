@@ -532,7 +532,7 @@ export class ActivitybarPart extends Part implements IActivityBarService {
 		this.homeBarContainer.classList.add('home-bar');
 
 		this.homeBar = this._register(new ActionBar(this.homeBarContainer, {
-			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, () => this.compositeBar.getContextMenuActions(), (theme: IColorTheme) => this.getActivitybarItemColors(theme), this.getActivityHoverOptions()),
+			actionViewItemProvider: action => this.instantiationService.createInstance(HomeActivityActionViewItem, action as ActivityAction, (theme: IColorTheme) => this.getActivitybarItemColors(theme), this.getActivityHoverOptions()),
 			orientation: ActionsOrientation.VERTICAL,
 			ariaLabel: localize('home', "Open on GitHub"),
 			animated: false,

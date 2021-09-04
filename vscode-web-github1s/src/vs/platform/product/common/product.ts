@@ -55,8 +55,10 @@ else {
 	if (Object.keys(product).length === 0) {
 		Object.assign(product, {
 			version: '1.60.0-dev',
-			nameShort: 'Code - OSS Dev',
-			nameLong: 'Code - OSS Dev',
+			// below codes are changed by github1s
+			nameShort: 'GitHub1s',
+			nameLong: 'GitHub1s',
+			// above codes are changed by github1s
 			applicationName: 'code-oss',
 			dataFolderName: '.vscode-oss',
 			urlProtocol: 'code-oss',
@@ -71,19 +73,26 @@ else {
 				'GitHub.remotehub',
 				'GitHub.remotehub-insiders'
 			],
+			// below codes are changed by github1s
+			extensionsGallery: {
+				serviceUrl:"https://marketplace.visualstudio.com/_apis/public/gallery",
+				cacheUrl:"https://vscode.blob.core.windows.net/gallery/index",
+				itemUrl:"https://marketplace.visualstudio.com/items",
+				resourceUrlTemplate:"https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",
+				controlUrl:"https://az764295.vo.msecnd.net/extensions/marketplace.json",
+				recommendationsUrl:"https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz"
+			},
+			linkProtectionTrustedDomains: [
+				'*.github.com',
+				'*.microsoft.com',
+				'*.github1s.com',
+				'*.vercel.com',
+				'*.sourcegraph.com',
+				'*.gitpod.io',
+			]
+			// above codes are changed by github1s
 		});
 	}
-
-	// below codes are changed by github1s
-	const productConfElement = document.getElementById('vscode-product-configuration');
-	const productConfAttribute = productConfElement ? productConfElement.getAttribute('data-settings') : undefined;
-	if (productConfAttribute) {
-		try {
-			const productConfiguration = JSON.parse(productConfAttribute);
-			product = Object.assign(product, productConfiguration);
-		} catch (e) { /* invalid productConfig, ignore it  */ }
-	}
-	// above codes are changed by github1s
 }
 
 export default product;

@@ -1,3 +1,4 @@
+/* eslint-disable header/header */
 /**
  * @file Authorizing to GitHub with OAuth App flow
  * @doc https://docs.github.com/en/developers/apps/authorizing-oauth-apps

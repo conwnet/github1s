@@ -17,8 +17,8 @@ import { localize } from 'vs/nls';
 import { parseLogLevel } from 'vs/platform/log/common/log';
 import product from 'vs/platform/product/common/product';
 import { isFolderToOpen, isWorkspaceToOpen } from 'vs/platform/windows/common/windows';
-import { create, ICredentialsProvider, IHomeIndicator, IProductQualityChangeHandler, ISettingsSyncOptions, IURLCallbackProvider, IWelcomeBanner, IWindowIndicator, IWorkbenchConstructionOptions, IWorkspace, IWorkspaceProvider } from 'vs/workbench/workbench.web.api';
 // below codes are changed by github1s
+import { create, ICredentialsProvider, IProductQualityChangeHandler, ISettingsSyncOptions, IURLCallbackProvider, IWelcomeBanner, IWindowIndicator, IWorkbenchConstructionOptions, IWorkspace, IWorkspaceProvider } from 'vs/workbench/workbench.web.api';
 import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
 import { renderNotification } from 'vs/github1s/notification';
 import { getGitHubAccessToken } from 'vs/github1s/authorizing-github';
@@ -507,16 +507,16 @@ class WindowIndicator implements IWindowIndicator {
 	// 	icon: 'code',
 	// 	title: localize('home', "Home")
 	// };
-	// above codes are changed by github1s
 
 	// Welcome Banner
-	const welcomeBanner: IWelcomeBanner = {
-		message: localize('welcomeBannerMessage', "{0} Web. Browser based playground for testing.", product.nameShort),
-		actions: [{
-			href: 'https://github.com/microsoft/vscode',
-			label: localize('learnMore', "Learn More")
-		}]
-	};
+	// const welcomeBanner: IWelcomeBanner = {
+	// 	message: localize('welcomeBannerMessage', "{0} Web. Browser based playground for testing.", product.nameShort),
+	// 	actions: [{
+	// 		href: 'https://github.com/microsoft/vscode',
+	// 		label: localize('learnMore', "Learn More")
+	// 	}]
+	// };
+	// above codes are changed by github1s
 
 	// Window indicator (unless connected to a remote)
 	let windowIndicator: WindowIndicator | undefined = undefined;
@@ -557,9 +557,9 @@ class WindowIndicator implements IWindowIndicator {
 		settingsSyncOptions,
 		// below codes are changed by github1s
 		// homeIndicator,
-		// above codes are changed by github1s
 		windowIndicator,
-		welcomeBanner,
+		// welcomeBanner,
+		// above codes are changed by github1s
 		productQualityChangeHandler,
 		workspaceProvider,
 		urlCallbackProvider: new PollingURLCallbackProvider(),
