@@ -50,7 +50,7 @@ it('should load successfully', async () => {
 		(el) => el.innerHTML
 	);
 	const tab = await page.$eval(
-		'div[role="tab"]',
+		'div[role="tab"] .label-name',
 		(el: HTMLElement) => el.innerText
 	);
 	expect(tab).toBe('[Preview] README.md');
