@@ -265,7 +265,9 @@
 
 .file-icons-enabled .show-file-icons .vs_code_welcome_page-name-file-icon.file-icon::before {
 	content: ' ';
-	background-image: url('../../../../browser/media/code-icon.svg');
+	/* below codes are changed by github1s */
+	background-image: url('../workbench/browser/media/code-icon.svg');
+	/* above codes are changed by github1s */
 }
 
 .monaco-workbench .part.editor > .content .welcomePage .mac-only,

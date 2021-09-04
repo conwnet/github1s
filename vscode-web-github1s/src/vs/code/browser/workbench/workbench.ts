@@ -18,10 +18,14 @@ import { parseLogLevel } from 'vs/platform/log/common/log';
 import product from 'vs/platform/product/common/product';
 import { isFolderToOpen, isWorkspaceToOpen } from 'vs/platform/windows/common/windows';
 // below codes are changed by github1s
-import { create, ICredentialsProvider, IProductQualityChangeHandler, ISettingsSyncOptions, IURLCallbackProvider, IWelcomeBanner, IWindowIndicator, IWorkbenchConstructionOptions, IWorkspace, IWorkspaceProvider } from 'vs/workbench/workbench.web.api';
+import { create, ICredentialsProvider, IProductQualityChangeHandler, ISettingsSyncOptions, IURLCallbackProvider, IWindowIndicator, IWorkbenchConstructionOptions, IWorkspace, IWorkspaceProvider } from 'vs/workbench/workbench.web.api';
+// eslint-disable-next-line
 import { getBrowserUrl, replaceBrowserUrl } from 'vs/github1s/util';
+// eslint-disable-next-line
 import { renderNotification } from 'vs/github1s/notification';
+// eslint-disable-next-line
 import { getGitHubAccessToken } from 'vs/github1s/authorizing-github';
+// eslint-disable-next-line
 import { getGitHubAccessTokenWithOverlay, hideAuthorizingOverlay } from 'vs/github1s/authorizing-overlay';
 
 // custom vs code commands defined by github1s
