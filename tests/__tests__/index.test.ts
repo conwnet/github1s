@@ -5,6 +5,7 @@ import {
 } from 'jest-image-snapshot';
 
 expect.extend({ toMatchImageSnapshot });
+jest.setTimeout(30000);
 
 const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
 	failureThreshold: 0.1,
