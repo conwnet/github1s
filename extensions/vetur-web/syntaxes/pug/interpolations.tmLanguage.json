@@ -1,9 +1,0 @@
-{
-  "scopeName": "vue.pug.interpolations",
-  "injectionSelector": "L:text.pug",
-  "patterns": [
-    {
-      "include": "source.vue#vue-interpolations"
-    }
-  ]
-}

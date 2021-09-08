@@ -9,6 +9,10 @@
       "destination": "/api/github-auth-callback"
     },
     {
+      "source": "/api/vscode-unpkg/(.*)",
+      "destination": "/api/vscode-unpkg"
+    },
+    {
       "source": "/static/(.*)",
       "destination": "/api/static-fallback"
     },

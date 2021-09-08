@@ -39,4 +39,4 @@ jobs:
       - run: yarn eslint
       - run: yarn build
       - uses: microsoft/playwright-github-action@v1
-      - run: yarn test:ci
+      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} yarn test:ci

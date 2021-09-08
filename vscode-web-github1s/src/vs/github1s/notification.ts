@@ -1,3 +1,4 @@
+/* eslint-disable header/header */
 /**
  * @file github1s notification
  * @author netcon

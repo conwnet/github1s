@@ -58,7 +58,7 @@ export class SettingsView implements vscode.WebviewViewProvider {
 						});
 					break;
 				case 'welcome-page':
-					vscode.commands.executeCommand('workbench.action.showWelcomePage');
+					vscode.commands.executeCommand('workbench.action.openWalkthrough');
 					break;
 				case 'authorizing-github':
 					this.handleAuthorizingGithub();

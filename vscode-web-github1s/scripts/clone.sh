@@ -13,7 +13,7 @@ function main() {
 	fi
 	mkdir -p lib
 	cd lib
-	git clone --depth 1 -b 1.55.0 https://github.com/microsoft/vscode.git vscode
+	git clone --depth 1 -b 1.60.0 https://github.com/microsoft/vscode.git vscode
 	cd vscode
 	yarn --frozen-lockfile
 }
