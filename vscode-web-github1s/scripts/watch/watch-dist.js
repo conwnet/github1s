@@ -26,7 +26,9 @@ const autoSyncVscodeOut = async () => {
 	const SOURCE = path.join(APP_ROOT, 'vscode-web-github1s/lib/vscode/out');
 	const TARGET = path.join(APP_ROOT, 'dist/static/vscode');
 
-	await util.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`);
+	await util
+		.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`)
+		.catch(() => {});
 
 	chokidar.watch(SOURCE).on(
 		'all',

@@ -4,6 +4,7 @@ import {
 	MatchImageSnapshotOptions,
 } from 'jest-image-snapshot';
 
+jest.setTimeout(60000);
 expect.extend({ toMatchImageSnapshot });
 
 const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
@@ -27,6 +28,19 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	page = await browser.newPage();
+	// setup github oauth token
+	await page.goto(BASE_URL);
+	await page.click('.action-item .action-label[aria-label="GitHub1s"]');
+	await page.waitForTimeout(3000);
+	const extensionIFrameHandle = await page.$(
+		'#webview-webviewview-github1s-views-settings iframe'
+	);
+	const extensionIFrame = await extensionIFrameHandle?.contentFrame();
+	const settingsIframeHandle = await extensionIFrame?.$('iframe#active-frame');
+	const settingsIframe = await settingsIframeHandle?.contentFrame();
+	await settingsIframe?.fill('#token-input', process.env.GITHUB_TOKEN || '');
+	await settingsIframe?.dispatchEvent('#save-button', 'click');
+	await page.waitForTimeout(3000);
 });
 
 afterEach(async () => {
@@ -50,7 +64,7 @@ it('should load successfully', async () => {
 		(el) => el.innerHTML
 	);
 	const tab = await page.$eval(
-		'div[role="tab"]',
+		'div[role="tab"] .label-name',
 		(el: HTMLElement) => el.innerText
 	);
 	expect(tab).toBe('[Preview] README.md');
@@ -91,15 +105,13 @@ it('should show PR list', async () => {
 	await page.press('body', ' ');
 	await page.press('body', 'Shift+Tab');
 	await page.press('body', ' ');
-	await page.waitForSelector('#list_id_3_1');
-	await page.waitForSelector('#list_id_4_1');
+	await page.waitForTimeout(3000);
 
 	const container = await page.$('[id="workbench.parts.sidebar"]');
 	let image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 
-	await page.click('#list_id_3_1');
-	await page.click('#list_id_4_1');
+	await page.click('.monaco-list-row[aria-posinset="3"]');
 	await page.waitForTimeout(3000);
 	image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);

@@ -28,14 +28,14 @@
 		self.require = {
 			baseUrl: `${window.location.origin}/static/vscode`,
 			recordStats: true,
-			trustedTypesPolicy: window.trustedTypes?.createPolicy('amdLoader', {
+			trustedTypesPolicy: window.trustedTypes ? window.trustedTypes.createPolicy('amdLoader', {
 				createScriptURL(value) {
 					if (value.startsWith(window.location.origin)) {
 						return value;
 					}
 					throw new Error(`Invalid script url: ${value}`);
 				},
-			}),
+			}) : undefined,
 			paths: {
 				'vscode-textmate': `${window.location.origin}/static/node_modules/vscode-textmate/release/main`,
 				'vscode-oniguruma': `${window.location.origin}/static/node_modules/vscode-oniguruma/release/main`,

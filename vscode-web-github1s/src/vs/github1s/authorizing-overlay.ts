@@ -1,3 +1,4 @@
+/* eslint-disable header/header */
 /**
  * @file authorizing overlay
  * @author netcon
