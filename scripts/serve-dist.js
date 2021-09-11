@@ -8,17 +8,10 @@ const handler = require('serve-handler');
 const httpProxy = require('http-proxy');
 
 const APP_ROOT = path.join(__dirname, '..');
-const options = { public: path.join(APP_ROOT, 'dist'), cleanUrls: false };
-
-// now sourcegraph graphql api is refused the CORS check
-// just proxy the request to sourcegraph directly for a taste
-const sourcegraphProxy = httpProxy.createProxyServer({
-	target: 'https://sourcegraph.com/.api/graphql',
+const staticOptions = { public: path.join(APP_ROOT, 'dist'), cleanUrls: false };
+const proxyServer = httpProxy.createServer({
 	ignorePath: true,
 	changeOrigin: false,
-	headers: {
-		host: 'sourcegraph.com',
-	},
 });
 
 const handleProxyError = (error) => {
@@ -27,26 +20,25 @@ const handleProxyError = (error) => {
 	});
 	res.end(JSON.stringify({ message: error.message }));
 };
+proxyServer.on('error', handleProxyError);
 
+// now sourcegraph graphql api is refused the CORS check
+// just proxy the request to sourcegraph directly for a taste
 const sourcegraphProxyHandler = (req, res) => {
-	sourcegraphProxy.web(req, res);
-	sourcegraphProxy.on('error', handleProxyError);
+	const host = 'sourcegraph.com';
+	const target = `https://${host}/.api/graphql`;
+	const headers = { host };
+	proxyServer.web(req, res, { target, headers });
 };
 
 // proxy the request to vscode-unpkg.net
 const vscodeUnpkgProxyHandler = (req, res, vscodeUnpkgMatches) => {
 	const publisher = vscodeUnpkgMatches[1];
 	const restPartsPath = vscodeUnpkgMatches[2];
-	const host = `${publisher}.vscode-unpkg.net`;
-	const proxy = httpProxy.createServer({
-		target: `https://${host}/${publisher}/${restPartsPath}`,
-		ignorePath: true,
-		changeOrigin: false,
-		headers: { host },
-	});
-
-	proxy.web(req, res);
-	proxy.on('error', handleProxyError);
+	const host = `${publisher}.vscode-unpkg.net`.toLowerCase();
+	const target = `https://${host}/${publisher}/${restPartsPath}`;
+	const headers = { host };
+	proxyServer.web(req, res, { target, headers });
 };
 
 const server = http.createServer((request, response) => {
@@ -66,11 +58,11 @@ const server = http.createServer((request, response) => {
 		fs.constants.F_OK,
 		(error) => {
 			if (!error && urlObj.pathname !== '/') {
-				return handler(request, response, options);
+				return handler(request, response, staticOptions);
 			}
 			return handler(request, response, {
 				rewrites: [{ source: '*', destination: '/index.html' }],
-				...options,
+				...staticOptions,
 			});
 		}
 	);
