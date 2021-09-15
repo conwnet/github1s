@@ -60,7 +60,7 @@ export class Router extends EventEmitter<RouterState> {
 	// compute the file URI authority of current routerState
 	public async getAuthority(): Promise<string> {
 		const state = await this.getState();
-		return `${this._state.repo}+${this._state.ref}`;
+		return `${state.repo}+${state.ref}`;
 	}
 
 	// push the url with current history

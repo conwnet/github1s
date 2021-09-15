@@ -8,7 +8,7 @@ import { GitHub1sDataSourceProvider } from './data-source-provider';
 import { GitHub1sRouterParser } from './router-parser';
 
 export class GitHub1sPlatformAdapter implements PlatformAdapter {
-	public schema: string = 'github1s';
+	public scheme: string = 'github1s';
 	public name: string = 'GitHub';
 
 	resolveDataSourceProvider(): Promisable<DataSourceProvider> {

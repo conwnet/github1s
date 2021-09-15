@@ -25,6 +25,15 @@ export interface File {
 	content: ArrayBuffer;
 }
 
+export interface Submodule {
+	// which commit the submodule repository point to
+	ref: string;
+}
+
+export interface SymbolicLink {
+	path: string;
+}
+
 export interface Branch {
 	name: string;
 	commitSha: string;
@@ -65,7 +74,7 @@ export interface Range {
 // for cross-repository data,
 // reference to another repository
 export interface ResourceScope {
-	schema: string; // github / github / bitbucket...
+	scheme: string; // github / github / bitbucket...
 	repo: string;
 	ref: string;
 }
@@ -260,8 +269,8 @@ export interface RouterParser {
 }
 
 export interface PlatformAdapter {
-	// specify which schema of workspace should current adapter should work with
-	readonly schema: string;
+	// specify which scheme of workspace should current adapter should work with
+	readonly scheme: string;
 	// platform name, using for displaying text such as: `open on **GitHub**`
 	readonly name: string;
 

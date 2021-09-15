@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { setExtensionContext } from '@/helpers/context';
 // import { registerGitHub1sCommands } from '@/commands';
-// import { registerVSCodeProviders } from '@/providers';
+import { registerVSCodeProviders } from '@/providers';
 // import { registerCustomViews } from '@/views';
 // import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 // import { showSponsors } from '@/sponsors';
@@ -29,13 +29,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register platform adapters
 	await registerPlatformAdapters();
 
-	// Ensure the router has been initialized at first
+	// Ensure the router has been initialized
 	await router.initialize(browserUrlManager);
+
+	// register VS Code providers
+	registerVSCodeProviders();
 
 	// // register the necessary event listeners
 	// registerEventListeners();
-	// register VS Code providers
-	// registerVSCodeProviders();
+
 	// // register custom views
 	// registerCustomViews();
 	// // register GitHub1s Commands

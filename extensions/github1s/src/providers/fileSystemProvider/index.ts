@@ -15,17 +15,27 @@ import {
 	Uri,
 } from 'vscode';
 import { toUint8Array as decodeBase64 } from 'js-base64';
+import platformAdapterManager from '@/adapters/manager';
 import router from '@/router';
 import { noop, trimStart } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
-import { apolloClient } from '@/interfaces/client';
-import { githubObjectQuery, isGraphQLEnabled } from '@/interfaces/github-api-gql';
 import { readGitHubDirectory, readGitHubFile } from '@/interfaces/github-api-rest';
 import { File, Directory, Entry, GitHubRESTEntry } from './types';
-import { createEntry, insertGitHubRESTEntryToDirectory, insertGitHubGraphQLEntriesToDirectory } from './util';
+import { insertGitHubRESTEntryToDirectory, insertGitHubGraphQLEntriesToDirectory } from './util';
 
 const textDecoder = new TextDecoder();
+
+const createEntry = (type: 'tree' | 'blob' | 'commit', uri: Uri, name: string, options?: any) => {
+	switch (type) {
+		case 'tree':
+			return new Directory(uri, name, options);
+		case 'commit':
+			return new Directory(uri, name, { ...options, isSubmodule: true });
+		default:
+			return new File(uri, name, options);
+	}
+};
 
 export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposable {
 	private readonly disposable: Disposable;
@@ -36,6 +46,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	dispose() {
 		this.disposable?.dispose();
+	}
+
+	private async resolveCurrentDataSourceProvider() {
+		return platformAdapterManager.getCurrentAdapter().resolveDataSourceProvider();
 	}
 
 	// --- lookup
@@ -171,30 +185,13 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			if (parent.isSubmodule) {
 				await this._updateSubmoduleDirectory(parent);
 			}
-			const [owner, repo, ref] = parent.uri.authority.split('+');
-			if (isGraphQLEnabled()) {
-				return apolloClient
-					.query({
-						query: githubObjectQuery,
-						variables: {
-							owner,
-							repo,
-							expression: `${ref}:${Uri.joinPath(parent.uri, parent.name).path.slice(1)}`,
-						},
-					})
-					.then((response) => {
-						const entries = response.data?.repository?.object?.entries;
-						if (!entries) {
-							throw FileSystemError.FileNotADirectory(uri);
-						}
-						insertGitHubGraphQLEntriesToDirectory(entries, parent);
-						return parent.getNameTypePairs();
-					});
-			}
-			const data = await readGitHubDirectory(owner, repo, ref, Uri.joinPath(parent.uri, parent.name).path);
+			const [repo, ref] = parent.uri.authority.split('+');
+			const path = Uri.joinPath(parent.uri, parent.name).path;
+			const dataSourceProvider = await this.resolveCurrentDataSourceProvider();
+			const data = await dataSourceProvider.provideDirectory(repo, ref, path, false);
 			// create new Entry to `parent.entries` only if `parent.entries.get(item.path)` is nil
-			for (const item of data.tree || []) {
-				insertGitHubRESTEntryToDirectory(item, parent);
+			for (const item of data.entities || []) {
+				// insertGitHubRESTEntryToDirectory(item, parent);
 			}
 			return parent.getNameTypePairs();
 		},

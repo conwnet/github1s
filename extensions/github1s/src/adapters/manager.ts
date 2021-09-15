@@ -20,29 +20,29 @@ export class PlatformAdapterManager {
 	}
 
 	public registerAdapter(adapter: PlatformAdapter) {
-		if (this.adaptersMap.has(adapter.schema)) {
-			throw new Error(`Adapter schema '${adapter.schema}' is already registered.`);
+		if (this.adaptersMap.has(adapter.scheme)) {
+			throw new Error(`Adapter scheme '${adapter.scheme}' is already registered.`);
 		}
-		this.adaptersMap.set(adapter.schema, adapter);
+		this.adaptersMap.set(adapter.scheme, adapter);
 	}
 
 	public getAllAdapters(): PlatformAdapter[] {
 		return Array.from(this.adaptersMap.values());
 	}
 
-	public getAdapter(schema: string): PlatformAdapter {
-		if (!this.adaptersMap.has(schema)) {
-			throw new Error(`Adapter with schema '${schema}' can not found.`);
+	public getAdapter(scheme: string): PlatformAdapter {
+		if (!this.adaptersMap.has(scheme)) {
+			throw new Error(`Adapter with scheme '${scheme}' can not found.`);
 		}
-		return this.adaptersMap.get(schema);
+		return this.adaptersMap.get(scheme);
 	}
 
 	public getCurrentAdapter(): PlatformAdapter {
 		if (!vscode.workspace.workspaceFolders.length) {
 			throw new Error(`Can not found active workspace`);
 		}
-		const schema = vscode.workspace.workspaceFolders[0].uri.scheme;
-		return this.getAdapter(schema);
+		const scheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+		return this.getAdapter(scheme);
 	}
 }
 
