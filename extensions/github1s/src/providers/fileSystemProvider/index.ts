@@ -14,23 +14,21 @@ import {
 	FileType,
 	Uri,
 } from 'vscode';
-import { toUint8Array as decodeBase64 } from 'js-base64';
 import platformAdapterManager from '@/adapters/manager';
+import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
-import { noop, trimStart } from '@/helpers/util';
+import { noop, trimStart, basename, dirname } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
-import { readGitHubDirectory, readGitHubFile } from '@/interfaces/github-api-rest';
-import { File, Directory, Entry, GitHubRESTEntry } from './types';
-import { insertGitHubRESTEntryToDirectory, insertGitHubGraphQLEntriesToDirectory } from './util';
+import { File, Directory, Entry } from './types';
 
 const textDecoder = new TextDecoder();
 
-const createEntry = (type: 'tree' | 'blob' | 'commit', uri: Uri, name: string, options?: any) => {
+const createEntry = (type: adapterTypes.FileType, uri: Uri, name: string, options?: any) => {
 	switch (type) {
-		case 'tree':
+		case adapterTypes.FileType.Directory:
 			return new Directory(uri, name, options);
-		case 'commit':
+		case adapterTypes.FileType.Submodule:
 			return new Directory(uri, name, { ...options, isSubmodule: true });
 		default:
 			return new File(uri, name, options);
@@ -48,8 +46,28 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		this.disposable?.dispose();
 	}
 
-	private async resolveCurrentDataSourceProvider() {
-		return platformAdapterManager.getCurrentAdapter().resolveDataSourceProvider();
+	private async _resolveDataSource(scheme: string) {
+		return platformAdapterManager.getAdapter(scheme).resolveDataSource();
+	}
+
+	// insert DirectoryEntry into the cache `this.root`
+	public async populateWithDirectoryEntities(base: Uri, entries: adapterTypes.DirectoryEntry[]) {
+		const baseDirectory = await this.lookupAsDirectory(base, true);
+		return entries.forEach((entry) => {
+			let current = baseDirectory;
+			const pathParts = dirname(entry.path).split('/').filter(Boolean);
+			pathParts.forEach((part) => {
+				if (!(current.entries || (current.entries = new Map<string, Entry>())).has(part)) {
+					current.entries.set(part, createEntry(adapterTypes.FileType.Directory, current.uri, current.name));
+				}
+				current = current.entries.get(part) as Directory;
+			});
+			const fileName = basename(entry.path);
+			if (!(current.entries || (current.entries = new Map<string, Entry>())).has(fileName)) {
+				const entryUri = Uri.joinPath(current.uri, current.name);
+				current.entries.set(fileName, createEntry(entry.type, entryUri, fileName));
+			}
+		});
 	}
 
 	// --- lookup
@@ -61,7 +79,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		// if the authority of uri is empty, we should use `current authority`
 		const authority = uri.authority || (await router.getAuthority());
 		if (!this.root.has(authority)) {
-			this.root.set(authority, createEntry('tree', uri.with({ authority, path: '/' }), ''));
+			this.root.set(authority, createEntry(adapterTypes.FileType.Directory, uri.with({ authority, path: '/' }), ''));
 		}
 		let entry = this.root.get(authority);
 		for (const part of parts) {
@@ -186,13 +204,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 				await this._updateSubmoduleDirectory(parent);
 			}
 			const [repo, ref] = parent.uri.authority.split('+');
-			const path = Uri.joinPath(parent.uri, parent.name).path;
-			const dataSourceProvider = await this.resolveCurrentDataSourceProvider();
-			const data = await dataSourceProvider.provideDirectory(repo, ref, path, false);
-			// create new Entry to `parent.entries` only if `parent.entries.get(item.path)` is nil
-			for (const item of data.entities || []) {
-				// insertGitHubRESTEntryToDirectory(item, parent);
-			}
+			const path = Uri.joinPath(parent.uri, parent.name).path.slice(1); // delete leading '/'
+			const dataSource = await this._resolveDataSource(uri.scheme);
+			const data = await dataSource.provideDirectory(repo, ref, path, false);
+			await this.populateWithDirectoryEntities(uri, data.entries);
 			return parent.getNameTypePairs();
 		},
 		(uri) => uri.toString()
@@ -201,18 +216,13 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
 			const file = await this.lookupAsFile(uri, false);
-			if (file.data !== null) {
-				return file.data;
+			if (file.content !== null) {
+				return file.content;
 			}
-			/**
-			 * Below code will only be triggered in two cases:
-			 *   1. The GraphQL query is disabled
-			 *   2. The GraphQL query is enabled, but the blob/file is binary
-			 */
-			const [owner, repo] = file.uri.authority.split('+');
-			const blob = await readGitHubFile(owner, repo, file.sha);
-			file.data = decodeBase64(blob.content);
-			return file.data;
+			const [repo, ref] = file.uri.authority.split('+');
+			const dataSource = await this._resolveDataSource(uri.scheme);
+			const data = await dataSource.provideFile(repo, ref, uri.path.slice(1));
+			return (data.content = data.content);
 		},
 		(uri) => uri.toString()
 	);

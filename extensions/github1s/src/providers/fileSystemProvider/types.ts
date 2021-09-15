@@ -12,7 +12,7 @@ export class File implements FileStat {
 	size: number;
 	name: string;
 	sha: string;
-	data?: Uint8Array;
+	content: Uint8Array;
 
 	constructor(public uri: Uri, name: string, options?: any) {
 		this.type = FileType.File;
@@ -21,7 +21,7 @@ export class File implements FileStat {
 		this.name = name;
 		this.sha = options && 'sha' in options ? options.sha : '';
 		this.size = options && 'size' in options ? options.size : 0;
-		this.data = options && 'data' in options ? options.data : null;
+		this.content = options && 'content' in options ? options.data : null;
 	}
 }
 

@@ -6,6 +6,17 @@
 import * as github1s from '../types';
 
 export class GitHub1sRouterParser implements github1s.RouterParser {
+	private static instance: GitHub1sRouterParser = null;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sRouterParser {
+		if (GitHub1sRouterParser.instance) {
+			return GitHub1sRouterParser.instance;
+		}
+		return (GitHub1sRouterParser.instance = new GitHub1sRouterParser());
+	}
+
 	parsePath(path: string): Promise<github1s.RouterState> {
 		return Promise.resolve({ repo: 'conwnet/github1s', ref: 'master', type: github1s.PageType.TREE, filePath: '' });
 	}

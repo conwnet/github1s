@@ -9,20 +9,21 @@ export enum FileType {
 	Directory = 'Directory',
 	File = 'File',
 	Link = 'Link',
+	Submodule = 'Submodule',
 }
 
-export type DirectoryEntity =
+export type DirectoryEntry =
 	| { type: FileType.Directory; path: string } // for director or link
 	| { type: FileType.File; path: string; size?: number }; // for a file
 
 export interface Directory {
-	entities: DirectoryEntity[];
-	// entities doesn't contains all results if `truncated` is true
+	entries: DirectoryEntry[];
+	// entries doesn't contains all results if `truncated` is true
 	truncated: boolean;
 }
 
 export interface File {
-	content: ArrayBuffer;
+	content: Uint8Array;
 }
 
 export interface Submodule {
@@ -131,7 +132,7 @@ export interface CommonQueryOptions {
 	query?: string;
 }
 
-export interface DataSourceProvider {
+export interface DataSource {
 	// if `recursive` is true, it should try to return all subtrees
 	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory>;
 
@@ -274,6 +275,6 @@ export interface PlatformAdapter {
 	// platform name, using for displaying text such as: `open on **GitHub**`
 	readonly name: string;
 
-	resolveDataSourceProvider(): Promisable<DataSourceProvider>;
+	resolveDataSource(): Promisable<DataSource>;
 	resolveRouterParser(): Promisable<RouterParser>;
 }

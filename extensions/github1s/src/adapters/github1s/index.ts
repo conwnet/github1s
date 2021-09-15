@@ -3,19 +3,19 @@
  * @author netcon
  */
 
-import { DataSourceProvider, PlatformAdapter, Promisable, RouterParser } from '../types';
-import { GitHub1sDataSourceProvider } from './data-source-provider';
+import { DataSource, RouterParser, PlatformAdapter, Promisable } from '../types';
+import { GitHub1sDataSource } from './data-source';
 import { GitHub1sRouterParser } from './router-parser';
 
 export class GitHub1sPlatformAdapter implements PlatformAdapter {
 	public scheme: string = 'github1s';
 	public name: string = 'GitHub';
 
-	resolveDataSourceProvider(): Promisable<DataSourceProvider> {
-		return Promise.resolve(new GitHub1sDataSourceProvider());
+	resolveDataSource(): Promisable<DataSource> {
+		return Promise.resolve(GitHub1sDataSource.getInstance());
 	}
 
 	resolveRouterParser(): Promisable<RouterParser> {
-		return Promise.resolve(new GitHub1sRouterParser());
+		return Promise.resolve(GitHub1sRouterParser.getInstance());
 	}
 }

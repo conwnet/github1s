@@ -11,9 +11,9 @@ import {
 	CodeSearchOptions,
 	Commit,
 	CommonQueryOptions,
-	DataSourceProvider,
+	DataSource,
 	Directory,
-	DirectoryEntity,
+	DirectoryEntry,
 	File,
 	FileBlameRange,
 	FileType,
@@ -22,6 +22,8 @@ import {
 } from '../types';
 (self as any).global = self;
 import { Octokit } from '@octokit/core';
+import { toUint8Array } from 'js-base64';
+import { trimStart } from '@/helpers/util';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -29,35 +31,52 @@ const parseRepoFullName = (repoFullName: string) => {
 };
 
 const encodeFilePath = (filePath: string): string => {
-	return filePath
-		.split('/')
-		.map((segment) => encodeURIComponent(segment))
-		.join('/');
+	const pathParts = filePath.split('/').filter(Boolean);
+	return pathParts.map((segment) => encodeURIComponent(segment)).join('/');
 };
 
-export class GitHub1sDataSourceProvider implements DataSourceProvider {
-	private octokit = new Octokit();
+const FileTypeMap = {
+	blob: FileType.File,
+	tree: FileType.Directory,
+	commit: FileType.Submodule,
+};
+
+export class GitHub1sDataSource implements DataSource {
+	private static instance: GitHub1sDataSource = null;
+	private octokit = new Octokit({ request: { fetch } });
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sDataSource {
+		if (GitHub1sDataSource.instance) {
+			return GitHub1sDataSource.instance;
+		}
+		return (GitHub1sDataSource.instance = new GitHub1sDataSource());
+	}
 
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
-		const requestParams = { ref, recursive, path: encodeFilePath(path), ...parseRepoFullName(repoFullName) };
+		const encodedPath = encodeFilePath(path);
+		// github api will return all files if `recursive` exists, even the value if false
+		const recursiveParams = recursive ? { recursive } : {};
+		const requestParams = { ref, path: encodedPath, ...parseRepoFullName(repoFullName), ...recursiveParams };
 		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
-		const parseTreeItem = (treeItem): DirectoryEntity => ({
+		const parseTreeItem = (treeItem): DirectoryEntry => ({
 			path: treeItem.path,
-			type: treeItem.type === 'blob' ? FileType.File : FileType.Directory,
+			type: FileTypeMap[treeItem.type] || FileType.File,
 			size: treeItem.size,
 		});
 
 		return {
-			entities: (data.tree || []).map(parseTreeItem),
+			entries: (data.tree || []).map(parseTreeItem),
 			truncated: !!data.truncated,
 		};
 	}
 
-	provideFile(repoFullName: string, ref: string, path: string): Promisable<File> {
+	async provideFile(repoFullName: string, ref: string, path: string): Promise<File> {
 		const { owner, repo } = parseRepoFullName(repoFullName);
-		return fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${encodeFilePath(path)}`)
-			.then((response) => response.arrayBuffer())
-			.then((buffer) => ({ content: buffer }));
+		const requestParams = { owner, repo, ref, path };
+		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/contents/{path}', requestParams);
+		return { content: toUint8Array((data as any).content) };
 	}
 
 	provideBranches(repo: string, options: CommonQueryOptions): Promisable<Branch[]> {

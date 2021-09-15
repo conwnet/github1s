@@ -18,8 +18,7 @@ import {
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 import { Directory } from './fileSystemProvider/types';
 
-export class GitHub1sSubmoduleDecorationProvider
-	implements FileDecorationProvider, Disposable {
+export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvider, Disposable {
 	private readonly disposable: Disposable;
 
 	// the directory which is submodule will be decorated with this
@@ -42,10 +41,7 @@ export class GitHub1sSubmoduleDecorationProvider
 		this._onDidChangeFileDecorations.fire(undefined);
 	}
 
-	provideFileDecoration(
-		uri: Uri,
-		_token: CancellationToken
-	): ProviderResult<FileDecoration> {
+	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
 		return this.fsProvider.lookup(uri, false).then((entry) => {
 			if (entry instanceof Directory && entry.isSubmodule === true) {
 				return GitHub1sSubmoduleDecorationProvider.submoduleDecorationData;
