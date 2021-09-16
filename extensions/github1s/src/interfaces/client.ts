@@ -3,12 +3,7 @@
  * @author xcv58
  */
 
-import {
-	ApolloClient,
-	createHttpLink,
-	InMemoryCache,
-	gql,
-} from '@apollo/client/core';
+import { ApolloClient, createHttpLink, InMemoryCache, gql } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
 import { getOAuthToken } from '@/helpers/context';
 

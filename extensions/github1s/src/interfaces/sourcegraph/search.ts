@@ -5,12 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { TextSearchQuery, TextSearchOptions } from 'vscode';
-import {
-	escapeRegexp,
-	sourcegraphClient,
-	combineGlobsToRegExp,
-	getRepoRefQueryString,
-} from './common';
+import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp, getRepoRefQueryString } from './common';
 
 export const buildTextSearchQueryString = (
 	owner: string,
@@ -23,12 +18,8 @@ export const buildTextSearchQueryString = (
 	// the string may looks like `case:yse file:src -file:node_modules`
 	const optionsString = [
 		query.isCaseSensitive ? `case:yes` : '',
-		options.includes?.length
-			? `file:${combineGlobsToRegExp(options.includes)}`
-			: '',
-		options.excludes?.length
-			? `-file:${combineGlobsToRegExp(options.excludes)}`
-			: '',
+		options.includes?.length ? `file:${combineGlobsToRegExp(options.includes)}` : '',
+		options.excludes?.length ? `-file:${combineGlobsToRegExp(options.excludes)}` : '',
 	]
 		.filter(Boolean)
 		.join(' ');
@@ -45,9 +36,7 @@ export const buildTextSearchQueryString = (
 		return `/\b${patternString}\b/`;
 	}
 
-	return [repoRefQueryString, optionsString, patternString]
-		.filter(Boolean)
-		.join(' ');
+	return [repoRefQueryString, optionsString, patternString].filter(Boolean).join(' ');
 };
 
 const textSearchQuery = gql`

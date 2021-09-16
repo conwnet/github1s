@@ -3,11 +3,7 @@
  * @author netcon
  */
 
-import {
-	ApolloClient,
-	createHttpLink,
-	InMemoryCache,
-} from '@apollo/client/core';
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { trimEnd, trimStart } from '@/helpers/util';
 
 const sourcegraphLink = createHttpLink({
@@ -34,11 +30,7 @@ export const canBeConvertToRegExp = (str: string) => {
 export const combineGlobsToRegExp = (globs: string[]) => {
 	// only support very simple globs convert now
 	const result = Array.from(
-		new Set(
-			globs.map((glob: string) =>
-				trimEnd(trimStart(glob, '*/'), '*/').replace(/^\./, '\\.')
-			)
-		)
+		new Set(globs.map((glob: string) => trimEnd(trimStart(glob, '*/'), '*/').replace(/^\./, '\\.')))
 	)
 		// if the glob still not can be convert to a regexp, just ignore it
 		.filter((item) => canBeConvertToRegExp(item))
@@ -47,19 +39,11 @@ export const combineGlobsToRegExp = (globs: string[]) => {
 	return canBeConvertToRegExp(result) ? result : '';
 };
 
-export const escapeRegexp = (text: string): string =>
-	text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
-export const getRepoRefQueryString = (
-	owner: string,
-	repo: string,
-	ref: string
-) => {
+export const getRepoRefQueryString = (owner: string, repo: string, ref: string) => {
 	// the string may looks like `^github\.com/conwnet/github1s$`
 	const repoPattern = `^${escapeRegexp(`github\.com/${owner}/${repo}`)}$`;
-	const repoRefQueryString =
-		ref.toUpperCase() === 'HEAD'
-			? `repo:${repoPattern}`
-			: `repo:${repoPattern}@${ref}`;
+	const repoRefQueryString = ref.toUpperCase() === 'HEAD' ? `repo:${repoPattern}` : `repo:${repoPattern}@${ref}`;
 	return repoRefQueryString;
 };

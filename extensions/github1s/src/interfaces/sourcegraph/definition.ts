@@ -26,13 +26,7 @@ export interface SymbolDefinition {
 }
 
 const LSIFDefinitionsQuery = gql`
-	query(
-		$repository: String!
-		$ref: String!
-		$path: String!
-		$line: Int!
-		$character: Int!
-	) {
+	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {
@@ -87,13 +81,9 @@ const getLSIFDefinitions = async (
 			character,
 		},
 	});
-	const definitionNodes =
-		response?.data?.repository?.commit?.blob?.lsif?.definitions?.nodes;
+	const definitionNodes = response?.data?.repository?.commit?.blob?.lsif?.definitions?.nodes;
 	return (definitionNodes || []).map(({ resource, range }) => {
-		const [owner, repo] = resource.repository.name
-			.split('/')
-			.filter(Boolean)
-			.slice(-2);
+		const [owner, repo] = resource.repository.name.split('/').filter(Boolean).slice(-2);
 		return {
 			precise: true,
 			owner,
@@ -118,14 +108,7 @@ export const getSymbolDefinitions = (
 	// fallback to search-based definitions, using
 	// two promise instead of `await` to request in
 	// parallel for getting result as soon as possible
-	const LSIFDefinitionsPromise = getLSIFDefinitions(
-		owner,
-		repo,
-		ref,
-		path,
-		line,
-		character
-	);
+	const LSIFDefinitionsPromise = getLSIFDefinitions(owner, repo, ref, path, line, character);
 	const searchDefinitionsPromise = getSymbolPositions(owner, repo, ref, symbol);
 
 	return LSIFDefinitionsPromise.then((LSIFDefinitions) => {

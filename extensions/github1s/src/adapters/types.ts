@@ -116,6 +116,13 @@ export interface CodeReview {
 	};
 }
 
+export interface FileList {
+	files: {
+		scope?: ResourceScope;
+		path: string;
+	}[];
+}
+
 export interface FileBlameRange {
 	age: number;
 	startingLine: number;
@@ -129,7 +136,7 @@ export type MarkdownString = string;
 export interface CommonQueryOptions {
 	page: number;
 	pageSize: number;
-	query: string;
+	query?: string;
 }
 
 export interface DataSource {
@@ -147,14 +154,6 @@ export interface DataSource {
 
 	provideTag(repo: string, tag: string): Promisable<Tag | null>;
 
-	provideCommits(
-		repo: string,
-		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
-	): Promisable<Commit[]>;
-
-	// the ref here may be a commitSha, branch, tag, or 'HEAD'
-	provideCommit(repo: string, ref: string): Promisable<Commit | null>;
-
 	// use `report` to populate search results gradually
 	provideTextSearchResults(
 		repo: string,
@@ -164,12 +163,20 @@ export interface DataSource {
 		report: (results: CodeLocation[]) => void
 	): Promisable<{ limitHit: boolean }>;
 
+	provideCommits(
+		repo: string,
+		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
+	): Promisable<Commit[]>;
+
+	// the ref here may be a commitSha, branch, tag, or 'HEAD'
+	provideCommit(repo: string, ref: string): Promisable<(Commit & FileList) | null>;
+
 	provideCodeReviews(
 		repo: string,
 		options: CommonQueryOptions & { state?: CodeReviewStatus; creator?: string }
 	): Promisable<CodeReview[]>;
 
-	provideCodeReview(repo: string, id: string): Promisable<CodeReview | null>;
+	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & FileList) | null>;
 
 	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]>;
 

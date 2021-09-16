@@ -16,6 +16,7 @@ import {
 	DirectoryEntry,
 	File,
 	FileBlameRange,
+	FileList,
 	FileType,
 	Promisable,
 	Tag,
@@ -121,6 +122,17 @@ export class GitHub1sDataSource implements DataSource {
 		return this.cachedBranches.find((item) => item.name === tag);
 	}
 
+	async provideTextSearchResults(
+		repoFullName: string,
+		ref: string,
+		query: string,
+		options: CodeSearchOptions,
+		report: (results: CodeLocation[]) => void
+	): Promise<{ limitHit: boolean }> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		return { limitHit: false };
+	}
+
 	async provideCommits(
 		repoFullName: string,
 		options: CommonQueryOptions & {
@@ -129,25 +141,39 @@ export class GitHub1sDataSource implements DataSource {
 			path?: string;
 		}
 	): Promise<Commit[]> {
-		// const { owner, repo } = parseRepoFullName(repoFullName);
-		// const requestParams = { owner, repo, page: options.page, per_page: options.pageSize};
-		// const { data } = await this.octokit.request('/repos/{owner}/{repo}/commits', requestParams);
-		throw new Error('Method not implemented.');
-
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const queryParams = {
+			page: options.page,
+			per_page: options.pageSize,
+			sha: options.from,
+			path: options.path,
+			author: options.author,
+		};
+		const requestParams = { owner, repo, ...queryParams };
+		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/commits', requestParams);
+		return data.map((item) => ({
+			sha: item.sha,
+			author: item.commit.author.name,
+			email: item.commit.author.email,
+			message: item.commit.message,
+			committer: item.commit.committer.name,
+			createTime: item.commit.author.date,
+		}));
 	}
 
-	provideCommit(repo: string, ref: string): Promisable<Commit> {
-		throw new Error('Method not implemented.');
-	}
-
-	provideTextSearchResults(
-		repo: string,
-		ref: string,
-		query: string,
-		options: CodeSearchOptions,
-		report: (results: CodeLocation[]) => void
-	): Promisable<{ limitHit: boolean }> {
-		throw new Error('Method not implemented.');
+	async provideCommit(repoFullName: string, ref: string): Promise<Commit & FileList> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo, ref };
+		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
+		return {
+			sha: data.sha,
+			author: data.commit.author.name,
+			email: data.commit.author.email,
+			message: data.commit.message,
+			committer: data.commit.committer.name,
+			createTime: data.commit.author.date,
+			files: data.files.map((item) => ({ path: item.filename })),
+		};
 	}
 
 	provideCodeReviews(
@@ -157,7 +183,7 @@ export class GitHub1sDataSource implements DataSource {
 		throw new Error('Method not implemented.');
 	}
 
-	provideCodeReview(repo: string, id: string): Promisable<CodeReview> {
+	provideCodeReview(repo: string, id: string): Promisable<CodeReview & FileList> {
 		throw new Error('Method not implemented.');
 	}
 

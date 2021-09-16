@@ -47,9 +47,7 @@ export const getBranches = (owner: string, repo: string) => {
 				repo,
 			},
 		})
-		.then((response) =>
-			response.data?.repository?.refs?.nodes?.map((x) => x.name)
-		);
+		.then((response) => response.data?.repository?.refs?.nodes?.map((x) => x.name));
 };
 
 /**
@@ -93,12 +91,7 @@ export const githubObjectQuery = gql`
  * GraphQL to get git blame data of a file
  */
 export const githubFileBlameQuery = gql`
-	query fileBlameQuery(
-		$owner: String!
-		$repo: String!
-		$ref: String!
-		$path: String!
-	) {
+	query fileBlameQuery($owner: String!, $repo: String!, $ref: String!, $path: String!) {
 		repository(owner: $owner, name: $repo) {
 			object(expression: $ref) {
 				... on Commit {

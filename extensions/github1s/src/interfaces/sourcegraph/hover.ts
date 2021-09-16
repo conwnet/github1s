@@ -12,13 +12,7 @@ export interface SymbolHover {
 }
 
 const LSIFHoverQuery = gql`
-	query(
-		$repository: String!
-		$ref: String!
-		$path: String!
-		$line: Int!
-		$character: Int!
-	) {
+	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {
@@ -55,8 +49,7 @@ const getLSIFHover = async (
 			character,
 		},
 	});
-	const markdown =
-		response?.data?.repository?.commit?.blob?.lsif?.hover?.markdown?.text;
+	const markdown = response?.data?.repository?.commit?.blob?.lsif?.hover?.markdown?.text;
 
 	if (!markdown) {
 		return null;

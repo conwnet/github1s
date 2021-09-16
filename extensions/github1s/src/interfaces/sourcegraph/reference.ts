@@ -26,13 +26,7 @@ export interface SymbolReference {
 }
 
 const LSIFReferencesQuery = gql`
-	query(
-		$repository: String!
-		$ref: String!
-		$path: String!
-		$line: Int!
-		$character: Int!
-	) {
+	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {
@@ -87,13 +81,9 @@ const getLSIFReferences = async (
 			character,
 		},
 	});
-	const referenceNodes =
-		response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
+	const referenceNodes = response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
 	return (referenceNodes || []).map(({ resource, range }) => {
-		const [owner, repo] = resource.repository.name
-			.split('/')
-			.filter(Boolean)
-			.slice(-2);
+		const [owner, repo] = resource.repository.name.split('/').filter(Boolean).slice(-2);
 		return {
 			precise: true,
 			owner,
@@ -118,14 +108,7 @@ export const getSymbolReferences = (
 	// fallback to search-based references, using
 	// two promise instead of `await` to request in
 	// parallel for getting result as soon as possible
-	const LSIFReferencesPromise = getLSIFReferences(
-		owner,
-		repo,
-		ref,
-		path,
-		line,
-		character
-	);
+	const LSIFReferencesPromise = getLSIFReferences(owner, repo, ref, path, line, character);
 	const searchReferencesPromise = getSymbolPositions(owner, repo, ref, symbol);
 
 	return LSIFReferencesPromise.then((LSIFReferences) => {
