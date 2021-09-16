@@ -15,23 +15,22 @@ import {
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
-import { getGitHubAllFiles } from '@/interfaces/github-api-rest';
+import * as adapterTypes from '@/adapters/types';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
-import { insertGitHubRESTEntryToDirectory } from './fileSystemProvider/util';
-import { GitHubRESTEntry } from './fileSystemProvider/types';
+import platformAdapterManager from '@/adapters/manager';
 
-export class GitHub1sFileSearchProvider
-	implements FileSearchProvider, Disposable {
-	static scheme = 'github1s';
+export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposable {
+	private static instance: GitHub1sFileSearchProvider = null;
 	private readonly disposable: Disposable;
 	private fileUrisMap: Map<string, Uri[]> = new Map();
 
-	constructor(private fsProvider: GitHub1sFileSystemProvider) {
-		// Preload the files for better `ctrl/command + p` experience.
-		// Once we have loaded the files, it will also populate the files into
-		// fileSystemProvider's cache. So after that, we don't have to send
-		// a request when you open the new directory in explorer late
-		this.loadFilesForCurrentAuthority();
+	private constructor() {}
+
+	public static getInstance(): GitHub1sFileSearchProvider {
+		if (GitHub1sFileSearchProvider.instance) {
+			return GitHub1sFileSearchProvider.instance;
+		}
+		return (GitHub1sFileSearchProvider.instance = new GitHub1sFileSearchProvider());
 	}
 
 	dispose() {
@@ -54,28 +53,22 @@ export class GitHub1sFileSearchProvider
 			if (this.fileUrisMap.has(authority)) {
 				return this.fileUrisMap.get(authority);
 			}
-			const [owner, repo, ref] = authority.split('+');
-			const treeData = await getGitHubAllFiles(owner, repo, ref);
-			const rootDirectoryUri = Uri.parse('').with({
-				scheme: GitHub1sFileSystemProvider.scheme,
-				authority,
-				path: '/',
-			});
+
+			const [repo, ref] = authority.split('+');
+			const currentAdapter = platformAdapterManager.getCurrentAdapter();
+			const dataSource = await currentAdapter.resolveDataSource();
+			const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '', true);
+			const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });
 
 			// the number of items in the tree array maybe exceeded maximum limit, only
 			// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
-			if (!treeData.truncated) {
-				const rootDirectory = await this.fsProvider.lookupAsDirectory(
-					rootDirectoryUri,
-					false
-				);
-				(treeData.tree || []).forEach((githubEntry: GitHubRESTEntry) => {
-					insertGitHubRESTEntryToDirectory(githubEntry, rootDirectory);
-				});
+			if (!rootDirectoryData.truncated) {
+				const fsProvider = GitHub1sFileSystemProvider.getInstance();
+				fsProvider.populateWithDirectoryEntities(rootDirectoryUri, rootDirectoryData.entries);
 			}
 
-			const fileUris = ((treeData.tree || []) as GitHubRESTEntry[])
-				.filter((item) => item.type === 'blob')
+			const fileUris = (rootDirectoryData.entries || [])
+				.filter((item) => item.type === adapterTypes.FileType.File)
 				.map((item) => Uri.joinPath(rootDirectoryUri, item.path));
 			this.fileUrisMap.set(authority, fileUris);
 			return fileUris;

@@ -28,10 +28,7 @@ export const reuseable = <T extends (...args: any[]) => Promise<any>>(
 	};
 };
 
-export const throttle = <T extends (...args: any[]) => any>(
-	func: T,
-	interval: number
-) => {
+export const throttle = <T extends (...args: any[]) => any>(func: T, interval: number) => {
 	let timer = null;
 	return function (...args: Parameters<T>): ReturnType<T> {
 		if (timer) {
@@ -42,10 +39,7 @@ export const throttle = <T extends (...args: any[]) => any>(
 	};
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
-	func: T,
-	wait: number
-) => {
+export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
 	let timer = null;
 	return function (...args: Parameters<T>): void {
 		timer && clearTimeout(timer);
@@ -54,10 +48,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 // debounce an async func. once an async func canceled, it throws a exception
-export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(
-	func: T,
-	wait: number
-) => {
+export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(func: T, wait: number) => {
 	let timer = null;
 	let previousReject = null;
 	return function (...args: Parameters<T>): ReturnType<T> {

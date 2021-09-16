@@ -16,10 +16,8 @@ import { GitHub1sDefinitionProvider } from './definitionProvider';
 import { GitHub1sReferenceProvider } from './referenceProvider';
 import { GitHub1sHoverProvider } from './hoverProvider';
 
-export const fileSystemProvider = new GitHub1sFileSystemProvider();
-// export const fileSearchProvider = new GitHub1sFileSearchProvider(fileSystemProvider);
 export const textSearchProvider = new GitHub1sTextSearchProvider();
-export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider(fileSystemProvider);
+// export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider();
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
 export const definitionProvider = new GitHub1sDefinitionProvider();
@@ -38,10 +36,11 @@ export const registerVSCodeProviders = () => {
 
 	allSchemes.forEach((scheme) => {
 		context.subscriptions.push(
-			vscode.workspace.registerFileSystemProvider(scheme, fileSystemProvider, {
+			vscode.workspace.registerFileSystemProvider(scheme, GitHub1sFileSystemProvider.getInstance(), {
 				isCaseSensitive: true,
 				isReadonly: true,
-			})
+			}),
+			vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance())
 		);
 	});
 

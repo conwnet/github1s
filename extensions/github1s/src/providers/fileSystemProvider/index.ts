@@ -36,9 +36,19 @@ const createEntry = (type: adapterTypes.FileType, uri: Uri, name: string, option
 };
 
 export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposable {
+	private static instance: GitHub1sFileSystemProvider = null;
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
 	private root: Map<string, Directory | File> = new Map();
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sFileSystemProvider {
+		if (GitHub1sFileSystemProvider.instance) {
+			return GitHub1sFileSystemProvider.instance;
+		}
+		return (GitHub1sFileSystemProvider.instance = new GitHub1sFileSystemProvider());
+	}
 
 	onDidChangeFile: Event<FileChangeEvent[]> = this._emitter.event;
 

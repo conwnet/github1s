@@ -21,8 +21,7 @@ import { getTextSearchResults } from '@/interfaces/sourcegraph/search';
 import { showSourcegraphSearchMessage } from '@/messages';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 
-export class GitHub1sTextSearchProvider
-	implements TextSearchProvider, Disposable {
+export class GitHub1sTextSearchProvider implements TextSearchProvider, Disposable {
 	static scheme = 'github1s';
 	private readonly disposable: Disposable;
 
@@ -38,13 +37,7 @@ export class GitHub1sTextSearchProvider
 	) {
 		return router.getAuthority().then(async (authority) => {
 			const [owner, repo, ref] = authority.split('+');
-			const searchResults = await getTextSearchResults(
-				owner,
-				repo,
-				ref,
-				query,
-				options
-			);
+			const searchResults = await getTextSearchResults(owner, repo, ref, query, options);
 
 			(searchResults.results || []).forEach((item) => {
 				const fileUri = Uri.parse('').with({
@@ -59,19 +52,12 @@ export class GitHub1sTextSearchProvider
 						uri: fileUri,
 						ranges: (match.offsetAndLengths || []).map(
 							(range) =>
-								new Range(
-									new Position(match.lineNumber, range[0]),
-									new Position(match.lineNumber, range[0] + range[1])
-								)
+								new Range(new Position(match.lineNumber, range[0]), new Position(match.lineNumber, range[0] + range[1]))
 						),
 						preview: {
 							text: match.preview,
 							matches: (match.offsetAndLengths || []).map(
-								(range) =>
-									new Range(
-										new Position(0, range[0]),
-										new Position(0, range[0] + range[1])
-									)
+								(range) => new Range(new Position(0, range[0]), new Position(0, range[0] + range[1]))
 							),
 						},
 					});

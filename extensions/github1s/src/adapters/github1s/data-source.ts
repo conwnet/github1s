@@ -23,7 +23,8 @@ import {
 (self as any).global = self;
 import { Octokit } from '@octokit/core';
 import { toUint8Array } from 'js-base64';
-import { trimStart } from '@/helpers/util';
+import { reuseable } from '@/helpers/func';
+import { matchSorter } from 'match-sorter';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -43,7 +44,9 @@ const FileTypeMap = {
 
 export class GitHub1sDataSource implements DataSource {
 	private static instance: GitHub1sDataSource = null;
-	private octokit = new Octokit({ request: { fetch } });
+	private octokit = new Octokit({ auth: process.env.AUTH_TOKEN || '', request: { fetch } });
+	private cachedBranches: Branch[] = null;
+	private cachedTags: Branch[] = null;
 
 	private constructor() {}
 
@@ -79,31 +82,58 @@ export class GitHub1sDataSource implements DataSource {
 		return { content: toUint8Array((data as any).content) };
 	}
 
-	provideBranches(repo: string, options: CommonQueryOptions): Promisable<Branch[]> {
-		throw new Error('Method not implemented.');
+	getMatchingRefs = reuseable(
+		async (repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch | Tag[]> => {
+			const { owner, repo } = parseRepoFullName(repoFullName);
+			const requestParams = { owner, repo, ref };
+			const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
+			return data.map((item) => ({ name: item.ref.slice(ref === 'heads' ? 11 : 10), commitSha: item.object.sha }));
+		}
+	);
+
+	async provideBranches(repoFullName: string, options: CommonQueryOptions): Promise<Branch[]> {
+		if (!this.cachedBranches) {
+			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
+		}
+		const matchedBranches = matchSorter(this.cachedBranches, options.query, { keys: ['name'] });
+		return matchedBranches.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
-	provideBranch(repo: string, branch: string): Promisable<Branch> {
-		throw new Error('Method not implemented.');
+	async provideBranch(repoFullName: string, branch: string): Promise<Branch> {
+		if (!this.cachedBranches) {
+			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
+		}
+		return this.cachedBranches.find((item) => item.name === branch);
 	}
 
-	provideTags(repo: string, options: CommonQueryOptions): Promisable<Tag[]> {
-		throw new Error('Method not implemented.');
+	async provideTags(repoFullName: string, options: CommonQueryOptions): Promise<Tag[]> {
+		if (!this.cachedTags) {
+			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'tags')) as Tag[];
+		}
+		const matchedTags = matchSorter(this.cachedBranches, options.query, { keys: ['name'] });
+		return matchedTags.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
-	provideTag(repo: string, tag: string): Promisable<Tag> {
-		throw new Error('Method not implemented.');
+	async provideTag(repoFullName: string, tag: string): Promise<Tag> {
+		if (!this.cachedBranches) {
+			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
+		}
+		return this.cachedBranches.find((item) => item.name === tag);
 	}
 
-	provideCommits(
-		repo: string,
+	async provideCommits(
+		repoFullName: string,
 		options: CommonQueryOptions & {
 			from?: string;
 			author?: string;
 			path?: string;
 		}
-	): Promisable<Commit[]> {
+	): Promise<Commit[]> {
+		// const { owner, repo } = parseRepoFullName(repoFullName);
+		// const requestParams = { owner, repo, page: options.page, per_page: options.pageSize};
+		// const { data } = await this.octokit.request('/repos/{owner}/{repo}/commits', requestParams);
 		throw new Error('Method not implemented.');
+
 	}
 
 	provideCommit(repo: string, ref: string): Promisable<Commit> {

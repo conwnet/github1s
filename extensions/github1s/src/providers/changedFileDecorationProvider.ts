@@ -43,13 +43,8 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	},
 };
 
-const getFileDecorationFromChangeFiles = (
-	uri: Uri,
-	changedFiles: RepositoryChangedFile[]
-): FileDecoration => {
-	const changedFile = changedFiles?.find(
-		(changedFile) => changedFile.filename === uri.path.slice(1)
-	);
+const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: RepositoryChangedFile[]): FileDecoration => {
+	const changedFile = changedFiles?.find((changedFile) => changedFile.filename === uri.path.slice(1));
 
 	if (changedFile) {
 		return changedFileDecorationDataMap[changedFile.status];
@@ -69,28 +64,17 @@ const getFileDecorationFromChangeFiles = (
 	return null;
 };
 
-const getFileDecorationForPull = async (
-	uri: Uri,
-	pullNumber: number
-): Promise<FileDecoration> => {
-	const changedFiles = await repository
-		.getPullManager()
-		.getPullFiles(pullNumber);
+const getFileDecorationForPull = async (uri: Uri, pullNumber: number): Promise<FileDecoration> => {
+	const changedFiles = await repository.getPullManager().getPullFiles(pullNumber);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
-const getFileDecorationForCommit = async (
-	uri: Uri,
-	commitSha: string
-): Promise<FileDecoration> => {
-	const changedFiles = await repository
-		.getCommitManager()
-		.getCommitFiles(commitSha);
+const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration> => {
+	const changedFiles = await repository.getCommitManager().getCommitFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
-export class GitHub1sChangedFileDecorationProvider
-	implements FileDecorationProvider, Disposable {
+export class GitHub1sChangedFileDecorationProvider implements FileDecorationProvider, Disposable {
 	private readonly disposable: Disposable;
 
 	private _onDidChangeFileDecorations = new EventEmitter<undefined>();
@@ -104,10 +88,7 @@ export class GitHub1sChangedFileDecorationProvider
 		this._onDidChangeFileDecorations.fire(undefined);
 	}
 
-	provideFileDecoration(
-		uri: Uri,
-		_token: CancellationToken
-	): ProviderResult<FileDecoration> {
+	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
 		if (uri.scheme !== GitHub1sFileSystemProvider.scheme) {
 			return null;
 		}

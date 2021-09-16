@@ -127,9 +127,9 @@ export interface FileBlameRange {
 export type MarkdownString = string;
 
 export interface CommonQueryOptions {
-	offset: number;
-	limit: number;
-	query?: string;
+	page: number;
+	pageSize: number;
+	query: string;
 }
 
 export interface DataSource {

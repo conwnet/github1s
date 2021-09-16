@@ -23,52 +23,30 @@ export interface UriState {
 const handleFileSystemRequestError = (error: RequestError) => {
 	if (error instanceof RequestRateLimitError) {
 		if (!error.token) {
-			throw vscode.FileSystemError.NoPermissions(
-				'API Rate Limit Exceeded, Please Offer an OAuth Token.'
-			);
+			throw vscode.FileSystemError.NoPermissions('API Rate Limit Exceeded, Please Offer an OAuth Token.');
 		}
-		throw vscode.FileSystemError.NoPermissions(
-			'API Rate Limit Exceeded, Please Change Another OAuth Token.'
-		);
+		throw vscode.FileSystemError.NoPermissions('API Rate Limit Exceeded, Please Change Another OAuth Token.');
 	}
 	if (error instanceof RequestInvalidTokenError) {
-		throw vscode.FileSystemError.NoPermissions(
-			'Current OAuth Token Is Invalid, Please Change Another One.'
-		);
+		throw vscode.FileSystemError.NoPermissions('Current OAuth Token Is Invalid, Please Change Another One.');
 	}
 	if (error instanceof RequestNotFoundError) {
 		throw vscode.FileSystemError.FileNotFound('GitHub Resource Not Found');
 	}
-	throw vscode.FileSystemError.Unavailable(
-		error.message || 'Unknown Error Occurred When Request To GitHub'
+	throw vscode.FileSystemError.Unavailable(error.message || 'Unknown Error Occurred When Request To GitHub');
+};
+
+export const readGitHubDirectory = (owner: string, repo: string, ref: string, path: string, options?: RequestInit) => {
+	return fetch(
+		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(path).replace(/^\//, ':')}`,
+		options
+	).catch(handleFileSystemRequestError);
+};
+
+export const readGitHubFile = (owner: string, repo: string, fileSha: string, options?: RequestInit) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs/${fileSha}`, options).catch(
+		handleFileSystemRequestError
 	);
-};
-
-export const readGitHubDirectory = (
-	owner: string,
-	repo: string,
-	ref: string,
-	path: string,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(
-			path
-		).replace(/^\//, ':')}`,
-		options
-	).catch(handleFileSystemRequestError);
-};
-
-export const readGitHubFile = (
-	owner: string,
-	repo: string,
-	fileSha: string,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/blobs/${fileSha}`,
-		options
-	).catch(handleFileSystemRequestError);
 };
 
 export const validateToken = (token: string) => {
@@ -93,55 +71,31 @@ export const validateToken = (token: string) => {
 // [List matching references](https://docs.github.com/en/rest/reference/git#list-matching-references)
 // can returned all branches for a request, and there is an issue for this API
 // https://github.com/github/docs/issues/3863
-export const getGitHubBranchRefs = (
-	owner: string,
-	repo: string,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/heads`,
-		options
-	).then((branchRefs) => {
+export const getGitHubBranchRefs = (owner: string, repo: string, options?: RequestInit) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/heads`, options).then((branchRefs) => {
 		// the field in branchRef will looks like `refs/heads/<branch>`, we add a name field here
 		return branchRefs.map((item) => ({ ...item, name: item.ref.slice(11) }));
 	});
 };
 
 // It's similar to `getGithubBranchRefs`
-export const getGitHubTagRefs = (
-	owner: string,
-	repo: string,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/tags`,
-		options
-	).then((tagRefs) => {
+export const getGitHubTagRefs = (owner: string, repo: string, options?: RequestInit) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/git/matching-refs/tags`, options).then((tagRefs) => {
 		// the field in tagRef will looks like `refs/tags/<tag>`, we add a name field here
 		return tagRefs.map((item) => ({ ...item, name: item.ref.slice(10) }));
 	});
 };
 
-export const getGitHubAllFiles = (
-	owner: string,
-	repo: string,
-	ref: string,
-	path: string = '/'
-) => {
+export const getGitHubAllFiles = (owner: string, repo: string, ref: string, path: string = '/') => {
 	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(
-			path
-		).replace(/^\//, ':')}?recursive=1`
+		`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}${encodeFilePath(path).replace(
+			/^\//,
+			':'
+		)}?recursive=1`
 	).catch(handleFileSystemRequestError);
 };
 
-export const getGitHubPulls = (
-	owner: string,
-	repo: string,
-	pageNumber = 0,
-	pageSize = 100,
-	options?: RequestInit
-) => {
+export const getGitHubPulls = (owner: string, repo: string, pageNumber = 0, pageSize = 100, options?: RequestInit) => {
 	// TODO: only recent 100 pull requests are supported now
 	return fetch(
 		`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&order=created&per_page=${pageSize}&page=${pageNumber}`,
@@ -149,29 +103,13 @@ export const getGitHubPulls = (
 	);
 };
 
-export const getGitHubPullDetail = (
-	owner: string,
-	repo: string,
-	pullNumber: number,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`,
-		options
-	);
+export const getGitHubPullDetail = (owner: string, repo: string, pullNumber: number, options?: RequestInit) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}`, options);
 };
 
-export const getGitHubPullFiles = (
-	owner: string,
-	repo: string,
-	pullNumber: number,
-	options?: RequestInit
-) => {
+export const getGitHubPullFiles = (owner: string, repo: string, pullNumber: number, options?: RequestInit) => {
 	// TODO: only the number of change files not greater than 100 are supported now!
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`,
-		options
-	);
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files?per_page=100`, options);
 };
 
 export const getGitHubCommits = (
@@ -201,14 +139,6 @@ export const getGitHubFileCommits = (
 	);
 };
 
-export const getGitHubCommitDetail = (
-	owner: string,
-	repo: string,
-	commitSha: string,
-	options?: RequestInit
-) => {
-	return fetch(
-		`https://api.github.com/repos/${owner}/${repo}/commits/${commitSha}`,
-		options
-	);
+export const getGitHubCommitDetail = (owner: string, repo: string, commitSha: string, options?: RequestInit) => {
+	return fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${commitSha}`, options);
 };
