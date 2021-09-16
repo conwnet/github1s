@@ -3,11 +3,7 @@
  * @author netcon
  */
 
-import {
-	getGitHubPulls,
-	getGitHubPullFiles,
-	getGitHubPullDetail,
-} from '@/interfaces/github-api-rest';
+import { getGitHubPulls, getGitHubPullFiles, getGitHubPullDetail } from '@/interfaces/github-api-rest';
 import { getFetchOptions } from '@/helpers/fetch';
 import { reuseable } from '@/helpers/func';
 import { Barrier } from '@/helpers/async';
@@ -39,10 +35,7 @@ export class GitHubPullManager implements PullManager {
 	);
 
 	getItem = reuseable(
-		async (
-			pullNumber: number,
-			forceUpdate: boolean = false
-		): Promise<RepositoryPull> => {
+		async (pullNumber: number, forceUpdate: boolean = false): Promise<RepositoryPull> => {
 			if (forceUpdate || !this._pullMap.has(pullNumber)) {
 				const pull = await getGitHubPullDetail(
 					this.repository.getOwner(),
@@ -82,10 +75,7 @@ export class GitHubPullManager implements PullManager {
 	}
 
 	public getPullFiles = reuseable(
-		async (
-			pullNumber: number,
-			forceUpdate: boolean = false
-		): Promise<RepositoryChangedFile[]> => {
+		async (pullNumber: number, forceUpdate: boolean = false): Promise<RepositoryChangedFile[]> => {
 			return getGitHubPullFiles(
 				this.repository.getOwner(),
 				this.repository.getRepo(),

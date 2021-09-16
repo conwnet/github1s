@@ -29,23 +29,14 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider {
 		const path = document.uri.path;
 		const { line, character } = position;
 
-		const symbolDefinitions = await getSymbolDefinitions(
-			owner,
-			repo,
-			ref,
-			path,
-			line,
-			character,
-			symbol
-		);
+		const symbolDefinitions = await getSymbolDefinitions(owner, repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {
 			showSourcegraphSymbolMessage(owner, repo, ref, path, line, character);
 		}
 
 		return symbolDefinitions.map((repoDefinition) => {
-			const isSameRepo =
-				repoDefinition.owner === owner && repoDefinition.repo === repo;
+			const isSameRepo = repoDefinition.owner === owner && repoDefinition.repo === repo;
 			// if the definition target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)

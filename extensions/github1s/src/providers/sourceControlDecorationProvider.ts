@@ -23,8 +23,7 @@ const selectedViewItemDecoration: FileDecoration = {
 	tooltip: 'Selected',
 };
 
-export class GitHub1sSourceControlDecorationProvider
-	implements FileDecorationProvider, Disposable {
+export class GitHub1sSourceControlDecorationProvider implements FileDecorationProvider, Disposable {
 	public static fileSchema: string = 'github1s-source-control-file';
 	public static pullSchema: string = 'github1s-source-control-pull';
 	public static commitSchema: string = 'github1s-source-control-commit';
@@ -41,10 +40,7 @@ export class GitHub1sSourceControlDecorationProvider
 		this._onDidChangeFileDecorations.fire(undefined);
 	}
 
-	provideFileDecoration(
-		uri: Uri,
-		_token: CancellationToken
-	): ProviderResult<FileDecoration> {
+	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.fileSchema) {
 			const query = queryString.parse(uri.query);
 			return changedFileDecorationDataMap[query.status as string];
@@ -53,18 +49,14 @@ export class GitHub1sSourceControlDecorationProvider
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.pullSchema) {
 			return router.getState().then((routerState) => {
 				const query = queryString.parse(uri.query);
-				return +routerState.pullNumber === +query.number
-					? selectedViewItemDecoration
-					: null;
+				return +routerState.pullNumber === +query.number ? selectedViewItemDecoration : null;
 			});
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.commitSchema) {
 			return router.getState().then((routerState) => {
 				const query = queryString.parse(uri.query);
-				return routerState.commitSha === query.sha
-					? selectedViewItemDecoration
-					: null;
+				return routerState.commitSha === query.sha ? selectedViewItemDecoration : null;
 			});
 		}
 	}

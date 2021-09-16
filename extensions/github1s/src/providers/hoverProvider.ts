@@ -26,10 +26,7 @@ const getSearchBasedMarkdownSuffix = (sourcegraphUrl: String) => `
 export class GitHub1sHoverProvider implements vscode.HoverProvider {
 	static scheme = 'github1s';
 
-	async getSearchBasedHover(
-		document: vscode.TextDocument,
-		symbol: string
-	): Promise<SymbolHover | null> {
+	async getSearchBasedHover(document: vscode.TextDocument, symbol: string): Promise<SymbolHover | null> {
 		const authority = document.uri.authority || (await router.getAuthority());
 		const [owner, repo, ref] = authority.split('+').filter(Boolean);
 		const definitions = await getSymbolPositions(owner, repo, ref, symbol);
@@ -53,16 +50,10 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider {
 		// open corresponding file with target
 		const textDocument = await vscode.workspace.openTextDocument(targetFileUri);
 		// get the content in `[range.start.line - 2, range.end.line + 2]` lines
-		const startPosition = new vscode.Position(
-			Math.max(0, target.range.start.line - 2),
-			0
-		);
-		const endPosition = textDocument.lineAt(
-			Math.min(textDocument.lineCount - 1, target.range.end.line + 2)
-		).range.end;
-		const codeText = textDocument.getText(
-			new vscode.Range(startPosition, endPosition)
-		);
+		const startPosition = new vscode.Position(Math.max(0, target.range.start.line - 2), 0);
+		// eslint-disable-next-line max-len
+		const endPosition = textDocument.lineAt(Math.min(textDocument.lineCount - 1, target.range.end.line + 2)).range.end;
+		const codeText = textDocument.getText(new vscode.Range(startPosition, endPosition));
 
 		return {
 			precise: false,

@@ -3,21 +3,13 @@
  * @author netcon
  */
 
-import {
-	getGitHubCommits,
-	getGitHubCommitDetail,
-	getGitHubFileCommits,
-} from '@/interfaces/github-api-rest';
+import { getGitHubCommits, getGitHubCommitDetail, getGitHubFileCommits } from '@/interfaces/github-api-rest';
 import { getFetchOptions } from '@/helpers/fetch';
 import { reuseable } from '@/helpers/func';
 import { Barrier } from '@/helpers/async';
 import { LinkedList, LinkedListDirection } from './linked-list';
 import { Repository } from './index';
-import {
-	CommitManager,
-	RepositoryCommit,
-	RepositoryChangedFile,
-} from './types';
+import { CommitManager, RepositoryCommit, RepositoryChangedFile } from './types';
 
 export class GitHubCommitManager implements CommitManager {
 	private _commitMap = new Map<string, RepositoryCommit>();
@@ -33,10 +25,7 @@ export class GitHubCommitManager implements CommitManager {
 	}
 
 	getList = reuseable(
-		async (
-			commitSha: string,
-			forceUpdate: boolean = false
-		): Promise<RepositoryCommit[]> => {
+		async (commitSha: string, forceUpdate: boolean = false): Promise<RepositoryCommit[]> => {
 			if (forceUpdate || !this._commitListMap.has(commitSha)) {
 				this._commitListMap.set(commitSha, []);
 				this._currentPageNumber = 0;
@@ -48,10 +37,7 @@ export class GitHubCommitManager implements CommitManager {
 	);
 
 	getItem = reuseable(
-		async (
-			commitSha: string,
-			forceUpdate: boolean = false
-		): Promise<RepositoryCommit> => {
+		async (commitSha: string, forceUpdate: boolean = false): Promise<RepositoryCommit> => {
 			if (forceUpdate || !this._commitMap.has(commitSha)) {
 				const commit = await getGitHubCommitDetail(
 					this.repository.getOwner(),
@@ -92,27 +78,19 @@ export class GitHubCommitManager implements CommitManager {
 	}
 
 	public getCommitFiles = reuseable(
-		async (
-			commitSha: string,
-			forceUpdate: boolean = false
-		): Promise<RepositoryChangedFile[]> => {
+		async (commitSha: string, forceUpdate: boolean = false): Promise<RepositoryChangedFile[]> => {
 			return (
 				// the commit maybe updated by fetch commit **list** which
 				// won't have the file list data, so we will fallback to
 				// fetch single commit data to get the file list data
-				(await this.getItem(commitSha, forceUpdate)).files ||
-				(await this.getItem(commitSha, true)).files
+				(await this.getItem(commitSha, forceUpdate)).files || (await this.getItem(commitSha, true)).files
 			);
 		}
 	);
 
 	// get this commits for a specified file
 	public getFileCommits = reuseable(
-		async (
-			filePath: string,
-			commitSha: string,
-			forceUpdate: boolean = false
-		): Promise<RepositoryCommit[]> => {
+		async (filePath: string, commitSha: string, forceUpdate: boolean = false): Promise<RepositoryCommit[]> => {
 			const commits = await getGitHubFileCommits(
 				this.repository.getOwner(),
 				this.repository.getRepo(),
@@ -141,11 +119,7 @@ export class GitHubCommitManager implements CommitManager {
 			}
 			const commitIdList = this._fileCommitIdListMap.get(filePath);
 			if (!commitIdList.getNodeId(commitShaOrRef, direction)) {
-				const commits = await this.getFileCommits(
-					filePath,
-					commitShaOrRef,
-					forceUpdate
-				);
+				const commits = await this.getFileCommits(filePath, commitShaOrRef, forceUpdate);
 				commitIdList.update(commits.map((item) => item.sha).reverse());
 				// Actually the latest commit for `filePath` maybe not equal the
 				// `commitSha` in arguments, we should use commits[0].sha in this case
@@ -156,17 +130,8 @@ export class GitHubCommitManager implements CommitManager {
 	);
 
 	public getFilePrevCommitSha = reuseable(
-		async (
-			filePath: string,
-			commitSha: string,
-			forceUpdate: boolean = false
-		): Promise<string> => {
-			return this.getFileCommitSha(
-				filePath,
-				commitSha,
-				LinkedListDirection.PREVIOUS,
-				forceUpdate
-			);
+		async (filePath: string, commitSha: string, forceUpdate: boolean = false): Promise<string> => {
+			return this.getFileCommitSha(filePath, commitSha, LinkedListDirection.PREVIOUS, forceUpdate);
 		}
 	);
 
@@ -174,9 +139,7 @@ export class GitHubCommitManager implements CommitManager {
 		async (filePath: string, commitSha: string): Promise<string | void> => {
 			// because we can not find the next commit by GitHub API,
 			// we can only try to find the next commit from the cache
-			return this._fileCommitIdListMap
-				.get(filePath)
-				?.getNodeId(commitSha, LinkedListDirection.NEXT);
+			return this._fileCommitIdListMap.get(filePath)?.getNodeId(commitSha, LinkedListDirection.NEXT);
 		}
 	);
 }

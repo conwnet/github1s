@@ -1,13 +1,14 @@
 /**
  * @file github1s data-source-provider
- * @author fezhang
+ * @author conwnet
  */
 
 import {
 	Branch,
+	ChangedFileList,
 	CodeLocation,
 	CodeReview,
-	CodeReviewStatus,
+	CodeReviewState,
 	CodeSearchOptions,
 	Commit,
 	CommonQueryOptions,
@@ -16,7 +17,6 @@ import {
 	DirectoryEntry,
 	File,
 	FileBlameRange,
-	FileList,
 	FileType,
 	Promisable,
 	Tag,
@@ -24,8 +24,10 @@ import {
 (self as any).global = self;
 import { Octokit } from '@octokit/core';
 import { toUint8Array } from 'js-base64';
-import { reuseable } from '@/helpers/func';
 import { matchSorter } from 'match-sorter';
+import { reuseable } from '@/helpers/func';
+import { getTextSearchResults } from '../sourcegraph/search';
+import { FILE_BLAME_QUERY } from './graphql';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -41,6 +43,19 @@ const FileTypeMap = {
 	blob: FileType.File,
 	tree: FileType.Directory,
 	commit: FileType.Submodule,
+};
+
+const getPullState = (pull: { state: string; merged_at?: string }): CodeReviewState => {
+	// current pull request is open
+	if (pull.state === 'open') {
+		return CodeReviewState.Open;
+	}
+	// current pull request is merged
+	if (pull.state === 'closed' && pull.merged_at) {
+		return CodeReviewState.Merged;
+	}
+	// current pull is closed
+	return CodeReviewState.Merged;
 };
 
 export class GitHub1sDataSource implements DataSource {
@@ -130,7 +145,8 @@ export class GitHub1sDataSource implements DataSource {
 		report: (results: CodeLocation[]) => void
 	): Promise<{ limitHit: boolean }> {
 		const { owner, repo } = parseRepoFullName(repoFullName);
-		return { limitHit: false };
+		const data = await getTextSearchResults(owner, repo, ref, query, options);
+		return { limitHit: data.limitHit };
 	}
 
 	async provideCommits(
@@ -157,11 +173,11 @@ export class GitHub1sDataSource implements DataSource {
 			email: item.commit.author.email,
 			message: item.commit.message,
 			committer: item.commit.committer.name,
-			createTime: item.commit.author.date,
+			createTime: new Date(item.commit.author.date),
 		}));
 	}
 
-	async provideCommit(repoFullName: string, ref: string): Promise<Commit & FileList> {
+	async provideCommit(repoFullName: string, ref: string): Promise<Commit & ChangedFileList> {
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref };
 		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
@@ -171,28 +187,80 @@ export class GitHub1sDataSource implements DataSource {
 			email: data.commit.author.email,
 			message: data.commit.message,
 			committer: data.commit.committer.name,
-			createTime: data.commit.author.date,
-			files: data.files.map((item) => ({ path: item.filename })),
+			createTime: new Date(data.commit.author.date),
+			files: data.files.map((item) => ({ path: item.filename, previousPath: item.previous_filename })),
 		};
 	}
 
-	provideCodeReviews(
-		repo: string,
-		options: CommonQueryOptions & { state?: CodeReviewStatus; creator?: string }
-	): Promisable<CodeReview[]> {
-		throw new Error('Method not implemented.');
+	async provideCodeReviews(
+		repoFullName: string,
+		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
+	): Promise<CodeReview[]> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const state = options.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
+		const queryParams = { state, page: options.page, per_page: options.pageSize, owner: options.creator };
+		const requestParams = { owner, repo, ...queryParams };
+		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/pulls', requestParams as any);
+
+		return data.map((item) => ({
+			id: `${item.id}`,
+			state: getPullState(item),
+			creator: item.user.login,
+			createTime: new Date(item.created_at),
+			mergeTime: item.merged_at ? new Date(item.merged_at) : null,
+			closeTime: item.closed_at ? new Date(item.closed_at) : null,
+			head: { label: item.head.label, commitSha: item.head.sha },
+			base: { label: item.base.label, commitSha: item.base.sha },
+		}));
 	}
 
-	provideCodeReview(repo: string, id: string): Promisable<CodeReview & FileList> {
-		throw new Error('Method not implemented.');
+	async provideCodeReview(repoFullName: string, id: string): Promise<CodeReview & ChangedFileList> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const pullRequestParams = { owner, repo, pull_number: Number(id) };
+		// TODO: only the number of change files not greater than 100 are supported now!
+		const filesRequestParams = { ...pullRequestParams, per_page: 100 };
+		const pullPromise = this.octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', pullRequestParams);
+		const filesPromise = this.octokit.request(
+			'GET /repos/{owner}/{repo}/pulls/{pull_number}/files',
+			filesRequestParams
+		);
+		const [pullResponse, filesResponse] = await Promise.all([pullPromise, filesPromise]);
+
+		return {
+			id: `${pullResponse.data.id}`,
+			state: getPullState(pullResponse.data),
+			creator: pullResponse.data.user.login,
+			createTime: new Date(pullResponse.data.created_at),
+			mergeTime: pullResponse.data.merged_at ? new Date(pullResponse.data.merged_at) : null,
+			closeTime: pullResponse.data.closed_at ? new Date(pullResponse.data.closed_at) : null,
+			head: { label: pullResponse.data.head.label, commitSha: pullResponse.data.head.sha },
+			base: { label: pullResponse.data.base.label, commitSha: pullResponse.data.base.sha },
+			files: filesResponse.data.map((item) => ({ path: item.filename, previousPath: item.previous_filename })),
+		};
 	}
 
-	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]> {
-		throw new Error('Method not implemented.');
+	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<FileBlameRange[]> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo, ref, path };
+		const { data } = await this.octokit.graphql(FILE_BLAME_QUERY, requestParams);
+		const blameRanges = data?.repository?.object?.blame?.ranges;
+
+		return blameRanges?.map((item) => ({
+			age: item.age as number,
+			startingLine: item.startingLine as number,
+			endingLine: item.endingLine as number,
+			commit: {
+				sha: item.commit.sha as string,
+				author: item.commit.author.name as string,
+				email: item.commit.author.email as string,
+				message: item.commit.message as string,
+				createTime: new Date(item.commit.authoredDate),
+			},
+		}));
 	}
 
 	provideCodeDefinition(
-		repo: string,
+		repoFullName: string,
 		ref: string,
 		path: string,
 		line: number,
@@ -215,7 +283,7 @@ export class GitHub1sDataSource implements DataSource {
 		throw new Error('Method not implemented.');
 	}
 
-	provideUserAvatarLink(user: string): Promisable<string> {
-		throw new Error('Method not implemented.');
+	provideUserAvatarLink(user: string): string {
+		return `https://github.com/${user}.png`;
 	}
 }

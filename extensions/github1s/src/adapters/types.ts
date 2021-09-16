@@ -51,15 +51,15 @@ export interface Commit {
 	email: string;
 	message: string;
 	committer?: string;
-	createTime: string;
+	createTime: Date;
 }
 
 export interface CodeSearchOptions {
 	isCaseSensitive: boolean;
 	isWordMatch: boolean;
 	isRegExp: boolean;
-	includes: string; // glob string
-	excludes: string; // glob string
+	includes: string[]; // glob string
+	excludes: string[]; // glob string
 }
 
 export interface Position {
@@ -88,8 +88,8 @@ export interface CodeLocation {
 	ranges: Range[];
 }
 
-export enum CodeReviewStatus {
-	Opening = 'Opening', // icon: 🟢
+export enum CodeReviewState {
+	Open = 'Open', // icon: 🟢
 	Merged = 'Merged', // icon: 🟣
 	Closed = 'Closed', // icon: 🔴
 }
@@ -99,11 +99,9 @@ export enum CodeReviewStatus {
 // or a Change Request for Gerrit
 export interface CodeReview {
 	id: string;
-	status: CodeReviewStatus;
+	state: CodeReviewState;
 	creator: string;
 	createTime: Date;
-	approveTime: Date | null;
-	denyTime: Date | null;
 	mergeTime: Date | null;
 	closeTime: Date | null;
 	head: {
@@ -116,10 +114,12 @@ export interface CodeReview {
 	};
 }
 
-export interface FileList {
+export interface ChangedFileList {
 	files: {
 		scope?: ResourceScope;
 		path: string;
+		// changed file may be renamed
+		previousPath?: string;
 	}[];
 }
 
@@ -169,14 +169,14 @@ export interface DataSource {
 	): Promisable<Commit[]>;
 
 	// the ref here may be a commitSha, branch, tag, or 'HEAD'
-	provideCommit(repo: string, ref: string): Promisable<(Commit & FileList) | null>;
+	provideCommit(repo: string, ref: string): Promisable<(Commit & ChangedFileList) | null>;
 
 	provideCodeReviews(
 		repo: string,
-		options: CommonQueryOptions & { state?: CodeReviewStatus; creator?: string }
+		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
 	): Promisable<CodeReview[]>;
 
-	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & FileList) | null>;
+	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & ChangedFileList) | null>;
 
 	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]>;
 

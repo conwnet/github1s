@@ -9,10 +9,7 @@ import repository from '@/repository';
 import { RepositoryPull } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import * as queryString from 'query-string';
-import {
-	getChangedFileCommand,
-	getPullChangedFiles,
-} from '@/source-control/changes';
+import { getChangedFileCommand, getPullChangedFiles } from '@/source-control/changes';
 
 enum PullState {
 	OPEN = 'open',
@@ -77,8 +74,7 @@ const loadMorePullItem: vscode.TreeItem = {
 	},
 };
 
-export class PullRequestTreeDataProvider
-	implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class PullRequestTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.pull-request-list';
 
 	private forceUpdate = false;
@@ -91,9 +87,7 @@ export class PullRequestTreeDataProvider
 	}
 
 	async getPullItems(): Promise<vscode.TreeItem[]> {
-		const repositoryPulls = await repository
-			.getPullManager()
-			.getList(this.forceUpdate);
+		const repositoryPulls = await repository.getPullManager().getList(this.forceUpdate);
 		this.forceUpdate = false;
 		const pullTreeItems = repositoryPulls.map((pull) => {
 			const label = getPullTreeItemLabel(pull);
@@ -116,9 +110,7 @@ export class PullRequestTreeDataProvider
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
-		return (await repository.getPullManager().hasMore())
-			? [...pullTreeItems, loadMorePullItem]
-			: pullTreeItems;
+		return (await repository.getPullManager().hasMore()) ? [...pullTreeItems, loadMorePullItem] : pullTreeItems;
 	}
 
 	async getPullFileItems(pull: RepositoryPull): Promise<vscode.TreeItem[]> {
@@ -142,15 +134,11 @@ export class PullRequestTreeDataProvider
 		});
 	}
 
-	getTreeItem(
-		element: vscode.TreeItem
-	): vscode.TreeItem | Thenable<vscode.TreeItem> {
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
 		return element;
 	}
 
-	getChildren(
-		element?: vscode.TreeItem
-	): vscode.ProviderResult<vscode.TreeItem[]> {
+	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
 		if (!element) {
 			return this.getPullItems();
 		}
@@ -161,10 +149,7 @@ export class PullRequestTreeDataProvider
 	// the tooltip of the `PullTreeItem` with `resourceUri` property won't show
 	// correctly if miss this resolveTreeItem, it seems a bug of current version
 	// vscode, and it has fixed in a newer version vscode
-	resolveTreeItem(
-		item: vscode.TreeItem,
-		_element: vscode.TreeItem
-	): vscode.ProviderResult<vscode.TreeItem> {
+	resolveTreeItem(item: vscode.TreeItem, _element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
 		return item;
 	}
 }

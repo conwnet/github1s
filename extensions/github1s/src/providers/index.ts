@@ -1,6 +1,6 @@
 /**
  * @file register VS Code providers
- * @author fezhang
+ * @author netcon
  */
 
 import * as vscode from 'vscode';

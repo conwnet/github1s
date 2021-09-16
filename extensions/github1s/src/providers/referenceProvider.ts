@@ -30,23 +30,14 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider {
 		const path = document.uri.path;
 		const { line, character } = position;
 
-		const symbolReferences = await getSymbolReferences(
-			owner,
-			repo,
-			ref,
-			path,
-			line,
-			character,
-			symbol
-		);
+		const symbolReferences = await getSymbolReferences(owner, repo, ref, path, line, character, symbol);
 
 		if (symbolReferences.length) {
 			showSourcegraphSymbolMessage(owner, repo, ref, path, line, character);
 		}
 
 		return symbolReferences.map((repoReference) => {
-			const isSameRepo =
-				repoReference.owner === owner && repoReference.repo === repo;
+			const isSameRepo = repoReference.owner === owner && repoReference.repo === repo;
 			// if the reference target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)

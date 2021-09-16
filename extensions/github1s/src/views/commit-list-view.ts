@@ -9,20 +9,11 @@ import { relativeTimeTo } from '@/helpers/date';
 import repository from '@/repository';
 import { RepositoryCommit } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
-import {
-	getChangedFileCommand,
-	getCommitChangedFiles,
-} from '@/source-control/changes';
+import { getChangedFileCommand, getCommitChangedFiles } from '@/source-control/changes';
 import router from '@/router';
 
-export const getCommitTreeItemDescription = (
-	commit: RepositoryCommit
-): string => {
-	return [
-		commit.sha.slice(0, 7),
-		commit.commit.author.name,
-		relativeTimeTo(commit.commit.author.date),
-	].join(', ');
+export const getCommitTreeItemDescription = (commit: RepositoryCommit): string => {
+	return [commit.sha.slice(0, 7), commit.commit.author.name, relativeTimeTo(commit.commit.author.date)].join(', ');
 };
 
 export interface CommitTreeItem extends vscode.TreeItem {
@@ -39,8 +30,7 @@ const loadMoreCommitItem: vscode.TreeItem = {
 	},
 };
 
-export class CommitTreeDataProvider
-	implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.commit-list';
 
 	private forceUpdate = false;
@@ -54,17 +44,13 @@ export class CommitTreeDataProvider
 
 	async getCommitItems(): Promise<vscode.TreeItem[]> {
 		const { ref } = await router.getState();
-		const repositoryCommits = await repository
-			.getCommitManager()
-			.getList(ref, this.forceUpdate);
+		const repositoryCommits = await repository.getCommitManager().getList(ref, this.forceUpdate);
 		this.forceUpdate = false;
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = `${commit.commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
-			const iconPath = commit.author
-				? vscode.Uri.parse(commit.author?.avatar_url)
-				: '';
+			const iconPath = commit.author ? vscode.Uri.parse(commit.author?.avatar_url) : '';
 			const contextValue = 'github1s:commit';
 
 			return {
@@ -81,14 +67,10 @@ export class CommitTreeDataProvider
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
-		return (await repository.getCommitManager().hasMore())
-			? [...commitTreeItems, loadMoreCommitItem]
-			: commitTreeItems;
+		return (await repository.getCommitManager().hasMore()) ? [...commitTreeItems, loadMoreCommitItem] : commitTreeItems;
 	}
 
-	async getCommitFileItems(
-		commit: RepositoryCommit
-	): Promise<vscode.TreeItem[]> {
+	async getCommitFileItems(commit: RepositoryCommit): Promise<vscode.TreeItem[]> {
 		const changedFiles = await getCommitChangedFiles(commit);
 
 		return changedFiles.map((changedFile) => {
@@ -109,15 +91,11 @@ export class CommitTreeDataProvider
 		});
 	}
 
-	getTreeItem(
-		element: vscode.TreeItem
-	): vscode.TreeItem | Thenable<vscode.TreeItem> {
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
 		return element;
 	}
 
-	getChildren(
-		element?: vscode.TreeItem
-	): vscode.ProviderResult<vscode.TreeItem[]> {
+	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
 		if (!element) {
 			return this.getCommitItems();
 		}
@@ -128,10 +106,7 @@ export class CommitTreeDataProvider
 	// the tooltip of the `CommitTreeItem` with `resourceUri` property won't show
 	// correctly if miss this resolveTreeItem, it seems a bug of current version
 	// vscode, and it has fixed in a newer version vscode
-	resolveTreeItem(
-		item: vscode.TreeItem,
-		_element: vscode.TreeItem
-	): vscode.ProviderResult<vscode.TreeItem> {
+	resolveTreeItem(item: vscode.TreeItem, _element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
 		return item;
 	}
 }

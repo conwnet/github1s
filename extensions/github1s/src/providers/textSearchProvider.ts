@@ -51,8 +51,8 @@ export class GitHub1sTextSearchProvider implements TextSearchProvider, Disposabl
 					progress.report({
 						uri: fileUri,
 						ranges: (match.offsetAndLengths || []).map(
-							(range) =>
-								new Range(new Position(match.lineNumber, range[0]), new Position(match.lineNumber, range[0] + range[1]))
+							// eslint-disable-next-line max-len
+							(range) => new Range(new Position(match.lineNumber, range[0]), new Position(match.lineNumber, range[0] + range[1]))
 						),
 						preview: {
 							text: match.preview,
