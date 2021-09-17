@@ -10,14 +10,16 @@ import repository from '@/repository';
 import { RepositoryCommit } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import { getChangedFileCommand, getCommitChangedFiles } from '@/source-control/changes';
+import platformAdapterManager from '@/adapters/manager';
+import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
 
-export const getCommitTreeItemDescription = (commit: RepositoryCommit): string => {
-	return [commit.sha.slice(0, 7), commit.commit.author.name, relativeTimeTo(commit.commit.author.date)].join(', ');
+export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
+	return [commit.sha.slice(0, 7), commit.author, relativeTimeTo(commit.createTime)].join(', ');
 };
 
 export interface CommitTreeItem extends vscode.TreeItem {
-	commit: RepositoryCommit;
+	commit: adapterTypes.Commit;
 }
 
 const loadMoreCommitItem: vscode.TreeItem = {
@@ -42,15 +44,21 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		this._onDidChangeTreeData.fire(undefined);
 	}
 
+	private async _resolveCurrentDataSource() {
+		return platformAdapterManager.getCurrentAdapter().resolveDataSource();
+	}
+
 	async getCommitItems(): Promise<vscode.TreeItem[]> {
-		const { ref } = await router.getState();
-		const repositoryCommits = await repository.getCommitManager().getList(ref, this.forceUpdate);
+		const { repo, ref } = await router.getState();
+		const dataSource = await this._resolveCurrentDataSource();
+		const queryOptions = { page: 1, pageSize: 100, from: ref };
+		const repositoryCommits = await dataSource.provideCommits(repo, queryOptions);
 		this.forceUpdate = false;
 		const commitTreeItems = repositoryCommits.map((commit) => {
-			const label = `${commit.commit.message}`;
+			const label = `${commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
-			const iconPath = commit.author ? vscode.Uri.parse(commit.author?.avatar_url) : '';
+			const iconPath = vscode.Uri.parse(dataSource.provideUserAvatarLink(commit.author));
 			const contextValue = 'github1s:commit';
 
 			return {
@@ -67,14 +75,16 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
-		return (await repository.getCommitManager().hasMore()) ? [...commitTreeItems, loadMoreCommitItem] : commitTreeItems;
+		return [...commitTreeItems, loadMoreCommitItem];
 	}
 
-	async getCommitFileItems(commit: RepositoryCommit): Promise<vscode.TreeItem[]> {
-		const changedFiles = await getCommitChangedFiles(commit);
+	async getCommitFileItems(commit: adapterTypes.Commit): Promise<vscode.TreeItem[]> {
+		const { repo } = await router.getState();
+		const dataSource = await this._resolveCurrentDataSource();
+		const repositoryCommit = await dataSource.provideCommit(repo, commit.sha);
 
-		return changedFiles.map((changedFile) => {
-			const filePath = changedFile.headFileUri.path;
+		return repositoryCommit.files.map((changedFile) => {
+			const filePath = changedFile.path;
 			const id = `${commit.sha} ${filePath}`;
 			const command = getChangedFileCommand(changedFile);
 

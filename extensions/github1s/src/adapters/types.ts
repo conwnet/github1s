@@ -204,7 +204,7 @@ export interface DataSource {
 		character: number
 	): Promisable<MarkdownString>;
 
-	provideUserAvatarLink(user: string): Promisable<string>;
+	provideUserAvatarLink(user: string): string;
 }
 
 export enum PageType {

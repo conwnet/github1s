@@ -6,11 +6,7 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import repository from '@/repository';
-import {
-	FileChangeType,
-	RepositoryCommit,
-	RepositoryPull,
-} from '@/repository/types';
+import { FileChangeType, RepositoryCommit, RepositoryPull } from '@/repository/types';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
@@ -64,9 +60,7 @@ export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
 	const headRootUri = baseRootUri.with({
 		authority: `${owner}+${repo}+${commit.sha || 'HEAD'}`,
 	});
-	const commitFiles = await repository
-		.getCommitManager()
-		.getCommitFiles(commit.sha);
+	const commitFiles = await repository.getCommitManager().getCommitFiles(commit.sha);
 
 	return commitFiles.map((commitFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -86,27 +80,19 @@ export const getChangedFiles = async (): Promise<ChangedFile[]> => {
 
 	// github pull page
 	if (routerState.pageType === PageType.PULL) {
-		const pull = await repository
-			.getPullManager()
-			.getItem(routerState.pullNumber);
+		const pull = await repository.getPullManager().getItem(routerState.pullNumber);
 		return pull ? getPullChangedFiles(pull) : [];
 	}
 	// github commit page
 	else if (routerState.pageType === PageType.COMMIT) {
-		const commit = await repository
-			.getCommitManager()
-			.getItem(routerState.commitSha);
+		const commit = await repository.getCommitManager().getItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
 	return [];
 };
 
 // get the title of the diff editor
-export const getChangedFileDiffTitle = (
-	baseFileUri: vscode.Uri,
-	headFileUri: vscode.Uri,
-	status: FileChangeType
-) => {
+export const getChangedFileDiffTitle = (baseFileUri: vscode.Uri, headFileUri: vscode.Uri, status: FileChangeType) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
 	const [_owner, _repo, baseCommitSha] = baseFileUri.authority.split('+');
@@ -148,11 +134,7 @@ export const getChangedFileCommand = (changedFile: ChangedFile) => {
 	return {
 		title: 'Diff',
 		command: 'vscode.diff',
-		arguments: [
-			baseFileUri.with({ query }),
-			headFileUri.with({ query }),
-			title,
-		],
+		arguments: [baseFileUri.with({ query }), headFileUri.with({ query }), title],
 	};
 };
 
