@@ -4,35 +4,35 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { CodeSearchOptions } from '../types';
+import { TextSearchOptions, CommonQueryOptions, TextSearchQuery, TextSearchResults } from '../types';
 import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp, getRepoRefQueryString } from './common';
 
+// build text search query for sourcegraph graphql request
 export const buildTextSearchQueryString = (
-	owner: string,
 	repo: string,
 	ref: string,
-	query: string,
-	options: CodeSearchOptions
+	query: TextSearchQuery,
+	options: TextSearchOptions
 ): string => {
-	const repoRefQueryString = getRepoRefQueryString(owner, repo, ref);
+	const repoRefQueryString = ref.toUpperCase() === 'HEAD' ? `repo:${repo}` : `repo:${repo}@${ref}`;
 	// the string may looks like `case:yse file:src -file:node_modules`
 	const optionsString = [
-		options.isCaseSensitive ? `case:yes` : '',
+		query.isCaseSensitive ? `case:yes` : '',
 		options.includes?.length ? `file:${combineGlobsToRegExp(options.includes)}` : '',
 		options.excludes?.length ? `-file:${combineGlobsToRegExp(options.excludes)}` : '',
 	]
 		.filter(Boolean)
 		.join(' ');
 	// convert the pattern to adapt the sourcegraph API
-	let patternString = query;
+	let patternString = query.pattern;
 
-	if (!options.isRegExp && !options.isWordMatch) {
+	if (!query.isRegExp && !query.isWordMatch) {
 		patternString = `"${patternString}"`;
-	} else if (!options.isRegExp && options.isWordMatch) {
+	} else if (!query.isRegExp && query.isWordMatch) {
 		patternString = `/\\b${escapeRegexp(patternString)}\\b/`;
-	} else if (options.isRegExp && !options.isWordMatch) {
+	} else if (query.isRegExp && !query.isWordMatch) {
 		patternString = `/${patternString}/`;
-	} else if (options.isRegExp && options.isWordMatch) {
+	} else if (query.isRegExp && query.isWordMatch) {
 		return `/\b${patternString}\b/`;
 	}
 
@@ -76,19 +76,42 @@ const textSearchQuery = gql`
 	}
 `;
 
+const formatTextSearchResults = (searchResults) => {
+	const truncated = searchResults.limitHit;
+	const results = searchResults.results.flatMap((fileMatch) => {
+		const path = fileMatch.file.path;
+
+		return fileMatch.lineMatches.map((lineMatch) => {
+			const lineNumber = lineMatch.lineNumber;
+			const ranges = lineMatch.offsetAndLengths.map((segment) => ({
+				start: { line: lineNumber, character: segment[0] },
+				end: { line: lineNumber, character: segment[0] + segment[1] },
+			}));
+			const previewMatches = lineMatch.offsetAndLengths.map((segment) => ({
+				start: { line: 0, character: segment[0] },
+				end: { line: 0, character: segment[0] + segment[1] },
+			}));
+			const preview = { text: lineMatch.preview, matches: previewMatches };
+
+			return { path, ranges, preview };
+		});
+	});
+
+	return { results, truncated };
+};
+
 export const getTextSearchResults = (
-	owner: string,
 	repo: string,
 	ref: string,
-	query: string,
-	options: CodeSearchOptions
-): any => {
+	query: TextSearchQuery,
+	options: TextSearchOptions
+): Promise<TextSearchResults> => {
 	return sourcegraphClient
 		.query({
 			query: textSearchQuery,
 			variables: {
-				query: buildTextSearchQueryString(owner, repo, ref, query, options),
+				query: buildTextSearchQueryString(repo, ref, query, options),
 			},
 		})
-		.then((response) => response?.data?.search?.results);
+		.then((response) => formatTextSearchResults(response?.data?.search?.results));
 };

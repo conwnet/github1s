@@ -6,6 +6,7 @@
 import { gql } from '@apollo/client/core';
 import { sourcegraphClient } from './common';
 import { getSymbolPositions } from './position';
+import { CodeSearchResults } from '../types';
 
 export interface SymbolReference {
 	precise: boolean;
@@ -70,29 +71,26 @@ const getLSIFReferences = async (
 	path: string,
 	line: number,
 	character: number
-): Promise<SymbolReference[]> => {
+): Promise<CodeSearchResults> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFReferencesQuery,
 		variables: {
 			repository: `github.com/${owner}/${repo}`,
 			ref,
-			path: path.slice(1),
+			path,
 			line,
 			character,
 		},
 	});
 	const referenceNodes = response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
-	return (referenceNodes || []).map(({ resource, range }) => {
-		const [owner, repo] = resource.repository.name.split('/').filter(Boolean).slice(-2);
+	// TODO: cross-repository symbols
+	const results = (referenceNodes || []).map(({ resource, range }) => {
 		return {
-			precise: true,
-			owner,
-			repo,
-			ref: resource.commit.oid,
-			path: `/${resource.path}`,
-			range,
+			path: resource.path,
+			ranges: { range },
 		};
 	});
+	return { results, truncated: false, precise: true };
 };
 
 export const getSymbolReferences = (
@@ -103,7 +101,7 @@ export const getSymbolReferences = (
 	line: number,
 	character: number,
 	symbol: string
-): Promise<SymbolReference[]> => {
+): Promise<CodeSearchResults> => {
 	// if failed to find references from LSIF,
 	// fallback to search-based references, using
 	// two promise instead of `await` to request in
@@ -112,9 +110,9 @@ export const getSymbolReferences = (
 	const searchReferencesPromise = getSymbolPositions(owner, repo, ref, symbol);
 
 	return LSIFReferencesPromise.then((LSIFReferences) => {
-		if (LSIFReferences.length) {
+		if (LSIFReferences.results.length) {
 			return LSIFReferences;
 		}
-		return searchReferencesPromise as Promise<SymbolReference[]>;
+		return searchReferencesPromise;
 	});
 };

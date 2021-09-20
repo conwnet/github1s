@@ -6,24 +6,7 @@
 import { gql } from '@apollo/client/core';
 import { sourcegraphClient } from './common';
 import { getSymbolPositions } from './position';
-
-export interface SymbolDefinition {
-	precise: boolean;
-	owner: string;
-	repo: string;
-	ref: string;
-	path: string;
-	range: {
-		start: {
-			line: number;
-			character: number;
-		};
-		end: {
-			line: number;
-			character: number;
-		};
-	};
-}
+import { CodeSearchResults } from '../types';
 
 const LSIFDefinitionsQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
@@ -70,29 +53,26 @@ const getLSIFDefinitions = async (
 	path: string,
 	line: number,
 	character: number
-): Promise<SymbolDefinition[]> => {
+): Promise<CodeSearchResults> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFDefinitionsQuery,
 		variables: {
 			repository: `github.com/${owner}/${repo}`,
 			ref,
-			path: path.slice(1),
+			path,
 			line,
 			character,
 		},
 	});
 	const definitionNodes = response?.data?.repository?.commit?.blob?.lsif?.definitions?.nodes;
-	return (definitionNodes || []).map(({ resource, range }) => {
-		const [owner, repo] = resource.repository.name.split('/').filter(Boolean).slice(-2);
+	// TODO: cross-repository symbols
+	const results = (definitionNodes || []).map(({ resource, range }) => {
 		return {
-			precise: true,
-			owner,
-			repo,
-			ref: resource.commit.oid,
-			path: `/${resource.path}`,
-			range,
+			path: resource.path,
+			ranges: [range],
 		};
 	});
+	return { results, truncated: false, precise: true };
 };
 
 export const getSymbolDefinitions = (
@@ -103,7 +83,7 @@ export const getSymbolDefinitions = (
 	line: number,
 	character: number,
 	symbol: string
-): Promise<SymbolDefinition[]> => {
+): Promise<CodeSearchResults> => {
 	// if failed to find definitions from LSIF,
 	// fallback to search-based definitions, using
 	// two promise instead of `await` to request in
@@ -111,10 +91,10 @@ export const getSymbolDefinitions = (
 	const LSIFDefinitionsPromise = getLSIFDefinitions(owner, repo, ref, path, line, character);
 	const searchDefinitionsPromise = getSymbolPositions(owner, repo, ref, symbol);
 
-	return LSIFDefinitionsPromise.then((LSIFDefinitions) => {
-		if (LSIFDefinitions.length) {
-			return LSIFDefinitions;
+	return LSIFDefinitionsPromise.then((LSIFResults) => {
+		if (LSIFResults.results.length) {
+			return LSIFResults;
 		}
-		return searchDefinitionsPromise as Promise<SymbolDefinition[]>;
+		return searchDefinitionsPromise;
 	});
 };

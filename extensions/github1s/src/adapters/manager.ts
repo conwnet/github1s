@@ -37,11 +37,15 @@ export class PlatformAdapterManager {
 		return this.adaptersMap.get(scheme);
 	}
 
-	public getCurrentAdapter(): PlatformAdapter {
+	public getCurrentScheme(): string {
 		if (!vscode.workspace.workspaceFolders.length) {
 			throw new Error(`Can not found active workspace`);
 		}
-		const scheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+		return vscode.workspace.workspaceFolders[0].uri.scheme;
+	}
+
+	public getCurrentAdapter(): PlatformAdapter {
+		const scheme = this.getCurrentScheme();
 		return this.getAdapter(scheme);
 	}
 }

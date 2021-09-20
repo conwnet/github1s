@@ -12,6 +12,12 @@ export enum FileType {
 	Submodule = 'Submodule',
 }
 
+export interface CommonQueryOptions {
+	page: number;
+	pageSize: number;
+	query?: string;
+}
+
 export type DirectoryEntry =
 	| { type: FileType.Directory; path: string } // for director or link
 	| { type: FileType.File; path: string; size?: number }; // for a file
@@ -54,12 +60,32 @@ export interface Commit {
 	createTime: Date;
 }
 
-export interface CodeSearchOptions {
-	isCaseSensitive: boolean;
-	isWordMatch: boolean;
-	isRegExp: boolean;
+export interface TextSearchQuery {
+	pattern: string;
+	isMultiline?: boolean;
+	isRegExp?: boolean;
+	isCaseSensitive?: boolean;
+	isWordMatch?: boolean;
+}
+
+export interface TextSearchOptions {
+	page: number;
+	pageSize: number;
 	includes: string[]; // glob string
 	excludes: string[]; // glob string
+}
+
+export interface TextSearchResults {
+	results: {
+		scope?: ResourceScope;
+		path: string;
+		ranges: Range | Range[];
+		preview: {
+			text: string;
+			matches: Range | Range[];
+		};
+	}[];
+	truncated: boolean;
 }
 
 export interface Position {
@@ -78,14 +104,6 @@ export interface ResourceScope {
 	scheme: string; // github / github / bitbucket...
 	repo: string;
 	ref: string;
-}
-
-export interface CodeLocation {
-	// we can set `scope` to marked that current
-	// result is referenced to another repository
-	scope?: ResourceScope;
-	path: string;
-	ranges: Range[];
 }
 
 export enum CodeReviewState {
@@ -130,14 +148,22 @@ export interface FileBlameRange {
 	commit: Commit;
 }
 
-// the string will be rendered use markdown format
-export type MarkdownString = string;
-
-export interface CommonQueryOptions {
-	page: number;
-	pageSize: number;
-	query?: string;
+export interface CodeLocation {
+	// we can set `scope` to marked that current
+	// result is referenced to another repository
+	scope?: ResourceScope;
+	path: string;
+	ranges: Range[];
 }
+
+export interface SymbolDefinitions {
+	results: CodeLocation[];
+	precise?: boolean; // if these results is precise?
+}
+
+export type SymbolReferences = SymbolDefinitions;
+
+export type SymbolHover = { markdown: string; precise: boolean };
 
 export interface DataSource {
 	// if `recursive` is true, it should try to return all subtrees
@@ -158,10 +184,9 @@ export interface DataSource {
 	provideTextSearchResults(
 		repo: string,
 		ref: string,
-		query: string,
-		options: CodeSearchOptions,
-		report: (results: CodeLocation[]) => void
-	): Promisable<{ limitHit: boolean }>;
+		query: TextSearchQuery,
+		options: TextSearchOptions
+	): Promisable<TextSearchResults>;
 
 	provideCommits(
 		repo: string,
@@ -180,29 +205,32 @@ export interface DataSource {
 
 	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]>;
 
-	provideCodeDefinition(
+	provideSymbolDefinitions(
 		repo: string,
 		ref: string,
 		path: string,
 		line: number,
-		character: number
-	): Promisable<CodeLocation | CodeLocation[]>;
+		character: number,
+		symbol: string
+	): Promisable<SymbolDefinitions>;
 
-	provideCodeReferences(
+	provideSymbolReferences(
 		repo: string,
 		ref: string,
 		path: string,
 		line: number,
-		character: number
-	): Promisable<CodeLocation[]>;
+		character: number,
+		symbol: string
+	): Promisable<SymbolReferences>;
 
-	provideCodeHover(
+	provideSymbolHover(
 		repo: string,
 		ref: string,
 		path: string,
 		line: number,
-		character: number
-	): Promisable<MarkdownString>;
+		character: number,
+		symbol: string
+	): Promisable<SymbolHover>;
 
 	provideUserAvatarLink(user: string): string;
 }

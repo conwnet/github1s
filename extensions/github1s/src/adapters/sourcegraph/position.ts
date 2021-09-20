@@ -5,24 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { escapeRegexp, sourcegraphClient, getRepoRefQueryString } from './common';
-
-export interface SymbolPosition {
-	precise: boolean;
-	owner: string;
-	repo: string;
-	ref: string;
-	path: string;
-	range: {
-		start: {
-			line: number;
-			character: number;
-		};
-		end: {
-			line: number;
-			character: number;
-		};
-	};
-}
+import { CodeSearchResults } from '../types';
 
 const searchPositionsQuery = gql`
 	query($query: String!) {
@@ -69,7 +52,7 @@ export const getSymbolPositions = async (
 	repo: string,
 	ref: string,
 	symbol: string
-): Promise<SymbolPosition[]> => {
+): Promise<CodeSearchResults> => {
 	const repoRefString = getRepoRefQueryString(owner, repo, ref);
 	const optionsString = ['context:global', 'type:symbol', 'patternType:regexp', 'case:yes'].join(' ');
 	const patternString = `^${escapeRegexp(symbol)}$`;
@@ -80,16 +63,15 @@ export const getSymbolPositions = async (
 	});
 
 	const resultSymbols = response?.data?.search?.results?.results?.flatMap((item) => item.symbols);
-	return (resultSymbols || []).map((symbol) => {
-		const { resource, range } = symbol.location;
-		const [owner, repo] = resource.repository.name.split('/').filter(Boolean).slice(-2);
-		return {
-			precise: false,
-			owner,
-			repo,
-			ref: resource.commit.oid,
-			path: `/${resource.path}`,
-			range,
-		};
-	});
+	const results = (resultSymbols || [])
+		.map((symbol) => {
+			const { resource, range } = symbol.location;
+			// TODO: cross-repository symbols
+			return {
+				path: resource.path,
+				ranges: [range],
+			};
+		})
+		.filter(Boolean);
+	return { results, truncated: false, precise: false };
 };

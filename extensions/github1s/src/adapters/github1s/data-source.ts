@@ -9,7 +9,7 @@ import {
 	CodeLocation,
 	CodeReview,
 	CodeReviewState,
-	CodeSearchOptions,
+	TextSearchOptions,
 	Commit,
 	CommonQueryOptions,
 	DataSource,
@@ -18,8 +18,11 @@ import {
 	File,
 	FileBlameRange,
 	FileType,
-	Promisable,
 	Tag,
+	TextSearchResults,
+	TextSearchQuery,
+	SymbolDefinitions,
+	SymbolReferences,
 } from '../types';
 (self as any).global = self;
 import { Octokit } from '@octokit/core';
@@ -27,6 +30,9 @@ import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import { getTextSearchResults } from '../sourcegraph/search';
+import { getSymbolDefinitions } from '../sourcegraph/definition';
+import { getSymbolReferences } from '../sourcegraph/reference';
+import { getSymbolHover } from '../sourcegraph/hover';
 import { FILE_BLAME_QUERY } from './graphql';
 
 const parseRepoFullName = (repoFullName: string) => {
@@ -57,6 +63,8 @@ const getPullState = (pull: { state: string; merged_at?: string }): CodeReviewSt
 	// current pull is closed
 	return CodeReviewState.Merged;
 };
+
+export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
 export class GitHub1sDataSource implements DataSource {
 	private static instance: GitHub1sDataSource = null;
@@ -140,15 +148,12 @@ export class GitHub1sDataSource implements DataSource {
 	async provideTextSearchResults(
 		repoFullName: string,
 		ref: string,
-		query: string,
-		options: CodeSearchOptions,
-		report: (results: CodeLocation[]) => void
-	): Promise<{ limitHit: boolean }> {
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const data = await getTextSearchResults(owner, repo, ref, query, options);
-		return { limitHit: data.limitHit };
+		query: TextSearchQuery,
+		options: TextSearchOptions
+	): Promise<TextSearchResults> {
+		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
+		return getTextSearchResults(repoPattern, ref, query, options);
 	}
-
 	async provideCommits(
 		repoFullName: string,
 		options: CommonQueryOptions & {
@@ -259,27 +264,37 @@ export class GitHub1sDataSource implements DataSource {
 		}));
 	}
 
-	provideCodeDefinition(
+	provideSymbolDefinitions(
 		repoFullName: string,
 		ref: string,
 		path: string,
 		line: number,
-		character: number
-	): Promisable<CodeLocation | CodeLocation[]> {
-		throw new Error('Method not implemented.');
+		character: number,
+		symbol: string
+	): Promise<SymbolDefinitions> {
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		return getSymbolDefinitions(owner, repo, ref, path, line, character, symbol);
 	}
 
-	provideCodeReferences(
-		repo: string,
+	async provideSymbolReferences(
+		repoFullName: string,
 		ref: string,
 		path: string,
 		line: number,
-		character: number
-	): Promisable<CodeLocation[]> {
+		character: number,
+		symbol: string
+	): Promise<SymbolReferences> {
 		throw new Error('Method not implemented.');
 	}
 
-	provideCodeHover(repo: string, ref: string, path: string, line: number, character: number): Promisable<string> {
+	async provideSymbolHover(
+		repoFullName: string,
+		ref: string,
+		path: string,
+		line: number,
+		character: number,
+		symbol: string
+	): Promise<{ markdown: string; precise: boolean }> {
 		throw new Error('Method not implemented.');
 	}
 

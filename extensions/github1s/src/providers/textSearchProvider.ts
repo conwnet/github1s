@@ -3,69 +3,60 @@
  * @author netcon
  */
 
-import {
-	CancellationToken,
-	Disposable,
-	Position,
-	Progress,
-	Range,
-	TextSearchComplete,
-	TextSearchOptions,
-	TextSearchProvider,
-	TextSearchQuery,
-	TextSearchResult,
-	Uri,
-} from 'vscode';
+import * as vscode from 'vscode';
 import router from '@/router';
-import { getTextSearchResults } from '@/interfaces/sourcegraph/search';
+import platformAdapterManager from '@/adapters/manager';
 import { showSourcegraphSearchMessage } from '@/messages';
-import { GitHub1sFileSystemProvider } from './fileSystemProvider';
+import * as adapterTypes from '@/adapters/types';
 
-export class GitHub1sTextSearchProvider implements TextSearchProvider, Disposable {
-	static scheme = 'github1s';
-	private readonly disposable: Disposable;
+const ensureArray = <T>(arrayOrItem: T | T[]): T[] => (Array.isArray(arrayOrItem) ? arrayOrItem : [arrayOrItem]);
+const createVscodeRange = (range: adapterTypes.Range) =>
+	new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character);
+
+export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vscode.Disposable {
+	private static instance: GitHub1sTextSearchProvider = null;
+	private readonly disposable: vscode.Disposable;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sTextSearchProvider {
+		if (GitHub1sTextSearchProvider.instance) {
+			return GitHub1sTextSearchProvider.instance;
+		}
+		return (GitHub1sTextSearchProvider.instance = new GitHub1sTextSearchProvider());
+	}
 
 	dispose() {
 		this.disposable?.dispose();
 	}
 
 	provideTextSearchResults(
-		query: TextSearchQuery,
-		options: TextSearchOptions,
-		progress: Progress<TextSearchResult>,
-		_token: CancellationToken
+		query: vscode.TextSearchQuery,
+		options: vscode.TextSearchOptions,
+		progress: vscode.Progress<vscode.TextSearchResult>,
+		_token: vscode.CancellationToken
 	) {
 		return router.getAuthority().then(async (authority) => {
-			const [owner, repo, ref] = authority.split('+');
-			const searchResults = await getTextSearchResults(owner, repo, ref, query, options);
+			const [repo, ref] = authority.split('+');
+			const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+			const searchOptions = { page: 1, pageSize: 30, includes: options.includes, excludes: options.excludes };
+			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
+			const currentScheme = platformAdapterManager.getCurrentScheme();
 
 			(searchResults.results || []).forEach((item) => {
-				const fileUri = Uri.parse('').with({
-					// because we set the authority of workspace as '' (on application start)
-					// at src/vs/code/browser/workbench/workbench.ts
-					// so don't specified authority here, or the VS Code won't use the results
-					scheme: GitHub1sFileSystemProvider.scheme,
-					path: `/${item.file?.path}`,
-				});
-				(item.lineMatches || []).forEach((match) => {
-					progress.report({
-						uri: fileUri,
-						ranges: (match.offsetAndLengths || []).map(
-							// eslint-disable-next-line max-len
-							(range) => new Range(new Position(match.lineNumber, range[0]), new Position(match.lineNumber, range[0] + range[1]))
-						),
-						preview: {
-							text: match.preview,
-							matches: (match.offsetAndLengths || []).map(
-								(range) => new Range(new Position(0, range[0]), new Position(0, range[0] + range[1]))
-							),
-						},
-					});
-				});
+				// because we set the authority of workspace as '' (on application start)
+				// at src/vs/code/browser/workbench/workbench.ts
+				// so don't specified authority here, or the VS Code won't use the results
+				const fileUri = vscode.Uri.parse('').with({ scheme: currentScheme, path: `/${item.path}` });
+				const ranges = ensureArray(item.ranges).map((range) => createVscodeRange(range));
+				const previewMatches = ensureArray(item.preview.matches).map((match) => createVscodeRange(match));
+				const preview = { text: item.preview.text, matches: previewMatches };
+
+				progress.report({ uri: fileUri, ranges, preview });
 			});
 
 			showSourcegraphSearchMessage();
-			return { limitHit: searchResults.limitHit } as TextSearchComplete;
+			return { limitHit: searchResults.truncated };
 		});
 	}
 }
