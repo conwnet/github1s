@@ -14,23 +14,21 @@ export const showSourcegraphSearchMessage = (() => {
 			return;
 		}
 		alreadyShown = true;
-		const { owner, repo, ref } = await router.getState();
-		const url = `https://sourcegraph.com/github.com/${owner}/${repo}@${ref}`;
+		const { repo, ref } = await router.getState();
+		const url = `https://sourcegraph.com/github.com/${repo}@${ref}`;
 		vscode.window.showInformationMessage(`The code search ability is powered by [Sourcegraph](${url})`);
 	};
 })();
 
 export const showSourcegraphSymbolMessage = (() => {
 	let alreadyShown = false;
-	return async (owner: string, repo: string, ref: string, path: string, line: number, character: number) => {
+	return async (repo: string, ref: string, path: string, line: number, character: number) => {
 		if (alreadyShown) {
 			return;
 		}
 		alreadyShown = true;
-		const url = getSourcegraphUrl(owner, repo, ref, path, line, character);
-		vscode.window.showInformationMessage(
-			`The results are provided by [Sourcegraph](${url})`
-		);
+		const url = getSourcegraphUrl(repo, ref, path, line, character);
+		vscode.window.showInformationMessage(`The results are provided by [Sourcegraph](${url})`);
 	};
 })();
 

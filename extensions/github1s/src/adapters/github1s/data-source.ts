@@ -6,7 +6,6 @@
 import {
 	Branch,
 	ChangedFileList,
-	CodeLocation,
 	CodeReview,
 	CodeReviewState,
 	TextSearchOptions,
@@ -272,8 +271,8 @@ export class GitHub1sDataSource implements DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolDefinitions> {
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		return getSymbolDefinitions(owner, repo, ref, path, line, character, symbol);
+		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
+		return getSymbolDefinitions(repoPattern, ref, path, line, character, symbol);
 	}
 
 	async provideSymbolReferences(
@@ -284,7 +283,8 @@ export class GitHub1sDataSource implements DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolReferences> {
-		throw new Error('Method not implemented.');
+		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
+		return getSymbolReferences(repoPattern, ref, path, line, character, symbol);
 	}
 
 	async provideSymbolHover(

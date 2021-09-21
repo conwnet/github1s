@@ -6,25 +6,7 @@
 import { gql } from '@apollo/client/core';
 import { sourcegraphClient } from './common';
 import { getSymbolPositions } from './position';
-import { CodeSearchResults } from '../types';
-
-export interface SymbolReference {
-	precise: boolean;
-	owner: string;
-	repo: string;
-	ref: string;
-	path: string;
-	range: {
-		start: {
-			line: number;
-			character: number;
-		};
-		end: {
-			line: number;
-			character: number;
-		};
-	};
-}
+import { SymbolReferences } from '../types';
 
 const LSIFReferencesQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
@@ -65,52 +47,40 @@ const LSIFReferencesQuery = gql`
 // find references with Sourcegraph LSIF
 // https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence
 const getLSIFReferences = async (
-	owner: string,
-	repo: string,
+	repository: string,
 	ref: string,
 	path: string,
 	line: number,
 	character: number
-): Promise<CodeSearchResults> => {
+): Promise<SymbolReferences> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFReferencesQuery,
-		variables: {
-			repository: `github.com/${owner}/${repo}`,
-			ref,
-			path,
-			line,
-			character,
-		},
+		variables: { repository, ref, path, line, character },
 	});
 	const referenceNodes = response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
 	// TODO: cross-repository symbols
-	const results = (referenceNodes || []).map(({ resource, range }) => {
-		return {
-			path: resource.path,
-			ranges: { range },
-		};
+	return (referenceNodes || []).map(({ resource, range }) => {
+		return { path: resource.path, range };
 	});
-	return { results, truncated: false, precise: true };
 };
 
 export const getSymbolReferences = (
-	owner: string,
-	repo: string,
+	repository: string,
 	ref: string,
 	path: string,
 	line: number,
 	character: number,
 	symbol: string
-): Promise<CodeSearchResults> => {
+): Promise<SymbolReferences> => {
 	// if failed to find references from LSIF,
 	// fallback to search-based references, using
 	// two promise instead of `await` to request in
 	// parallel for getting result as soon as possible
-	const LSIFReferencesPromise = getLSIFReferences(owner, repo, ref, path, line, character);
-	const searchReferencesPromise = getSymbolPositions(owner, repo, ref, symbol);
+	const LSIFReferencesPromise = getLSIFReferences(repository, ref, path, line, character);
+	const searchReferencesPromise = getSymbolPositions(repository, ref, symbol);
 
 	return LSIFReferencesPromise.then((LSIFReferences) => {
-		if (LSIFReferences.results.length) {
+		if (LSIFReferences.length) {
 			return LSIFReferences;
 		}
 		return searchReferencesPromise;

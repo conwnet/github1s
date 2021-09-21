@@ -5,12 +5,25 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { getSymbolDefinitions } from '@/interfaces/sourcegraph/definition';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import { GitHub1sFileSystemProvider } from './fileSystemProvider';
+import platformAdapterManager from '@/adapters/manager';
 
-export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider {
-	static scheme = 'github1s';
+export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vscode.Disposable {
+	private static instance: GitHub1sDefinitionProvider = null;
+	private readonly disposable: vscode.Disposable;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sDefinitionProvider {
+		if (GitHub1sDefinitionProvider.instance) {
+			return GitHub1sDefinitionProvider.instance;
+		}
+		return (GitHub1sDefinitionProvider.instance = new GitHub1sDefinitionProvider());
+	}
+
+	dispose() {
+		this.disposable?.dispose();
+	}
 
 	async provideDefinition(
 		document: vscode.TextDocument,
@@ -21,33 +34,34 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider {
 		const symbol = symbolRange ? document.getText(symbolRange) : '';
 
 		if (!symbol) {
-			return;
+			return [];
 		}
 
 		const authority = document.uri.authority || (await router.getAuthority());
-		const [owner, repo, ref] = authority.split('+').filter(Boolean);
-		const path = document.uri.path;
+		const [repo, ref] = authority.split('+').filter(Boolean);
+		const { scheme, path } = document.uri;
 		const { line, character } = position;
 
-		const symbolDefinitions = await getSymbolDefinitions(owner, repo, ref, path, line, character, symbol);
+		const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+		const symbolDefinitions = await dataSource.provideSymbolDefinitions(repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {
-			showSourcegraphSymbolMessage(owner, repo, ref, path, line, character);
+			showSourcegraphSymbolMessage(repo, ref, path, line, character);
 		}
 
-		return symbolDefinitions.map((repoDefinition) => {
-			const isSameRepo = repoDefinition.owner === owner && repoDefinition.repo === repo;
+		return symbolDefinitions.map(({ scope, path, range }) => {
+			const isSameRepo = !scope || (scope.scheme === scheme && scope.repo === repo);
 			// if the definition target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)
 			const uri = isSameRepo
-				? document.uri.with({ path: repoDefinition.path })
+				? document.uri.with({ path: `/${path}` })
 				: vscode.Uri.parse('').with({
-						scheme: GitHub1sFileSystemProvider.scheme,
-						authority: `${owner}+${repo}+${ref}`,
-						path: repoDefinition.path,
+						scheme: scope.scheme,
+						authority: `${scope.repo}+${scope.ref}`,
+						path: `/${path}`,
 				  });
-			const { start, end } = repoDefinition.range;
+			const { start, end } = range;
 			return {
 				uri,
 				range: new vscode.Range(

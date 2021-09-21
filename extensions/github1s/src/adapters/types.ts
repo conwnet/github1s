@@ -153,15 +153,12 @@ export interface CodeLocation {
 	// result is referenced to another repository
 	scope?: ResourceScope;
 	path: string;
-	ranges: Range[];
+	range: Range;
 }
 
-export interface SymbolDefinitions {
-	results: CodeLocation[];
-	precise?: boolean; // if these results is precise?
-}
+export type SymbolDefinitions = CodeLocation[];
 
-export type SymbolReferences = SymbolDefinitions;
+export type SymbolReferences = CodeLocation[];
 
 export type SymbolHover = { markdown: string; precise: boolean };
 

@@ -101,7 +101,7 @@ const formatTextSearchResults = (searchResults) => {
 };
 
 export const getTextSearchResults = (
-	repo: string,
+	repository: string,
 	ref: string,
 	query: TextSearchQuery,
 	options: TextSearchOptions
@@ -109,9 +109,7 @@ export const getTextSearchResults = (
 	return sourcegraphClient
 		.query({
 			query: textSearchQuery,
-			variables: {
-				query: buildTextSearchQueryString(repo, ref, query, options),
-			},
+			variables: { query: buildTextSearchQueryString(repository, ref, query, options) },
 		})
 		.then((response) => formatTextSearchResults(response?.data?.search?.results));
 };

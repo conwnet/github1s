@@ -20,8 +20,8 @@ import { GitHub1sHoverProvider } from './hoverProvider';
 // export const submoduleDecorationProvider = new GitHub1sSubmoduleDecorationProvider();
 export const changedFileDecorationProvider = new GitHub1sChangedFileDecorationProvider();
 export const sourceControlDecorationProvider = new GitHub1sSourceControlDecorationProvider();
-export const definitionProvider = new GitHub1sDefinitionProvider();
-export const referenceProvider = new GitHub1sReferenceProvider();
+// export const definitionProvider = new GitHub1sDefinitionProvider();
+// export const referenceProvider = new GitHub1sReferenceProvider();
 export const hoverProvider = new GitHub1sHoverProvider();
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
@@ -41,7 +41,10 @@ export const registerVSCodeProviders = () => {
 				isReadonly: true,
 			}),
 			vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
-			vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance())
+			vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
+			vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
+			vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance())
+			// vscode.languages.registerHoverProvider({ scheme: GitHub1sHoverProvider.scheme }, hoverProvider),
 		);
 	});
 

@@ -5,7 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { escapeRegexp, sourcegraphClient, getRepoRefQueryString } from './common';
-import { CodeSearchResults } from '../types';
+import { CodeLocation } from '../types';
 
 const searchPositionsQuery = gql`
 	query($query: String!) {
@@ -47,13 +47,8 @@ const searchPositionsQuery = gql`
 
 // get symbol position information base on search,
 // used by definition, reference and hover
-export const getSymbolPositions = async (
-	owner: string,
-	repo: string,
-	ref: string,
-	symbol: string
-): Promise<CodeSearchResults> => {
-	const repoRefString = getRepoRefQueryString(owner, repo, ref);
+export const getSymbolPositions = async (repository: string, ref: string, symbol: string): Promise<CodeLocation[]> => {
+	const repoRefString = ref.toUpperCase() === 'HEAD' ? `repo:${repository}` : `repo:${repository}@${ref}`;
 	const optionsString = ['context:global', 'type:symbol', 'patternType:regexp', 'case:yes'].join(' ');
 	const patternString = `^${escapeRegexp(symbol)}$`;
 	const query = [repoRefString, optionsString, patternString].join(' ');
@@ -62,16 +57,15 @@ export const getSymbolPositions = async (
 		variables: { query },
 	});
 
-	const resultSymbols = response?.data?.search?.results?.results?.flatMap((item) => item.symbols);
-	const results = (resultSymbols || [])
+	const resultSymbols = response?.data?.search?.results?.results?.flatMap((item) => item.symbols) || [];
+	return resultSymbols
 		.map((symbol) => {
 			const { resource, range } = symbol.location;
 			// TODO: cross-repository symbols
 			return {
 				path: resource.path,
-				ranges: [range],
+				range,
 			};
 		})
 		.filter(Boolean);
-	return { results, truncated: false, precise: false };
 };

@@ -5,12 +5,25 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { getSymbolReferences } from '@/interfaces/sourcegraph/reference';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import { GitHub1sFileSystemProvider } from './fileSystemProvider';
+import platformAdapterManager from '@/adapters/manager';
 
-export class GitHub1sReferenceProvider implements vscode.ReferenceProvider {
-	static scheme = 'github1s';
+export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vscode.Disposable {
+	private static instance: GitHub1sReferenceProvider = null;
+	private readonly disposable: vscode.Disposable;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sReferenceProvider {
+		if (GitHub1sReferenceProvider.instance) {
+			return GitHub1sReferenceProvider.instance;
+		}
+		return (GitHub1sReferenceProvider.instance = new GitHub1sReferenceProvider());
+	}
+
+	dispose() {
+		this.disposable?.dispose();
+	}
 
 	async provideReferences(
 		document: vscode.TextDocument,
@@ -22,33 +35,34 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider {
 		const symbol = symbolRange ? document.getText(symbolRange) : '';
 
 		if (!symbol) {
-			return;
+			return [];
 		}
 
 		const authority = document.uri.authority || (await router.getAuthority());
-		const [owner, repo, ref] = authority.split('+').filter(Boolean);
-		const path = document.uri.path;
+		const [repo, ref] = authority.split('+').filter(Boolean);
+		const { scheme, path } = document.uri;
 		const { line, character } = position;
 
-		const symbolReferences = await getSymbolReferences(owner, repo, ref, path, line, character, symbol);
+		const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+		const symbolReferences = await dataSource.provideSymbolReferences(repo, ref, path, line, character, symbol);
 
 		if (symbolReferences.length) {
-			showSourcegraphSymbolMessage(owner, repo, ref, path, line, character);
+			showSourcegraphSymbolMessage(repo, ref, path, line, character);
 		}
 
-		return symbolReferences.map((repoReference) => {
-			const isSameRepo = repoReference.owner === owner && repoReference.repo === repo;
+		return symbolReferences.map(({ scope, path, range }) => {
+			const isSameRepo = !scope || (scope.scheme === scheme && scope.repo === repo);
 			// if the reference target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)
 			const uri = isSameRepo
-				? document.uri.with({ path: repoReference.path })
+				? document.uri.with({ path: `/${path}` })
 				: vscode.Uri.parse('').with({
-						scheme: GitHub1sFileSystemProvider.scheme,
-						authority: `${owner}+${repo}+${ref}`,
-						path: repoReference.path,
+						scheme: scope.scheme,
+						authority: `${scope.repo}+${scope.ref}`,
+						path: `/${path}`,
 				  });
-			const { start, end } = repoReference.range;
+			const { start, end } = range;
 			return {
 				uri,
 				range: new vscode.Range(
