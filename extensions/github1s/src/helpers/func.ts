@@ -49,7 +49,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 	let timer = null;
 	return function (...args: Parameters<T>): void {
 		timer && clearTimeout(timer);
-		timer = setTimeout(() => func.call(this, ...args), timer);
+		timer = setTimeout(() => func.call(this, ...args), wait);
 	};
 };
 
