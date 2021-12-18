@@ -16,10 +16,6 @@ const proxyServer = httpProxy.createServer({
 
 const handleProxyError = (error) => {
 	console.trace(error);
-	res.writeHead(500, {
-		'Content-Type': 'application/json',
-	});
-	res.end(JSON.stringify({ message: error.message }));
 };
 proxyServer.on('error', handleProxyError);
 
