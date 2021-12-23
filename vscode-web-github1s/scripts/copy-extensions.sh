@@ -5,8 +5,8 @@ cd "$(dirname "${0}")/.."
 APP_ROOT=$(pwd)
 function ensureBuiltinExtensitions() {
 	cd "${APP_ROOT}/lib/vscode"
-	git diff --exit-code --name-only extensions
-	if [ $? != 0 ] || [ ! -e "extensions/emmet/dist/browser" ]
+	EXTENSIONS_DIRTY=0 && git diff --exit-code --name-only extensions || EXTENSIONS_DIRTY=$?
+	if [ $EXTENSIONS_DIRTY != 0 ] || [ ! -e "extensions/emmet/dist/browser" ]
 	then
 		echo "compile vscode builtin extensions..."
 		yarn gulp compile-web
