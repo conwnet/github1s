@@ -1,0 +1,101 @@
+{
+	"name": "anycode",
+	"displayName": "anycode",
+	"publisher": "ms-vscode",
+	"description": "",
+	"version": "0.0.55",
+	"enabledApiProposals": [
+		"languageStatus"
+	],
+	"preview": true,
+	"repository": {
+		"url": "https://github.com/microsoft/vscode-anycode"
+	},
+	"engines": {
+		"vscode": "^1.60.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"activationEvents": [
+		"onLanguage:c",
+		"onLanguage:cpp",
+		"onLanguage:csharp",
+		"onLanguage:go",
+		"onLanguage:java",
+		"onLanguage:php",
+		"onLanguage:python",
+		"onLanguage:rust",
+		"onLanguage:javascript",
+		"onLanguage:typescript",
+		"onCommand:workbench.action.showAllSymbols"
+	],
+	"browser": "./prebuilt/anycode.extension.js",
+	"contributes": {
+		"configuration": {
+			"title": "Anycode",
+			"properties": {
+				"anycode.symbolIndexSize": {
+					"type": "number",
+					"default": 500,
+					"minimum": 0,
+					"markdownDescription": "Size of the index that is used for features like symbol search and go to definition."
+				},
+				"anycode.language.features": {
+					"markdownDescription": "Control the language features that anycode offers. This can be configured for each supported language: [Learn How to Do That](https://code.visualstudio.com/docs/getstarted/settings#_languagespecific-editor-settings)",
+					"type": "object",
+					"scope": "language-overridable",
+					"additionalProperties": false,
+					"properties": {
+						"definitions": {
+							"type": "boolean",
+							"description": "Go to Definition based on identifiers and local variables"
+						},
+						"references": {
+							"type": "boolean",
+							"description": "Find References based on identifiers and local variables"
+						},
+						"workspaceSymbols": {
+							"type": "boolean",
+							"description": "Add symbols to workspace symbol search"
+						},
+						"highlights": {
+							"type": "boolean",
+							"description": "Highlight Occurrences of identifiers and local variables"
+						},
+						"outline": {
+							"type": "boolean",
+							"description": "Populate Outline, Quick-outline, and Breadcrumbs"
+						},
+						"completions": {
+							"type": "boolean",
+							"description": "Completions based on identifiers and symbol names"
+						},
+						"folding": {
+							"type": "boolean",
+							"description": "Fold sections of codes to a single line"
+						},
+						"diagnostics": {
+							"type": "boolean",
+							"description": "(experimental) Parse errors show as problems"
+						}
+					},
+					"default": {
+						"completions": true,
+						"definitions": true,
+						"references": true,
+						"highlights": true,
+						"outline": true,
+						"workspaceSymbols": true,
+						"folding": false,
+						"diagnostics": false
+					}
+				}
+			}
+		}
+	},
+	"scripts": {
+    "compile": "echo done",
+    "watch": "echo done"
+	}
+}
