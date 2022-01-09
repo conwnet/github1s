@@ -39,9 +39,10 @@
     "views": {
       "github1s": [
         {
-          "id": "github1s.views.settings",
+          "id": "github1s.views.github1s-settings",
           "name": "Settings",
-          "type": "webview"
+          "type": "webview",
+          "when": "github1s:views:github1s-settings:visible == true"
         }
       ],
       "scm": [

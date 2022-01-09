@@ -16,21 +16,12 @@ export const registerCustomViews = () => {
 
 	context.subscriptions.push(
 		// register settings view
-		vscode.window.registerWebviewViewProvider(
-			SettingsView.viewType,
-			new SettingsView()
-		),
+		// vscode.window.registerWebviewViewProvider(SettingsView.viewType, new SettingsView()),
 
 		// register pull request view which is in source control panel
-		vscode.window.registerTreeDataProvider(
-			PullRequestTreeDataProvider.viewType,
-			pullRequestTreeDataProvider
-		),
+		vscode.window.registerTreeDataProvider(PullRequestTreeDataProvider.viewType, pullRequestTreeDataProvider),
 
 		// register commit view which is in source control panel
-		vscode.window.registerTreeDataProvider(
-			CommitTreeDataProvider.viewType,
-			commitTreeDataProvider
-		)
+		vscode.window.registerTreeDataProvider(CommitTreeDataProvider.viewType, commitTreeDataProvider)
 	);
 };

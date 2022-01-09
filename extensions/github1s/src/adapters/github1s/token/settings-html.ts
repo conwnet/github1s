@@ -1,152 +1,14 @@
 /**
- * @file GitHub1s Settings Webview Provider
+ * @file github1s settings html
  * @author netcon
  */
 
-import * as vscode from 'vscode';
-import { getExtensionContext } from '@/helpers/context';
-import { getNonce, getWebviewOptions } from '@/helpers/util';
-import { validateToken } from '@/interfaces/github-api-rest';
-import { GITHUB_OAUTH_TOKEN } from '@/helpers/constants';
+import { getNonce } from '@/helpers/util';
 
-interface WebviewState {
-	token?: string;
-	pageType?: 'EDIT' | 'PREVIEW';
-	valid?: boolean;
-	validating?: boolean;
-}
+export const getSettingsHtml = () => {
+	const nonce = getNonce();
 
-export class SettingsView implements vscode.WebviewViewProvider {
-	public static readonly viewType = 'github1s.views.settings';
-	private readonly _extensionContext: vscode.ExtensionContext;
-	private _webviewView: vscode.WebviewView;
-
-	constructor() {
-		this._extensionContext = getExtensionContext();
-	}
-
-	resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext<unknown>,
-		token: vscode.CancellationToken
-	): void | Thenable<void> {
-		this._webviewView = webviewView;
-		webviewView.webview.options = getWebviewOptions(this._extensionContext.extensionUri);
-		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-		webviewView.webview.onDidReceiveMessage((data) => {
-			switch (data.type) {
-				case 'validate-token':
-					this.handleValidateToken(data.payload);
-					break;
-				case 'update-token':
-					this.handleUpdateToken(data.payload);
-					break;
-				case 'clear-token':
-					vscode.commands.executeCommand('github1s.clear-token').then((cleared) => {
-						cleared &&
-							this.updateWebviewState({
-								token: '',
-								pageType: 'EDIT',
-								valid: false,
-								validating: false,
-							});
-					});
-					break;
-				case 'welcome-page':
-					vscode.commands.executeCommand('workbench.action.openWalkthrough');
-					break;
-				case 'authorizing-github':
-					this.handleAuthorizingGithub();
-					break;
-				default:
-					const oauthToken = (this._extensionContext.globalState.get(GITHUB_OAUTH_TOKEN) as string) || '';
-					(oauthToken
-						? validateToken(oauthToken).then((data) => data.valid && data.remaining > 0)
-						: Promise.resolve(false)
-					).then((isValid) => {
-						this.updateWebviewState({
-							token: oauthToken,
-							pageType: oauthToken ? 'PREVIEW' : 'EDIT',
-							valid: isValid,
-							validating: false,
-						});
-					});
-			}
-		});
-	}
-
-	updateWebviewState(state: WebviewState) {
-		this._webviewView.webview.postMessage({
-			type: 'update-state',
-			payload: state,
-		});
-	}
-
-	handleValidateToken(token: string) {
-		this.updateWebviewState({ validating: true });
-		validateToken(token)
-			.then((tokenStatus) => {
-				if (!tokenStatus.valid) {
-					vscode.window.showErrorMessage('This GitHub OAuth Token is invalid.');
-				} else if (tokenStatus.remaining <= 0) {
-					vscode.window.showWarningMessage('This GitHub OAuth Token is valid, but the rate limit is exceeded.');
-				} else {
-					vscode.window.showInformationMessage('This GitHub OAuth Token is OK.');
-				}
-				this.updateWebviewState({
-					valid: tokenStatus.valid && tokenStatus.remaining > 0,
-					validating: false,
-				});
-			})
-			.catch(() => this.updateWebviewState({ valid: false, validating: false }));
-	}
-
-	handleUpdateToken(token: string) {
-		if (!token) {
-			return;
-		}
-		this.updateWebviewState({ validating: true });
-		validateToken(token)
-			.then((tokenStatus) => {
-				if (!tokenStatus.valid) {
-					this.updateWebviewState({ pageType: 'EDIT', validating: false });
-					vscode.window.showErrorMessage('This GitHub OAuth Token is invalid.');
-				} else if (tokenStatus.remaining <= 0) {
-					this.updateWebviewState({ pageType: 'EDIT', validating: false });
-					vscode.window.showWarningMessage('This GitHub OAuth Token is valid, but the rate limit is exceeded.');
-				} else {
-					this.updateWebviewState({
-						token,
-						valid: true,
-						pageType: 'PREVIEW',
-						validating: false,
-					});
-					this._extensionContext.globalState.update(GITHUB_OAUTH_TOKEN, token || '').then(() => {
-						vscode.commands.executeCommand('workbench.files.action.refreshFilesExplorer');
-					});
-				}
-			})
-			.catch(() => this.updateWebviewState({ token, validating: false }));
-	}
-
-	async handleAuthorizingGithub() {
-		const token: string = await vscode.commands.executeCommand('github1s.authorizing-github');
-		if (!token) {
-			return;
-		}
-		this.updateWebviewState({
-			token,
-			valid: true,
-			pageType: 'PREVIEW',
-			validating: false,
-		});
-	}
-
-	_getHtmlForWebview(webview): string {
-		const nonce = getNonce();
-
-		return `
+	return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -343,7 +205,7 @@ button.secondary:hover {
 			</div>
 			<div id="token-text"></div>
 		</div>
-		<div><button id="welcome-button">Detail</button></div>
+		<div><button id="detail-button">Detail</button></div>
 		<div><button id="validate-button">Validate</button></div>
 		<div><button id="edit-button">Edit</button></div>
 		<div><button id="clear-button">Clear</button></div>
@@ -399,8 +261,8 @@ button.secondary:hover {
 		vscode.postMessage({ type: 'clear-token' });
 	});
 
-	delegate(document.body, '#welcome-button', 'click', () => {
-		vscode.postMessage({ type: 'welcome-page' });
+	delegate(document.body, '#detail-button', 'click', () => {
+		vscode.postMessage({ type: 'detail-page' });
 	});
 
 	delegate(document.body, '#authorizing-button', 'click', () => {
@@ -435,6 +297,5 @@ button.secondary:hover {
 	</script>
 </body>
 </html>
-		`;
-	}
-}
+`;
+};

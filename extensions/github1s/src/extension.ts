@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { setExtensionContext } from '@/helpers/context';
 // import { registerGitHub1sCommands } from '@/commands';
 import { registerVSCodeProviders } from '@/providers';
-// import { registerCustomViews } from '@/views';
+import { registerCustomViews } from '@/views';
 // import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 // import { showSponsors } from '@/sponsors';
 // import { showGitpod } from '@/gitpod';
@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// registerEventListeners();
 
 	// // register custom views
-	// registerCustomViews();
+	registerCustomViews();
 	// // register GitHub1s Commands
 	// registerGitHub1sCommands();
 
