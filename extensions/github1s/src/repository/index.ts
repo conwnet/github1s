@@ -5,10 +5,7 @@
 
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
-import {
-	getGitHubBranchRefs,
-	getGitHubTagRefs,
-} from '@/interfaces/github-api-rest';
+import { getGitHubBranchRefs, getGitHubTagRefs } from '@/interfaces/github-api-rest';
 import { apolloClient } from '@/interfaces/client';
 import { githubFileBlameQuery } from '@/interfaces/github-api-gql';
 import { getFetchOptions } from '@/helpers/fetch';
@@ -81,8 +78,7 @@ export class Repository {
 					query: githubFileBlameQuery,
 					variables: { owner, repo, ref: commitSha, path: filePath.slice(1) },
 				});
-				const blameRanges =
-					response.data?.repository?.object?.blame?.ranges || [];
+				const blameRanges = response.data?.repository?.object?.blame?.ranges || [];
 				this._fileBlameMap.set(cacheKey, blameRanges);
 			}
 			return this._fileBlameMap.get(cacheKey);

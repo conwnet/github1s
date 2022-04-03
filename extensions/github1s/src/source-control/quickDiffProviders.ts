@@ -5,84 +5,62 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import repository from '@/repository';
-import { FileChangeType } from '@/repository/types';
-import { PageType } from '@/router/types';
 import { emptyFileUri } from '@/providers';
-import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
+import platformAdapterManager from '@/adapters/manager';
+import * as adapterTypes from '@/adapters/types';
 
 // get the original source uri when the `routerState.pageType` is `PageType.PULL`
-const getOriginalResourceForPull = async (
-	uri: vscode.Uri,
-	pullNumber: number
-): Promise<vscode.Uri> => {
-	const changedFiles = await repository
-		.getPullManager()
-		.getPullFiles(pullNumber);
-	const changedFile = changedFiles?.find(
-		(changedFile) => changedFile.filename === uri.path.slice(1)
-	);
+const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string): Promise<vscode.Uri> => {
+	const routeState = await router.getState();
+	const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+	const codeReview = await dataSource.provideCodeReview(routeState.repo, codeReviewId);
+	const changedFile = codeReview.files?.find((changedFile) => changedFile.path === uri.path.slice(1));
 
-	if (!changedFile || changedFile.status === FileChangeType.REMOVED) {
+	// TODO: why removed
+	if (!changedFile || changedFile.status === adapterTypes.FileChangeStatus.REMOVED) {
 		return null;
 	}
 
-	if (changedFile.status === FileChangeType.ADDED) {
+	if (changedFile.status === adapterTypes.FileChangeStatus.ADDED) {
 		return emptyFileUri;
 	}
 
-	const pull = await repository.getPullManager().getItem(pullNumber);
-	const { owner, repo } = await router.getState();
-	const originalAuthority = `${owner}+${repo}+${pull.base.sha}`;
-	const originalPath = changedFile.previous_filename
-		? `/${changedFile.previous_filename}`
-		: uri.path;
+	const originalAuthority = `${routeState.repo}+${codeReview.base.commitSha}`;
+	const originalPath = changedFile.previousPath ? `/${changedFile.previousPath}` : uri.path;
 
 	return uri.with({ authority: originalAuthority, path: originalPath });
 };
 
 // get the original source uri when the `routerState.pageType` is `PageType.COMMIT`
-const getOriginalResourceForCommit = async (
-	uri: vscode.Uri,
-	commitSha: string
-) => {
-	const changedFiles = await repository
-		.getCommitManager()
-		.getCommitFiles(commitSha);
-	const changedFile = changedFiles?.find(
-		(changedFile) => changedFile.filename === uri.path.slice(1)
-	);
+const getOriginalResourceForCommit = async (uri: vscode.Uri, commitSha: string) => {
+	const routeState = await router.getState();
+	const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+	const commit = await dataSource.provideCommit(routeState.repo, commitSha);
+	const changedFile = commit.files?.find((changedFile) => changedFile.path === uri.path.slice(1));
 
-	if (!changedFile || changedFile.status === FileChangeType.REMOVED) {
+	if (!changedFile || changedFile.status === adapterTypes.FileChangeStatus.REMOVED) {
 		return null;
 	}
 
-	if (changedFile.status === FileChangeType.ADDED) {
+	if (changedFile.status === adapterTypes.FileChangeStatus.ADDED) {
 		return emptyFileUri;
 	}
 
-	const commit = await repository.getCommitManager().getItem(commitSha);
-	const { owner, repo } = await router.getState();
 	const parentCommitSha = commit.parents?.[0]?.sha;
 
 	if (!parentCommitSha) {
 		return emptyFileUri;
 	}
 
-	const originalAuthority = `${owner}+${repo}+${parentCommitSha}`;
-	const originalPath = changedFile.previous_filename
-		? `/${changedFile.previous_filename}`
-		: uri.path;
+	const originalAuthority = `${routeState.repo}+${parentCommitSha}`;
+	const originalPath = changedFile.previousPath ? `/${changedFile.previousPath}` : uri.path;
 
 	return uri.with({ authority: originalAuthority, path: originalPath });
 };
 
 export class GitHub1sQuickDiffProvider implements vscode.QuickDiffProvider {
-	provideOriginalResource(
-		uri: vscode.Uri,
-		_token: vscode.CancellationToken
-	): vscode.ProviderResult<vscode.Uri> {
-		if (uri.scheme !== GitHub1sFileSystemProvider.scheme) {
+	provideOriginalResource(uri: vscode.Uri, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Uri> {
+		if (uri.scheme !== platformAdapterManager.getCurrentScheme()) {
 			return null;
 		}
 
@@ -92,11 +70,11 @@ export class GitHub1sQuickDiffProvider implements vscode.QuickDiffProvider {
 				return null;
 			}
 
-			if (routerState.pageType === PageType.PULL) {
-				return getOriginalResourceForPull(uri, routerState.pullNumber);
+			if (routerState.type === adapterTypes.PageType.CODE_REVIEW) {
+				return getOriginalResourceForPull(uri, routerState.codeReviewId);
 			}
 
-			if (routerState.pageType === PageType.COMMIT) {
+			if (routerState.type === adapterTypes.PageType.COMMIT) {
 				return getOriginalResourceForCommit(uri, routerState.commitSha);
 			}
 

@@ -8,11 +8,11 @@ import { PageType, RouterState } from '../../types';
 import { parseTreeUrl } from './tree';
 
 export const parseBlobUrl = async (path: string): Promise<RouterState> => {
-	const routerState = await parseTreeUrl(path);
+	const routerState = (await parseTreeUrl(path)) as any;
 	const { hash: routerHash } = parsePath(path);
 
 	if (!routerHash) {
-		return { ...routerState, pageType: PageType.BLOB };
+		return { ...routerState, type: PageType.Blob };
 	}
 
 	// get selected line number range from path which looks like:
@@ -22,8 +22,8 @@ export const parseBlobUrl = async (path: string): Promise<RouterState> => {
 
 	return {
 		...routerState,
-		pageType: PageType.BLOB,
-		startLineNumber: parseInt(startLineNumber, 10),
-		endLineNumber: parseInt(endLineNumber || startLineNumber, 10),
+		type: PageType.Blob,
+		startLine: parseInt(startLineNumber, 10),
+		endLine: parseInt(endLineNumber || startLineNumber, 10),
 	};
 };

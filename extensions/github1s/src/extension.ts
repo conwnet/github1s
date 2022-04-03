@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// registerEventListeners();
 
 	// // register custom views
-	registerCustomViews();
+	// registerCustomViews();
 	// // register GitHub1s Commands
 	// registerGitHub1sCommands();
 

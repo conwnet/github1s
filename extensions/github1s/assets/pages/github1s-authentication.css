@@ -1,0 +1,142 @@
+.authentication-form .form-title {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 32px;
+  color: var(--vscode-button-foreground);
+}
+
+.authentication-form .form-content {
+  width: 320px;
+}
+
+.authentication-features {
+  list-style: none;
+	font-size: 14px;
+	padding: 0;
+	margin: 0 0 32px;
+}
+
+.authentication-features .feature-item {
+	white-space: nowrap;
+	margin-bottom: 4px;
+}
+
+.authentication-features .feature-item:last-child {
+	margin-bottom: 0;
+}
+
+.authentication-features li.feature-item a {
+	color: var(--vscode-foreground);
+	text-decoration: none;
+}
+
+.authentication-features li.feature-item a.link:hover {
+	color: #40a9ff;
+}
+
+.authentication-features li.feature-item a.link:active {
+	color: #096dd9;
+}
+
+.authentication-features .feature-item::before {
+	content: '✓';
+	color: #32d74b;
+	margin-right: 4px;
+}
+
+.authentication-features .feature-item {
+	white-space: nowrap;
+	line-height: 20px;
+}
+
+.github1s-authorizing-dialog li.feature-item a {
+	color: var(--vscode-foreground);
+	text-decoration: none;
+}
+
+.authentication-button {
+  width: 100%;
+  height: 40px;
+  outline: none;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 2px 4px;
+  border: 1px solid var(--vscode-foreground);
+  border-radius: 4px;
+  font-size: 16px;
+  transition: all 0.1s;
+  cursor: pointer;
+}
+
+.authentication-button:not([disabled]):hover {
+  transform: scale(1.03);
+  box-shadow: rgba(255, 255, 255, 0.25) 0px 2px 8px;
+}
+
+.authentication-button:not([disabled]):active {
+  transform: scale(0.98);
+}
+
+.authentication-button .github-logo {
+  height: 24px;
+  margin-right: 8px;
+}
+
+.authentication-button[disabled] .github-logo {
+  opacity: .5;
+}
+
+.authentication-token .token-input-line {
+  display: flex;
+  margin-bottom: 6px;
+}
+
+.authentication-token .token-input-line .vscode-input {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.split-line {
+  height: 0;
+  border: 1px solid var(--vscode-foreground);
+  margin: 28px 0;
+  position: relative;
+}
+
+.split-line::after {
+  content: 'OR';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  border: 2px solid var(--vscode-foreground);
+  padding: 4px 16px;
+  border-radius: 8px;
+  background-color: var(--vscode-editor-background);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.authentication-notice {
+  margin-top: 24px;
+  color: var(--vscode-foreground);
+}
+
+.authentication-notice > div:first-child {
+  margin-bottom: 4px;
+}
+
+.authentication-form {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#app {
+  margin-top: 60px;
+}

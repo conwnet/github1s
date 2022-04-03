@@ -22,17 +22,17 @@ import {
 	TextSearchQuery,
 	SymbolDefinitions,
 	SymbolReferences,
+	FileChangeStatus,
 } from '../types';
 (self as any).global = self;
-import { Octokit } from '@octokit/core';
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import { getTextSearchResults } from '../sourcegraph/search';
 import { getSymbolDefinitions } from '../sourcegraph/definition';
 import { getSymbolReferences } from '../sourcegraph/reference';
-import { getSymbolHover } from '../sourcegraph/hover';
 import { FILE_BLAME_QUERY } from './graphql';
+import { GitHubFetcher } from './fetcher';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -65,13 +65,10 @@ const getPullState = (pull: { state: string; merged_at?: string }): CodeReviewSt
 
 export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
-export class GitHub1sDataSource implements DataSource {
+export class GitHub1sDataSource extends DataSource {
 	private static instance: GitHub1sDataSource = null;
-	private octokit = new Octokit({ auth: process.env.AUTH_TOKEN || '', request: { fetch } });
 	private cachedBranches: Branch[] = null;
 	private cachedTags: Branch[] = null;
-
-	private constructor() {}
 
 	public static getInstance(): GitHub1sDataSource {
 		if (GitHub1sDataSource.instance) {
@@ -81,11 +78,12 @@ export class GitHub1sDataSource implements DataSource {
 	}
 
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
+		const fetcher = GitHubFetcher.getInstance();
 		const encodedPath = encodeFilePath(path);
 		// github api will return all files if `recursive` exists, even the value if false
 		const recursiveParams = recursive ? { recursive } : {};
 		const requestParams = { ref, path: encodedPath, ...parseRepoFullName(repoFullName), ...recursiveParams };
-		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
 			path: treeItem.path,
 			type: FileTypeMap[treeItem.type] || FileType.File,
@@ -99,17 +97,19 @@ export class GitHub1sDataSource implements DataSource {
 	}
 
 	async provideFile(repoFullName: string, ref: string, path: string): Promise<File> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref, path };
-		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/contents/{path}', requestParams);
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/contents/{path}', requestParams);
 		return { content: toUint8Array((data as any).content) };
 	}
 
 	getMatchingRefs = reuseable(
 		async (repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch | Tag[]> => {
+			const fetcher = GitHubFetcher.getInstance();
 			const { owner, repo } = parseRepoFullName(repoFullName);
 			const requestParams = { owner, repo, ref };
-			const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
+			const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
 			return data.map((item) => ({ name: item.ref.slice(ref === 'heads' ? 11 : 10), commitSha: item.object.sha }));
 		}
 	);
@@ -161,6 +161,7 @@ export class GitHub1sDataSource implements DataSource {
 			path?: string;
 		}
 	): Promise<Commit[]> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const queryParams = {
 			page: options.page,
@@ -170,7 +171,7 @@ export class GitHub1sDataSource implements DataSource {
 			author: options.author,
 		};
 		const requestParams = { owner, repo, ...queryParams };
-		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/commits', requestParams);
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits', requestParams);
 		return data.map((item) => ({
 			sha: item.sha,
 			author: item.commit.author.name,
@@ -182,9 +183,10 @@ export class GitHub1sDataSource implements DataSource {
 	}
 
 	async provideCommit(repoFullName: string, ref: string): Promise<Commit & ChangedFileList> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref };
-		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
 		return {
 			sha: data.sha,
 			author: data.commit.author.name,
@@ -192,7 +194,11 @@ export class GitHub1sDataSource implements DataSource {
 			message: data.commit.message,
 			committer: data.commit.committer.name,
 			createTime: new Date(data.commit.author.date),
-			files: data.files.map((item) => ({ path: item.filename, previousPath: item.previous_filename })),
+			files: data.files.map((item) => ({
+				path: item.filename,
+				previousPath: item.previous_filename,
+				status: item.status as FileChangeStatus,
+			})),
 		};
 	}
 
@@ -200,14 +206,16 @@ export class GitHub1sDataSource implements DataSource {
 		repoFullName: string,
 		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
 	): Promise<CodeReview[]> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const state = options.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
 		const queryParams = { state, page: options.page, per_page: options.pageSize, owner: options.creator };
 		const requestParams = { owner, repo, ...queryParams };
-		const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/pulls', requestParams as any);
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/pulls', requestParams as any);
 
 		return data.map((item) => ({
 			id: `${item.id}`,
+			title: item.title,
 			state: getPullState(item),
 			creator: item.user.login,
 			createTime: new Date(item.created_at),
@@ -219,19 +227,18 @@ export class GitHub1sDataSource implements DataSource {
 	}
 
 	async provideCodeReview(repoFullName: string, id: string): Promise<CodeReview & ChangedFileList> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const pullRequestParams = { owner, repo, pull_number: Number(id) };
 		// TODO: only the number of change files not greater than 100 are supported now!
 		const filesRequestParams = { ...pullRequestParams, per_page: 100 };
-		const pullPromise = this.octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', pullRequestParams);
-		const filesPromise = this.octokit.request(
-			'GET /repos/{owner}/{repo}/pulls/{pull_number}/files',
-			filesRequestParams
-		);
+		const pullPromise = fetcher.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', pullRequestParams);
+		const filesPromise = fetcher.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', filesRequestParams);
 		const [pullResponse, filesResponse] = await Promise.all([pullPromise, filesPromise]);
 
 		return {
 			id: `${pullResponse.data.id}`,
+			title: pullResponse.data.title,
 			state: getPullState(pullResponse.data),
 			creator: pullResponse.data.user.login,
 			createTime: new Date(pullResponse.data.created_at),
@@ -239,14 +246,19 @@ export class GitHub1sDataSource implements DataSource {
 			closeTime: pullResponse.data.closed_at ? new Date(pullResponse.data.closed_at) : null,
 			head: { label: pullResponse.data.head.label, commitSha: pullResponse.data.head.sha },
 			base: { label: pullResponse.data.base.label, commitSha: pullResponse.data.base.sha },
-			files: filesResponse.data.map((item) => ({ path: item.filename, previousPath: item.previous_filename })),
+			files: filesResponse.data.map((item) => ({
+				path: item.filename,
+				previousPath: item.previous_filename,
+				status: item.status as FileChangeStatus,
+			})),
 		};
 	}
 
 	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<FileBlameRange[]> {
+		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref, path };
-		const { data } = await this.octokit.graphql(FILE_BLAME_QUERY, requestParams);
+		const { data } = (await fetcher.graphql(FILE_BLAME_QUERY, requestParams)) as any;
 		const blameRanges = data?.repository?.object?.blame?.ranges;
 
 		return blameRanges?.map((item) => ({

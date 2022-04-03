@@ -58,6 +58,7 @@ export interface Commit {
 	message: string;
 	committer?: string;
 	createTime: Date;
+	parents?: Commit[];
 }
 
 export interface TextSearchQuery {
@@ -117,6 +118,7 @@ export enum CodeReviewState {
 // or a Change Request for Gerrit
 export interface CodeReview {
 	id: string;
+	title: string;
 	state: CodeReviewState;
 	creator: string;
 	createTime: Date;
@@ -132,9 +134,17 @@ export interface CodeReview {
 	};
 }
 
+export enum FileChangeStatus {
+	Added = 'added',
+	Removed = 'removed',
+	Modified = 'modified',
+	Renamed = 'renamed',
+}
+
 export interface ChangedFileList {
 	files: {
 		scope?: ResourceScope;
+		status: FileChangeStatus;
 		path: string;
 		// changed file may be renamed
 		previousPath?: string;
@@ -162,20 +172,32 @@ export type SymbolReferences = CodeLocation[];
 
 export type SymbolHover = { markdown: string; precise: boolean };
 
-export interface DataSource {
+export class DataSource {
 	// if `recursive` is true, it should try to return all subtrees
-	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory>;
+	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory | null> {
+		return null;
+	}
 
 	// the ref here may be a commitSha, branch, tag, or 'HEAD'
-	provideFile(repo: string, ref: string, path: string): Promisable<File>;
+	provideFile(repo: string, ref: string, path: string): Promisable<File | null> {
+		return null;
+	}
 
-	provideBranches(repo: string, options: CommonQueryOptions): Promisable<Branch[]>;
+	provideBranches(repo: string, options: CommonQueryOptions): Promisable<Branch[]> {
+		return [];
+	}
 
-	provideBranch(repo: string, branch: string): Promisable<Branch | null>;
+	provideBranch(repo: string, branch: string): Promisable<Branch | null> {
+		return null;
+	}
 
-	provideTags(repo: string, options: CommonQueryOptions): Promisable<Tag[]>;
+	provideTags(repo: string, options: CommonQueryOptions): Promisable<Tag[]> {
+		return [];
+	}
 
-	provideTag(repo: string, tag: string): Promisable<Tag | null>;
+	provideTag(repo: string, tag: string): Promisable<Tag | null> {
+		return null;
+	}
 
 	// use `report` to populate search results gradually
 	provideTextSearchResults(
@@ -183,24 +205,36 @@ export interface DataSource {
 		ref: string,
 		query: TextSearchQuery,
 		options: TextSearchOptions
-	): Promisable<TextSearchResults>;
+	): Promisable<TextSearchResults> {
+		return { results: [], truncated: false };
+	}
 
 	provideCommits(
 		repo: string,
 		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
-	): Promisable<Commit[]>;
+	): Promisable<Commit[]> {
+		return [];
+	}
 
 	// the ref here may be a commitSha, branch, tag, or 'HEAD'
-	provideCommit(repo: string, ref: string): Promisable<(Commit & ChangedFileList) | null>;
+	provideCommit(repo: string, ref: string): Promisable<(Commit & ChangedFileList) | null> {
+		return null;
+	}
 
 	provideCodeReviews(
 		repo: string,
 		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
-	): Promisable<CodeReview[]>;
+	): Promisable<CodeReview[]> {
+		return [];
+	}
 
-	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & ChangedFileList) | null>;
+	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & ChangedFileList) | null> {
+		return null;
+	}
 
-	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]>;
+	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]> {
+		return [];
+	}
 
 	provideSymbolDefinitions(
 		repo: string,
@@ -209,7 +243,9 @@ export interface DataSource {
 		line: number,
 		character: number,
 		symbol: string
-	): Promisable<SymbolDefinitions>;
+	): Promisable<SymbolDefinitions> {
+		return [];
+	}
 
 	provideSymbolReferences(
 		repo: string,
@@ -218,7 +254,9 @@ export interface DataSource {
 		line: number,
 		character: number,
 		symbol: string
-	): Promisable<SymbolReferences>;
+	): Promisable<SymbolReferences> {
+		return [];
+	}
 
 	provideSymbolHover(
 		repo: string,
@@ -227,78 +265,103 @@ export interface DataSource {
 		line: number,
 		character: number,
 		symbol: string
-	): Promisable<SymbolHover>;
+	): Promisable<SymbolHover | null> {
+		return null;
+	}
 
-	provideUserAvatarLink(user: string): string;
+	provideUserAvatarLink(user: string): string {
+		return '';
+	}
 }
 
 export enum PageType {
 	// show the structure of a dictionary
 	// e.g. https://github.com/conwnet/github1s/tree/master/src/vs
-	TREE = 1,
+	Tree = 'Tree',
 
 	// show the content for a file
 	// e.g. https://github.com/conwnet/github1s/blob/master/extensions/github1s/src/extension.ts
-	BLOB = 2,
+	Blob = 'Blob',
 
 	// show the commit list of a repository
 	// e.g. https://github.com/conwnet/github1s/commits/master
-	COMMIT_LIST = 3,
+	CommitList = 'CommitList',
 
 	// show the detail of a commit
 	// e.g. https://github.com/conwnet/github1s/commit/c1264f7338833c7aa3a502c4629df8aa6b7d6ccf
-	COMMIT = 4,
+	Commit = 'Commit',
 
 	// show the pull request (or merge request) list of a repository
 	// e.g. https://github.com/conwnet/github1s/pulls
-	CODE_REVIEW_LIST = 5,
+	CodeReviewList = 'CodeReviewList',
 
 	// show the detail of a pull request (or merge request)
 	// e.g. https://github.com/conwnet/github1s/pull/81
-	CODE_REVIEW = 6,
+	CodeReview = 'CodeReview',
 
 	// show the file blame
 	// e.g. https://github.com/conwnet/github1s/blame/master/.gitignore
-	FILE_BLAME = 7,
+	FileBlame = 'FileBlame',
 
 	// branches, tags, wiki, gist should be on the way
-	UNKNOWN = 0,
+	Unknown = 'Unknown',
 }
 
 export type RouterState = { repo: string; ref: string } & (
-	| { type: PageType.TREE; filePath: string } // for tree page
-	| { type: PageType.BLOB; filePath: string; startLine?: number; endLine?: number } // for blob page
-	| { type: PageType.COMMIT_LIST } // for commit list page
-	| { type: PageType.COMMIT; commitSha: string } // for commit detail page
-	| { type: PageType.CODE_REVIEW_LIST } // for code review list page
-	| { type: PageType.CODE_REVIEW; codeReviewId: string } // for code review detail page
+	| { type: PageType.Tree; filePath: string } // for tree page
+	| { type: PageType.Blob; filePath: string; startLine?: number; endLine?: number } // for blob page
+	| { type: PageType.CommitList } // for commit list page
+	| { type: PageType.Commit; commitSha: string } // for commit detail page
+	| { type: PageType.CodeReviewList } // for code review list page
+	| { type: PageType.CodeReview; codeReviewId: string } // for code review detail page
 );
 
-export interface RouterParser {
+export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,
-	parsePath(path: string): Promisable<RouterState>;
+	parsePath(path: string): Promisable<RouterState> {
+		return { repo: 'conwnet/github1s', ref: 'HEAD', type: PageType.Tree, filePath: '' };
+	}
 
 	// build the tree page path
-	buildTreePath(repo: string, ref: string, filePath: string): Promisable<string>;
+	buildTreePath(repo: string, ref: string, filePath: string): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 
 	// build the blob page path
 	// eslint-disable-next-line max-len
-	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): Promisable<string>;
-
+	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 	// build the commit list page path
-	buildCommitListPath(repo: string): Promisable<string>;
+	buildCommitListPath(repo: string): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 
 	// build the commit page path
-	buildCommitPath(repo: string, commitSha: string): Promisable<string>;
+	buildCommitPath(repo: string, commitSha: string): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 
 	// build the code review list page path
-	buildCodeReviewListPath(repo: string): Promisable<string>;
+	buildCodeReviewListPath(repo: string): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 
 	// build the code review page path
-	buildCodeReviewPath(repo: string, codeReviewId: string): Promisable<string>;
+	buildCodeReviewPath(repo: string, codeReviewId: string): Promisable<string> {
+		return '/conwnet/github1s';
+	}
 
 	// convert giving path to the external link (using for jumping back to origin platform)
-	buildExternalLink(path: string): Promisable<string | null>;
+	buildExternalLink(path: string): Promisable<string | null> {
+		return '/conwnet/github1s';
+	}
+}
+
+export enum CodeReviewType {
+	PullRequest = 'PullRequest',
+	MergeRequest = 'MergeRequest',
+	ChangeRequest = 'ChangeRequest',
 }
 
 export interface PlatformAdapter {
@@ -306,7 +369,10 @@ export interface PlatformAdapter {
 	readonly scheme: string;
 	// platform name, using for displaying text such as: `open on **GitHub**`
 	readonly name: string;
+	// the code review type
+	readonly codeReviewType: CodeReviewType;
 
 	resolveDataSource(): Promisable<DataSource>;
 	resolveRouterParser(): Promisable<RouterParser>;
+	registerAsDefault?(): Promisable<void>;
 }

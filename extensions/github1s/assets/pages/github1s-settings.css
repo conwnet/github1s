@@ -1,0 +1,63 @@
+.vscode-input {
+  margin-bottom: 10px;
+}
+
+.vscode-button {
+  margin-bottom: 10px;
+}
+
+#app {
+  padding: 10px;
+}
+
+.flex-line {
+  display: flex;
+}
+
+.flex-line > * {
+  flex: 1;
+}
+
+.page-title {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.description {
+  font-size: 12px;
+	margin-bottom: 10px;
+}
+
+.description div {
+	margin-bottom: 5px;
+}
+
+.description div:last-child {
+	margin-bottom: 0;
+}
+
+.authentication-method-block {
+	margin-bottom: 8px;
+}
+
+.authentication-method-title {
+  font-weight: normal;
+	margin-bottom: 8px;
+}
+
+.create-token-link {
+	margin-bottom: 10px;
+}
+
+.token-text {
+  margin-bottom: 8px;
+}
+
+.token-text.token-valid {
+  color: #73c991;
+}
+
+.token-text.token-invalid {
+  color: #f88070;
+}

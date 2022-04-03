@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
-import { getNonce, getWebviewOptions } from '@/helpers/util';
+import { getNonce, getWebviewOptions } from '@/helpers/page';
 import { validateToken } from '@/interfaces/github-api-rest';
 import { GITHUB_OAUTH_TOKEN } from '@/helpers/constants';
 

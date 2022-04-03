@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { SettingsView } from './settings-view';
-import { PullRequestTreeDataProvider } from './pull-list-view';
+import { PullRequestTreeDataProvider } from './code-review-list-view';
 import { CommitTreeDataProvider } from './commit-list-view';
 
 export const commitTreeDataProvider = new CommitTreeDataProvider();

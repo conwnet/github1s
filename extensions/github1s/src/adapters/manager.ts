@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { PlatformAdapter } from './types';
+import { PlatformAdapter, Promisable } from './types';
 
 export class PlatformAdapterManager {
 	private static instance: PlatformAdapterManager = null;
@@ -19,11 +19,14 @@ export class PlatformAdapterManager {
 		return (PlatformAdapterManager.instance = new PlatformAdapterManager());
 	}
 
-	public registerAdapter(adapter: PlatformAdapter) {
+	public registerAdapter(adapter: PlatformAdapter): Promisable<void> {
 		if (this.adaptersMap.has(adapter.scheme)) {
 			throw new Error(`Adapter scheme '${adapter.scheme}' is already registered.`);
 		}
 		this.adaptersMap.set(adapter.scheme, adapter);
+		if (this.getCurrentScheme() === adapter.scheme && adapter.registerAsDefault) {
+			return adapter.registerAsDefault();
+		}
 	}
 
 	public getAllAdapters(): PlatformAdapter[] {

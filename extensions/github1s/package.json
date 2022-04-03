@@ -39,10 +39,10 @@
     "views": {
       "github1s": [
         {
-          "id": "github1s.views.github1s-settings",
+          "id": "github1s.views.settings",
           "name": "Settings",
           "type": "webview",
-          "when": "github1s:views:github1s-settings:visible == true"
+          "when": "github1s:views:settings:visible == true"
         }
       ],
       "scm": [
@@ -204,6 +204,11 @@
       {
         "command": "github1s.open-on-github",
         "title": "Open on GitHub",
+        "category": "GitHub1s"
+      },
+      {
+        "command": "github1s.open-authentication-page",
+        "title": "Open Authentication Page",
         "category": "GitHub1s"
       }
     ],

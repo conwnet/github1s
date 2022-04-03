@@ -8,12 +8,11 @@ import { RouterState, PageType } from '../../types';
 
 export const parseCommitsUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname.split('/').filter(Boolean);
-	const [owner, repo, _pageType, ...branchParts] = pathParts;
+	const [owner, repo, _pageType, ...refParts] = pathParts;
 
 	return {
-		owner,
-		repo,
-		pageType: PageType.COMMIT_LIST,
-		ref: branchParts.length ? branchParts.join('/') : 'HEAD',
+		repo: `${owner}/${repo}`,
+		type: PageType.CommitList,
+		ref: refParts.length ? refParts.join('/') : 'HEAD',
 	};
 };

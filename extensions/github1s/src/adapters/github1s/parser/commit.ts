@@ -10,5 +10,5 @@ export const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname.split('/').filter(Boolean);
 	const [owner, repo, _pageType, commitSha] = pathParts;
 
-	return { owner, repo, pageType: PageType.COMMIT, ref: commitSha, commitSha };
+	return { repo: `${owner}/${repo}`, type: PageType.Commit, ref: commitSha, commitSha };
 };

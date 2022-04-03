@@ -11,9 +11,7 @@ import { getChangedFileFromSourceControl } from '@/commands/editor';
 import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 import { debounce } from '@/helpers/func';
 
-const handleRouterOnActiveEditorChange = async (
-	editor: vscode.TextEditor | undefined
-) => {
+const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {
 	// replace current url when user change active editor
 	const { owner, repo, ref, pageType } = await router.getState();
 	const activeFileUri = editor?.document.uri;
@@ -25,15 +23,8 @@ const handleRouterOnActiveEditorChange = async (
 
 	// if the file which not belong to current workspace is opened, or no file
 	// is opened, only retain `owner` and `repo` (and `ref` if need) in browser url
-	if (
-		!activeFileUri ||
-		activeFileUri?.authority ||
-		activeFileUri?.scheme !== GitHub1sFileSystemProvider.scheme
-	) {
-		const browserPath =
-			ref.toUpperCase() === 'HEAD'
-				? `/${owner}/${repo}`
-				: `/${owner}/${repo}/tree/${ref}`;
+	if (!activeFileUri || activeFileUri?.authority || activeFileUri?.scheme !== GitHub1sFileSystemProvider.scheme) {
+		const browserPath = ref.toUpperCase() === 'HEAD' ? `/${owner}/${repo}` : `/${owner}/${repo}/tree/${ref}`;
 		router.history.replace({ pathname: browserPath, hash: '' });
 		return;
 	}
@@ -43,17 +34,10 @@ const handleRouterOnActiveEditorChange = async (
 };
 
 // if the `Open Changes` Button should show in editor title
-const handleOpenChangesContextOnActiveEditorChange = async (
-	editor: vscode.TextEditor | undefined
-) => {
-	const changedFile = editor?.document.uri
-		? await getChangedFileFromSourceControl(editor.document.uri)
-		: undefined;
+const handleOpenChangesContextOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {
+	const changedFile = editor?.document.uri ? await getChangedFileFromSourceControl(editor.document.uri) : undefined;
 
-	return setVSCodeContext(
-		'github1s.context.showOpenChangesInEditorTitle',
-		!!changedFile
-	);
+	return setVSCodeContext('github1s.context.showOpenChangesInEditorTitle', !!changedFile);
 };
 
 // set the `gutterBlameOpening` to false when the active editor changed
@@ -76,9 +60,7 @@ const getAnchorHashFromSelection = (selection: vscode.Selection) => {
 };
 
 // add the line number anchor when user selection lines in a editor
-const handleRouterOnTextEditorSelectionChange = async (
-	editor: vscode.TextEditor
-) => {
+const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor) => {
 	const { owner, repo, ref, pageType } = await router.getState();
 
 	// only add the line number anchor when pageType is PageType.BLOB
@@ -101,10 +83,7 @@ export const registerVSCodeEventListeners = () => {
 	});
 
 	// debounce to update the browser url
-	const debouncedSelectionChangeRouterHandler = debounce(
-		handleRouterOnTextEditorSelectionChange,
-		100
-	);
+	const debouncedSelectionChangeRouterHandler = debounce(handleRouterOnTextEditorSelectionChange, 100);
 	vscode.window.onDidChangeTextEditorSelection((event) => {
 		debouncedSelectionChangeRouterHandler(event.textEditor);
 	});

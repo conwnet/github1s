@@ -54,19 +54,15 @@ const server = http.createServer((request, response) => {
 		return vscodeUnpkgProxyHandler(request, response, vscodeUnpkgMatches);
 	}
 
-	return fs.access(
-		path.join(APP_ROOT, 'dist', urlObj.pathname),
-		fs.constants.F_OK,
-		(error) => {
-			if (!error && urlObj.pathname !== '/') {
-				return handler(request, response, staticOptions);
-			}
-			return handler(request, response, {
-				rewrites: [{ source: '*', destination: '/index.html' }],
-				...staticOptions,
-			});
+	return fs.access(path.join(APP_ROOT, 'dist', urlObj.pathname), fs.constants.F_OK, (error) => {
+		if (!error && urlObj.pathname !== '/') {
+			return handler(request, response, staticOptions);
 		}
-	);
+		return handler(request, response, {
+			rewrites: [{ source: '*', destination: '/index.html' }],
+			...staticOptions,
+		});
+	});
 });
 
 server.listen(5000, () => {

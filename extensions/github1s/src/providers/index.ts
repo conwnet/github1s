@@ -39,11 +39,11 @@ export const registerVSCodeProviders = () => {
 			vscode.workspace.registerFileSystemProvider(scheme, GitHub1sFileSystemProvider.getInstance(), {
 				isCaseSensitive: true,
 				isReadonly: true,
-			}),
-			vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
-			vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
-			vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
-			vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance())
+			})
+			// vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
+			// vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
+			// vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
+			// vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance())
 			// vscode.languages.registerHoverProvider({ scheme: GitHub1sHoverProvider.scheme }, hoverProvider),
 		);
 	});

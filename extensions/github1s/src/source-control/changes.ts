@@ -6,67 +6,70 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import repository from '@/repository';
-import { FileChangeType, RepositoryCommit, RepositoryPull } from '@/repository/types';
+import * as adapterTypes from '@/adapters/types';
+import platformAdapterManager from '@/adapters/manager';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
-import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
-import { PageType } from '@/router/types';
 import { GitHub1sQuickDiffProvider } from './quickDiffProviders';
 
 export interface ChangedFile {
 	baseFileUri: vscode.Uri;
 	headFileUri: vscode.Uri;
-	status: FileChangeType;
+	status: adapterTypes.FileChangeStatus;
 }
 
-// get the change files of a pull
-export const getPullChangedFiles = async (pull: RepositoryPull) => {
-	const { owner, repo } = await router.getState();
+// get the change files of a codeReview
+export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeReview) => {
+	const currentAdapter = platformAdapterManager.getCurrentAdapter();
+	const dataSource = await currentAdapter.resolveDataSource();
+	const { repo } = await router.getState();
 	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: GitHub1sFileSystemProvider.scheme,
-		authority: `${owner}+${repo}+${pull.base.sha}`,
+		scheme: currentAdapter.scheme,
+		authority: `${repo}+${codeReview.base.commitSha}`,
 		path: '/',
 	});
 	const headRootUri = baseRootUri.with({
-		authority: `${owner}+${repo}+${pull.head.sha}`,
+		authority: `${repo}+${codeReview.head.commitSha}`,
 	});
-	const pullFiles = await repository.getPullManager().getPullFiles(pull.number);
+	const codeReviewDetail = await dataSource.provideCodeReview(repo, codeReview.id);
 
-	return pullFiles.map((pullFile) => {
+	return codeReviewDetail.files.map((changedFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
 		// fallback to `filename` otherwise
-		const baseFilePath = pullFile.previous_filename || pullFile.filename;
-		const headFilePath = pullFile.filename;
+		const baseFilePath = changedFile.previousPath || changedFile.path;
+		const headFilePath = changedFile.path;
 		return {
 			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
 			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
-			status: pullFile.status,
+			status: changedFile.status,
 		};
 	});
 };
 
-export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
-	const { owner, repo } = await router.getState();
+export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
+	const currentAdapter = platformAdapterManager.getCurrentAdapter();
+	const dataSource = await currentAdapter.resolveDataSource();
+	const { repo } = await router.getState();
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// So we use the parents[0].sha as the parent commitSha
 	const baseRef = commit?.parents?.[0]?.sha;
 	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: GitHub1sFileSystemProvider.scheme,
-		authority: `${owner}+${repo}+${baseRef || 'HEAD'}`,
+		scheme: currentAdapter.scheme,
+		authority: `${repo}+${baseRef || 'HEAD'}`,
 		path: '/',
 	});
 	const headRootUri = baseRootUri.with({
-		authority: `${owner}+${repo}+${commit.sha || 'HEAD'}`,
+		authority: `${repo}+${commit.sha || 'HEAD'}`,
 	});
-	const commitFiles = await repository.getCommitManager().getCommitFiles(commit.sha);
+	const commitDetail = await dataSource.provideCommit(repo, commit.sha);
 
-	return commitFiles.map((commitFile) => {
+	return commitDetail.files.map((commitFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
 		// fallback to `filename` otherwise
-		const baseFilePath = commitFile.previous_filename || commitFile.filename;
-		const headFilePath = commitFile.filename;
+		const baseFilePath = commitFile.previousPath || commitFile.path;
+		const headFilePath = commitFile.path;
 		return {
 			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
 			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
@@ -77,22 +80,28 @@ export const getCommitChangedFiles = async (commit: RepositoryCommit) => {
 
 export const getChangedFiles = async (): Promise<ChangedFile[]> => {
 	const routerState = await router.getState();
+	const currentAdapter = platformAdapterManager.getCurrentAdapter();
+	const dataSource = await currentAdapter.resolveDataSource();
 
 	// github pull page
-	if (routerState.pageType === PageType.PULL) {
-		const pull = await repository.getPullManager().getItem(routerState.pullNumber);
-		return pull ? getPullChangedFiles(pull) : [];
+	if (routerState.type === adapterTypes.PageType.CODE_REVIEW) {
+		const codeReview = await dataSource.provideCodeReview(routerState.repo, routerState.codeReviewId);
+		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// github commit page
-	else if (routerState.pageType === PageType.COMMIT) {
-		const commit = await repository.getCommitManager().getItem(routerState.commitSha);
+	else if (routerState.type === adapterTypes.PageType.COMMIT) {
+		const commit = await dataSource.provideCommit(routerState.repo, routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
 	return [];
 };
 
 // get the title of the diff editor
-export const getChangedFileDiffTitle = (baseFileUri: vscode.Uri, headFileUri: vscode.Uri, status: FileChangeType) => {
+export const getChangedFileDiffTitle = (
+	baseFileUri: vscode.Uri,
+	headFileUri: vscode.Uri,
+	status: adapterTypes.FileChangeStatus
+) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
 	const [_owner, _repo, baseCommitSha] = baseFileUri.authority.split('+');
@@ -100,11 +109,11 @@ export const getChangedFileDiffTitle = (baseFileUri: vscode.Uri, headFileUri: vs
 	const baseFileLabel = `${baseFileName} (${baseCommitSha?.slice(0, 7)})`;
 	const headFileLabel = `${headFileName} (${headCommitSha?.slice(0, 7)})`;
 
-	if (status === FileChangeType.ADDED) {
+	if (status === adapterTypes.FileChangeStatus.ADDED) {
 		return `${headFileName} (added in ${headCommitSha.slice(0, 7)})`;
 	}
 
-	if (status === FileChangeType.REMOVED) {
+	if (status === adapterTypes.FileChangeStatus.REMOVED) {
 		return `${baseFileName} (deleted from ${baseCommitSha.slice(0, 7)})`;
 	}
 
@@ -116,11 +125,11 @@ export const getChangedFileCommand = (changedFile: ChangedFile) => {
 	let headFileUri = changedFile.headFileUri;
 	const status = changedFile.status;
 
-	if (status === FileChangeType.ADDED) {
+	if (status === adapterTypes.FileChangeStatus.ADDED) {
 		baseFileUri = emptyFileUri;
 	}
 
-	if (status === FileChangeType.REMOVED) {
+	if (status === adapterTypes.FileChangeStatus.REMOVED) {
 		headFileUri = emptyFileUri;
 	}
 
@@ -150,7 +159,7 @@ export const updateSourceControlChanges = (() => {
 			return {
 				resourceUri: changedFile.headFileUri,
 				decorations: {
-					strikeThrough: changedFile.status === FileChangeType.REMOVED,
+					strikeThrough: changedFile.status === adapterTypes.FileChangeStatus.REMOVED,
 					tooltip: changedFile.status,
 				},
 				command: getChangedFileCommand(changedFile),

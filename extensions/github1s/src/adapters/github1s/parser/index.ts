@@ -15,18 +15,14 @@ import { parseCommitUrl } from './commit';
 // detect concrete PageType the *third part* in url.path
 const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 	const PAGE_TYPE_MAP = {
-		tree: PageType.TREE,
-		blob: PageType.BLOB,
-		pulls: PageType.CODE_REVIEW_LIST,
-		pull: PageType.CODE_REVIEW,
-		commit: PageType.COMMIT,
-		commits: PageType.COMMIT_LIST,
+		tree: PageType.Tree,
+		blob: PageType.Blob,
+		pulls: PageType.CodeReviewList,
+		pull: PageType.CodeReview,
+		commit: PageType.Commit,
+		commits: PageType.CommitList,
 	};
-	return PAGE_TYPE_MAP[pathParts[2]] || PageType.TREE;
-};
-
-const extractGitHubRef = (refAndFilePath: string) => {
-	// return
+	return PAGE_TYPE_MAP[pathParts[2]] || PageType.Tree;
 };
 
 export const parseGitHubUrl = async (path: string): Promise<RouterState> => {
@@ -34,24 +30,24 @@ export const parseGitHubUrl = async (path: string): Promise<RouterState> => {
 	const pageType = detectPageTypeFromPathParts(pathParts);
 
 	switch (pageType) {
-		case PageType.TREE:
+		case PageType.Tree:
 			return parseTreeUrl(path);
-		case PageType.BLOB:
+		case PageType.Blob:
 			return parseBlobUrl(path);
-		case PageType.CODE_REVIEW:
+		case PageType.CodeReview:
 			return parsePullUrl(path);
-		case PageType.CODE_REVIEW_LIST:
+		case PageType.CodeReviewList:
 			return parsePullsUrl(path);
-		case PageType.COMMIT:
+		case PageType.Commit:
 			return parseCommitUrl(path);
-		case PageType.COMMIT_LIST:
+		case PageType.CommitList:
 			return parseCommitsUrl(path);
 	}
 
 	// fallback to default
 	return {
 		repo: 'conwnet/github1s',
-		type: PageType.TREE,
+		type: PageType.Tree,
 		ref: 'HEAD',
 		filePath: '',
 	};

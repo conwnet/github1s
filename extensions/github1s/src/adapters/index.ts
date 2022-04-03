@@ -9,3 +9,5 @@ import { GitHub1sPlatformAdapter } from './github1s';
 export const registerPlatformAdapters = async (): Promise<void> => {
 	await platformAdapterManager.registerAdapter(new GitHub1sPlatformAdapter());
 };
+
+export { platformAdapterManager };

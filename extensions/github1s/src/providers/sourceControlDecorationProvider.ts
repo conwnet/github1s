@@ -25,7 +25,7 @@ const selectedViewItemDecoration: FileDecoration = {
 
 export class GitHub1sSourceControlDecorationProvider implements FileDecorationProvider, Disposable {
 	public static fileSchema: string = 'github1s-source-control-file';
-	public static pullSchema: string = 'github1s-source-control-pull';
+	public static codeReviewSchema: string = 'github1s-source-control-code-review';
 	public static commitSchema: string = 'github1s-source-control-commit';
 
 	private readonly disposable: Disposable;
@@ -46,17 +46,17 @@ export class GitHub1sSourceControlDecorationProvider implements FileDecorationPr
 			return changedFileDecorationDataMap[query.status as string];
 		}
 
-		if (uri.scheme === GitHub1sSourceControlDecorationProvider.pullSchema) {
+		if (uri.scheme === GitHub1sSourceControlDecorationProvider.codeReviewSchema) {
 			return router.getState().then((routerState) => {
 				const query = queryString.parse(uri.query);
-				return +routerState.pullNumber === +query.number ? selectedViewItemDecoration : null;
+				return +(routerState as any).codeReviewId === +query.id ? selectedViewItemDecoration : null;
 			});
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.commitSchema) {
 			return router.getState().then((routerState) => {
 				const query = queryString.parse(uri.query);
-				return routerState.commitSha === query.sha ? selectedViewItemDecoration : null;
+				return (routerState as any).commitSha === query.sha ? selectedViewItemDecoration : null;
 			});
 		}
 	}
