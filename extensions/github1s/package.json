@@ -15,7 +15,7 @@
     "onCommand:github1s.clear-token",
     "onCommand:github1s.get-current-authority",
     "onCommand:github1s.checkout-ref",
-    "onCommand:github1s.switch-to-pull",
+    "onCommand:github1s.switch-to-code-review",
     "onCommand:github1s.switch-to-commit",
     "onCommand:github1s.diff-view-open-left-file",
     "onCommand:github1s.diff-view-open-right-file",
@@ -47,12 +47,14 @@
       ],
       "scm": [
         {
-          "id": "github1s.views.pull-request-list",
-          "name": "Pull Requests"
+          "id": "github1s.views.code-review-list",
+          "name": "Code Reviews",
+          "when": "github1s:views:code-review-list:visible == true"
         },
         {
           "id": "github1s.views.commit-list",
-          "name": "Commits"
+          "name": "Commits",
+          "when": "github1s:views:commit-list:visible == true"
         }
       ]
     },
@@ -88,25 +90,25 @@
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.switch-to-pull",
+        "command": "github1s.switch-to-code-review",
         "title": "Search a Pull Request",
         "category": "GitHub1s",
         "icon": "$(search)"
       },
       {
-        "command": "github1s.pull-view-refresh-pull-list",
+        "command": "github1s.code-review-view-refresh-code-review-list",
         "title": "Refresh",
         "category": "GitHub1s",
         "icon": "$(refresh)"
       },
       {
-        "command": "github1s.pull-view-item-switch-to-pull",
+        "command": "github1s.code-review-view-item-switch-to-code-review",
         "title": "Switch to Pull Request",
         "category": "GitHub1s",
         "icon": "$(log-in)"
       },
       {
-        "command": "github1s.pull-view-item-open-on-github",
+        "command": "github1s.code-review-view-item-open-on-official-page",
         "title": "Open on GitHub",
         "category": "GitHub1s",
         "icon": "$(globe)"
@@ -280,15 +282,15 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "github1s.pull-view-refresh-pull-list",
+          "command": "github1s.code-review-view-refresh-code-review-list",
           "when": "false"
         },
         {
-          "command": "github1s.pull-view-item-switch-to-pull",
+          "command": "github1s.code-review-view-item-switch-to-code-review",
           "when": "false"
         },
         {
-          "command": "github1s.pull-view-item-open-on-github",
+          "command": "github1s.code-review-view-item-open-on-official-page",
           "when": "false"
         },
         {
@@ -334,13 +336,13 @@
       ],
       "view/title": [
         {
-          "command": "github1s.pull-view-refresh-pull-list",
-          "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
+          "command": "github1s.code-review-view-refresh-code-review-list",
+          "when": "view =~ /^github1s\\.views\\.code-review-list$/",
           "group": "navigation@1"
         },
         {
-          "command": "github1s.switch-to-pull",
-          "when": "view =~ /^github1s\\.views\\.pull-request-list$/",
+          "command": "github1s.switch-to-code-review",
+          "when": "view =~ /^github1s\\.views\\.code-review-list$/",
           "group": "navigation@2"
         },
         {
@@ -356,13 +358,13 @@
       ],
       "view/item/context": [
         {
-          "command": "github1s.pull-view-item-switch-to-pull",
-          "when": "viewItem =~ /^github1s:pull-request$/",
+          "command": "github1s.code-review-view-item-switch-to-code-review",
+          "when": "viewItem =~ /^github1s:code-review$/",
           "group": "inline@1"
         },
         {
-          "command": "github1s.pull-view-item-open-on-github",
-          "when": "viewItem =~ /^github1s:pull-request$/",
+          "command": "github1s.code-review-view-item-open-on-official-page",
+          "when": "viewItem =~ /^github1s:code-review$/",
           "group": "inline@2"
         },
         {
@@ -426,7 +428,7 @@
   "license": "MIT",
   "dependencies": {
     "@apollo/client": "^3.3.9",
-    "@octokit/core": "^3.5.1",
+    "@octokit/core": "^3.6.0",
     "dayjs": "^1.10.4",
     "graphql": "^15.5.0",
     "history": "^5.0.0",

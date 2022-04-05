@@ -16,34 +16,35 @@ import {
 } from 'vscode';
 import router from '@/router';
 import repository from '@/repository';
-import { FileChangeType, RepositoryChangedFile } from '@/repository/types';
+// import { FileChangeType, RepositoryChangedFile } from '@/repository/types';
+import { ChangedFileList, FileChangeStatus } from '@/adapters/types';
 import { PageType } from '@/router/types';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 
 export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
-	[FileChangeType.ADDED]: {
+	[FileChangeStatus.Added]: {
 		tooltip: 'Added',
 		badge: 'A',
 		color: new ThemeColor('gitDecoration.addedResourceForeground'),
 	},
-	[FileChangeType.REMOVED]: {
+	[FileChangeStatus.Removed]: {
 		tooltip: 'Deleted',
 		badge: 'D',
 		color: new ThemeColor('gitDecoration.deletedResourceForeground'),
 	},
-	[FileChangeType.MODIFIED]: {
+	[FileChangeStatus.Modified]: {
 		tooltip: 'Modified',
 		badge: 'M',
 		color: new ThemeColor('gitDecoration.modifiedResourceForeground'),
 	},
-	[FileChangeType.RENAMED]: {
+	[FileChangeStatus.Renamed]: {
 		tooltip: 'Renamed',
 		badge: 'R',
 		color: new ThemeColor('gitDecoration.modifiedResourceForeground'),
 	},
 };
 
-const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: RepositoryChangedFile[]): FileDecoration => {
+const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFileList['files']): FileDecoration => {
 	const changedFile = changedFiles?.find((changedFile) => changedFile.filename === uri.path.slice(1));
 
 	if (changedFile) {

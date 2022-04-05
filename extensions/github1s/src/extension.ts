@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { setExtensionContext } from '@/helpers/context';
-// import { registerGitHub1sCommands } from '@/commands';
+import { registerGitHub1sCommands } from '@/commands';
 import { registerVSCodeProviders } from '@/providers';
 import { registerCustomViews } from '@/views';
 // import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
@@ -38,10 +38,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	// // register the necessary event listeners
 	// registerEventListeners();
 
-	// // register custom views
-	// registerCustomViews();
-	// // register GitHub1s Commands
-	// registerGitHub1sCommands();
+	// register GitHub1s Commands
+	registerGitHub1sCommands();
+
+	// register custom views
+	registerCustomViews();
 
 	// // activate SourceControl features,
 	// activateSourceControl();

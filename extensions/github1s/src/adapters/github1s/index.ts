@@ -32,6 +32,9 @@ export class GitHub1sPlatformAdapter implements PlatformAdapter {
 	registerAsDefault(): Promisable<void> {
 		// register settings view and show it in activity bar
 		setVSCodeContext('github1s:views:settings:visible', true);
+		setVSCodeContext('github1s:views:code-review-list:visible', true);
+		setVSCodeContext('github1s:views:commit-list:visible', true);
+
 		vscode.window.registerWebviewViewProvider(
 			GitHub1sSettingsViewProvider.viewType,
 			new GitHub1sSettingsViewProvider()

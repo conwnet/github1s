@@ -53,12 +53,14 @@ export interface Tag {
 
 export interface Commit {
 	sha: string;
-	author: string;
+	creator: string; // website login user
+	author: string; // original commit author
 	email: string;
 	message: string;
 	committer?: string;
 	createTime: Date;
 	parents?: Commit[];
+	avatarUrl: string;
 }
 
 export interface TextSearchQuery {
@@ -132,6 +134,7 @@ export interface CodeReview {
 		label: string;
 		commitSha: string;
 	};
+	avatarUrl: string;
 }
 
 export enum FileChangeStatus {
@@ -141,14 +144,12 @@ export enum FileChangeStatus {
 	Renamed = 'renamed',
 }
 
-export interface ChangedFileList {
-	files: {
-		scope?: ResourceScope;
-		status: FileChangeStatus;
-		path: string;
-		// changed file may be renamed
-		previousPath?: string;
-	}[];
+export interface ChangedFile {
+	scope?: ResourceScope;
+	status: FileChangeStatus;
+	path: string;
+	// changed file may be renamed
+	previousPath?: string;
 }
 
 export interface FileBlameRange {
@@ -209,27 +210,40 @@ export class DataSource {
 		return { results: [], truncated: false };
 	}
 
+	// optionally return changed files (if `files` exists can reduce api calls)
+	// should return by the order of `new to old`
 	provideCommits(
 		repo: string,
 		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
-	): Promisable<Commit[]> {
+	): Promisable<(Commit & { files?: ChangedFile[] })[]> {
 		return [];
 	}
 
 	// the ref here may be a commitSha, branch, tag, or 'HEAD'
-	provideCommit(repo: string, ref: string): Promisable<(Commit & ChangedFileList) | null> {
+	// optionally return changed files (if `files` exists can reduce api calls)
+	provideCommit(repo: string, ref: string): Promisable<(Commit & { files?: ChangedFile[] }) | null> {
 		return null;
 	}
 
-	provideCodeReviews(
-		repo: string,
-		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
-	): Promisable<CodeReview[]> {
+	provideCommitChangedFiles(repo: string, ref: string, options: CommonQueryOptions): Promisable<ChangedFile[]> {
 		return [];
 	}
 
-	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & ChangedFileList) | null> {
+	// optionally return changed files (if `files` exists can reduce api calls)
+	provideCodeReviews(
+		repo: string,
+		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
+	): Promisable<(CodeReview & { files?: ChangedFile[] })[]> {
+		return [];
+	}
+
+	// optionally return changed files (if `files` exists can reduce api calls)
+	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & { files?: ChangedFile[] }) | null> {
 		return null;
+	}
+
+	provideCodeReviewChangedFiles(repo: string, id: string, options: CommonQueryOptions): Promisable<ChangedFile[]> {
+		return [];
 	}
 
 	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]> {
@@ -353,7 +367,7 @@ export class RouterParser {
 	}
 
 	// convert giving path to the external link (using for jumping back to origin platform)
-	buildExternalLink(path: string): Promisable<string | null> {
+	buildExternalLink(path: string): Promisable<string> {
 		return '/conwnet/github1s';
 	}
 }

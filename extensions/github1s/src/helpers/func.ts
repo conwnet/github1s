@@ -19,7 +19,7 @@ export const reuseable = <T extends (...args: any[]) => Promise<any>>(
 	return function (...args: Parameters<T>): ReturnType<T> {
 		const key = computeCacheKey(...args);
 		if (cache.has(key)) {
-			return cache.get(key);
+			return cache.get(key)!;
 		}
 
 		const promise = func.call(this, ...args);
@@ -29,8 +29,8 @@ export const reuseable = <T extends (...args: any[]) => Promise<any>>(
 };
 
 export const throttle = <T extends (...args: any[]) => any>(func: T, interval: number) => {
-	let timer = null;
-	return function (...args: Parameters<T>): ReturnType<T> {
+	let timer: ReturnType<typeof setTimeout> | null = null;
+	return function (...args: Parameters<T>): ReturnType<T> | undefined {
 		if (timer) {
 			return;
 		}
@@ -40,7 +40,7 @@ export const throttle = <T extends (...args: any[]) => any>(func: T, interval: n
 };
 
 export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
-	let timer = null;
+	let timer: ReturnType<typeof setTimeout> | null = null;
 	return function (...args: Parameters<T>): void {
 		timer && clearTimeout(timer);
 		timer = setTimeout(() => func.call(this, ...args), wait);
@@ -49,8 +49,8 @@ export const debounce = <T extends (...args: any[]) => any>(func: T, wait: numbe
 
 // debounce an async func. once an async func canceled, it throws a exception
 export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(func: T, wait: number) => {
-	let timer = null;
-	let previousReject = null;
+	let timer: ReturnType<typeof setTimeout> | null = null;
+	let previousReject: (() => any) | null = null;
 	return function (...args: Parameters<T>): ReturnType<T> {
 		return new Promise((resolve, reject) => {
 			timer && clearTimeout(timer);

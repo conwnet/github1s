@@ -14,12 +14,13 @@ import {
 } from './token';
 import { commandGetCurrentAuthority, commandCheckoutRef } from './ref';
 import {
-	commandSwitchToPull,
-	commandPullViewItemSwitchToPull,
-	commandPullViewItemOpenOnGitHub,
-	commandPullViewRefreshPullList,
-	commandPullViewLoadMorePulls,
-} from './pull';
+	commandSwitchToCodeReview,
+	commandCodeReviewViewItemSwitchToCodeReview,
+	commandCodeReviewViewItemOpenOnOfficialPage,
+	commandCodeReviewViewRefreshCodeReviewList,
+	commandCodeReviewViewLoadMoreCodeReviews,
+	commandCodeReviewViewLoadMoreChangedFiles,
+} from './code-review';
 import {
 	commandSwitchToCommit,
 	commandOpenCommitOnGitHub,
@@ -36,11 +37,7 @@ import {
 	commandEditorViewOpenNextRevision,
 	commandEditorViewOpenPrevRevision,
 } from './editor';
-import {
-	commandToggleEditorGutterBlame,
-	commandOpenEditorGutterBlame,
-	commandCloseEditorGutterBlame,
-} from './blame';
+import { commandToggleEditorGutterBlame, commandOpenEditorGutterBlame, commandCloseEditorGutterBlame } from './blame';
 import { commandOpenOnGitHub } from './global';
 
 const commands: { id: string; callback: (...args: any[]) => any }[] = [
@@ -60,18 +57,20 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// checkout to other branch/tag/commit
 	{ id: 'github1s.checkout-ref', callback: commandCheckoutRef },
 
-	// switch to a pull request & input pull number manually
-	{ id: 'github1s.switch-to-pull', callback: commandSwitchToPull },
-	// update the pull request list in the pull requests view
-	{ id: 'github1s.pull-view-refresh-pull-list', callback: commandPullViewRefreshPullList }, // prettier-ignore
-	// load more pulls in the pull requests tree view
-	{ id: 'github1s.pull-view-load-more-pulls', callback: commandPullViewLoadMorePulls }, // prettier-ignore
-	// switch to a pull request in the pull requests view
-	{ id: 'github1s.pull-view-item-switch-to-pull', callback: commandPullViewItemSwitchToPull }, // prettier-ignore
-	// open pull on github in the pull requests view
-	{ id: 'github1s.pull-view-item-open-on-github', callback: commandPullViewItemOpenOnGitHub }, // prettier-ignore
+	// switch to a code review & input code review id manually
+	{ id: 'github1s.switch-to-code-review', callback: commandSwitchToCodeReview },
+	// update the code review list in the code reviews view
+	{ id: 'github1s.code-review-view-refresh-code-review-list', callback: commandCodeReviewViewRefreshCodeReviewList }, // prettier-ignore
+	// load more code reviews in the code reviews tree view
+	{ id: 'github1s.code-review-view-load-more-code-reviews', callback: commandCodeReviewViewLoadMoreCodeReviews }, // prettier-ignore
+	// load more changed files in the code reviews tree view
+	{ id: 'github1s.code-review-view-load-more-changed-files', callback: commandCodeReviewViewLoadMoreChangedFiles }, // prettier-ignore
+	// switch to a code review in the code reviews view
+	{ id: 'github1s.code-review-view-item-switch-to-code-review', callback: commandCodeReviewViewItemSwitchToCodeReview }, // prettier-ignore
+	// open cod reviews on official page in the code reviews view
+	{ id: 'github1s.code-review-view-item-open-on-official-page', callback: commandCodeReviewViewItemOpenOnOfficialPage }, // prettier-ignore
 
-	// switch to a commit & input pull number manually
+	// switch to a commit & input commit sha manually
 	{ id: 'github1s.switch-to-commit', callback: commandSwitchToCommit },
 	// open a commit on GitHub's website
 	{ id: 'github1s.open-commit-on-github', callback: commandOpenCommitOnGitHub },
@@ -113,9 +112,7 @@ export const registerGitHub1sCommands = () => {
 	const context = getExtensionContext();
 
 	context.subscriptions.push(
-		...commands.map((command) =>
-			vscode.commands.registerCommand(command.id, command.callback)
-		)
+		...commands.map((command) => vscode.commands.registerCommand(command.id, command.callback))
 	);
 
 	vscode.commands.registerCommand('github1s.dev-test', () => {

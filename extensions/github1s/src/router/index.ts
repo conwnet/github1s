@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { History, createMemoryHistory } from 'history';
-import { RouterState } from '@/adapters/types';
+import { RouterParser, RouterState } from '@/adapters/types';
 import { Barrier } from '@/helpers/async';
 import platformAdapterManager from '@/adapters/manager';
 import { EventEmitter } from './events';
@@ -18,8 +18,9 @@ export interface UrlManager {
 export class Router extends EventEmitter<RouterState> {
 	private static instance: Router;
 
-	private _state: RouterState = null;
-	private _history: History = null;
+	private _state: RouterState | null = null;
+	private _history: History | null = null;
+	private _parser: RouterParser | null = null;
 	// ensure router has been initialized
 	private _barrier: Barrier = new Barrier();
 
@@ -32,11 +33,11 @@ export class Router extends EventEmitter<RouterState> {
 
 	// initialize the router with current url in browser
 	async initialize(urlManager: UrlManager) {
-		const routerParser = await platformAdapterManager.getCurrentAdapter().resolveRouterParser();
+		this._parser = await platformAdapterManager.getCurrentAdapter().resolveRouterParser();
 		const { path: pathname, query, fragment } = vscode.Uri.parse(await urlManager.getUrl());
 		const path = pathname + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 
-		this._state = await routerParser.parsePath(path);
+		this._state = await this._parser.parsePath(path);
 		this._history = createMemoryHistory({ initialEntries: [path] });
 
 		this._history.listen(async ({ location }) => {
@@ -54,7 +55,7 @@ export class Router extends EventEmitter<RouterState> {
 	// get the routerState for current url
 	public async getState(): Promise<RouterState> {
 		await this._barrier.wait();
-		return this._state;
+		return this._state!;
 	}
 
 	// compute the file URI authority of current routerState
@@ -66,13 +67,18 @@ export class Router extends EventEmitter<RouterState> {
 	// push the url with current history
 	public async push(path: string) {
 		await this._barrier.wait();
-		return this._history.push(path);
+		return this._history!.push(path);
 	}
 
 	// replace the url with current history
 	public async replace(path: string) {
 		await this._barrier.wait();
-		return this._history.replace(path);
+		return this._history!.replace(path);
+	}
+
+	public async resolveParser(): Promise<RouterParser> {
+		await this._barrier.wait();
+		return this._parser!;
 	}
 }
 

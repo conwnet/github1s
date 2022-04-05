@@ -1,5 +1,5 @@
 /**
- * @file GitHub Pull Request List View
+ * @file Code Review List View
  * @author netcon
  */
 
@@ -10,7 +10,9 @@ import platformAdapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import * as queryString from 'query-string';
 import router from '@/router';
-import { getChangedFileCommand, getPullChangedFiles } from '@/source-control/changes';
+import { getChangedFileCommand, getCodeReviewChangedFiles } from '@/source-control/changes';
+import { CodeReviewManager } from './code-review-manager';
+import { Barrier } from '@/helpers/async';
 
 enum CodeReviewState {
 	OPEN = 'open',
@@ -19,17 +21,17 @@ enum CodeReviewState {
 }
 
 const getCodeReviewStatus = (codeReview: adapterTypes.CodeReview): CodeReviewState => {
-	// current pull request is open
+	// current codeReview request is open
 	if (codeReview.state === adapterTypes.CodeReviewState.Open) {
 		return CodeReviewState.OPEN;
 	}
 
-	// current pull request is merged
-	if (codeReview.state === adapterTypes.CodeReviewState.Closed && codeReview.mergeTime) {
+	// current codeReview request is merged
+	if (codeReview.state === adapterTypes.CodeReviewState.Merged) {
 		return CodeReviewState.MERGED;
 	}
 
-	// current pull is closed
+	// current codeReview is closed
 	return CodeReviewState.CLOSED;
 };
 
@@ -39,70 +41,100 @@ const statusIconMap = {
 	[CodeReviewState.MERGED]: '🟣',
 };
 
-export const getPullTreeItemLabel = (codeReview: adapterTypes.CodeReview) => {
+export const getCodeReviewTreeItemLabel = (codeReview: adapterTypes.CodeReview) => {
 	const statusIcon = statusIconMap[getCodeReviewStatus(codeReview)];
 	return `${statusIcon} #${codeReview.id} ${codeReview.title}`;
 };
 
-export const getPullTreeItemDescription = (codeReview: adapterTypes.CodeReview) => {
+export const getCodeReviewTreeItemDescription = (codeReview: adapterTypes.CodeReview) => {
 	const codeReviewStatus = getCodeReviewStatus(codeReview);
 
-	// current pull request is open
+	// current codeReview request is open
 	if (codeReviewStatus === CodeReviewState.OPEN) {
 		return `opened ${relativeTimeTo(codeReview.createTime)} by ${codeReview.creator}`;
 	}
 
-	// current pull request is merged
+	// current codeReview request is merged
 	if (codeReviewStatus === CodeReviewState.MERGED) {
-		return `by ${codeReview.creator} was merged ${relativeTimeTo(codeReview.mergeTime)}`;
+		return `by ${codeReview.creator} was merged ${relativeTimeTo(codeReview.mergeTime!)}`;
 	}
 
-	// current pull is closed
-	return `by ${codeReview.creator} was closed ${relativeTimeTo(codeReview.closeTime)}`;
+	// current codeReview is closed
+	return `by ${codeReview.creator} was closed ${relativeTimeTo(codeReview.closeTime!)}`;
 };
 
 export interface CodeReviewTreeItem extends vscode.TreeItem {
 	codeReview: adapterTypes.CodeReview;
 }
 
-const loadMoreCodeReviewItem: vscode.TreeItem = {
+const loadMoreCodeReviewsItem: vscode.TreeItem = {
 	label: 'Load more',
-	tooltip: 'Load more pull requests',
+	tooltip: 'Load more code reviews',
 	command: {
-		title: 'Load more pull requests',
-		command: 'github1s.pull-view-load-more-pulls',
-		tooltip: 'Load more pull requests',
+		title: 'Load more code reviews',
+		command: 'github1s.code-review-view-load-more-code-reviews',
+		tooltip: 'Load more code reviews',
 	},
 };
+
+const createLoadMoreChangedFilesItem = (codeReviewId: string): vscode.TreeItem => ({
+	label: 'Load more',
+	tooltip: 'Load more changed files',
+	command: {
+		title: 'Load more changed files',
+		command: 'github1s.code-review-view-load-more-changed-files',
+		tooltip: 'Load more changed files',
+		arguments: [codeReviewId],
+	},
+});
 
 export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.code-review-list';
 
-	private forceUpdate = false;
-	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
+	private _forceUpdate = false;
+	private _loadingBarrier: Barrier | null = null;
+	private _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-	private async _resolveDataSource() {
-		return platformAdapterManager.getCurrentAdapter().resolveDataSource();
+	public updateTree(forceUpdate = true) {
+		this._forceUpdate = forceUpdate;
+		this._onDidChangeTreeData.fire();
 	}
 
-	public updateTree(forceUpdate = true) {
-		this.forceUpdate = forceUpdate;
-		this._onDidChangeTreeData.fire(undefined);
+	public async loadMoreCodeReviews() {
+		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
+			this._loadingBarrier = new Barrier(5000);
+			this.updateTree(false);
+			const scheme = platformAdapterManager.getCurrentScheme();
+			const { repo } = await router.getState();
+			await CodeReviewManager.getInstance(scheme, repo)!.loadMore();
+			this._loadingBarrier.open();
+		}
+	}
+
+	public async loadMoreChangedFiles(codeReviewId: string) {
+		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
+			this._loadingBarrier = new Barrier(5000);
+			this.updateTree(false);
+			const scheme = platformAdapterManager.getCurrentScheme();
+			const { repo } = await router.getState();
+			await CodeReviewManager.getInstance(scheme, repo)!.loadMoreChangedFiles(codeReviewId);
+			this._loadingBarrier.open();
+		}
 	}
 
 	async getCodeReviewItems(): Promise<vscode.TreeItem[]> {
+		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const currentAdapter = platformAdapterManager.getCurrentAdapter();
-		const dataSource = await currentAdapter.resolveDataSource();
-		const routerState = await router.getState();
-		const codeReviews = await dataSource.provideCodeReviews(routerState.repo, { page: 1, pageSize: 100 });
-		this.forceUpdate = false;
+		const { repo } = await router.getState();
+		const codeReviewManager = CodeReviewManager.getInstance(currentAdapter.scheme, repo)!;
+		const codeReviews = await codeReviewManager.getList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
-			const label = getPullTreeItemLabel(codeReview);
-			const description = getPullTreeItemDescription(codeReview);
+			const label = getCodeReviewTreeItemLabel(codeReview);
+			const description = getCodeReviewTreeItemDescription(codeReview);
 			const tooltip = `${label} (${description})`;
-			const iconPath = vscode.Uri.parse(dataSource.provideUserAvatarLink(codeReview.creator));
-			const contextValue = 'github1s:pull-request';
+			const iconPath = vscode.Uri.parse(codeReview.avatarUrl);
+			const contextValue = 'github1s:code-review';
 
 			return {
 				codeReview,
@@ -118,15 +150,17 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
-		return codeReviews.length >= 100 ? [...codeReviewTreeItems, loadMoreCodeReviewItem] : codeReviewTreeItems;
+		this._forceUpdate = false;
+		const hasMore = await codeReviewManager.hasMore();
+		return hasMore ? [...codeReviewTreeItems, loadMoreCodeReviewsItem] : codeReviewTreeItems;
 	}
 
-	async getPullFileItems(codeReview: adapterTypes.CodeReview): Promise<vscode.TreeItem[]> {
-		const changedFiles = await getPullChangedFiles(codeReview);
-
-		return changedFiles.map((changedFile) => {
+	async getCodeReviewFileItems(codeReview: adapterTypes.CodeReview): Promise<vscode.TreeItem[]> {
+		this._loadingBarrier && (await this._loadingBarrier.wait());
+		const changedFiles = await getCodeReviewChangedFiles(codeReview);
+		const changedFileItems = changedFiles.map((changedFile) => {
 			const filePath = changedFile.headFileUri.path;
-			const id = `${pull.number} ${filePath}`;
+			const id = `${codeReview.id} ${filePath}`;
 			const command = getChangedFileCommand(changedFile);
 
 			return {
@@ -140,6 +174,12 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
 		});
+		const scheme = platformAdapterManager.getCurrentScheme();
+		const { repo } = await router.getState();
+		const codeReviewManager = CodeReviewManager.getInstance(scheme, repo)!;
+		const hasMore = await codeReviewManager.hasMoreChangedFiles(codeReview.id);
+		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(codeReview.id);
+		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;
 	}
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -148,16 +188,9 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 
 	getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
 		if (!element) {
-			return this.getPullItems();
+			return this.getCodeReviewItems();
 		}
-		const pull = (element as PullTreeItem)?.pull;
-		return pull ? this.getPullFileItems(pull) : [];
-	}
-
-	// the tooltip of the `PullTreeItem` with `resourceUri` property won't show
-	// correctly if miss this resolveTreeItem, it seems a bug of current version
-	// vscode, and it has fixed in a newer version vscode
-	resolveTreeItem(item: vscode.TreeItem, _element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
-		return item;
+		const codeReview = (element as CodeReviewTreeItem)?.codeReview;
+		return codeReview ? this.getCodeReviewFileItems(codeReview) : [];
 	}
 }

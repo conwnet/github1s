@@ -42,7 +42,7 @@ export class GitHubFetcher {
 
 	private constructor() {
 		this.accessToken = GitHubTokenManager.getInstance().getToken();
-		this.octokit = new Octokit({ auth: this.accessToken, request: { fetcher: fetch } });
+		this.octokit = new Octokit({ auth: this.accessToken, request: { fetch } });
 	}
 
 	public static getInstance(): GitHubFetcher {

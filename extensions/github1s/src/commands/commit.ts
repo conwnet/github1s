@@ -6,10 +6,7 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import repository from '@/repository';
-import {
-	CommitTreeItem,
-	getCommitTreeItemDescription,
-} from '@/views/commit-list-view';
+import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
 import { commitTreeDataProvider } from '@/views';
 import { RequestNotFoundError } from '@/helpers/fetch';
 
@@ -18,9 +15,7 @@ const checkCommitExists = async (commitSha: string) => {
 		return !!(await repository.getCommitManager().getItem(commitSha));
 	} catch (e) {
 		vscode.window.showErrorMessage(
-			e instanceof RequestNotFoundError
-				? `No commit found for SHA: ${commitSha}`
-				: e.message
+			e instanceof RequestNotFoundError ? `No commit found for SHA: ${commitSha}` : e.message
 		);
 		return false;
 	}
@@ -50,9 +45,8 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 		quickPick.items = [inputCommitShaItem, ...commitItems];
 		quickPick.show();
 
-		const choice = (await new Promise<vscode.QuickPickItem | undefined>(
-			(resolve) =>
-				quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
+		const choice = (await new Promise<vscode.QuickPickItem | undefined>((resolve) =>
+			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
 		)) as vscode.QuickPickItem & { commitSha?: string };
 		quickPick.hide();
 
@@ -72,14 +66,11 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 		}
 	}
 
-	(await checkCommitExists(commitSha)) &&
-		router.replace(`/${owner}/${repo}/commit/${commitSha}`);
+	(await checkCommitExists(commitSha)) && router.replace(`/${owner}/${repo}/commit/${commitSha}`);
 };
 
 // this command is used in `source control commits view`
-export const commandCommitViewItemSwitchToCommit = (
-	viewItem: CommitTreeItem
-) => {
+export const commandCommitViewItemSwitchToCommit = (viewItem: CommitTreeItem) => {
 	return commandSwitchToCommit(viewItem?.commit?.sha);
 };
 
@@ -92,9 +83,7 @@ export const commandOpenCommitOnGitHub = async (commitSha: string) => {
 };
 
 // this command is used in `source control commit list view`
-export const commandCommitViewItemOpenOnGitHub = async (
-	viewItem: CommitTreeItem
-) => {
+export const commandCommitViewItemOpenOnGitHub = async (viewItem: CommitTreeItem) => {
 	const commitSha = viewItem?.commit?.sha;
 	commitSha && commandOpenCommitOnGitHub(commitSha);
 };

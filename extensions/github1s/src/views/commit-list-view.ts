@@ -6,13 +6,13 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import { relativeTimeTo } from '@/helpers/date';
-import repository from '@/repository';
-import { RepositoryCommit } from '@/repository/types';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
 import { getChangedFileCommand, getCommitChangedFiles } from '@/source-control/changes';
 import platformAdapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
+import { CommitManager } from './commit-manager';
+import { Barrier } from '@/helpers/async';
 
 export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
 	return [commit.sha.slice(0, 7), commit.author, relativeTimeTo(commit.createTime)].join(', ');
@@ -32,33 +32,63 @@ const loadMoreCommitItem: vscode.TreeItem = {
 	},
 };
 
+const createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => ({
+	label: 'Load more',
+	tooltip: 'Load more changed files',
+	command: {
+		title: 'Load more changed files',
+		command: 'github1s.commit-view-load-more-changed-files',
+		tooltip: 'Load more changed files',
+		arguments: [commitSha],
+	},
+});
+
 export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.commit-list';
 
-	private forceUpdate = false;
-	private _onDidChangeTreeData = new vscode.EventEmitter<undefined>();
+	private _forceUpdate = false;
+	private _loadingBarrier: Barrier | null = null;
+	private _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
 	public updateTree(forceUpdate = true) {
-		this.forceUpdate = forceUpdate;
-		this._onDidChangeTreeData.fire(undefined);
+		this._forceUpdate = forceUpdate;
+		this._onDidChangeTreeData.fire();
 	}
 
-	private async _resolveCurrentDataSource() {
-		return platformAdapterManager.getCurrentAdapter().resolveDataSource();
+	public async loadMoreCommits() {
+		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
+			this._loadingBarrier = new Barrier(5000);
+			this.updateTree(false);
+			const scheme = platformAdapterManager.getCurrentScheme();
+			const { repo } = await router.getState();
+			await CommitManager.getInstance(scheme, repo)!.loadMore();
+			this._loadingBarrier.open();
+		}
+	}
+
+	public async loadMoreChangedFiles(commitSha: string) {
+		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
+			this._loadingBarrier = new Barrier(5000);
+			this.updateTree(false);
+			const scheme = platformAdapterManager.getCurrentScheme();
+			const { repo } = await router.getState();
+			await CommitManager.getInstance(scheme, repo)!.loadMoreChangedFiles(commitSha);
+			this._loadingBarrier.open();
+		}
 	}
 
 	async getCommitItems(): Promise<vscode.TreeItem[]> {
+		this._loadingBarrier && (await this._loadingBarrier.wait());
+		const currentAdapter = platformAdapterManager.getCurrentAdapter();
 		const { repo, ref } = await router.getState();
-		const dataSource = await this._resolveCurrentDataSource();
-		const queryOptions = { page: 1, pageSize: 100, from: ref };
-		const repositoryCommits = await dataSource.provideCommits(repo, queryOptions);
-		this.forceUpdate = false;
+		const commitManager = CommitManager.getInstance(currentAdapter.scheme, repo)!;
+		const repositoryCommits = await commitManager.getList(ref, '', this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = `${commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
-			const iconPath = vscode.Uri.parse(dataSource.provideUserAvatarLink(commit.author));
+			const iconPath = vscode.Uri.parse(commit.avatarUrl);
 			const contextValue = 'github1s:commit';
 
 			return {
@@ -75,16 +105,15 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			};
 		});
-		return [...commitTreeItems, loadMoreCommitItem];
+		this._forceUpdate = false;
+		const hasMore = await commitManager.hasMore(ref);
+		return hasMore ? [...commitTreeItems, loadMoreCommitItem] : commitTreeItems;
 	}
 
 	async getCommitFileItems(commit: adapterTypes.Commit): Promise<vscode.TreeItem[]> {
-		const { repo } = await router.getState();
-		const dataSource = await this._resolveCurrentDataSource();
-		const repositoryCommit = await dataSource.provideCommit(repo, commit.sha);
-
-		return repositoryCommit.files.map((changedFile) => {
-			const filePath = changedFile.path;
+		const changedFiles = await getCommitChangedFiles(commit);
+		const changedFileItems = changedFiles.map((changedFile) => {
+			const filePath = changedFile.headFileUri.path;
 			const id = `${commit.sha} ${filePath}`;
 			const command = getChangedFileCommand(changedFile);
 
@@ -99,6 +128,12 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
 		});
+		const scheme = platformAdapterManager.getCurrentScheme();
+		const { repo } = await router.getState();
+		const commitManager = CommitManager.getInstance(scheme, repo)!;
+		const hasMore = await commitManager.hasMoreChangedFiles(commit.sha);
+		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(commit.sha);
+		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;
 	}
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -111,12 +146,5 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		}
 		const commit = (element as CommitTreeItem)?.commit;
 		return commit ? this.getCommitFileItems(commit) : [];
-	}
-
-	// the tooltip of the `CommitTreeItem` with `resourceUri` property won't show
-	// correctly if miss this resolveTreeItem, it seems a bug of current version
-	// vscode, and it has fixed in a newer version vscode
-	resolveTreeItem(item: vscode.TreeItem, _element: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem> {
-		return item;
 	}
 }

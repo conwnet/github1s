@@ -25,8 +25,8 @@ const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 	return PAGE_TYPE_MAP[pathParts[2]] || PageType.Tree;
 };
 
-export const parseGitHubUrl = async (path: string): Promise<RouterState> => {
-	const pathParts = parsePath(path).pathname.split('/').filter(Boolean);
+export const parseGitHubPath = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname?.split('/').filter(Boolean) || [];
 	const pageType = detectPageTypeFromPathParts(pathParts);
 
 	switch (pageType) {

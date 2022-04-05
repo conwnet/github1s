@@ -4,9 +4,10 @@
  */
 
 import * as github1s from '../types';
+import { parseGitHubPath } from './parser';
 
 export class GitHub1sRouterParser extends github1s.RouterParser {
-	private static instance: GitHub1sRouterParser = null;
+	private static instance: GitHub1sRouterParser | null = null;
 
 	public static getInstance(): GitHub1sRouterParser {
 		if (GitHub1sRouterParser.instance) {
@@ -16,7 +17,7 @@ export class GitHub1sRouterParser extends github1s.RouterParser {
 	}
 
 	parsePath(path: string): Promise<github1s.RouterState> {
-		return Promise.resolve({ repo: 'conwnet/github1s', ref: 'master', type: github1s.PageType.Tree, filePath: '' });
+		return parseGitHubPath(path);
 	}
 
 	buildTreePath(repo: string, ref: string, filePath: string): string {

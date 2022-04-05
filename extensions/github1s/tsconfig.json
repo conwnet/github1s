@@ -3,8 +3,9 @@
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
+    "strictNullChecks": true,
     "outDir": "out",
-    "lib": ["es2016", "WebWorker"],
+    "lib": ["WebWorker", "es2016"],
     "sourceMap": true,
     "baseUrl": "src",
     "paths": {
