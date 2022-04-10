@@ -23,11 +23,11 @@ import {
 } from './code-review';
 import {
 	commandSwitchToCommit,
-	commandOpenCommitOnGitHub,
 	commandCommitViewItemSwitchToCommit,
-	commandCommitViewItemOpenOnGitHub,
+	commandCommitViewItemOpenOnOfficialPage,
 	commandCommitViewRefreshCommitList,
 	commandCommitViewLoadMoreCommits,
+	commandCommitViewLoadMoreChangedFiles,
 } from './commit';
 import { commandOpenGitpod } from './gitpod';
 import {
@@ -72,16 +72,16 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 
 	// switch to a commit & input commit sha manually
 	{ id: 'github1s.switch-to-commit', callback: commandSwitchToCommit },
-	// open a commit on GitHub's website
-	{ id: 'github1s.open-commit-on-github', callback: commandOpenCommitOnGitHub },
 	// update the commit list in the commits view
 	{ id: 'github1s.commit-view-refresh-commit-list', callback: commandCommitViewRefreshCommitList }, // prettier-ignore
 	// load more commits in the commits tree view
 	{ id: 'github1s.commit-view-load-more-commits', callback: commandCommitViewLoadMoreCommits }, // prettier-ignore
+	// load more commits in the commits tree view
+	{ id: 'github1s.commit-view-load-more-changed-files', callback: commandCodeReviewViewLoadMoreChangedFiles }, // prettier-ignore
 	// switch to a commit in the commits view
 	{ id: 'github1s.commit-view-item-switch-to-commit', callback: commandCommitViewItemSwitchToCommit }, // prettier-ignore
 	// open commit on github in the commits view
-	{ id: 'github1s.commit-view-item-open-on-github', callback: commandCommitViewItemOpenOnGitHub }, // prettier-ignore
+	{ id: 'github1s.commit-view-item-open-on-official-page', callback: commandCodeReviewViewItemOpenOnOfficialPage }, // prettier-ignore
 
 	// open current repository on gitpod
 	{ id: 'github1s.open-gitpod', callback: commandOpenGitpod },

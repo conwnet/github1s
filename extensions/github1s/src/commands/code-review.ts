@@ -114,6 +114,6 @@ export const commandCodeReviewViewLoadMoreCodeReviews = async () => {
 	return codeReviewRequestTreeDataProvider.loadMoreCodeReviews();
 };
 
-export const commandCodeReviewViewLoadMoreChangedFiles = async (codeReviewId) => {
+export const commandCodeReviewViewLoadMoreChangedFiles = async (codeReviewId: string) => {
 	return codeReviewRequestTreeDataProvider.loadMoreChangedFiles(codeReviewId);
 };

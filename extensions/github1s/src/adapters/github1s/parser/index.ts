@@ -22,7 +22,7 @@ const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 		commit: PageType.Commit,
 		commits: PageType.CommitList,
 	};
-	return PAGE_TYPE_MAP[pathParts[2]] || PageType.Tree;
+	return pathParts[2] ? PAGE_TYPE_MAP[pathParts[2]] || PageType.Unknown : '';
 };
 
 export const parseGitHubPath = async (path: string): Promise<RouterState> => {
@@ -31,6 +31,7 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 
 	switch (pageType) {
 		case PageType.Tree:
+		case PageType.Unknown:
 			return parseTreeUrl(path);
 		case PageType.Blob:
 			return parseBlobUrl(path);

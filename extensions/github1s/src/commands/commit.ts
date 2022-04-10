@@ -5,24 +5,30 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import repository from '@/repository';
+// import repository from '@/repository';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
 import { commitTreeDataProvider } from '@/views';
+import { platformAdapterManager } from '@/adapters';
 import { RequestNotFoundError } from '@/helpers/fetch';
+import { CommitManager } from '@/views/commit-manager';
 
-const checkCommitExists = async (commitSha: string) => {
+const checkCommitExists = async (repo: string, commitSha: string) => {
+	const adapter = platformAdapterManager.getCurrentAdapter();
+	const dataSoruce = await adapter.resolveDataSource();
 	try {
-		return !!(await repository.getCommitManager().getItem(commitSha));
+		return !!(await dataSoruce.provideCommit(repo, commitSha));
 	} catch (e) {
 		vscode.window.showErrorMessage(
-			e instanceof RequestNotFoundError ? `No commit found for SHA: ${commitSha}` : e.message
+			e instanceof RequestNotFoundError ? `No commit found for CommitID: ${commitSha}` : e.messaged
 		);
 		return false;
 	}
 };
 
 export const commandSwitchToCommit = async (commitSha?: string) => {
-	const { owner, repo } = await router.getState();
+	const adapter = platformAdapterManager.getCurrentAdapter();
+	const { repo } = await router.getState();
+	const commitManager = CommitManager.getInstance(adapter.scheme, repo)!;
 
 	// if the a commitSha isn't provided, use quickInput
 	if (!commitSha) {
@@ -32,11 +38,10 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 			alwaysShow: true,
 		};
 		// use the commit list as the candidates
-		const commitItems: vscode.QuickPickItem[] = (
-			await repository.getCommitManager().getList((await router.getState()).ref)
-		).map((commit) => ({
+		const commits = await commitManager.getList();
+		const commitItems: vscode.QuickPickItem[] = commits.map((commit) => ({
 			commitSha: commit.sha,
-			label: commit.commit.message,
+			label: commit.message,
 			description: getCommitTreeItemDescription(commit),
 		}));
 
@@ -66,7 +71,10 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 		}
 	}
 
-	(await checkCommitExists(commitSha)) && router.replace(`/${owner}/${repo}/commit/${commitSha}`);
+	const routerParser = await router.resolveParser();
+	if (await checkCommitExists(repo, commitSha!)) {
+		router.replace(await routerParser.buildCommitPath(repo, commitSha!));
+	}
 };
 
 // this command is used in `source control commits view`
@@ -74,18 +82,16 @@ export const commandCommitViewItemSwitchToCommit = (viewItem: CommitTreeItem) =>
 	return commandSwitchToCommit(viewItem?.commit?.sha);
 };
 
-export const commandOpenCommitOnGitHub = async (commitSha: string) => {
-	const { owner, repo } = await router.getState();
-	return vscode.commands.executeCommand(
-		'vscode.open',
-		vscode.Uri.parse(`https://github.com/${owner}/${repo}/commit/${commitSha}`)
-	);
-};
-
 // this command is used in `source control commit list view`
-export const commandCommitViewItemOpenOnGitHub = async (viewItem: CommitTreeItem) => {
+export const commandCommitViewItemOpenOnOfficialPage = async (viewItem: CommitTreeItem) => {
 	const commitSha = viewItem?.commit?.sha;
-	commitSha && commandOpenCommitOnGitHub(commitSha);
+	if (commitSha) {
+		const { repo } = await router.getState();
+		const routerParser = await router.resolveParser();
+		const commitPath = await routerParser.buildCommitPath(repo, commitSha);
+		const commitLink = await routerParser.buildExternalLink(commitPath);
+		return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(commitLink));
+	}
 };
 
 export const commandCommitViewRefreshCommitList = (forceUpdate = true) => {
@@ -93,7 +99,9 @@ export const commandCommitViewRefreshCommitList = (forceUpdate = true) => {
 };
 
 export const commandCommitViewLoadMoreCommits = async () => {
-	const { ref } = await router.getState();
-	repository.getCommitManager().loadMore(ref);
-	return commandCommitViewRefreshCommitList(false);
+	return commitTreeDataProvider.loadMoreCommits();
+};
+
+export const commandCommitViewLoadMoreChangedFiles = async (commitSha: string) => {
+	return commitTreeDataProvider.loadMoreChangedFiles(commitSha);
 };
