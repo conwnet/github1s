@@ -8,7 +8,6 @@ import { setExtensionContext } from '@/helpers/context';
 import { registerGitHub1sCommands } from '@/commands';
 import { registerVSCodeProviders } from '@/providers';
 import { registerCustomViews } from '@/views';
-// import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
 // import { showSponsors } from '@/sponsors';
 // import { showGitpod } from '@/gitpod';
 // import { activateSourceControl } from '@/source-control';

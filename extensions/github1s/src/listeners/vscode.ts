@@ -8,7 +8,7 @@ import router from '@/router';
 import { PageType } from '@/router/types';
 import { setVSCodeContext } from '@/helpers/vscode';
 import { getChangedFileFromSourceControl } from '@/commands/editor';
-import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
+import { GitHub1sFileSystemProvider } from '@/providers/file-system-provider';
 import { debounce } from '@/helpers/func';
 
 const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {

@@ -15,7 +15,7 @@ import {
 } from 'vscode';
 import router from '@/router';
 import * as queryString from 'query-string';
-import { changedFileDecorationDataMap } from './changedFileDecorationProvider';
+import { changedFileDecorationDataMap } from './changed-file-decoration-provider';
 
 const selectedViewItemDecoration: FileDecoration = {
 	color: new ThemeColor('github1s.colors.selectedViewItem'),
@@ -27,10 +27,20 @@ export class GitHub1sSourceControlDecorationProvider implements FileDecorationPr
 	public static fileSchema: string = 'github1s-source-control-file';
 	public static codeReviewSchema: string = 'github1s-source-control-code-review';
 	public static commitSchema: string = 'github1s-source-control-commit';
+	private static instance: GitHub1sSourceControlDecorationProvider | null = null;
 
 	private readonly disposable: Disposable;
 	private _onDidChangeFileDecorations = new EventEmitter<undefined>();
 	readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sSourceControlDecorationProvider {
+		if (GitHub1sSourceControlDecorationProvider.instance) {
+			return GitHub1sSourceControlDecorationProvider.instance;
+		}
+		return (GitHub1sSourceControlDecorationProvider.instance = new GitHub1sSourceControlDecorationProvider());
+	}
 
 	dispose() {
 		this.disposable?.dispose();
@@ -49,7 +59,7 @@ export class GitHub1sSourceControlDecorationProvider implements FileDecorationPr
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.codeReviewSchema) {
 			return router.getState().then((routerState) => {
 				const query = queryString.parse(uri.query);
-				return +(routerState as any).codeReviewId === +query.id ? selectedViewItemDecoration : null;
+				return +(routerState as any).codeReviewId === +query.id! ? selectedViewItemDecoration : null;
 			});
 		}
 

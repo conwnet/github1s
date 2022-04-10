@@ -22,8 +22,22 @@ const getSearchBasedMarkdownSuffix = (sourcegraphUrl: String) => `
 [Search-based](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provided by [Sourcegraph](${sourcegraphUrl})
 `;
 
-export class GitHub1sHoverProvider implements vscode.HoverProvider {
-	static scheme = 'github1s';
+export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Disposable {
+	private static instance: GitHub1sHoverProvider | null = null;
+	private readonly disposable: vscode.Disposable;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sHoverProvider {
+		if (GitHub1sHoverProvider.instance) {
+			return GitHub1sHoverProvider.instance;
+		}
+		return (GitHub1sHoverProvider.instance = new GitHub1sHoverProvider());
+	}
+
+	dispose() {
+		this.disposable?.dispose();
+	}
 
 	async getSearchBasedHover(
 		document: vscode.TextDocument,

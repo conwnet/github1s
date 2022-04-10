@@ -36,7 +36,7 @@ const createEntry = (type: adapterTypes.FileType, uri: Uri, name: string, option
 };
 
 export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposable {
-	private static instance: GitHub1sFileSystemProvider = null;
+	private static instance: GitHub1sFileSystemProvider | null = null;
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
 	private root: Map<string, Directory | File> = new Map();
@@ -63,6 +63,9 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	// insert DirectoryEntry into the cache `this.root`
 	public async populateWithDirectoryEntities(base: Uri, entries: adapterTypes.DirectoryEntry[]) {
 		const baseDirectory = await this.lookupAsDirectory(base, true);
+		if (!baseDirectory) {
+			return;
+		}
 		return entries.forEach((entry) => {
 			let current = baseDirectory;
 			const pathParts = dirname(entry.path).split('/').filter(Boolean);
@@ -83,8 +86,8 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	// --- lookup
 	// ensure the authority field in `the uri of returned entry` is exists
 	public async lookup(uri: Uri, silent: false): Promise<Entry>;
-	public async lookup(uri: Uri, silent: boolean): Promise<Entry | undefined>;
-	public async lookup(uri: Uri, silent: boolean): Promise<Entry | undefined> {
+	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null>;
+	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null> {
 		let parts = uri.path.split('/').filter(Boolean);
 		// if the authority of uri is empty, we should use `current authority`
 		const authority = uri.authority || (await router.getAuthority());
@@ -98,21 +101,21 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 				if (entry.entries === null) {
 					await this.readDirectory(Uri.joinPath(entry.uri, entry.name));
 				}
-				child = entry.entries.get(part);
+				child = entry.entries?.get(part);
 			}
 			if (!child) {
 				if (!silent) {
 					throw FileSystemError.FileNotFound(uri);
 				} else {
-					return undefined;
+					return null;
 				}
 			}
 			entry = child;
 		}
-		return entry;
+		return entry || null;
 	}
 
-	public async lookupAsDirectory(uri: Uri, silent: boolean): Promise<Directory> {
+	public async lookupAsDirectory(uri: Uri, silent: boolean): Promise<Directory | null> {
 		const entry = await this.lookup(uri, silent);
 		if (entry instanceof Directory) {
 			return entry;
@@ -120,9 +123,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		if (!silent) {
 			throw FileSystemError.FileNotADirectory(uri);
 		}
+		return null;
 	}
 
-	public async lookupAsFile(uri: Uri, silent: boolean): Promise<File> {
+	public async lookupAsFile(uri: Uri, silent: boolean): Promise<File | null> {
 		const entry = await this.lookup(uri, silent);
 		if (entry instanceof File) {
 			return entry;
@@ -130,6 +134,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		if (!silent) {
 			throw FileSystemError.FileIsADirectory(uri);
 		}
+		return null;
 	}
 
 	watch(uri: Uri, options: { recursive: boolean; excludes: string[] }): Disposable {
@@ -179,7 +184,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 				return directory.getNameTypePairs() || [];
 			}
 			const parentRepositoryRoot = await this.lookupAsDirectory(directory.uri.with({ path: '/' }), false);
-			if (!parentRepositoryRoot.entries || !parentRepositoryRoot.entries.has('.gitmodules')) {
+			if (!parentRepositoryRoot?.entries || !parentRepositoryRoot.entries.has('.gitmodules')) {
 				throw FileSystemError.FileNotFound('.gitmodules can not be found');
 			}
 			const submodulesFileContent = textDecoder.decode(
@@ -201,12 +206,17 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			});
 			// insert the directory in to this.root map because it indicated another repository
 			this.root.set(submoduleAuthority, directory);
+			return [];
 		}
 	);
 
 	readDirectory = reuseable(
 		async (uri: Uri): Promise<[string, FileType][]> => {
 			const parent = await this.lookupAsDirectory(uri, false);
+			if (!parent) {
+				return [];
+			}
+
 			if (parent.entries !== null) {
 				return parent.getNameTypePairs();
 			}
@@ -217,7 +227,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			const path = Uri.joinPath(parent.uri, parent.name).path.slice(1); // delete leading '/'
 			const dataSource = await this._resolveDataSource(uri.scheme);
 			const data = await dataSource.provideDirectory(repo, ref, path, false);
-			await this.populateWithDirectoryEntities(uri, data.entries);
+			data?.entries && (await this.populateWithDirectoryEntities(uri, data.entries));
 			return parent.getNameTypePairs();
 		},
 		(uri) => uri.toString()
@@ -226,13 +236,17 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
 			const file = await this.lookupAsFile(uri, false);
+			if (!file) {
+				return new Uint8Array();
+			}
+
 			if (file.content !== null) {
 				return file.content;
 			}
 			const [repo, ref] = file.uri.authority.split('+');
 			const dataSource = await this._resolveDataSource(uri.scheme);
 			const data = await dataSource.provideFile(repo, ref, uri.path.slice(1));
-			return (data.content = data.content);
+			return data?.content ? (file.content = data.content) : new Uint8Array();
 		},
 		(uri) => uri.toString()
 	);

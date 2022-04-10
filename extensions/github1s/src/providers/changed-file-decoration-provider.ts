@@ -78,10 +78,20 @@ const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<
 };
 
 export class GitHub1sChangedFileDecorationProvider implements FileDecorationProvider, Disposable {
+	private static instance: GitHub1sChangedFileDecorationProvider | null = null;
 	private readonly disposable: Disposable;
 
 	private _onDidChangeFileDecorations = new EventEmitter<undefined>();
 	readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
+
+	private constructor() {}
+
+	public static getInstance(): GitHub1sChangedFileDecorationProvider {
+		if (GitHub1sChangedFileDecorationProvider.instance) {
+			return GitHub1sChangedFileDecorationProvider.instance;
+		}
+		return (GitHub1sChangedFileDecorationProvider.instance = new GitHub1sChangedFileDecorationProvider());
+	}
 
 	dispose() {
 		this.disposable?.dispose();

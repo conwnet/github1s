@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import { relativeTimeTo } from '@/helpers/date';
-import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
+import { GitHub1sSourceControlDecorationProvider } from '@/providers/source-control-decoration-provider';
 import { getChangedFileCommand, getCommitChangedFiles } from '@/source-control/changes';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
