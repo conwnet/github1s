@@ -20,13 +20,13 @@ export class GitHub1sRouterParser extends github1s.RouterParser {
 		return parseGitHubPath(path);
 	}
 
-	buildTreePath(repo: string, ref: string, filePath: string): string {
-		return `/${repo}/${ref}/${filePath}`;
+	buildTreePath(repo: string, ref?: string, filePath?: string): string {
+		return ref ? (filePath ? `/${repo}/tree/${ref}/${filePath}` : `/${repo}/tree/${ref}`) : `/${repo}`;
 	}
 
 	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): string {
 		const hash = startLine ? (endLine ? `#L${startLine}-L${endLine}` : `#L${startLine}`) : '';
-		return `/${repo}/${ref}/${filePath}${hash}`;
+		return `/${repo}/blob/${ref}/${filePath}${hash}`;
 	}
 
 	buildCommitListPath(repo: string): string {

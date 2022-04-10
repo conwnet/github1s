@@ -10,8 +10,8 @@ import { registerVSCodeProviders } from '@/providers';
 import { registerCustomViews } from '@/views';
 // import { showSponsors } from '@/sponsors';
 // import { showGitpod } from '@/gitpod';
-// import { activateSourceControl } from '@/source-control';
-// import { registerEventListeners } from '@/listeners';
+import { activateSourceControl } from '@/source-control';
+import { registerEventListeners } from '@/listeners';
 import { registerAdapters } from './adapters';
 import router from '@/router';
 // import { PageType } from './router/types';
@@ -34,8 +34,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register VS Code providers
 	registerVSCodeProviders();
 
-	// // register the necessary event listeners
-	// registerEventListeners();
+	// register the necessary event listeners
+	registerEventListeners();
 
 	// register GitHub1s Commands
 	registerGitHub1sCommands();
@@ -43,8 +43,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register custom views
 	registerCustomViews();
 
-	// // activate SourceControl features,
-	// activateSourceControl();
+	// activate SourceControl features,
+	activateSourceControl();
 
 	// // sponsors in Status Bar
 	// showSponsors();

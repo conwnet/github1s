@@ -14,6 +14,9 @@ export const extractGitHubRef = async (
 	if (!refAndFilePath) {
 		return { ref: 'HEAD', path: '' };
 	}
+	if (refAndFilePath.startsWith('HEAD/')) {
+		return { ref: 'HEAD', path: refAndFilePath.slice(5) };
+	}
 	return GitHubFetcher.getInstance()
 		.request(`GET /repos/${repoFullName}/git/extract-ref/${refAndFilePath}`)
 		.then((response) => {

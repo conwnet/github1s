@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { History, createMemoryHistory } from 'history';
+import { History, createMemoryHistory, parsePath } from 'history';
 import { RouterParser, RouterState } from '@/adapters/types';
 import { Barrier } from '@/helpers/async';
 import adapterManager from '@/adapters/manager';
@@ -73,7 +73,8 @@ export class Router extends EventEmitter<RouterState> {
 	// replace the url with current history
 	public async replace(path: string) {
 		await this._barrier.wait();
-		return this._history!.replace(path);
+		const emptyState = { pathname: '', search: '', hash: '' };
+		return this._history!.replace({ ...emptyState, ...parsePath(path) });
 	}
 
 	public async resolveParser(): Promise<RouterParser> {

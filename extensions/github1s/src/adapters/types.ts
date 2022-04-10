@@ -337,7 +337,7 @@ export class RouterParser {
 	}
 
 	// build the tree page path
-	buildTreePath(repo: string, ref: string, filePath: string): Promisable<string> {
+	buildTreePath(repo: string, ref?: string, filePath?: string): Promisable<string> {
 		return '/conwnet/github1s';
 	}
 

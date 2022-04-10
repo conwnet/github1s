@@ -3,25 +3,24 @@
  * @author netcon
  */
 
-import { RouterState } from '@/router/types';
+import { RouterState } from '@/adapters/types';
 import { updateSourceControlChanges } from '@/source-control/changes';
 import { updateCheckoutRefOnStatusBar } from '@/source-control/status-bar';
 import { commitTreeDataProvider } from '@/views';
 
-export const sourceControlRouterListener = (
-	currentState: RouterState,
-	previousState: RouterState
-) => {
+type NewType = RouterState;
+
+export const sourceControlRouterListener = (currentState: NewType, previousState: RouterState) => {
 	if (currentState.ref !== previousState.ref) {
 		updateCheckoutRefOnStatusBar();
 		commitTreeDataProvider.updateTree();
 	}
 
-	if (currentState.pullNumber !== previousState.pullNumber) {
+	if ((currentState as any).codeReviewId !== (previousState as any).codeReviewId) {
 		updateSourceControlChanges();
 	}
 
-	if (currentState.commitSha !== previousState.commitSha) {
+	if ((currentState as any).commitSha !== (previousState as any).commitSha) {
 		updateSourceControlChanges();
 	}
 };
