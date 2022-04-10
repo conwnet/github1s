@@ -4,12 +4,8 @@
  */
 
 import { gql } from '@apollo/client/core';
+import { SymbolHover } from '../types';
 import { sourcegraphClient } from './common';
-
-export interface SymbolHover {
-	precise: boolean;
-	markdown: string;
-}
 
 const LSIFHoverQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
@@ -32,8 +28,7 @@ const LSIFHoverQuery = gql`
 // find Hover with Sourcegraph LSIF
 // https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence
 const getLSIFHover = async (
-	owner: string,
-	repo: string,
+	repository: string,
 	ref: string,
 	path: string,
 	line: number,
@@ -42,7 +37,7 @@ const getLSIFHover = async (
 	const response = await sourcegraphClient.query({
 		query: LSIFHoverQuery,
 		variables: {
-			repository: `github.com/${owner}/${repo}`,
+			repository: repository,
 			ref,
 			path: path.slice(1),
 			line,
@@ -55,16 +50,15 @@ const getLSIFHover = async (
 		return null;
 	}
 
-	return { precise: true, markdown };
+	return { markdown };
 };
 
 export const getSymbolHover = (
-	owner: string,
-	repo: string,
+	repository: string,
 	ref: string,
 	path: string,
 	line: number,
 	character: number
 ): Promise<SymbolHover | null> => {
-	return getLSIFHover(owner, repo, ref, path, line, character);
+	return getLSIFHover(repository, ref, path, line, character);
 };

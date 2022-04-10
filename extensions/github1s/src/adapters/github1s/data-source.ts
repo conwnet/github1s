@@ -24,6 +24,7 @@ import {
 	FileChangeStatus,
 	ChangedFile,
 	Promisable,
+	SymbolHover,
 } from '../types';
 (self as any).global = self;
 import { toUint8Array } from 'js-base64';
@@ -34,6 +35,7 @@ import { getSymbolDefinitions } from '../sourcegraph/definition';
 import { getSymbolReferences } from '../sourcegraph/reference';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
+import { getSymbolHover } from '../sourcegraph/hover';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -341,9 +343,10 @@ export class GitHub1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
-	): Promise<{ markdown: string; precise: boolean }> {
-		throw new Error('Method not implemented.');
+		_symbol: string
+	): Promise<SymbolHover | null> {
+		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
+		return getSymbolHover(repoPattern, ref, path, line, character);
 	}
 
 	provideUserAvatarLink(user: string): string {

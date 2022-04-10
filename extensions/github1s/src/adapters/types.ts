@@ -171,7 +171,7 @@ export type SymbolDefinitions = CodeLocation[];
 
 export type SymbolReferences = CodeLocation[];
 
-export type SymbolHover = { markdown: string; precise: boolean };
+export type SymbolHover = { markdown: string };
 
 export class DataSource {
 	// if `recursive` is true, it should try to return all subtrees

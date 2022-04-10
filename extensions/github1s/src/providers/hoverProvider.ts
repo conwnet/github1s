@@ -5,9 +5,8 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { getSymbolHover, SymbolHover } from '@/interfaces/sourcegraph/hover';
-import { getSymbolPositions } from '@/interfaces/sourcegraph/position';
 import { getSourcegraphUrl } from '@/helpers/urls';
+import { adapterManager } from '@/adapters';
 
 const getSemanticMarkdownSuffix = (sourcegraphUrl: String) => `
 
@@ -26,10 +25,18 @@ const getSearchBasedMarkdownSuffix = (sourcegraphUrl: String) => `
 export class GitHub1sHoverProvider implements vscode.HoverProvider {
 	static scheme = 'github1s';
 
-	async getSearchBasedHover(document: vscode.TextDocument, symbol: string): Promise<SymbolHover | null> {
+	async getSearchBasedHover(
+		document: vscode.TextDocument,
+		position: vscode.Position,
+		symbol: string
+	): Promise<string | null> {
+		const { line, character } = position;
 		const authority = document.uri.authority || (await router.getAuthority());
-		const [owner, repo, ref] = authority.split('+').filter(Boolean);
-		const definitions = await getSymbolPositions(owner, repo, ref, symbol);
+		const [repo, ref] = authority.split('+').filter(Boolean);
+		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+
+		const requestParams = [repo, ref, document.uri.path, line, character, symbol] as const;
+		const definitions = await dataSource.provideSymbolDefinitions(...requestParams);
 
 		if (!definitions.length) {
 			return null;
@@ -37,15 +44,15 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider {
 
 		// use the information of first definition as hover context
 		const target = definitions[0];
-		const isSameRepo = target.owner === owner && target.repo === repo;
+		const isSameRepo = !target.scope || (target.scope.scheme === document.uri.scheme && target.scope.repo === repo);
 		// if the definition target and the searched symbol is in the same
 		// repository, just replace the `document.uri.path` with targetPath
 		const targetFileUri = isSameRepo
-			? document.uri.with({ path: target.path })
+			? document.uri.with({ path: `/${target.path}` })
 			: vscode.Uri.parse('').with({
-					scheme: GitHub1sHoverProvider.scheme,
-					authority: `${target.owner}+${target.repo}+${target.ref}`,
-					path: target.path,
+					scheme: target.scope?.scheme,
+					authority: `${target.scope?.repo}+${target.scope?.ref}`,
+					path: `/${target.path}`,
 			  });
 		// open corresponding file with target
 		const textDocument = await vscode.workspace.openTextDocument(targetFileUri);
@@ -55,10 +62,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider {
 		const endPosition = textDocument.lineAt(Math.min(textDocument.lineCount - 1, target.range.end.line + 2)).range.end;
 		const codeText = textDocument.getText(new vscode.Range(startPosition, endPosition));
 
-		return {
-			precise: false,
-			markdown: `\`\`\`${textDocument.languageId}\n${codeText}\n\`\`\``,
-		};
+		return `\`\`\`${textDocument.languageId}\n${codeText}\n\`\`\``;
 	}
 
 	async provideHover(
@@ -70,39 +74,35 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider {
 		const symbol = symbolRange ? document.getText(symbolRange) : '';
 
 		if (!symbol) {
-			return;
-		}
-
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [owner, repo, ref] = authority.split('+').filter(Boolean);
-		const path = document.uri.path;
-		const { line, character } = position;
-
-		type ParamsType = [string, string, string, string, number, number];
-		const requestParams: ParamsType = [owner, repo, ref, path, line, character];
-		// get the sourcegraph url for current symbol
-		const sourcegraphUrl = getSourcegraphUrl(...requestParams);
-		// get the hover result based on sourcegraph lsif
-		const preciseHoverPromise = getSymbolHover(...requestParams);
-		// get the hover result based on search
-		const searchBasedHoverPromise = this.getSearchBasedHover(document, symbol);
-
-		const symbolHover = await preciseHoverPromise.then((symbolHover) => {
-			if (symbolHover) {
-				return symbolHover;
-			}
-			// fallback to search based result if we can not get precise result
-			return searchBasedHoverPromise;
-		});
-
-		if (!symbolHover) {
 			return null;
 		}
 
-		const suffixMarkdown = symbolHover.precise
+		const authority = document.uri.authority || (await router.getAuthority());
+		const [repo, ref] = authority.split('+').filter(Boolean);
+		const path = document.uri.path;
+		const { line, character } = position;
+
+		// get the sourcegraph url for current symbol
+		const sourcegraphUrl = getSourcegraphUrl(repo, ref, path, line, character);
+		const requestParams = [repo, ref, path, line, character, symbol] as const;
+
+		// get the hover result based on search
+		const searchBasedMardownPromise = this.getSearchBasedHover(document, position, symbol);
+
+		// get the hover result based on sourcegraph lsif
+		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const symbolHover = await dataSource.provideSymbolHover(...requestParams);
+
+		const markdown = symbolHover ? symbolHover.markdown : await searchBasedMardownPromise;
+
+		if (!markdown) {
+			return null;
+		}
+
+		const suffixMarkdown = symbolHover
 			? getSemanticMarkdownSuffix(sourcegraphUrl)
 			: getSearchBasedMarkdownSuffix(sourcegraphUrl);
 
-		return new vscode.Hover(symbolHover.markdown + suffixMarkdown);
+		return new vscode.Hover(markdown + suffixMarkdown);
 	}
 }

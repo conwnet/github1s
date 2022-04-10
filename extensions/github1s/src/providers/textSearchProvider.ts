@@ -14,7 +14,7 @@ const createVscodeRange = (range: adapterTypes.Range) =>
 	new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character);
 
 export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vscode.Disposable {
-	private static instance: GitHub1sTextSearchProvider = null;
+	private static instance: GitHub1sTextSearchProvider | null = null;
 	private readonly disposable: vscode.Disposable;
 
 	private constructor() {}
