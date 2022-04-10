@@ -12,7 +12,7 @@ export const parseBlobUrl = async (path: string): Promise<RouterState> => {
 	const { hash: routerHash } = parsePath(path);
 
 	if (!routerHash) {
-		return { ...routerState, type: PageType.Blob };
+		return { ...routerState, pageType: PageType.Blob };
 	}
 
 	// get selected line number range from path which looks like:
@@ -22,7 +22,7 @@ export const parseBlobUrl = async (path: string): Promise<RouterState> => {
 
 	return {
 		...routerState,
-		type: PageType.Blob,
+		pageType: PageType.Blob,
 		startLine: parseInt(startLineNumber, 10),
 		endLine: parseInt(endLineNumber || startLineNumber, 10),
 	};

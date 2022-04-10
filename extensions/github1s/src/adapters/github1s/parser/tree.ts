@@ -22,10 +22,10 @@ export const extractGitHubRef = async (
 };
 
 export const parseTreeUrl = async (path: string): Promise<RouterState> => {
-	const pathParts = parsePath(path).pathname.split('/').filter(Boolean);
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const [owner, repo, _pageType, ...restParts] = pathParts;
 	const repoFullName = `${owner}/${repo}`;
 	const { ref, path: filePath } = await extractGitHubRef(repoFullName, restParts.join('/'));
 
-	return { type: PageType.Tree, repo: repoFullName, ref, filePath };
+	return { pageType: PageType.Tree, repo: repoFullName, ref, filePath };
 };

@@ -48,8 +48,8 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 	// fallback to default
 	return {
 		repo: 'conwnet/github1s',
-		type: PageType.Tree,
 		ref: 'HEAD',
+		pageType: PageType.Tree,
 		filePath: '',
 	};
 };

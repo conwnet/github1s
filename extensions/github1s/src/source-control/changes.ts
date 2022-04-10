@@ -85,13 +85,13 @@ export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 	const scheme = platformAdapterManager.getCurrentScheme();
 
 	// code review page
-	if (routerState.type === adapterTypes.PageType.CodeReview) {
+	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
 		const codeReviewManager = CodeReviewManager.getInstance(scheme, routerState.repo)!;
 		const codeReview = await codeReviewManager.getItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
-	else if (routerState.type === adapterTypes.PageType.Commit) {
+	else if (routerState.pageType === adapterTypes.PageType.Commit) {
 		const commitManager = CommitManager.getInstance(scheme, routerState.repo)!;
 		const commit = await commitManager.getItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];

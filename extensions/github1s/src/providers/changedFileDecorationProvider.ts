@@ -15,11 +15,10 @@ import {
 	ThemeColor,
 } from 'vscode';
 import router from '@/router';
-import repository from '@/repository';
-// import { FileChangeType, RepositoryChangedFile } from '@/repository/types';
-import { ChangedFileList, FileChangeStatus } from '@/adapters/types';
-import { PageType } from '@/router/types';
-import { GitHub1sFileSystemProvider } from './fileSystemProvider';
+import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
+import { platformAdapterManager } from '@/adapters';
+import { CodeReviewManager } from '@/views/code-review-manager';
+import { CommitManager } from '@/views/commit-manager';
 
 export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeStatus.Added]: {
@@ -44,8 +43,8 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	},
 };
 
-const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFileList['files']): FileDecoration => {
-	const changedFile = changedFiles?.find((changedFile) => changedFile.filename === uri.path.slice(1));
+const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[]): FileDecoration | null => {
+	const changedFile = changedFiles.find((changedFile) => changedFile.path === uri.path.slice(1));
 
 	if (changedFile) {
 		return changedFileDecorationDataMap[changedFile.status];
@@ -53,9 +52,8 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFileLis
 	// we have to determine the changed folder manually rather then use
 	// the `propagate` property of FileDecoration, because the file tree
 	// in the file explorer is lazy load
-	const includeChangedFile = changedFiles?.find((changedFile) =>
-		changedFile.filename.startsWith(`${uri.path.slice(1)}/`)
-	);
+	const folderPath = `${uri.path.slice(1)}/`;
+	const includeChangedFile = changedFiles.find((changedFile) => changedFile.path.startsWith(folderPath));
 	if (includeChangedFile) {
 		return {
 			...changedFileDecorationDataMap[includeChangedFile.status],
@@ -65,13 +63,17 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFileLis
 	return null;
 };
 
-const getFileDecorationForPull = async (uri: Uri, pullNumber: number): Promise<FileDecoration> => {
-	const changedFiles = await repository.getPullManager().getPullFiles(pullNumber);
+const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
+	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
+	const codeReviewManager = CodeReviewManager.getInstance(uri.scheme, repo)!;
+	const changedFiles = await codeReviewManager.getChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
-const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration> => {
-	const changedFiles = await repository.getCommitManager().getCommitFiles(commitSha);
+const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
+	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
+	const commitManager = CommitManager.getInstance(uri.scheme, repo)!;
+	const changedFiles = await commitManager.getChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
@@ -90,15 +92,16 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
-		if (uri.scheme !== GitHub1sFileSystemProvider.scheme) {
+		const scheme = platformAdapterManager.getCurrentScheme();
+		if (uri.scheme !== scheme) {
 			return null;
 		}
 
 		return router.getState().then((routerState) => {
-			if (routerState.pageType === PageType.PULL) {
-				return getFileDecorationForPull(uri, routerState.pullNumber);
+			if (routerState.pageType === PageType.CodeReview) {
+				return getFileDecorationForCodeReview(uri, routerState.codeReviewId);
 			}
-			if (routerState.pageType === PageType.COMMIT) {
+			if (routerState.pageType === PageType.Commit) {
 				return getFileDecorationForCommit(uri, routerState.commitSha);
 			}
 			return null;

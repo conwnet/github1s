@@ -322,18 +322,18 @@ export enum PageType {
 }
 
 export type RouterState = { repo: string; ref: string } & (
-	| { type: PageType.Tree; filePath: string } // for tree page
-	| { type: PageType.Blob; filePath: string; startLine?: number; endLine?: number } // for blob page
-	| { type: PageType.CommitList } // for commit list page
-	| { type: PageType.Commit; commitSha: string } // for commit detail page
-	| { type: PageType.CodeReviewList } // for code review list page
-	| { type: PageType.CodeReview; codeReviewId: string } // for code review detail page
+	| { pageType: PageType.Tree; filePath: string } // for tree page
+	| { pageType: PageType.Blob; filePath: string; startLine?: number; endLine?: number } // for blob page
+	| { pageType: PageType.CommitList } // for commit list page
+	| { pageType: PageType.Commit; commitSha: string } // for commit detail page
+	| { pageType: PageType.CodeReviewList } // for code review list page
+	| { pageType: PageType.CodeReview; codeReviewId: string } // for code review detail page
 );
 
 export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,
 	parsePath(path: string): Promisable<RouterState> {
-		return { repo: 'conwnet/github1s', ref: 'HEAD', type: PageType.Tree, filePath: '' };
+		return { repo: 'conwnet/github1s', ref: 'HEAD', pageType: PageType.Tree, filePath: '' };
 	}
 
 	// build the tree page path
