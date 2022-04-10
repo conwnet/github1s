@@ -42,30 +42,19 @@ export const registerVSCodeProviders = () => {
 			}),
 			vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
 			vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance()),
-			vscode.languages.registerHoverProvider({ scheme }, hoverProvider)
-			// vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
-			// vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
+			vscode.languages.registerHoverProvider({ scheme }, hoverProvider),
+			vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
+			vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance())
 		);
 	});
 
 	context.subscriptions.push(
-		// 	vscode.workspace.registerFileSystemProvider(GitHub1sFileSystemProvider.scheme, fileSystemProvider, {
-		// 		isCaseSensitive: true,
-		// 		isReadonly: true,
-		// 	})
-		// vscode.workspace.registerFileSearchProvider(GitHub1sFileSearchProvider.scheme, fileSearchProvider),
-		// vscode.workspace.registerTextSearchProvider(GitHub1sTextSearchProvider.scheme, textSearchProvider),
 		// vscode.window.registerFileDecorationProvider(submoduleDecorationProvider),
-		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider)
+		vscode.window.registerFileDecorationProvider(changedFileDecorationProvider),
 		// vscode.window.registerFileDecorationProvider(sourceControlDecorationProvider),
-
-		// vscode.languages.registerDefinitionProvider({ scheme: GitHub1sDefinitionProvider.scheme }, definitionProvider),
-		// vscode.languages.registerReferenceProvider({ scheme: GitHub1sReferenceProvider.scheme }, referenceProvider),
-		// vscode.languages.registerHoverProvider({ scheme: GitHub1sHoverProvider.scheme }, hoverProvider),
-
-		// // provider a readonly empty file for diff
-		// vscode.workspace.registerTextDocumentContentProvider(EMPTY_FILE_SCHEME, {
-		// 	provideTextDocumentContent: () => '',
-		// })
+		// provider a readonly empty file for diff
+		vscode.workspace.registerTextDocumentContentProvider(EMPTY_FILE_SCHEME, {
+			provideTextDocumentContent: () => '',
+		})
 	);
 };
