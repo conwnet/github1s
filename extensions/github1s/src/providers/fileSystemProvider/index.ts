@@ -14,7 +14,7 @@ import {
 	FileType,
 	Uri,
 } from 'vscode';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
 import { noop, trimStart, basename, dirname } from '@/helpers/util';
@@ -57,7 +57,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	}
 
 	private async _resolveDataSource(scheme: string) {
-		return platformAdapterManager.getAdapter(scheme).resolveDataSource();
+		return adapterManager.getAdapter(scheme).resolveDataSource();
 	}
 
 	// insert DirectoryEntry into the cache `this.root`

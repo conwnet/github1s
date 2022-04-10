@@ -13,7 +13,7 @@ import { registerCustomViews } from '@/views';
 // import { showGitpod } from '@/gitpod';
 // import { activateSourceControl } from '@/source-control';
 // import { registerEventListeners } from '@/listeners';
-import { registerPlatformAdapters } from './adapters';
+import { registerAdapters } from './adapters';
 import router from '@/router';
 // import { PageType } from './router/types';
 
@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	setExtensionContext(context);
 
 	// register platform adapters
-	await registerPlatformAdapters();
+	await registerAdapters();
 
 	// Ensure the router has been initialized
 	await router.initialize(browserUrlManager);

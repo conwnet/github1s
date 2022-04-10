@@ -13,7 +13,7 @@ import {
 import { codeReviewRequestTreeDataProvider } from '@/views';
 import { RequestNotFoundError } from '@/helpers/fetch';
 import { CodeReviewType } from '@/adapters/types';
-import { platformAdapterManager } from '@/adapters';
+import { adapterManager } from '@/adapters';
 import { CodeReviewManager } from '@/views/code-review-manager';
 
 const CodeReviewTypeName = {
@@ -23,7 +23,7 @@ const CodeReviewTypeName = {
 };
 
 const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
-	const adapter = platformAdapterManager.getCurrentAdapter();
+	const adapter = adapterManager.getCurrentAdapter();
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCodeReview(repo, codeReviewId));
@@ -37,7 +37,7 @@ const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
 };
 
 export const commandSwitchToCodeReview = async (codeReviewId?: string) => {
-	const adapter = platformAdapterManager.getCurrentAdapter();
+	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType];
 	const codeReviewManager = CodeReviewManager.getInstance(adapter.scheme, repo)!;

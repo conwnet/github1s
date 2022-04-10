@@ -17,7 +17,7 @@ import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import * as adapterTypes from '@/adapters/types';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 
 export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposable {
 	private static instance: GitHub1sFileSearchProvider = null;
@@ -55,7 +55,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 			}
 
 			const [repo, ref] = authority.split('+');
-			const currentAdapter = platformAdapterManager.getCurrentAdapter();
+			const currentAdapter = adapterManager.getCurrentAdapter();
 			const dataSource = await currentAdapter.resolveDataSource();
 			const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '', true);
 			const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });

@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { History, createMemoryHistory } from 'history';
 import { RouterParser, RouterState } from '@/adapters/types';
 import { Barrier } from '@/helpers/async';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import { EventEmitter } from './events';
 
 export interface UrlManager {
@@ -33,7 +33,7 @@ export class Router extends EventEmitter<RouterState> {
 
 	// initialize the router with current url in browser
 	async initialize(urlManager: UrlManager) {
-		this._parser = await platformAdapterManager.getCurrentAdapter().resolveRouterParser();
+		this._parser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 		const { path: pathname, query, fragment } = vscode.Uri.parse(await urlManager.getUrl());
 		const path = pathname + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 
@@ -43,7 +43,7 @@ export class Router extends EventEmitter<RouterState> {
 		this._history.listen(async ({ location }) => {
 			const prevState = this._state;
 			const targetPath = `${location.pathname}${location.search}${location.hash}`;
-			const routerParser = await platformAdapterManager.getCurrentAdapter().resolveRouterParser();
+			const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
 			urlManager.setUrl(targetPath);
 			this._state = await routerParser.parsePath(targetPath);

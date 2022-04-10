@@ -5,14 +5,14 @@
 
 import * as vscode from 'vscode';
 import { setVSCodeContext } from '@/helpers/vscode';
-import { DataSource, RouterParser, PlatformAdapter, Promisable, CodeReviewType } from '../types';
+import { DataSource, RouterParser, Adapter, Promisable, CodeReviewType } from '../types';
 import { GitHub1sDataSource } from './data-source';
 import { GitHub1sRouterParser } from './router-parser';
 import { GitHubTokenManager } from './token';
 import { GitHub1sAuthenticationView } from './authentication';
 import { GitHub1sSettingsViewProvider } from './settings';
 
-export class GitHub1sPlatformAdapter implements PlatformAdapter {
+export class GitHub1sAdapter implements Adapter {
 	public scheme: string = 'github1s';
 	public name: string = 'GitHub';
 	public codeReviewType: CodeReviewType = CodeReviewType.PullRequest;

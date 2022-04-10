@@ -5,7 +5,7 @@
 
 import { reuseable } from '@/helpers/func';
 import { ChangedFile, CodeReview } from '@/adapters/types';
-import { platformAdapterManager } from '@/adapters';
+import { adapterManager } from '@/adapters';
 
 // manage changed files for a code review
 class CodeReviewChangedFilesManager {
@@ -47,7 +47,7 @@ class CodeReviewChangedFilesManager {
 
 	loadMore = reuseable(
 		async (): Promise<boolean> => {
-			const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const changedFiles = await dataSource.provideCodeReviewChangedFiles(this._repo, this._codeReviewId, {
 				pageSize: this._pageSize,
 				page: this._currentPage,
@@ -87,7 +87,7 @@ export class CodeReviewManager {
 		if (!CodeReviewManager.instancesMap.has(mapKey)) {
 			CodeReviewManager.instancesMap.set(mapKey, new CodeReviewManager(scheme, repo));
 		}
-		return CodeReviewManager.instancesMap.get(mapKey);
+		return CodeReviewManager.instancesMap.get(mapKey)!;
 	}
 
 	private constructor(scheme: string, repo: string) {
@@ -109,7 +109,7 @@ export class CodeReviewManager {
 	getItem = reuseable(
 		async (codeReviewId: string, forceUpdate = false): Promise<CodeReview | null> => {
 			if (forceUpdate || !this._codeReviewMap.has(codeReviewId)) {
-				const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+				const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 				const codeReview = await dataSource.provideCodeReview(this._repo, codeReviewId);
 				codeReview && this._codeReviewMap.set(codeReviewId, codeReview);
 				if (codeReview?.files) {
@@ -124,7 +124,7 @@ export class CodeReviewManager {
 	loadMore = reuseable(
 		async (): Promise<boolean> => {
 			console.log('oh no');
-			const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const queryOptions = { pageSize: this._pageSize, page: this._currentPage };
 			const codeReviews = await dataSource.provideCodeReviews(this._repo, queryOptions);
 

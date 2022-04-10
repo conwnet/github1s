@@ -378,7 +378,7 @@ export enum CodeReviewType {
 	ChangeRequest = 'ChangeRequest',
 }
 
-export interface PlatformAdapter {
+export interface Adapter {
 	// specify which scheme of workspace should current adapter should work with
 	readonly scheme: string;
 	// platform name, using for displaying text such as: `open on **GitHub**`

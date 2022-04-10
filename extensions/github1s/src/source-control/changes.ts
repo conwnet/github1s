@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import * as adapterTypes from '@/adapters/types';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
@@ -22,7 +22,7 @@ interface VSCodeChangedFile {
 
 // get the change files of a codeReview
 export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeReview) => {
-	const scheme = platformAdapterManager.getCurrentScheme();
+	const scheme = adapterManager.getCurrentScheme();
 	const { repo } = await router.getState();
 	const baseRootUri = vscode.Uri.parse('').with({
 		scheme: scheme,
@@ -49,7 +49,7 @@ export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeRev
 };
 
 export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
-	const currentAdapter = platformAdapterManager.getCurrentAdapter();
+	const currentAdapter = adapterManager.getCurrentAdapter();
 	const scheme = currentAdapter.scheme;
 	const { repo } = await router.getState();
 	// if the commit.parents is more than one element
@@ -82,7 +82,7 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 
 export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 	const routerState = await router.getState();
-	const scheme = platformAdapterManager.getCurrentScheme();
+	const scheme = adapterManager.getCurrentScheme();
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {

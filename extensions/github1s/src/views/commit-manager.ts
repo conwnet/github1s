@@ -5,7 +5,7 @@
 
 import { reuseable } from '@/helpers/func';
 import { ChangedFile, Commit } from '@/adapters/types';
-import { platformAdapterManager } from '@/adapters';
+import { adapterManager } from '@/adapters';
 
 // manage changed files for a commit
 class CommitChangedFilesManager {
@@ -25,7 +25,7 @@ class CommitChangedFilesManager {
 			const manager = new CommitChangedFilesManager(scheme, repo, commitSha);
 			CommitChangedFilesManager.instancesMap.set(mapKey, manager);
 		}
-		return CommitChangedFilesManager.instancesMap.get(mapKey);
+		return CommitChangedFilesManager.instancesMap.get(mapKey)!;
 	}
 
 	constructor(scheme: string, repo: string, commitSha: string) {
@@ -47,7 +47,7 @@ class CommitChangedFilesManager {
 
 	loadMore = reuseable(
 		async (): Promise<boolean> => {
-			const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const changedFiles = await dataSource.provideCommitChangedFiles(this._repo, this._commitSha, {
 				pageSize: this._pageSize,
 				page: this._currentPage,
@@ -150,7 +150,7 @@ export class CommitManager {
 	getItem = reuseable(
 		async (ref: string, forceUpdate: boolean = false): Promise<Commit | null> => {
 			if (forceUpdate || !this._commitMap.has(ref)) {
-				const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+				const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 				const commit = await dataSource.provideCommit(this._repo, ref);
 				// also map `ref` to this commit
 				commit && this._commitMap.set(ref, commit);
@@ -168,7 +168,7 @@ export class CommitManager {
 		async (ref: string = 'HEAD', filePath: string = ''): Promise<boolean> => {
 			const commitList = this.resolveCommitList(ref, filePath);
 			const latestRef = commitList.length ? commitList[commitList.length - 1] : ref;
-			const dataSource = await platformAdapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const queryOptions = { pageSize: this._pageSize, page: 1, ref: latestRef, filePath };
 			const commits = await dataSource.provideCommits(this._repo, queryOptions);
 

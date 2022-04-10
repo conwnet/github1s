@@ -6,10 +6,10 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 
 export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vscode.Disposable {
-	private static instance: GitHub1sDefinitionProvider = null;
+	private static instance: GitHub1sDefinitionProvider | null = null;
 	private readonly disposable: vscode.Disposable;
 
 	private constructor() {}
@@ -42,7 +42,7 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 		const { scheme, path } = document.uri;
 		const { line, character } = position;
 
-		const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
 		const symbolDefinitions = await dataSource.provideSymbolDefinitions(repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {

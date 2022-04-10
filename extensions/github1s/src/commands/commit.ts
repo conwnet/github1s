@@ -8,12 +8,12 @@ import router from '@/router';
 // import repository from '@/repository';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
 import { commitTreeDataProvider } from '@/views';
-import { platformAdapterManager } from '@/adapters';
+import { adapterManager } from '@/adapters';
 import { RequestNotFoundError } from '@/helpers/fetch';
 import { CommitManager } from '@/views/commit-manager';
 
 const checkCommitExists = async (repo: string, commitSha: string) => {
-	const adapter = platformAdapterManager.getCurrentAdapter();
+	const adapter = adapterManager.getCurrentAdapter();
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCommit(repo, commitSha));
@@ -26,7 +26,7 @@ const checkCommitExists = async (repo: string, commitSha: string) => {
 };
 
 export const commandSwitchToCommit = async (commitSha?: string) => {
-	const adapter = platformAdapterManager.getCurrentAdapter();
+	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
 	const commitManager = CommitManager.getInstance(adapter.scheme, repo)!;
 

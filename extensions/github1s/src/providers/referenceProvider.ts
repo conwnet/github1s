@@ -6,10 +6,10 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 
 export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vscode.Disposable {
-	private static instance: GitHub1sReferenceProvider = null;
+	private static instance: GitHub1sReferenceProvider | null = null;
 	private readonly disposable: vscode.Disposable;
 
 	private constructor() {}
@@ -43,7 +43,7 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 		const { scheme, path } = document.uri;
 		const { line, character } = position;
 
-		const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
 		const symbolReferences = await dataSource.provideSymbolReferences(repo, ref, path, line, character, symbol);
 
 		if (symbolReferences.length) {

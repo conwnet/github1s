@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import { getExtensionContext } from '@/helpers/context';
 import { GitHub1sFileSystemProvider } from './fileSystemProvider';
 import { GitHub1sFileSearchProvider } from './fileSearchProvider';
@@ -32,18 +32,18 @@ export const emptyFileUri = vscode.Uri.parse('').with({
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
 
-	const allSchemes = platformAdapterManager.getAllAdapters().map((item) => item.scheme);
+	const allSchemes = adapterManager.getAllAdapters().map((item) => item.scheme);
 
 	allSchemes.forEach((scheme) => {
 		context.subscriptions.push(
 			vscode.workspace.registerFileSystemProvider(scheme, GitHub1sFileSystemProvider.getInstance(), {
 				isCaseSensitive: true,
 				isReadonly: true,
-			})
+			}),
+			vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
+			vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance())
 			// vscode.workspace.registerFileSearchProvider(scheme, GitHub1sFileSearchProvider.getInstance()),
 			// vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
-			// vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
-			// vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance())
 			// vscode.languages.registerHoverProvider({ scheme: GitHub1sHoverProvider.scheme }, hoverProvider),
 		);
 	});

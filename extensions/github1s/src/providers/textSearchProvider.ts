@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import { showSourcegraphSearchMessage } from '@/messages';
 import * as adapterTypes from '@/adapters/types';
 
@@ -38,10 +38,10 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 	) {
 		return router.getAuthority().then(async (authority) => {
 			const [repo, ref] = authority.split('+');
-			const dataSource = await platformAdapterManager.getCurrentAdapter().resolveDataSource();
+			const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
 			const searchOptions = { page: 1, pageSize: 30, includes: options.includes, excludes: options.excludes };
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
-			const currentScheme = platformAdapterManager.getCurrentScheme();
+			const currentScheme = adapterManager.getCurrentScheme();
 
 			(searchResults.results || []).forEach((item) => {
 				// because we set the authority of workspace as '' (on application start)

@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { relativeTimeTo } from '@/helpers/date';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/sourceControlDecorationProvider';
-import platformAdapterManager from '@/adapters/manager';
+import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import * as queryString from 'query-string';
 import router from '@/router';
@@ -105,7 +105,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
-			const scheme = platformAdapterManager.getCurrentScheme();
+			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
 			await CodeReviewManager.getInstance(scheme, repo)!.loadMore();
 			this._loadingBarrier.open();
@@ -116,7 +116,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
-			const scheme = platformAdapterManager.getCurrentScheme();
+			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
 			await CodeReviewManager.getInstance(scheme, repo)!.loadMoreChangedFiles(codeReviewId);
 			this._loadingBarrier.open();
@@ -125,7 +125,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 
 	async getCodeReviewItems(): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
-		const currentAdapter = platformAdapterManager.getCurrentAdapter();
+		const currentAdapter = adapterManager.getCurrentAdapter();
 		const { repo } = await router.getState();
 		const codeReviewManager = CodeReviewManager.getInstance(currentAdapter.scheme, repo)!;
 		const codeReviews = await codeReviewManager.getList(this._forceUpdate);
@@ -174,7 +174,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
 		});
-		const scheme = platformAdapterManager.getCurrentScheme();
+		const scheme = adapterManager.getCurrentScheme();
 		const { repo } = await router.getState();
 		const codeReviewManager = CodeReviewManager.getInstance(scheme, repo)!;
 		const hasMore = await codeReviewManager.hasMoreChangedFiles(codeReview.id);

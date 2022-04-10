@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { CodeReviewTreeDataProvider } from './code-review-list-view';
 import { CommitTreeDataProvider } from './commit-list-view';
-import { platformAdapterManager } from '@/adapters';
+import { adapterManager } from '@/adapters';
 import { CodeReviewType } from '@/adapters/types';
 
 export const commitTreeDataProvider = new CommitTreeDataProvider();
@@ -26,7 +26,7 @@ export const registerCustomViews = () => {
 		treeDataProvider: codeReviewRequestTreeDataProvider,
 	});
 	// set code view list view title according code review type
-	treeView.title = codeReviewViewTitle[platformAdapterManager.getCurrentAdapter().codeReviewType];
+	treeView.title = codeReviewViewTitle[adapterManager.getCurrentAdapter().codeReviewType];
 
 	context.subscriptions.push(
 		// register commit view which is in source control panel
