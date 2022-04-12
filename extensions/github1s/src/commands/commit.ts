@@ -8,7 +8,6 @@ import router from '@/router';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
 import { commitTreeDataProvider } from '@/views';
 import { adapterManager } from '@/adapters';
-import { RequestNotFoundError } from '@/helpers/fetch';
 import { Repository } from '@/repository';
 
 const checkCommitExists = async (repo: string, commitSha: string) => {
@@ -16,10 +15,12 @@ const checkCommitExists = async (repo: string, commitSha: string) => {
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCommit(repo, commitSha));
-	} catch (e) {
-		vscode.window.showErrorMessage(
-			e instanceof RequestNotFoundError ? `No commit found for CommitID: ${commitSha}` : e.messaged
-		);
+	} catch (error) {
+		const errorMessage =
+			(error as any)?.response?.status === 404
+				? `No commit found for commitSha: ${commitSha}`
+				: error?.response?.data?.message;
+		vscode.window.showErrorMessage(errorMessage || `Get commit ${commitSha}} error`);
 		return false;
 	}
 };

@@ -2,7 +2,6 @@
  * @file github api auth token manager
  */
 
-import { Octokit } from '@octokit/core';
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 
@@ -17,7 +16,7 @@ export interface TokenStatus {
 }
 
 export class GitHubTokenManager {
-	private static instance: GitHubTokenManager = null;
+	private static instance: GitHubTokenManager | null = null;
 	private _emitter = new vscode.EventEmitter<string>();
 	public onDidChangeToken = this._emitter.event;
 
@@ -30,7 +29,7 @@ export class GitHubTokenManager {
 	}
 
 	public getToken(): string {
-		return getExtensionContext().globalState.get(GITHUB_OAUTH_TOKEN);
+		return getExtensionContext().globalState.get(GITHUB_OAUTH_TOKEN) || '';
 	}
 
 	public setToken(token: string) {
@@ -48,11 +47,11 @@ export class GitHubTokenManager {
 					return null;
 				}
 				return {
-					ratelimitLimit: +response.headers.get('x-ratelimit-limit'),
-					ratelimitRemaining: +response.headers.get('x-ratelimit-remaining'),
-					ratelimitReset: +response.headers.get('x-ratelimit-reset'),
-					ratelimitResource: +response.headers.get('ratelimit-resource'),
-					ratelimitUsed: +response.headers.get('x-ratelimit-used'),
+					ratelimitLimit: +response.headers.get('x-ratelimit-limit')! || 0,
+					ratelimitRemaining: +response.headers.get('x-ratelimit-remaining')! || 0,
+					ratelimitReset: +response.headers.get('x-ratelimit-reset')! || 0,
+					ratelimitResource: +response.headers.get('ratelimit-resource')! || 0,
+					ratelimitUsed: +response.headers.get('x-ratelimit-used')! || 0,
 				};
 			})
 			.catch(() => null);

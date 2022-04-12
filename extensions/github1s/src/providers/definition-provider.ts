@@ -57,8 +57,8 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 			const uri = isSameRepo
 				? document.uri.with({ path: `/${path}` })
 				: vscode.Uri.parse('').with({
-						scheme: scope.scheme,
-						authority: `${scope.repo}+${scope.ref}`,
+						scheme: scope!.scheme,
+						authority: `${scope!.repo}+${scope!.ref}`,
 						path: `/${path}`,
 				  });
 			const { start, end } = range;

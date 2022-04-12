@@ -58,8 +58,8 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 			const uri = isSameRepo
 				? document.uri.with({ path: `/${path}` })
 				: vscode.Uri.parse('').with({
-						scheme: scope.scheme,
-						authority: `${scope.repo}+${scope.ref}`,
+						scheme: scope!.scheme,
+						authority: `${scope!.repo}+${scope!.ref}`,
 						path: `/${path}`,
 				  });
 			const { start, end } = range;

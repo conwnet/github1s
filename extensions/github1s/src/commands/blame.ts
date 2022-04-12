@@ -196,7 +196,7 @@ class EditorGitBlame {
 		return EditorGitBlame.instanceMap.get(editor)!;
 	}
 
-	async getBlameRanges() {
+	async getBlameRanges(): Promise<BlameRange[]> {
 		const filePath = this.editor.document?.uri.path;
 		const fileAuthority = this.editor.document?.uri.authority || (await router.getAuthority());
 		const [repo, ref] = fileAuthority.split('+').filter(Boolean);

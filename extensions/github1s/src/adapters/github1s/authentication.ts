@@ -10,7 +10,7 @@ import { GitHubTokenManager } from './token';
 import { createPageHtml, getWebviewOptions } from '@/helpers/page';
 
 export class GitHub1sAuthenticationView {
-	private static instance: GitHub1sAuthenticationView = null;
+	private static instance: GitHub1sAuthenticationView | null = null;
 	public static viewType = 'github1s.views.github1s-authentication';
 	private webviewPanel: vscode.WebviewPanel | null = null;
 	// using for waiting token
@@ -34,14 +34,14 @@ export class GitHub1sAuthenticationView {
 		this.webviewPanel.webview.onDidReceiveMessage((message) => {
 			switch (message.type) {
 				case 'get-notice':
-					this.webviewPanel.webview.postMessage({
+					this.webviewPanel!.webview.postMessage({
 						id: message.id,
 						type: message.type,
 						data: this.notice,
 					});
 					break;
 				case 'get-token':
-					this.webviewPanel.webview.postMessage({
+					this.webviewPanel!.webview.postMessage({
 						id: message.id,
 						type: message.type,
 						data: GitHubTokenManager.getInstance().getToken(),
@@ -53,7 +53,7 @@ export class GitHub1sAuthenticationView {
 						.then(() => {
 							this.tokenBarrier && this.tokenBarrier.open();
 							this.tokenBarrier && (this.tokenBarrier = null);
-							this.webviewPanel.webview.postMessage({
+							this.webviewPanel!.webview.postMessage({
 								id: message.id,
 								type: message.type,
 							});
@@ -63,7 +63,7 @@ export class GitHub1sAuthenticationView {
 					GitHubTokenManager.getInstance()
 						.validateToken(message.data)
 						.then((tokenStatus) =>
-							this.webviewPanel.webview.postMessage({
+							this.webviewPanel!.webview.postMessage({
 								id: message.id,
 								type: message.type,
 								data: tokenStatus,
@@ -74,7 +74,7 @@ export class GitHub1sAuthenticationView {
 		});
 
 		GitHubTokenManager.getInstance().onDidChangeToken((token) => {
-			this.webviewPanel.webview.postMessage({ type: 'token-changed', token });
+			this.webviewPanel!.webview.postMessage({ type: 'token-changed', token });
 		});
 	}
 
@@ -104,6 +104,6 @@ export class GitHub1sAuthenticationView {
 		];
 
 		this.webviewPanel.webview.html = createPageHtml('Authenticating To GitHub', styles, scripts);
-		return withBarriar ? this.tokenBarrier.wait() : Promise.resolve();
+		return withBarriar ? this.tokenBarrier!.wait() : Promise.resolve();
 	}
 }

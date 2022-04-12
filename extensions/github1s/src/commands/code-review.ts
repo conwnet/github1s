@@ -11,7 +11,6 @@ import {
 	getCodeReviewTreeItemDescription,
 } from '@/views/code-review-list-view';
 import { codeReviewRequestTreeDataProvider } from '@/views';
-import { RequestNotFoundError } from '@/helpers/fetch';
 import { CodeReviewType } from '@/adapters/types';
 import { adapterManager } from '@/adapters';
 import { Repository } from '@/repository';
@@ -27,11 +26,13 @@ const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCodeReview(repo, codeReviewId));
-	} catch (e) {
+	} catch (error) {
 		const typeName = CodeReviewTypeName[adapter.codeReviewType];
-		vscode.window.showErrorMessage(
-			e instanceof RequestNotFoundError ? `No ${typeName} found for id: ${codeReviewId}` : e.message
-		);
+		const errorMessage =
+			(error as any)?.response?.status === 404
+				? `No ${typeName} found for id: ${codeReviewId}`
+				: error?.response?.data?.message;
+		vscode.window.showErrorMessage(errorMessage || `Get ${typeName} ${codeReviewId} error`);
 		return false;
 	}
 };
