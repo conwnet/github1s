@@ -17,7 +17,7 @@ import { registerCodeReviewCommands } from './code-review';
 import { registerCommitCommands } from './commit';
 import { commandOpenGitpod } from './gitpod';
 import { registerEditorCommands } from './editor';
-import { commandToggleEditorGutterBlame, commandOpenEditorGutterBlame, commandCloseEditorGutterBlame } from './blame';
+import { registerBlameCommands } from './blame';
 import { commandOpenOnGitHub } from './global';
 
 const commands: { id: string; callback: (...args: any[]) => any }[] = [
@@ -35,24 +35,6 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// open current repository on gitpod
 	{ id: 'github1s.open-gitpod', callback: commandOpenGitpod },
 
-	// // open the changes of a file
-	// { id: 'github1s.editor-view-open-changes', callback: commandEditorViewOpenChanges }, // prettier-ignore
-	// // open the left file in diff editor
-	// { id: 'github1s.diff-view-open-left-file', callback: commandDiffViewOpenLeftFile }, // prettier-ignore
-	// // open the right file in diff editor
-	// { id: 'github1s.diff-view-open-right-file', callback: commandDiffViewOpenRightFile }, // prettier-ignore
-	// // open the previous revision of a file
-	// { id: 'github1s.editor-view-open-prev-revision', callback: commandEditorViewOpenPrevRevision }, // prettier-ignore
-	// // open the next revision of a file
-	// { id: 'github1s.editor-view-open-next-revision', callback: commandEditorViewOpenNextRevision }, // prettier-ignore
-
-	// toggle the gutter blame of a editor
-	{ id: 'github1s.toggleEditorGutterBlame', callback: commandToggleEditorGutterBlame }, // prettier-ignore
-	// open the gutter blame of a editor
-	{ id: 'github1s.openEditorGutterBlame', callback: commandOpenEditorGutterBlame }, // prettier-ignore
-	// close the gutter blame of a editor
-	{ id: 'github1s.closeEditorGutterBlame', callback: commandCloseEditorGutterBlame }, // prettier-ignore
-
 	// open current page on GitHub
 	{ id: 'github1s.openOnGitHub', callback: commandOpenOnGitHub },
 ];
@@ -64,6 +46,7 @@ export const registerGitHub1sCommands = () => {
 	registerEditorCommands(context);
 	registerCodeReviewCommands(context);
 	registerCommitCommands(context);
+	registerBlameCommands(context);
 
 	context.subscriptions.push(
 		...commands.map((command) => vscode.commands.registerCommand(command.id, command.callback))

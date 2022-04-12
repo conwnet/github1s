@@ -23,7 +23,6 @@ import {
 	SymbolReferences,
 	FileChangeStatus,
 	ChangedFile,
-	Promisable,
 	SymbolHover,
 } from '../types';
 (self as any).global = self;
@@ -292,12 +291,12 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
-	async provideBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
+	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref, path };
-		const { data } = (await fetcher.graphql(FILE_BLAME_QUERY, requestParams)) as any;
-		const blameRanges = data?.repository?.object?.blame?.ranges;
+		const data = await fetcher.graphql(FILE_BLAME_QUERY, requestParams);
+		const blameRanges = (data as any)?.repository?.object?.blame?.ranges;
 
 		return blameRanges?.map((item) => ({
 			age: item.age as number,
@@ -305,10 +304,12 @@ export class GitHub1sDataSource extends DataSource {
 			endingLine: item.endingLine as number,
 			commit: {
 				sha: item.commit.sha as string,
+				creator: item.commit.author.name as string,
 				author: item.commit.author.name as string,
 				email: item.commit.author.email as string,
 				message: item.commit.message as string,
 				createTime: new Date(item.commit.authoredDate),
+				avatarUrl: item.commit.author.avatarUrl as string,
 			},
 		}));
 	}

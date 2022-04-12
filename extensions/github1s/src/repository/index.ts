@@ -29,6 +29,7 @@ export class Repository {
 		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
 		this._commitManager = CommitManager.getInstance(_scheme, _repo);
 		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
+		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
 
 	getBranchList(...args: Parameters<BranchTagManager['getBranchList']>) {
@@ -131,13 +132,13 @@ export class Repository {
 		return this._codeReviewManager.hasMoreChangedFiles(...args);
 	}
 
-	async getFileBlame(ref: string, path: string) {
+	async getFileBlameRanges(ref: string, path: string) {
 		const cacheKey = `${ref} ${path}`;
 		if (!this._blameRangesCache.has(cacheKey)) {
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const blameRanges = await dataSource.provideBlameRanges(this._repo, ref, path);
+			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
 			this._blameRangesCache.set(cacheKey, blameRanges);
 		}
-		return this._blameRangesCache.get(cacheKey);
+		return this._blameRangesCache.get(cacheKey) || [];
 	}
 }

@@ -36,7 +36,7 @@ const detectErrorMessage = (response: any, authenticated: boolean) => {
 };
 
 export class GitHubFetcher {
-	private static instance: GitHubFetcher = null;
+	private static instance: GitHubFetcher | null = null;
 	private accessToken: string = '';
 	private octokit: Octokit | null = null;
 
@@ -72,7 +72,12 @@ export class GitHubFetcher {
 		});
 	}
 
-	public graphql(...args: Parameters<Octokit['graphql']>): ReturnType<Octokit['graphql']> {
+	public async graphql(...args: Parameters<Octokit['graphql']>): ReturnType<Octokit['graphql']> {
+		// graphql API only worked for authenticated users
+		if (!GitHubTokenManager.getInstance().getToken()) {
+			const message = 'GraphQL API only worked for authenticated users';
+			await GitHub1sAuthenticationView.getInstance().open(message, true);
+		}
 		const octokit = this.getOctokit();
 		return octokit.graphql(...args);
 	}

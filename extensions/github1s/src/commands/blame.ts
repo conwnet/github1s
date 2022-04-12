@@ -9,7 +9,7 @@ import { last } from '@/helpers/util';
 import { hasValidToken } from '@/helpers/context';
 import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
-// import repository from '@/repository';
+import { Repository } from '@/repository';
 import { BlameRange, PlatformName } from '@/adapters/types';
 import { showFileBlameAuthorizedRequiredMessage } from '@/messages';
 import { adapterManager } from '@/adapters';
@@ -163,7 +163,7 @@ const createLineDecorationOptions = (
 	blameRange: BlameRange,
 	hoverMessage?: vscode.MarkdownString | string
 ): vscode.DecorationOptions[] => {
-	const decorationOptions: { range: vscode.Range; hoverMessage?: vscode.MarkdownString | string }[] = [];
+	const decorationOptions: vscode.DecorationOptions[] = [];
 	const { startingLine, endingLine } = blameRange;
 
 	for (let lineIndex = startingLine - 1; lineIndex < endingLine; lineIndex++) {
@@ -176,7 +176,7 @@ const createLineDecorationOptions = (
 };
 
 class EditorGitBlame {
-	private static instanceMap = new WeakMap();
+	private static instanceMap = new WeakMap<vscode.TextEditor, EditorGitBlame>();
 	private opening: boolean = false; // if the editor blame is showing now
 	private refreshDisposables: vscode.Disposable[] = [];
 	private selectionDisposables: vscode.Disposable[] = [];
@@ -189,24 +189,25 @@ class EditorGitBlame {
 		});
 	}
 
-	public static getInstance(editor) {
+	public static getInstance(editor: vscode.TextEditor) {
 		if (!EditorGitBlame.instanceMap.has(editor)) {
 			EditorGitBlame.instanceMap.set(editor, new EditorGitBlame(editor));
 		}
-		return EditorGitBlame.instanceMap.get(editor);
+		return EditorGitBlame.instanceMap.get(editor)!;
 	}
 
 	async getBlameRanges() {
 		const filePath = this.editor.document?.uri.path;
 		const fileAuthority = this.editor.document?.uri.authority || (await router.getAuthority());
-		const [_owner, _repo, ref] = fileAuthority.split('+').filter(Boolean);
-		// return filePath ? repository.getFileBlame(filePath, ref) : [];
-		return [];
+		const [repo, ref] = fileAuthority.split('+').filter(Boolean);
+		const scheme = adapterManager.getCurrentScheme();
+		const repository = Repository.getInstance(scheme, repo);
+		return filePath ? repository.getFileBlameRanges(ref, filePath.slice(1)) : [];
 	}
 
 	async open() {
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
-		setVSCodeContext('github1s:blames:gutterBlameOpening', true);
+		setVSCodeContext('github1s:blames:gutterBlameOpen', true);
 		const { platformName } = adapterManager.getCurrentAdapter();
 
 		(await this.getBlameRanges()).forEach((blameRange) => {
@@ -236,7 +237,7 @@ class EditorGitBlame {
 		)?.commit.sha;
 		const selectedBlameRanges = blameRanges.filter((blameRange) => blameRange.commit.sha === selectedCommitSha);
 		const decorationType = createSelectedLineDecorationType();
-		const decorationOptions = [];
+		const decorationOptions: vscode.DecorationOptions[] = [];
 
 		this.selectionDisposables.push(decorationType);
 		selectedBlameRanges.forEach((blameRange) => {
@@ -246,7 +247,7 @@ class EditorGitBlame {
 	}
 
 	close() {
-		setVSCodeContext('github1s:blames:gutterBlameOpening', false);
+		setVSCodeContext('github1s:blames:gutterBlameOpen', false);
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
 		this.selectionDisposables.forEach((disposable) => disposable.dispose());
 		this.opening = false;
@@ -265,20 +266,28 @@ const ensureUserAuthorized = () => {
 	return false;
 };
 
-export const commandToggleEditorGutterBlame = () => {
+const commandToggleEditorGutterBlame = () => {
 	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).toggle();
 	}
 };
 
-export const commandOpenEditorGutterBlame = () => {
+const commandOpenEditorGutterBlame = () => {
 	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).open();
 	}
 };
 
-export const commandCloseEditorGutterBlame = () => {
+const commandCloseEditorGutterBlame = () => {
 	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).close();
 	}
+};
+
+export const registerBlameCommands = (context: vscode.ExtensionContext) => {
+	return context.subscriptions.push(
+		vscode.commands.registerCommand('github1s.commands.toggleEditorGutterBlame', commandToggleEditorGutterBlame),
+		vscode.commands.registerCommand('github1s.commands.openEditorGutterBlame', commandOpenEditorGutterBlame),
+		vscode.commands.registerCommand('github1s.commands.closeEditorGutterBlame', commandCloseEditorGutterBlame)
+	);
 };

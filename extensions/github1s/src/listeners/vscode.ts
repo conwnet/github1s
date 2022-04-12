@@ -44,9 +44,9 @@ const handleOpenChangesContextOnActiveEditorChange = async (editor: vscode.TextE
 	return setVSCodeContext('github1s:editors:showDiffChangedFile', !!changedFile);
 };
 
-// set the `gutterBlameOpening` to false when the active editor changed
-const handleGutterBlameOpeningContextOnActiveEditorChange = async () => {
-	return setVSCodeContext('github1s:blames:gutterBlameOpening', false);
+// set the `gutterBlameOpen` to false when the active editor changed
+const handlegutterBlameOpenContextOnActiveEditorChange = async () => {
+	return setVSCodeContext('github1s:blames:gutterBlameOpen', false);
 };
 
 // add the line number anchor when user selection lines in a editor
@@ -76,7 +76,7 @@ export const registerVSCodeEventListeners = () => {
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		handleRouterOnActiveEditorChange(editor);
 		handleOpenChangesContextOnActiveEditorChange(editor);
-		handleGutterBlameOpeningContextOnActiveEditorChange();
+		handlegutterBlameOpenContextOnActiveEditorChange();
 	});
 
 	// debounce to update the browser url

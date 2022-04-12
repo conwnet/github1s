@@ -246,7 +246,7 @@ export class DataSource {
 		return [];
 	}
 
-	provideBlameRanges(repo: string, ref: string, path: string): Promisable<BlameRange[]> {
+	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<BlameRange[]> {
 		return [];
 	}
 

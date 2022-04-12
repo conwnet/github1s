@@ -224,13 +224,13 @@
       },
 
       {
-        "command": "github1s.toggleEditorGutterBlame",
+        "command": "github1s.commands.toggleEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.openEditorGutterBlame",
+        "command": "github1s.commands.openEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "icon": {
@@ -240,7 +240,7 @@
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.closeEditorGutterBlame",
+        "command": "github1s.commands.closeEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "icon": {
@@ -389,11 +389,11 @@
         },
 
         {
-          "command": "github1s.openEditorGutterBlame",
+          "command": "github1s.commands.openEditorGutterBlame",
           "when": "false"
         },
         {
-          "command": "github1s.closeEditorGutterBlame",
+          "command": "github1s.commands.closeEditorGutterBlame",
           "when": "false"
         }
       ],
@@ -512,15 +512,14 @@
           "when": "resourceScheme =~ /^github1s/",
           "group": "navigation@99"
         },
-
         {
-          "command": "github1s.openEditorGutterBlame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && !github1s:blames:gutterBlameOpening",
+          "command": "github1s.commands.openEditorGutterBlame",
+          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && !github1s:blames:gutterBlameOpen",
           "group": "navigation@4"
         },
         {
-          "command": "github1s.closeEditorGutterBlame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && github1s:blames:gutterBlameOpening",
+          "command": "github1s.commands.closeEditorGutterBlame",
+          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && github1s:blames:gutterBlameOpen",
           "group": "navigation@4"
         }
       ]
