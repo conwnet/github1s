@@ -14,7 +14,7 @@ import { codeReviewRequestTreeDataProvider } from '@/views';
 import { RequestNotFoundError } from '@/helpers/fetch';
 import { CodeReviewType } from '@/adapters/types';
 import { adapterManager } from '@/adapters';
-import { CodeReviewManager } from '@/views/code-review-manager';
+import { Repository } from '@/repository';
 
 const CodeReviewTypeName = {
 	[CodeReviewType.PullRequest]: 'pull request',
@@ -45,7 +45,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType];
-	const codeReviewManager = CodeReviewManager.getInstance(adapter.scheme, repo);
+	const repository = Repository.getInstance(adapter.scheme, repo);
 
 	// if the a codeReviewId isn't provided, use quickInput
 	if (!codeReviewId) {
@@ -55,7 +55,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 			alwaysShow: true,
 		};
 		// use the code review list as the candidates
-		const codeReviews = await codeReviewManager.getList();
+		const codeReviews = await repository.getCodeReviewList();
 		const codeReviewItems: vscode.QuickPickItem[] = codeReviews.map((codeReview) => ({
 			codeReviewId: codeReview.id,
 			label: getCodeReviewTreeItemLabel(codeReview),

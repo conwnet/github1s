@@ -9,8 +9,8 @@ import { last } from '@/helpers/util';
 import { hasValidToken } from '@/helpers/context';
 import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
-import repository from '@/repository';
-import { FileBlameRange, PlatformName } from '@/adapters/types';
+// import repository from '@/repository';
+import { BlameRange, PlatformName } from '@/adapters/types';
 import { showFileBlameAuthorizedRequiredMessage } from '@/messages';
 import { adapterManager } from '@/adapters';
 
@@ -47,7 +47,7 @@ const openOnOfficialPageCommand = {
 	},
 };
 
-const createCommitMessagePreviewMarkdown = (blameRange: FileBlameRange, platformName: PlatformName) => {
+const createCommitMessagePreviewMarkdown = (blameRange: BlameRange, platformName: PlatformName) => {
 	const commit = blameRange.commit;
 	const messageTextLines: string[] = [];
 
@@ -112,7 +112,7 @@ const createSelectedLineDecorationType = () =>
 	});
 
 // the decoration type for the first line of **a blame block**
-const createFirstLineDecorationType = (blameRange: FileBlameRange) => {
+const createFirstLineDecorationType = (blameRange: BlameRange) => {
 	// put the avatar of commit author to the beginning of the line
 	const firstLineBeforeTextDecorationCss =
 		commonLineDecorationTypeOptions.before.textDecoration +
@@ -148,7 +148,7 @@ const createFirstLineDecorationType = (blameRange: FileBlameRange) => {
 };
 
 // the decoration type for the rest lines (not the first line) of a blame block
-const createRestLinesDecorationType = (blameRange: FileBlameRange) => {
+const createRestLinesDecorationType = (blameRange: BlameRange) => {
 	return vscode.window.createTextEditorDecorationType({
 		...commonLineDecorationTypeOptions,
 		before: {
@@ -160,7 +160,7 @@ const createRestLinesDecorationType = (blameRange: FileBlameRange) => {
 
 // create decoration option for each line of a blame block
 const createLineDecorationOptions = (
-	blameRange: FileBlameRange,
+	blameRange: BlameRange,
 	hoverMessage?: vscode.MarkdownString | string
 ): vscode.DecorationOptions[] => {
 	const decorationOptions: { range: vscode.Range; hoverMessage?: vscode.MarkdownString | string }[] = [];
@@ -200,7 +200,8 @@ class EditorGitBlame {
 		const filePath = this.editor.document?.uri.path;
 		const fileAuthority = this.editor.document?.uri.authority || (await router.getAuthority());
 		const [_owner, _repo, ref] = fileAuthority.split('+').filter(Boolean);
-		return filePath ? repository.getFileBlame(filePath, ref) : [];
+		// return filePath ? repository.getFileBlame(filePath, ref) : [];
+		return [];
 	}
 
 	async open() {

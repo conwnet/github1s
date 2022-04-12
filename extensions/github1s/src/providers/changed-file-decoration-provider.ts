@@ -17,8 +17,7 @@ import {
 import router from '@/router';
 import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
 import { adapterManager } from '@/adapters';
-import { CodeReviewManager } from '@/views/code-review-manager';
-import { CommitManager } from '@/views/commit-manager';
+import { Repository } from '@/repository';
 
 export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeStatus.Added]: {
@@ -65,15 +64,15 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 
 const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
 	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const codeReviewManager = CodeReviewManager.getInstance(uri.scheme, repo);
-	const changedFiles = await codeReviewManager.getChangedFiles(codeReviewId);
+	const repository = Repository.getInstance(uri.scheme, repo);
+	const changedFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
 const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
 	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const commitManager = CommitManager.getInstance(uri.scheme, repo);
-	const changedFiles = await commitManager.getChangedFiles(commitSha);
+	const repository = Repository.getInstance(uri.scheme, repo);
+	const changedFiles = await repository.getCommitChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 

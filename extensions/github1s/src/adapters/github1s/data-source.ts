@@ -14,7 +14,7 @@ import {
 	Directory,
 	DirectoryEntry,
 	File,
-	FileBlameRange,
+	BlameRange,
 	FileType,
 	Tag,
 	TextSearchResults,
@@ -127,11 +127,11 @@ export class GitHub1sDataSource extends DataSource {
 		return matchedBranches.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
-	async provideBranch(repoFullName: string, branch: string): Promise<Branch | null> {
+	async provideBranch(repoFullName: string, branchName: string): Promise<Branch | null> {
 		if (!this.cachedBranches) {
 			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
 		}
-		return this.cachedBranches.find((item) => item.name === branch) || null;
+		return this.cachedBranches.find((item) => item.name === branchName) || null;
 	}
 
 	async provideTags(repoFullName: string, options: CommonQueryOptions): Promise<Tag[]> {
@@ -144,11 +144,11 @@ export class GitHub1sDataSource extends DataSource {
 		return matchedTags.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
-	async provideTag(repoFullName: string, tag: string): Promise<Tag | null> {
+	async provideTag(repoFullName: string, tagName: string): Promise<Tag | null> {
 		if (!this.cachedTags) {
 			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'heads')) as Tag[];
 		}
-		return this.cachedTags.find((item) => item.name === tag) || null;
+		return this.cachedTags.find((item) => item.name === tagName) || null;
 	}
 
 	async provideTextSearchResults(
@@ -292,7 +292,7 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
-	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<FileBlameRange[]> {
+	async provideBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref, path };

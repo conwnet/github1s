@@ -11,7 +11,7 @@ import * as adapterTypes from '@/adapters/types';
 import * as queryString from 'query-string';
 import router from '@/router';
 import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/source-control/changes';
-import { CodeReviewManager } from './code-review-manager';
+import { Repository } from '../repository';
 import { Barrier } from '@/helpers/async';
 
 enum CodeReviewState {
@@ -107,7 +107,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CodeReviewManager.getInstance(scheme, repo).loadMore();
+			await Repository.getInstance(scheme, repo).loadMoreCodeReviews();
 			this._loadingBarrier.open();
 		}
 	}
@@ -118,7 +118,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CodeReviewManager.getInstance(scheme, repo).loadMoreChangedFiles(codeReviewId);
+			await Repository.getInstance(scheme, repo).loadMoreCodeReviewChangedFiles(codeReviewId);
 			this._loadingBarrier.open();
 		}
 	}
@@ -127,8 +127,8 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const { repo } = await router.getState();
-		const codeReviewManager = CodeReviewManager.getInstance(currentAdapter.scheme, repo);
-		const codeReviews = await codeReviewManager.getList(this._forceUpdate);
+		const repository = Repository.getInstance(currentAdapter.scheme, repo);
+		const codeReviews = await repository.getCodeReviewList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
 			const label = getCodeReviewTreeItemLabel(codeReview);
 			const description = getCodeReviewTreeItemDescription(codeReview);
@@ -151,7 +151,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			};
 		});
 		this._forceUpdate = false;
-		const hasMore = await codeReviewManager.hasMore();
+		const hasMore = await repository.hasMoreCodeReviews();
 		return hasMore ? [...codeReviewTreeItems, loadMoreCodeReviewsItem] : codeReviewTreeItems;
 	}
 
@@ -176,8 +176,8 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		});
 		const scheme = adapterManager.getCurrentScheme();
 		const { repo } = await router.getState();
-		const codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
-		const hasMore = await codeReviewManager.hasMoreChangedFiles(codeReview.id);
+		const repository = Repository.getInstance(scheme, repo);
+		const hasMore = await repository.hasMoreCodeReviewChangedFiles(codeReview.id);
 		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(codeReview.id);
 		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;
 	}

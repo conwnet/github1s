@@ -9,7 +9,7 @@ import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-lis
 import { commitTreeDataProvider } from '@/views';
 import { adapterManager } from '@/adapters';
 import { RequestNotFoundError } from '@/helpers/fetch';
-import { CommitManager } from '@/views/commit-manager';
+import { Repository } from '@/repository';
 
 const checkCommitExists = async (repo: string, commitSha: string) => {
 	const adapter = adapterManager.getCurrentAdapter();
@@ -32,7 +32,7 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 		: '';
 	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
-	const commitManager = CommitManager.getInstance(adapter.scheme, repo);
+	const repository = Repository.getInstance(adapter.scheme, repo);
 
 	// if the a commitSha isn't provided, use quickInput
 	if (!commitSha) {
@@ -42,7 +42,7 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 			alwaysShow: true,
 		};
 		// use the commit list as the candidates
-		const commits = await commitManager.getList();
+		const commits = await repository.getCommitList();
 		const commitItems: vscode.QuickPickItem[] = commits.map((commit) => ({
 			commitSha: commit.sha,
 			label: commit.message,

@@ -11,8 +11,7 @@ import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
 import { GitHub1sQuickDiffProvider } from './quickDiffProviders';
-import { CodeReviewManager } from '@/views/code-review-manager';
-import { CommitManager } from '@/views/commit-manager';
+import { Repository } from '@/repository';
 
 interface VSCodeChangedFile {
 	baseFileUri: vscode.Uri;
@@ -32,8 +31,8 @@ export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeRev
 	const headRootUri = baseRootUri.with({
 		authority: `${repo}+${codeReview.head.commitSha}`,
 	});
-	const codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
-	const changedFiles = await codeReviewManager.getChangedFiles(codeReview.id);
+	const repository = Repository.getInstance(scheme, repo);
+	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -64,8 +63,8 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 	const headRootUri = baseRootUri.with({
 		authority: `${repo}+${commit.sha || 'HEAD'}`,
 	});
-	const commitManager = CommitManager.getInstance(scheme, repo);
-	const changedFiles = await commitManager.getChangedFiles(commit.sha);
+	const repository = Repository.getInstance(scheme, repo);
+	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -86,14 +85,14 @@ export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
-		const codeReviewManager = CodeReviewManager.getInstance(scheme, routerState.repo);
-		const codeReview = await codeReviewManager.getItem(routerState.codeReviewId);
+		const repository = Repository.getInstance(scheme, routerState.repo);
+		const codeReview = await repository.getCodeReviewItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
 	else if (routerState.pageType === adapterTypes.PageType.Commit) {
-		const commitManager = CommitManager.getInstance(scheme, routerState.repo);
-		const commit = await commitManager.getItem(routerState.commitSha);
+		const repository = Repository.getInstance(scheme, routerState.repo);
+		const commit = await repository.getCommitItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
 	return [];

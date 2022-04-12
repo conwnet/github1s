@@ -6,18 +6,17 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { adapterManager } from '@/adapters';
+import { Repository } from '@/repository';
 
 // check out to branch/tag/commit
 const commandCheckoutTo = async () => {
 	const currentAdapter = adapterManager.getCurrentAdapter();
-	const dataSource = await currentAdapter.resolveDataSource();
 	const routerParser = await currentAdapter.resolveRouterParser();
-	const { repo: currentRepo, ref: currentRef } = await router.getState();
+	const routeState = await router.getState();
 
-	const [branchRefs, tagRefs] = await Promise.all([
-		dataSource.provideBranches(currentRepo, { page: 1, pageSize: 100 }),
-		dataSource.provideTags(currentRepo, { page: 1, pageSize: 100 }),
-	]);
+	const scheme = adapterManager.getCurrentScheme();
+	const repository = Repository.getInstance(scheme, routeState.repo);
+	const [branchRefs, tagRefs] = await Promise.all([repository.getBranchList(), repository.getTagList()]);
 	const branchPickerItems: vscode.QuickPickItem[] = branchRefs.map((branchRef) => ({
 		label: branchRef.name,
 		description: (branchRef.commitSha || '').slice(0, 8),
@@ -28,7 +27,7 @@ const commandCheckoutTo = async () => {
 	}));
 
 	const quickPick = vscode.window.createQuickPick();
-	quickPick.placeholder = currentRef;
+	quickPick.placeholder = routeState.ref;
 	quickPick.items = [...branchPickerItems, ...tagPickerItems];
 
 	quickPick.show();
@@ -40,7 +39,7 @@ const commandCheckoutTo = async () => {
 	const selectedRef = choice?.label || quickPick.value;
 	if (selectedRef) {
 		const targetRef = selectedRef.toUpperCase() !== 'HEAD' ? selectedRef : undefined;
-		router.push(await routerParser.buildTreePath(currentRepo, targetRef));
+		router.push(await routerParser.buildTreePath(routeState.repo, targetRef));
 	}
 };
 

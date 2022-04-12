@@ -9,7 +9,7 @@ import router from '@/router';
 import { emptyFileUri } from '@/providers';
 import { basename } from '@/helpers/util';
 import { FileChangeStatus } from '@/adapters/types';
-import { CommitManager } from '@/views/commit-manager';
+import { Repository } from '@/repository';
 import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/source-control/changes';
 
 export const getChangedFileFromSourceControl = async (fileUri: vscode.Uri) => {
@@ -78,9 +78,9 @@ const getConcreteFileUri = async (fileUri: vscode.Uri) => {
 	// the `fileUri.authority` maybe empty, fallback to router.getAuthority() in this case
 	const fileAuthority = fileUri.authority || (await router.getAuthority());
 	const [repo, ref] = fileAuthority.split('+').filter(Boolean);
-	const commitManager = CommitManager.getInstance(fileUri.scheme, repo);
-	const commit = await commitManager.getFileLatestCommit(ref, fileUri.path.slice(1));
-	const latestCommitSha = commit?.sha || (await commitManager.getItem(ref))?.sha || 'HEAD';
+	const repository = Repository.getInstance(fileUri.scheme, repo);
+	const commit = await repository.getFileLatestCommit(ref, fileUri.path.slice(1));
+	const latestCommitSha = commit?.sha || (await repository.getCommitItem(ref))?.sha || 'HEAD';
 
 	return fileUri.with({ authority: `${repo}+${latestCommitSha}` });
 };
@@ -95,13 +95,13 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 	);
 	const [repo, rightCommitSha] = rightFileUri.authority.split('+').filter(Boolean);
 
-	const commitManager = CommitManager.getInstance(fileUri.scheme, repo);
-	const leftCommit = await commitManager.getPreviousCommit(rightCommitSha, fileUri.path.slice(1));
+	const repository = Repository.getInstance(fileUri.scheme, repo);
+	const leftCommit = await repository.getPreviousCommit(rightCommitSha, fileUri.path.slice(1));
 	// if we can't find previous commit, use the the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? rightFileUri.with({ authority: `${repo}+${leftCommit.sha}` }) : emptyFileUri;
 
 	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;
-	const hasNextRevision = !!(await commitManager.getNextCommit(rightCommitSha, rightFileUri.path.slice(1)));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path.slice(1)));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
@@ -125,15 +125,15 @@ const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
 	const leftFileUri = await getConcreteFileUri(fileUri);
 
 	const [repo, leftCommitSha] = leftFileUri.authority.split('+').filter(Boolean);
-	const commitManager = CommitManager.getInstance(fileUri.scheme, repo);
-	const rightCommit = await commitManager.getNextCommit(leftCommitSha, fileUri.path.slice(1));
+	const repository = Repository.getInstance(fileUri.scheme, repo);
+	const rightCommit = await repository.getNextCommit(leftCommitSha, fileUri.path.slice(1));
 
 	if (!rightCommit) {
 		return vscode.window.showInformationMessage('There is no next commit found.');
 	}
 
 	const rightFileUri = leftFileUri.with({ authority: `${repo}+${rightCommit.sha}` });
-	const hasNextRevision = !!(await commitManager.getNextCommit(rightCommit.sha, rightFileUri.path.slice(1)));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path.slice(1)));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),

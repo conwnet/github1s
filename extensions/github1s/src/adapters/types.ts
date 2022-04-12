@@ -152,7 +152,7 @@ export interface ChangedFile {
 	previousPath?: string;
 }
 
-export interface FileBlameRange {
+export interface BlameRange {
 	age: number;
 	startingLine: number;
 	endingLine: number;
@@ -188,7 +188,7 @@ export class DataSource {
 		return [];
 	}
 
-	provideBranch(repo: string, branch: string): Promisable<Branch | null> {
+	provideBranch(repo: string, branchName: string): Promisable<Branch | null> {
 		return null;
 	}
 
@@ -196,7 +196,7 @@ export class DataSource {
 		return [];
 	}
 
-	provideTag(repo: string, tag: string): Promisable<Tag | null> {
+	provideTag(repo: string, tagName: string): Promisable<Tag | null> {
 		return null;
 	}
 
@@ -246,7 +246,7 @@ export class DataSource {
 		return [];
 	}
 
-	provideFileBlameRanges(repo: string, ref: string, path: string): Promisable<FileBlameRange[]> {
+	provideBlameRanges(repo: string, ref: string, path: string): Promisable<BlameRange[]> {
 		return [];
 	}
 

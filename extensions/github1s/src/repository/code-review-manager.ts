@@ -154,7 +154,7 @@ export class CodeReviewManager {
 		}
 	);
 
-	public loadMoreChangedFiles = reuseable(async (codeReviewId) => {
+	public loadMoreChangedFiles = reuseable(async (codeReviewId: string) => {
 		const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
 		return manager.loadMore();
 	});
