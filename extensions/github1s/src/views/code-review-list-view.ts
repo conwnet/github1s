@@ -10,7 +10,7 @@ import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import * as queryString from 'query-string';
 import router from '@/router';
-import { getChangedFileCommand, getCodeReviewChangedFiles } from '@/source-control/changes';
+import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/source-control/changes';
 import { CodeReviewManager } from './code-review-manager';
 import { Barrier } from '@/helpers/async';
 
@@ -72,7 +72,7 @@ const loadMoreCodeReviewsItem: vscode.TreeItem = {
 	tooltip: 'Load more code reviews',
 	command: {
 		title: 'Load more code reviews',
-		command: 'github1s.code-review-view-load-more-code-reviews',
+		command: 'github1s.commands.load-more-code-reviews',
 		tooltip: 'Load more code reviews',
 	},
 };
@@ -82,7 +82,7 @@ const createLoadMoreChangedFilesItem = (codeReviewId: string): vscode.TreeItem =
 	tooltip: 'Load more changed files',
 	command: {
 		title: 'Load more changed files',
-		command: 'github1s.code-review-view-load-more-changed-files',
+		command: 'github1s.commands.load-more-code-review-changed-files',
 		tooltip: 'Load more changed files',
 		arguments: [codeReviewId],
 	},
@@ -107,7 +107,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CodeReviewManager.getInstance(scheme, repo)!.loadMore();
+			await CodeReviewManager.getInstance(scheme, repo).loadMore();
 			this._loadingBarrier.open();
 		}
 	}
@@ -118,7 +118,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CodeReviewManager.getInstance(scheme, repo)!.loadMoreChangedFiles(codeReviewId);
+			await CodeReviewManager.getInstance(scheme, repo).loadMoreChangedFiles(codeReviewId);
 			this._loadingBarrier.open();
 		}
 	}
@@ -127,14 +127,14 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const { repo } = await router.getState();
-		const codeReviewManager = CodeReviewManager.getInstance(currentAdapter.scheme, repo)!;
+		const codeReviewManager = CodeReviewManager.getInstance(currentAdapter.scheme, repo);
 		const codeReviews = await codeReviewManager.getList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
 			const label = getCodeReviewTreeItemLabel(codeReview);
 			const description = getCodeReviewTreeItemDescription(codeReview);
 			const tooltip = `${label} (${description})`;
 			const iconPath = vscode.Uri.parse(codeReview.avatarUrl);
-			const contextValue = 'github1s:code-review';
+			const contextValue = 'github1s:code-review-list-item';
 
 			return {
 				codeReview,
@@ -161,7 +161,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		const changedFileItems = changedFiles.map((changedFile) => {
 			const filePath = changedFile.headFileUri.path;
 			const id = `${codeReview.id} ${filePath}`;
-			const command = getChangedFileCommand(changedFile);
+			const command = getChangedFileDiffCommand(changedFile);
 
 			return {
 				id,
@@ -176,7 +176,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		});
 		const scheme = adapterManager.getCurrentScheme();
 		const { repo } = await router.getState();
-		const codeReviewManager = CodeReviewManager.getInstance(scheme, repo)!;
+		const codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
 		const hasMore = await codeReviewManager.hasMoreChangedFiles(codeReview.id);
 		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(codeReview.id);
 		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;

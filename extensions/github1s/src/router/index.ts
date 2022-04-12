@@ -67,7 +67,8 @@ export class Router extends EventEmitter<RouterState> {
 	// push the url with current history
 	public async push(path: string) {
 		await this._barrier.wait();
-		return this._history!.push(path);
+		const emptyState = { pathname: '', search: '', hash: '' };
+		return this._history!.push({ ...emptyState, ...parsePath(path) });
 	}
 
 	// replace the url with current history

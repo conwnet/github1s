@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import { relativeTimeTo } from '@/helpers/date';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/source-control-decoration-provider';
-import { getChangedFileCommand, getCommitChangedFiles } from '@/source-control/changes';
+import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/source-control/changes';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
@@ -27,7 +27,7 @@ const loadMoreCommitItem: vscode.TreeItem = {
 	tooltip: 'Load more commits',
 	command: {
 		title: 'Load more commits',
-		command: 'github1s.commit-view-load-more-commits',
+		command: 'github1s.commands.load-more-commits',
 		tooltip: 'Load more commits',
 	},
 };
@@ -37,7 +37,7 @@ const createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => (
 	tooltip: 'Load more changed files',
 	command: {
 		title: 'Load more changed files',
-		command: 'github1s.commit-view-load-more-changed-files',
+		command: 'github1s.commands.load-more-commit-changed-files',
 		tooltip: 'Load more changed files',
 		arguments: [commitSha],
 	},
@@ -62,7 +62,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CommitManager.getInstance(scheme, repo)!.loadMore();
+			await CommitManager.getInstance(scheme, repo).loadMore();
 			this._loadingBarrier.open();
 		}
 	}
@@ -73,7 +73,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo } = await router.getState();
-			await CommitManager.getInstance(scheme, repo)!.loadMoreChangedFiles(commitSha);
+			await CommitManager.getInstance(scheme, repo).loadMoreChangedFiles(commitSha);
 			this._loadingBarrier.open();
 		}
 	}
@@ -82,14 +82,14 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const { repo, ref } = await router.getState();
-		const commitManager = CommitManager.getInstance(currentAdapter.scheme, repo)!;
+		const commitManager = CommitManager.getInstance(currentAdapter.scheme, repo);
 		const repositoryCommits = await commitManager.getList(ref, '', this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = `${commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
 			const iconPath = vscode.Uri.parse(commit.avatarUrl);
-			const contextValue = 'github1s:commit';
+			const contextValue = 'github1s:commit-list-item';
 
 			return {
 				commit,
@@ -115,7 +115,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		const changedFileItems = changedFiles.map((changedFile) => {
 			const filePath = changedFile.headFileUri.path;
 			const id = `${commit.sha} ${filePath}`;
-			const command = getChangedFileCommand(changedFile);
+			const command = getChangedFileDiffCommand(changedFile);
 
 			return {
 				id,
@@ -130,7 +130,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		});
 		const scheme = adapterManager.getCurrentScheme();
 		const { repo } = await router.getState();
-		const commitManager = CommitManager.getInstance(scheme, repo)!;
+		const commitManager = CommitManager.getInstance(scheme, repo);
 		const hasMore = await commitManager.hasMoreChangedFiles(commit.sha);
 		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(commit.sha);
 		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;

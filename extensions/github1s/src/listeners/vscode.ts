@@ -24,7 +24,7 @@ const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | unde
 	const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
 	// if the file which not belong to current workspace is opened, or no file
-	// is opened, only retain `owner` and `repo` (and `ref` if need) in browser url
+	// is opened, only retain `repo` (and `ref` if need) in browser url
 	if (!activeFileUri || activeFileUri?.authority || activeFileUri?.scheme !== adapterManager.getCurrentScheme()) {
 		const browserPath = await (ref.toUpperCase() === 'HEAD'
 			? routerParser.buildTreePath(repo)
@@ -41,7 +41,7 @@ const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | unde
 const handleOpenChangesContextOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {
 	const changedFile = editor?.document.uri ? await getChangedFileFromSourceControl(editor.document.uri) : undefined;
 
-	return setVSCodeContext('github1s.context.showOpenChangesInEditorTitle', !!changedFile);
+	return setVSCodeContext('github1s.context.show-open-changes-in-editor-title', !!changedFile);
 };
 
 // set the `gutterBlameOpening` to false when the active editor changed

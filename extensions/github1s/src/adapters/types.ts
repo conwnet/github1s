@@ -376,13 +376,20 @@ export enum CodeReviewType {
 	PullRequest = 'PullRequest',
 	MergeRequest = 'MergeRequest',
 	ChangeRequest = 'ChangeRequest',
+	CodeReview = 'CodeReview',
+}
+
+export enum PlatformName {
+	GitHub = 'GitHub',
+	GitLab = 'GitLab',
+	Bitbucket = 'Bitbucket',
 }
 
 export interface Adapter {
 	// specify which scheme of workspace should current adapter should work with
 	readonly scheme: string;
 	// platform name, using for displaying text such as: `open on **GitHub**`
-	readonly name: string;
+	readonly platformName: PlatformName;
 	// the code review type
 	readonly codeReviewType: CodeReviewType;
 

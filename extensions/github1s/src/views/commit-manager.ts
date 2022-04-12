@@ -46,7 +46,7 @@ class CommitChangedFilesManager {
 	);
 
 	loadMore = reuseable(
-		async (): Promise<boolean> => {
+		async (): Promise<ChangedFile[]> => {
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const changedFiles = await dataSource.provideCommitChangedFiles(this._repo, this._commitSha, {
 				pageSize: this._pageSize,
@@ -57,7 +57,7 @@ class CommitChangedFilesManager {
 			this._hasMore = changedFiles.length === this._pageSize;
 			(this._changedFilesList || (this._changedFilesList = [])).push(...changedFiles);
 
-			return this._hasMore;
+			return changedFiles;
 		}
 	);
 
@@ -93,7 +93,7 @@ export class CommitManager {
 		if (!CommitManager.instancesMap.has(mapKey)) {
 			CommitManager.instancesMap.set(mapKey, new CommitManager(scheme, repo));
 		}
-		return CommitManager.instancesMap.get(mapKey);
+		return CommitManager.instancesMap.get(mapKey)!;
 	}
 
 	private constructor(scheme: string, repo: string) {
@@ -156,7 +156,7 @@ export class CommitManager {
 				commit && this._commitMap.set(ref, commit);
 				commit && this._commitMap.set(commit.sha, commit);
 				if (commit?.files) {
-					const manager = CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha)!;
+					const manager = CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha);
 					manager.setChangedFiles(commit.files);
 				}
 			}
@@ -165,19 +165,20 @@ export class CommitManager {
 	);
 
 	loadMore = reuseable(
-		async (ref: string = 'HEAD', filePath: string = ''): Promise<boolean> => {
+		async (ref: string = 'HEAD', filePath: string = ''): Promise<Commit[]> => {
 			const commitList = this.resolveCommitList(ref, filePath);
-			const latestRef = commitList.length ? commitList[commitList.length - 1] : ref;
+			const latestRef = commitList?.[commitList.length - 1]?.sha || ref;
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const queryOptions = { pageSize: this._pageSize, page: 1, ref: latestRef, filePath };
+			const queryOptions = { pageSize: this._pageSize, page: 1, from: latestRef, path: filePath };
 			const commits = await dataSource.provideCommits(this._repo, queryOptions);
 
 			// also map `ref` to the first commit
 			commits.length && this._commitMap.set(ref, commits[0]);
 			commits.forEach((commit) => {
 				this._commitMap.set(commit.sha, commit);
+				// directly set changed files if they are in response
 				if (commit?.files) {
-					const manager = CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha)!;
+					const manager = CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha);
 					manager.setChangedFiles(commit.files);
 				}
 			});
@@ -191,7 +192,7 @@ export class CommitManager {
 			if (commits.length && !hasMore) {
 				this.linkCommitShas(filePath, null, commits[commits.length - 1].sha);
 			}
-			return hasMore;
+			return commits;
 		}
 	);
 
@@ -212,10 +213,10 @@ export class CommitManager {
 	);
 
 	public loadMoreChangedFiles = reuseable(
-		async (ref: string): Promise<boolean> => {
+		async (ref: string): Promise<ChangedFile[]> => {
 			const commit = this._commitMap.has(ref) ? this._commitMap.get(ref) : await this.getItem(ref);
 			const manager = commit ? CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha) : null;
-			return manager ? manager.loadMore() : false;
+			return manager ? manager.loadMore() : [];
 		}
 	);
 
@@ -224,6 +225,19 @@ export class CommitManager {
 			const commit = this._commitMap.has(ref) ? this._commitMap.get(ref) : await this.getItem(ref);
 			const manager = commit ? CommitChangedFilesManager.getInstance(this._scheme, this._repo, commit.sha) : null;
 			return manager ? manager.hasMore() : false;
+		}
+	);
+
+	// get the lastest commit of `file with modifications`,
+	// the commit of `ref` in arguments could be newer than result
+	public getFileLatestCommit = reuseable(
+		async (ref: string, filePath: string): Promise<Commit | null> => {
+			const refCommit = this._commitMap.has(ref) ? this._commitMap.get(ref) : null;
+			// if the `filePath` is occurred in `_relationMap`, the latest commit of this file is refCommit
+			if (refCommit && this._relationMap.get(refCommit.sha)?.filePathPreviousMap?.has(filePath)) {
+				return refCommit;
+			}
+			return (await this.loadMore(ref, filePath))[0] || null;
 		}
 	);
 

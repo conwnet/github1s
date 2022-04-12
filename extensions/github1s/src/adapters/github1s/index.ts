@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { setVSCodeContext } from '@/helpers/vscode';
-import { DataSource, RouterParser, Adapter, Promisable, CodeReviewType } from '../types';
+import { DataSource, RouterParser, Adapter, Promisable, CodeReviewType, PlatformName } from '../types';
 import { GitHub1sDataSource } from './data-source';
 import { GitHub1sRouterParser } from './router-parser';
 import { GitHubTokenManager } from './token';
@@ -14,7 +14,7 @@ import { GitHub1sSettingsViewProvider } from './settings';
 
 export class GitHub1sAdapter implements Adapter {
 	public scheme: string = 'github1s';
-	public name: string = 'GitHub';
+	public platformName: PlatformName = PlatformName.GitHub;
 	public codeReviewType: CodeReviewType = CodeReviewType.PullRequest;
 
 	constructor() {

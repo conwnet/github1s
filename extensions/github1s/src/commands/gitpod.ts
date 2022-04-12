@@ -11,9 +11,7 @@ export const commandOpenGitpod = () => {
 		const [currentOwner, currentRepo] = currentAuthority.split('+');
 		vscode.commands.executeCommand(
 			'vscode.open',
-			vscode.Uri.parse(
-				`https://gitpod.io/#https://github.com/${currentOwner}/${currentRepo}`
-			)
+			vscode.Uri.parse(`https://gitpod.io/#https://github.com/${currentOwner}/${currentRepo}`)
 		);
 	});
 };

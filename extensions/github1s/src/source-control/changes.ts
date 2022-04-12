@@ -32,7 +32,7 @@ export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeRev
 	const headRootUri = baseRootUri.with({
 		authority: `${repo}+${codeReview.head.commitSha}`,
 	});
-	const codeReviewManager = CodeReviewManager.getInstance(scheme, repo)!;
+	const codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
 	const changedFiles = await codeReviewManager.getChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
@@ -64,7 +64,7 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 	const headRootUri = baseRootUri.with({
 		authority: `${repo}+${commit.sha || 'HEAD'}`,
 	});
-	const commitManager = CommitManager.getInstance(scheme, repo)!;
+	const commitManager = CommitManager.getInstance(scheme, repo);
 	const changedFiles = await commitManager.getChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {
@@ -86,13 +86,13 @@ export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
-		const codeReviewManager = CodeReviewManager.getInstance(scheme, routerState.repo)!;
+		const codeReviewManager = CodeReviewManager.getInstance(scheme, routerState.repo);
 		const codeReview = await codeReviewManager.getItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
 	else if (routerState.pageType === adapterTypes.PageType.Commit) {
-		const commitManager = CommitManager.getInstance(scheme, routerState.repo)!;
+		const commitManager = CommitManager.getInstance(scheme, routerState.repo);
 		const commit = await commitManager.getItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
@@ -108,7 +108,7 @@ export const getChangedFileDiffTitle = (
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
 	const [_repo, baseCommitSha] = baseFileUri.authority.split('+');
-	const [__repo, , headCommitSha] = headFileUri.authority.split('+');
+	const [__repo, headCommitSha] = headFileUri.authority.split('+');
 	const baseFileLabel = `${baseFileName} (${baseCommitSha?.slice(0, 7)})`;
 	const headFileLabel = `${headFileName} (${headCommitSha?.slice(0, 7)})`;
 
@@ -123,7 +123,7 @@ export const getChangedFileDiffTitle = (
 	return `${baseFileLabel} ⟷ ${headFileLabel}`;
 };
 
-export const getChangedFileCommand = (changedFile: VSCodeChangedFile) => {
+export const getChangedFileDiffCommand = (changedFile: VSCodeChangedFile): vscode.Command => {
 	let baseFileUri = changedFile.baseFileUri;
 	let headFileUri = changedFile.headFileUri;
 	const status = changedFile.status;
@@ -165,7 +165,7 @@ export const updateSourceControlChanges = (() => {
 					strikeThrough: changedFile.status === adapterTypes.FileChangeStatus.Removed,
 					tooltip: changedFile.status,
 				},
-				command: getChangedFileCommand(changedFile),
+				command: getChangedFileDiffCommand(changedFile),
 			};
 		});
 	};

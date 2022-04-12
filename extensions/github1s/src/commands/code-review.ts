@@ -36,11 +36,16 @@ const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
 	}
 };
 
-export const commandSwitchToCodeReview = async (codeReviewId?: string) => {
+const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeReviewTreeItem) => {
+	let codeReviewId: string | undefined = codeReviewItemOrId
+		? typeof codeReviewItemOrId === 'string'
+			? codeReviewItemOrId
+			: codeReviewItemOrId.codeReview.id
+		: '';
 	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType];
-	const codeReviewManager = CodeReviewManager.getInstance(adapter.scheme, repo)!;
+	const codeReviewManager = CodeReviewManager.getInstance(adapter.scheme, repo);
 
 	// if the a codeReviewId isn't provided, use quickInput
 	if (!codeReviewId) {
@@ -89,14 +94,12 @@ export const commandSwitchToCodeReview = async (codeReviewId?: string) => {
 };
 
 // this command is used in `source control code review view`
-export const commandCodeReviewViewItemSwitchToCodeReview = (viewItem: CodeReviewTreeItem) => {
-	return commandSwitchToCodeReview(viewItem?.codeReview?.id);
-};
-
-// this command is used in `source control code review view`
-export const commandCodeReviewViewItemOpenOnOfficialPage = async (viewItem: CodeReviewTreeItem) => {
-	const codeReviewId = viewItem?.codeReview?.id;
-
+const commandOpenCodeReviewOnOfficialPage = async (codeReviewItemOrId?: string | CodeReviewTreeItem) => {
+	const codeReviewId: string | undefined = codeReviewItemOrId
+		? typeof codeReviewItemOrId === 'string'
+			? codeReviewItemOrId
+			: codeReviewItemOrId.codeReview.id
+		: '';
 	if (codeReviewId) {
 		const { repo } = await router.getState();
 		const routerParser = await router.resolveParser();
@@ -106,14 +109,46 @@ export const commandCodeReviewViewItemOpenOnOfficialPage = async (viewItem: Code
 	}
 };
 
-export const commandCodeReviewViewRefreshCodeReviewList = (forceUpdate = true) => {
+const commandRefreshCodeReviewList = (forceUpdate = true) => {
 	return codeReviewRequestTreeDataProvider.updateTree(forceUpdate);
 };
 
-export const commandCodeReviewViewLoadMoreCodeReviews = async () => {
+const commandLoadMoreCodeReviews = async () => {
 	return codeReviewRequestTreeDataProvider.loadMoreCodeReviews();
 };
 
-export const commandCodeReviewViewLoadMoreChangedFiles = async (codeReviewId: string) => {
+const commandLoadMoreCodeReviewChangedFiles = async (codeReviewId: string) => {
 	return codeReviewRequestTreeDataProvider.loadMoreChangedFiles(codeReviewId);
+};
+
+export const registerCodeReviewCommands = (context: vscode.ExtensionContext) => {
+	return context.subscriptions.push(
+		vscode.commands.registerCommand('github1s.commands.refresh-code-review-list', commandRefreshCodeReviewList),
+		vscode.commands.registerCommand('github1s.commands.search-code-review', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switch-to-pull-request', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switch-to-merge-request', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switch-to-change-request', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switch-to-code-review', commandSwitchToCodeReview),
+		vscode.commands.registerCommand(
+			'github1s.commands.open-code-review-on-github',
+			commandOpenCodeReviewOnOfficialPage
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.open-code-review-on-gitlab',
+			commandOpenCodeReviewOnOfficialPage
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.open-code-review-on-bitbucket',
+			commandOpenCodeReviewOnOfficialPage
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.open-code-review-on-official-page',
+			commandOpenCodeReviewOnOfficialPage
+		),
+		vscode.commands.registerCommand('github1s.commands.load-more-code-reviews', commandLoadMoreCodeReviews),
+		vscode.commands.registerCommand(
+			'github1s.commands.load-more-code-review-changed-files',
+			commandLoadMoreCodeReviewChangedFiles
+		)
+	);
 };

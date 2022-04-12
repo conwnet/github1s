@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-// import repository from '@/repository';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
 import { commitTreeDataProvider } from '@/views';
 import { adapterManager } from '@/adapters';
@@ -25,10 +24,15 @@ const checkCommitExists = async (repo: string, commitSha: string) => {
 	}
 };
 
-export const commandSwitchToCommit = async (commitSha?: string) => {
+const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) => {
+	let commitSha: string | undefined = commitItemOrSha
+		? typeof commitItemOrSha === 'string'
+			? commitItemOrSha
+			: commitItemOrSha.commit.sha
+		: '';
 	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
-	const commitManager = CommitManager.getInstance(adapter.scheme, repo)!;
+	const commitManager = CommitManager.getInstance(adapter.scheme, repo);
 
 	// if the a commitSha isn't provided, use quickInput
 	if (!commitSha) {
@@ -77,14 +81,13 @@ export const commandSwitchToCommit = async (commitSha?: string) => {
 	}
 };
 
-// this command is used in `source control commits view`
-export const commandCommitViewItemSwitchToCommit = (viewItem: CommitTreeItem) => {
-	return commandSwitchToCommit(viewItem?.commit?.sha);
-};
-
 // this command is used in `source control commit list view`
-export const commandCommitViewItemOpenOnOfficialPage = async (viewItem: CommitTreeItem) => {
-	const commitSha = viewItem?.commit?.sha;
+const commandOpenCommitOnOfficialPage = async (commitItemOrSha?: string | CommitTreeItem) => {
+	const commitSha = commitItemOrSha
+		? typeof commitItemOrSha === 'string'
+			? commitItemOrSha
+			: commitItemOrSha.commit.sha
+		: '';
 	if (commitSha) {
 		const { repo } = await router.getState();
 		const routerParser = await router.resolveParser();
@@ -94,14 +97,31 @@ export const commandCommitViewItemOpenOnOfficialPage = async (viewItem: CommitTr
 	}
 };
 
-export const commandCommitViewRefreshCommitList = (forceUpdate = true) => {
+const commandRefreshCommitList = (forceUpdate = true) => {
 	return commitTreeDataProvider.updateTree(forceUpdate);
 };
 
-export const commandCommitViewLoadMoreCommits = async () => {
+const commandLoadMoreCommits = async () => {
 	return commitTreeDataProvider.loadMoreCommits();
 };
 
-export const commandCommitViewLoadMoreChangedFiles = async (commitSha: string) => {
+const commandLoadMoreCommitChangedFiles = async (commitSha: string) => {
 	return commitTreeDataProvider.loadMoreChangedFiles(commitSha);
+};
+
+export const registerCommitCommands = (context: vscode.ExtensionContext) => {
+	return context.subscriptions.push(
+		vscode.commands.registerCommand('github1s.commands.refresh-commit-list', commandRefreshCommitList),
+		vscode.commands.registerCommand('github1s.commands.search-commit', commandSwitchToCommit),
+		vscode.commands.registerCommand('github1s.commands.switch-to-commit', commandSwitchToCommit),
+		vscode.commands.registerCommand('github1s.commands.open-commit-on-github', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.open-commit-on-gitlab', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.open-commit-on-bitbucket', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.open-commit-on-official-page', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.load-more-commits', commandLoadMoreCommits),
+		vscode.commands.registerCommand(
+			'github1s.commands.load-more-commit-changed-files',
+			commandLoadMoreCommitChangedFiles
+		)
+	);
 };

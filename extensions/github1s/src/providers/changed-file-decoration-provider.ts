@@ -65,14 +65,14 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 
 const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
 	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const codeReviewManager = CodeReviewManager.getInstance(uri.scheme, repo)!;
+	const codeReviewManager = CodeReviewManager.getInstance(uri.scheme, repo);
 	const changedFiles = await codeReviewManager.getChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
 const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
 	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const commitManager = CommitManager.getInstance(uri.scheme, repo)!;
+	const commitManager = CommitManager.getInstance(uri.scheme, repo);
 	const changedFiles = await commitManager.getChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };

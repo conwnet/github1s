@@ -46,7 +46,7 @@ class CodeReviewChangedFilesManager {
 	);
 
 	loadMore = reuseable(
-		async (): Promise<boolean> => {
+		async (): Promise<ChangedFile[]> => {
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const changedFiles = await dataSource.provideCodeReviewChangedFiles(this._repo, this._codeReviewId, {
 				pageSize: this._pageSize,
@@ -57,7 +57,7 @@ class CodeReviewChangedFilesManager {
 			this._hasMore = changedFiles.length === this._pageSize;
 			(this._changedFilesList || (this._changedFilesList = [])).push(...changedFiles);
 
-			return this._hasMore;
+			return changedFiles;
 		}
 	);
 
@@ -122,15 +122,15 @@ export class CodeReviewManager {
 	);
 
 	loadMore = reuseable(
-		async (): Promise<boolean> => {
-			console.log('oh no');
+		async (): Promise<CodeReview[]> => {
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
 			const queryOptions = { pageSize: this._pageSize, page: this._currentPage };
 			const codeReviews = await dataSource.provideCodeReviews(this._repo, queryOptions);
 
 			codeReviews.forEach((codeReview) => {
 				this._codeReviewMap.set(codeReview.id, codeReview);
-				if (codeReview?.files) {
+				// directly set changed files if they are in response
+				if (codeReview.files) {
 					const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReview.id);
 					manager.setChangedFiles(codeReview.files);
 				}
@@ -139,7 +139,7 @@ export class CodeReviewManager {
 			this._hasMore = codeReviews.length === this._pageSize;
 			(this._codeReviewList || (this._codeReviewList = [])).push(...codeReviews);
 
-			return this._hasMore;
+			return codeReviews;
 		}
 	);
 

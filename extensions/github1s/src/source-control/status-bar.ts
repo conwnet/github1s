@@ -11,8 +11,8 @@ export const updateCheckoutRefOnStatusBar = (() => {
 	return async () => {
 		const { ref } = await router.getState();
 		checkoutItem.text = `$(git-branch) ${ref}`;
-		checkoutItem.tooltip = `Checkout branch/tag/commit...`;
-		checkoutItem.command = `github1s.checkout-ref`;
+		checkoutItem.tooltip = 'Checkout branch/tag/commit...';
+		checkoutItem.command = 'github1s.commands.checkout-to';
 		checkoutItem.show();
 	};
 })();
