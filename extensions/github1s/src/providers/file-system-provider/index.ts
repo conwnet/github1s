@@ -17,7 +17,7 @@ import {
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
-import { noop, trimStart, basename, dirname } from '@/helpers/util';
+import { noop, trimStart, basename, dirname, joinPath } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
 import { File, Directory, Entry } from './types';
@@ -197,11 +197,12 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			if (!gitmoduleData) {
 				throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
 			}
-			const [submoduleOwner, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
-			const submoduleAuthority = `${submoduleOwner}+${submoduleRepo}+${directory.sha || 'HEAD'}`;
+			const [submoduleScheme, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
+			const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
 			directory.name = ''; // update the name field to '' to indicated it is an root directory
 			// update the uri field to indicated it is belong the `submodule repository`
-			directory.uri = directory.uri.with({
+			directory.uri = Uri.parse('').with({
+				scheme: submoduleScheme,
 				authority: submoduleAuthority,
 				path: '/',
 			});
@@ -236,13 +237,20 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
-			const authority = uri.authority || (await router.getAuthority());
-			const cacheKey = `${uri.scheme} ${authority} ${uri.path}`;
-
+			let { scheme, authority, path } = uri;
+			// if `authority` is empty, try to find it with `this.lookupAsFile`, we can't
+			// use `router.getAuthority()` directly because this file may be in submodule
+			if (!authority) {
+				const file = (await this.lookupAsFile(uri, false))!;
+				scheme = file.uri.scheme;
+				authority = file.uri.authority;
+				path = joinPath(file.uri.path, file.name);
+			}
+			const cacheKey = `${scheme} ${authority} ${path}`;
 			if (!this.contentCache.has(cacheKey)) {
 				const [repo, ref] = authority.split('+');
-				const dataSource = await this._resolveDataSource(uri.scheme);
-				const data = await dataSource.provideFile(repo, ref, uri.path.slice(1));
+				const dataSource = await this._resolveDataSource(scheme);
+				const data = await dataSource.provideFile(repo, ref, path.slice(1));
 				data && this.contentCache.set(cacheKey, data.content);
 			}
 			return this.contentCache.get(cacheKey) || new Uint8Array();

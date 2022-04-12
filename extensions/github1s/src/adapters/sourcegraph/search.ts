@@ -4,8 +4,8 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { TextSearchOptions, CommonQueryOptions, TextSearchQuery, TextSearchResults } from '../types';
-import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp, getRepoRefQueryString } from './common';
+import { TextSearchOptions, TextSearchQuery, TextSearchResults } from '../types';
+import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp } from './common';
 
 // build text search query for sourcegraph graphql request
 export const buildTextSearchQueryString = (

@@ -40,10 +40,3 @@ export const combineGlobsToRegExp = (globs: string[]) => {
 };
 
 export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-
-export const getRepoRefQueryString = (owner: string, repo: string, ref: string) => {
-	// the string may looks like `^github\.com/conwnet/github1s$`
-	const repoPattern = `^${escapeRegexp(`github\.com/${owner}/${repo}`)}$`;
-	const repoRefQueryString = ref.toUpperCase() === 'HEAD' ? `repo:${repoPattern}` : `repo:${repoPattern}@${ref}`;
-	return repoRefQueryString;
-};

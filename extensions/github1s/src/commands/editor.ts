@@ -57,19 +57,13 @@ const openFileToEditor = async (fileUri) => {
 // open the left file in the diff editor title
 const commandDiffViewOpenLeftFile = async (fileUri: vscode.Uri) => {
 	const query = queryString.parse(fileUri?.query || '');
-	if (!query.base) {
-		return;
-	}
-	return openFileToEditor(vscode.Uri.parse(query.base as string));
+	return query.base ? openFileToEditor(vscode.Uri.parse(query.base as string)) : null;
 };
 
 // open the right file in the diff editor title
 const commandDiffViewOpenRightFile = async (fileUri: vscode.Uri) => {
 	const query = queryString.parse(fileUri?.query || '');
-	if (!query.head) {
-		return;
-	}
-	return openFileToEditor(vscode.Uri.parse(query.head as string));
+	return query.head ? openFileToEditor(vscode.Uri.parse(query.head as string)) : null;
 };
 
 // get the file uri with the concrete commit sha, the `ref` in

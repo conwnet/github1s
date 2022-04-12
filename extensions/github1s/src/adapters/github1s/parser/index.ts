@@ -22,27 +22,29 @@ const detectPageTypeFromPathParts = (pathParts: string[]): PageType => {
 		commit: PageType.Commit,
 		commits: PageType.CommitList,
 	};
-	return pathParts[2] ? PAGE_TYPE_MAP[pathParts[2]] || PageType.Unknown : '';
+	return pathParts[2] ? PAGE_TYPE_MAP[pathParts[2]] : PageType.Unknown;
 };
 
 export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname?.split('/').filter(Boolean) || [];
 	const pageType = detectPageTypeFromPathParts(pathParts);
 
-	switch (pageType) {
-		case PageType.Tree:
-		case PageType.Unknown:
-			return parseTreeUrl(path);
-		case PageType.Blob:
-			return parseBlobUrl(path);
-		case PageType.CodeReview:
-			return parsePullUrl(path);
-		case PageType.CodeReviewList:
-			return parsePullsUrl(path);
-		case PageType.Commit:
-			return parseCommitUrl(path);
-		case PageType.CommitList:
-			return parseCommitsUrl(path);
+	if (pathParts.length >= 2) {
+		switch (pageType) {
+			case PageType.Tree:
+			case PageType.Unknown:
+				return parseTreeUrl(path);
+			case PageType.Blob:
+				return parseBlobUrl(path);
+			case PageType.CodeReview:
+				return parsePullUrl(path);
+			case PageType.CodeReviewList:
+				return parsePullsUrl(path);
+			case PageType.Commit:
+				return parseCommitUrl(path);
+			case PageType.CommitList:
+				return parseCommitsUrl(path);
+		}
 	}
 
 	// fallback to default

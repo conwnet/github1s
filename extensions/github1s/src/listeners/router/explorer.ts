@@ -17,7 +17,7 @@ const sortedEqual = (source: any[], target: any[]) => {
 };
 
 const shouldRefreshExplorerState = (currentState: RouterState, previousState: RouterState) => {
-	if (['owner', 'repo', 'ref'].find((key) => currentState[key] !== previousState[key])) {
+	if (['repo', 'ref'].find((key) => currentState[key] !== previousState[key])) {
 		return true;
 	}
 

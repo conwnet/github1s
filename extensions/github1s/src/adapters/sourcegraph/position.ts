@@ -4,7 +4,7 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { escapeRegexp, sourcegraphClient, getRepoRefQueryString } from './common';
+import { escapeRegexp, sourcegraphClient } from './common';
 import { CodeLocation } from '../types';
 
 const searchPositionsQuery = gql`
