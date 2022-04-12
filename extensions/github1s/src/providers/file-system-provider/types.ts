@@ -21,7 +21,6 @@ export class File implements FileStat {
 		this.name = name;
 		this.sha = options && 'sha' in options ? options.sha : '';
 		this.size = options && 'size' in options ? options.size : 0;
-		this.content = options && 'content' in options ? options.data : null;
 	}
 }
 

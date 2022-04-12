@@ -40,6 +40,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	private readonly disposable: Disposable;
 	private _emitter = new EventEmitter<FileChangeEvent[]>();
 	private root: Map<string, Directory | File> = new Map();
+	private contentCache: Map<string, Uint8Array> = new Map();
 
 	private constructor() {}
 
@@ -235,18 +236,16 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
-			const file = await this.lookupAsFile(uri, false);
-			if (!file) {
-				return new Uint8Array();
-			}
+			const authority = uri.authority || (await router.getAuthority());
+			const cacheKey = `${uri.scheme} ${authority} ${uri.path}`;
 
-			if (file.content !== null) {
-				return file.content;
+			if (!this.contentCache.has(cacheKey)) {
+				const [repo, ref] = authority.split('+');
+				const dataSource = await this._resolveDataSource(uri.scheme);
+				const data = await dataSource.provideFile(repo, ref, uri.path.slice(1));
+				data && this.contentCache.set(cacheKey, data.content);
 			}
-			const [repo, ref] = file.uri.authority.split('+');
-			const dataSource = await this._resolveDataSource(uri.scheme);
-			const data = await dataSource.provideFile(repo, ref, uri.path.slice(1));
-			return data?.content ? (file.content = data.content) : new Uint8Array();
+			return this.contentCache.get(cacheKey) || new Uint8Array();
 		},
 		(uri) => uri.toString()
 	);
