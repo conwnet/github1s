@@ -38,7 +38,7 @@ export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvid
 	private static submoduleDecorationData: FileDecoration = {
 		tooltip: 'Submodule',
 		badge: 'S',
-		color: new ThemeColor('gitDecoration.submoduleResourceForeground'),
+		color: new ThemeColor('github1s.colors.submoduleResourceForeground'),
 	};
 
 	private _onDidChangeFileDecorations = new EventEmitter<undefined>();

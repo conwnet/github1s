@@ -32,14 +32,14 @@ export class GitHub1sAdapter implements Adapter {
 	registerAsDefault(): Promisable<void> {
 		// register settings view and show it in activity bar
 		setVSCodeContext('github1s:views:settings:visible', true);
-		setVSCodeContext('github1s:views:code-review-list:visible', true);
-		setVSCodeContext('github1s:views:commit-list:visible', true);
+		setVSCodeContext('github1s:views:codeReviewList:visible', true);
+		setVSCodeContext('github1s:views:commitList:visible', true);
 
 		vscode.window.registerWebviewViewProvider(
 			GitHub1sSettingsViewProvider.viewType,
 			new GitHub1sSettingsViewProvider()
 		);
-		vscode.commands.registerCommand('github1s.open-authentication-page', () => {
+		vscode.commands.registerCommand('github1s.openAuthenticationPage', () => {
 			GitHub1sAuthenticationView.getInstance().open();
 		});
 	}

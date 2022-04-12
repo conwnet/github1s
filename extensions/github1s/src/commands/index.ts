@@ -47,14 +47,14 @@ const commands: { id: string; callback: (...args: any[]) => any }[] = [
 	// { id: 'github1s.editor-view-open-next-revision', callback: commandEditorViewOpenNextRevision }, // prettier-ignore
 
 	// toggle the gutter blame of a editor
-	{ id: 'github1s.toggle-editor-gutter-blame', callback: commandToggleEditorGutterBlame }, // prettier-ignore
+	{ id: 'github1s.toggleEditorGutterBlame', callback: commandToggleEditorGutterBlame }, // prettier-ignore
 	// open the gutter blame of a editor
-	{ id: 'github1s.open-editor-gutter-blame', callback: commandOpenEditorGutterBlame }, // prettier-ignore
+	{ id: 'github1s.openEditorGutterBlame', callback: commandOpenEditorGutterBlame }, // prettier-ignore
 	// close the gutter blame of a editor
-	{ id: 'github1s.close-editor-gutter-blame', callback: commandCloseEditorGutterBlame }, // prettier-ignore
+	{ id: 'github1s.closeEditorGutterBlame', callback: commandCloseEditorGutterBlame }, // prettier-ignore
 
 	// open current page on GitHub
-	{ id: 'github1s.open-on-github', callback: commandOpenOnGitHub },
+	{ id: 'github1s.openOnGitHub', callback: commandOpenOnGitHub },
 ];
 
 export const registerGitHub1sCommands = () => {

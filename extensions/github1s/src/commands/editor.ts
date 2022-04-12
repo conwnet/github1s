@@ -152,10 +152,10 @@ const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
 
 export const registerEditorCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
-		vscode.commands.registerCommand('github1s.commands.diff-changed-file', commandDiffChangedFile),
-		vscode.commands.registerCommand('github1s.commands.diff-view-open-left-file', commandDiffViewOpenLeftFile),
-		vscode.commands.registerCommand('github1s.commands.diff-view-open-right-file', commandDiffViewOpenRightFile),
-		vscode.commands.registerCommand('github1s.commands.open-file-previous-revision', commandOpenFilePreviousRevision),
-		vscode.commands.registerCommand('github1s.commands.open-file-next-revision', commandOpenFileNextRevision)
+		vscode.commands.registerCommand('github1s.commands.diffChangedFile', commandDiffChangedFile),
+		vscode.commands.registerCommand('github1s.commands.diffViewOpenLeftFile', commandDiffViewOpenLeftFile),
+		vscode.commands.registerCommand('github1s.commands.diffViewOpenRightFile', commandDiffViewOpenRightFile),
+		vscode.commands.registerCommand('github1s.commands.openFilePreviousRevision', commandOpenFilePreviousRevision),
+		vscode.commands.registerCommand('github1s.commands.openFileNextRevision', commandOpenFileNextRevision)
 	);
 };

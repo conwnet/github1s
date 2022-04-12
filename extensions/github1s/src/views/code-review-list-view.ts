@@ -89,7 +89,7 @@ const createLoadMoreChangedFilesItem = (codeReviewId: string): vscode.TreeItem =
 });
 
 export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-	public static viewType = 'github1s.views.code-review-list';
+	public static viewType = 'github1s.views.codeReviewList';
 
 	private _forceUpdate = false;
 	private _loadingBarrier: Barrier | null = null;
@@ -134,7 +134,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			const description = getCodeReviewTreeItemDescription(codeReview);
 			const tooltip = `${label} (${description})`;
 			const iconPath = vscode.Uri.parse(codeReview.avatarUrl);
-			const contextValue = 'github1s:code-review-list-item';
+			const contextValue = 'github1s:viewItems:codeReviewListItem';
 
 			return {
 				codeReview,

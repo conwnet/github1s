@@ -44,7 +44,7 @@ const createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => (
 });
 
 export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-	public static viewType = 'github1s.views.commit-list';
+	public static viewType = 'github1s.views.commitList';
 
 	private _forceUpdate = false;
 	private _loadingBarrier: Barrier | null = null;
@@ -89,7 +89,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
 			const iconPath = vscode.Uri.parse(commit.avatarUrl);
-			const contextValue = 'github1s:commit-list-item';
+			const contextValue = 'github1s:viewItems:commitListItem';
 
 			return {
 				commit,

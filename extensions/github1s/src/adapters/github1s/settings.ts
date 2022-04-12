@@ -53,7 +53,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 						);
 					break;
 				case 'open-detail-page':
-					vscode.commands.executeCommand('github1s.open-authentication-page');
+					vscode.commands.executeCommand('github1s.openAuthenticationPage');
 					webviewView.webview.postMessage({
 						id: message.id,
 						type: message.type,

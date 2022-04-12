@@ -123,26 +123,17 @@ const commandLoadMoreCodeReviewChangedFiles = async (codeReviewId: string) => {
 
 export const registerCodeReviewCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
-		vscode.commands.registerCommand('github1s.commands.refresh-code-review-list', commandRefreshCodeReviewList),
-		vscode.commands.registerCommand('github1s.commands.search-code-review', commandSwitchToCodeReview),
-		vscode.commands.registerCommand('github1s.commands.switch-to-pull-request', commandSwitchToCodeReview),
-		vscode.commands.registerCommand('github1s.commands.switch-to-merge-request', commandSwitchToCodeReview),
-		vscode.commands.registerCommand('github1s.commands.switch-to-change-request', commandSwitchToCodeReview),
-		vscode.commands.registerCommand('github1s.commands.switch-to-code-review', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.refreshCodeReviewList', commandRefreshCodeReviewList),
+		vscode.commands.registerCommand('github1s.commands.searchCodeReview', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switchToPullRequest', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switchToMergeRequest', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switchToChangeRequest', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.switchToCodeReview', commandSwitchToCodeReview),
+		vscode.commands.registerCommand('github1s.commands.openCodeReviewOnGitHub', commandOpenCodeReviewOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openCodeReviewOnGitLab', commandOpenCodeReviewOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openCodeReviewOnBitbucket', commandOpenCodeReviewOnOfficialPage),
 		vscode.commands.registerCommand(
-			'github1s.commands.open-code-review-on-github',
-			commandOpenCodeReviewOnOfficialPage
-		),
-		vscode.commands.registerCommand(
-			'github1s.commands.open-code-review-on-gitlab',
-			commandOpenCodeReviewOnOfficialPage
-		),
-		vscode.commands.registerCommand(
-			'github1s.commands.open-code-review-on-bitbucket',
-			commandOpenCodeReviewOnOfficialPage
-		),
-		vscode.commands.registerCommand(
-			'github1s.commands.open-code-review-on-official-page',
+			'github1s.commands.openCodeReviewOnOfficialPage',
 			commandOpenCodeReviewOnOfficialPage
 		),
 		vscode.commands.registerCommand('github1s.commands.load-more-code-reviews', commandLoadMoreCodeReviews),

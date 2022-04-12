@@ -111,13 +111,13 @@ const commandLoadMoreCommitChangedFiles = async (commitSha: string) => {
 
 export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
-		vscode.commands.registerCommand('github1s.commands.refresh-commit-list', commandRefreshCommitList),
-		vscode.commands.registerCommand('github1s.commands.search-commit', commandSwitchToCommit),
-		vscode.commands.registerCommand('github1s.commands.switch-to-commit', commandSwitchToCommit),
-		vscode.commands.registerCommand('github1s.commands.open-commit-on-github', commandOpenCommitOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.open-commit-on-gitlab', commandOpenCommitOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.open-commit-on-bitbucket', commandOpenCommitOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.open-commit-on-official-page', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.refreshCommitList', commandRefreshCommitList),
+		vscode.commands.registerCommand('github1s.commands.searchCommit', commandSwitchToCommit),
+		vscode.commands.registerCommand('github1s.commands.switchToCommit', commandSwitchToCommit),
+		vscode.commands.registerCommand('github1s.commands.openCommitOnGitHub', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openCommitOnGitLab', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openCommitOnBitbucket', commandOpenCommitOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openCommitOnOfficialPage', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.load-more-commits', commandLoadMoreCommits),
 		vscode.commands.registerCommand(
 			'github1s.commands.load-more-commit-changed-files',

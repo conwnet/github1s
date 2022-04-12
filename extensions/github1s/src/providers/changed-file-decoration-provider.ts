@@ -24,22 +24,22 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeStatus.Added]: {
 		tooltip: 'Added',
 		badge: 'A',
-		color: new ThemeColor('gitDecoration.addedResourceForeground'),
+		color: new ThemeColor('github1s.colors.addedResourceForeground'),
 	},
 	[FileChangeStatus.Removed]: {
 		tooltip: 'Deleted',
 		badge: 'D',
-		color: new ThemeColor('gitDecoration.deletedResourceForeground'),
+		color: new ThemeColor('github1s.colors.deletedResourceForeground'),
 	},
 	[FileChangeStatus.Modified]: {
 		tooltip: 'Modified',
 		badge: 'M',
-		color: new ThemeColor('gitDecoration.modifiedResourceForeground'),
+		color: new ThemeColor('github1s.colors.modifiedResourceForeground'),
 	},
 	[FileChangeStatus.Renamed]: {
 		tooltip: 'Renamed',
 		badge: 'R',
-		color: new ThemeColor('gitDecoration.modifiedResourceForeground'),
+		color: new ThemeColor('github1s.colors.modifiedResourceForeground'),
 	},
 };
 

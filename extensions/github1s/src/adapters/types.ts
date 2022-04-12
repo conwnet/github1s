@@ -376,13 +376,14 @@ export enum CodeReviewType {
 	PullRequest = 'PullRequest',
 	MergeRequest = 'MergeRequest',
 	ChangeRequest = 'ChangeRequest',
-	CodeReview = 'CodeReview',
+	CodeReview = 'CodeReview', // as fallback
 }
 
 export enum PlatformName {
 	GitHub = 'GitHub',
 	GitLab = 'GitLab',
 	Bitbucket = 'Bitbucket',
+	OfficialPage = 'OfficialPage', // as fallback
 }
 
 export interface Adapter {

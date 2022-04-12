@@ -12,7 +12,7 @@ export const updateCheckoutRefOnStatusBar = (() => {
 		const { ref } = await router.getState();
 		checkoutItem.text = `$(git-branch) ${ref}`;
 		checkoutItem.tooltip = 'Checkout branch/tag/commit...';
-		checkoutItem.command = 'github1s.commands.checkout-to';
+		checkoutItem.command = 'github1s.commands.checkoutTo';
 		checkoutItem.show();
 	};
 })();

@@ -80,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
 // 	} else if (pageType === PageType.PULL_LIST) {
 // 		vscode.commands.executeCommand('github1s.views.pull-request-list.focus');
 // 	} else if (pageType === PageType.COMMIT_LIST) {
-// 		vscode.commands.executeCommand('github1s.views.commit-list.focus');
+// 		vscode.commands.executeCommand('github1s.views.commitList.focus');
 // 	} else if ([PageType.PULL, PageType.COMMIT].includes(pageType)) {
 // 		vscode.commands.executeCommand('workbench.scm.focus');
 // 	}

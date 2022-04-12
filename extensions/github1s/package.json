@@ -18,7 +18,7 @@
     "onCommand:github1s.switch-to-commit",
     "onCommand:github1s.diff-view-open-left-file",
     "onCommand:github1s.diff-view-open-right-file",
-    "onCommand:github1s.open-on-github",
+    "onCommand:github1s.openOnGitHub",
     "onView:github1s"
   ],
   "browser": "./dist/extension",
@@ -46,150 +46,150 @@
       ],
       "scm": [
         {
-          "id": "github1s.views.code-review-list",
+          "id": "github1s.views.codeReviewList",
           "name": "Code Reviews",
-          "when": "github1s:views:code-review-list:visible == true"
+          "when": "github1s:views:codeReviewList:visible == true"
         },
         {
-          "id": "github1s.views.commit-list",
+          "id": "github1s.views.commitList",
           "name": "Commits",
-          "when": "github1s:views:commit-list:visible == true"
+          "when": "github1s:views:commitList:visible == true"
         }
       ]
     },
     "commands": [
       {
-        "command": "github1s.commands.dev-test",
+        "command": "github1s.commands.devTest",
         "title": "GitHub1s Dev Test",
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.commands.checkout-to",
+        "command": "github1s.commands.checkoutTo",
         "title": "Checkout to...",
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.commands.refresh-code-review-list",
+        "command": "github1s.commands.refreshCodeReviewList",
         "title": "Refresh",
         "category": "GitHub1s",
         "icon": "$(refresh)"
       },
       {
-        "command": "github1s.commands.search-code-review",
+        "command": "github1s.commands.searchCodeReview",
         "title": "Search",
         "category": "GitHub1s",
         "icon": "$(search)"
       },
       {
-        "command": "github1s.commands.switch-to-pull-request",
+        "command": "github1s.commands.switchToPullRequest",
         "title": "Switch to Pull Request",
         "category": "GitHub1s",
         "icon": "$(log-in)",
-        "enablement": "github1s:adapters:default:code-review-type == 'PullRequest'"
+        "enablement": "github1s:adapters:default:codeReviewType == 'PullRequest'"
       },
       {
-        "command": "github1s.commands.switch-to-merge-request",
+        "command": "github1s.commands.switchToMergeRequest",
         "title": "Switch to Merge Request",
         "category": "GitHub1s",
         "icon": "$(log-in)",
-        "enablement": "github1s:adapters:default:code-review-type == 'MergeRequest'"
+        "enablement": "github1s:adapters:default:codeReviewType == 'MergeRequest'"
       },
       {
-        "command": "github1s.commands.switch-to-change-request",
+        "command": "github1s.commands.switchToChangeRequest",
         "title": "Switch to Change Request",
         "category": "GitHub1s",
         "icon": "$(log-in)",
-        "enablement": "github1s:adapters:default:code-review-type == 'ChangeRequest'"
+        "enablement": "github1s:adapters:default:codeReviewType == 'ChangeRequest'"
       },
       {
-        "command": "github1s.commands.switch-to-code-review",
+        "command": "github1s.commands.switchToCodeReview",
         "title": "Switch to Code Review",
         "category": "GitHub1s",
         "icon": "$(log-in)",
-        "enablement": "github1s:adapters:default:code-review-type != 'PullRequest' && github1s:adapters:default:code-review-type != 'MergeRequest' && github1s:adapters:default:code-review-type != 'ChangeRequest'"
+        "enablement": "github1s:adapters:default:codeReviewType != 'PullRequest' && github1s:adapters:default:codeReviewType != 'MergeRequest' && github1s:adapters:default:codeReviewType != 'ChangeRequest'"
       },
       {
-        "command": "github1s.commands.open-code-review-on-github",
+        "command": "github1s.commands.openCodeReviewOnGitHub",
         "title": "Open on GitHub",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'GitHub'"
+        "enablement": "github1s:adapters:default:platformName == 'GitHub'"
       },
       {
-        "command": "github1s.commands.open-code-review-on-gitlab",
+        "command": "github1s.commands.openCodeReviewOnGitLab",
         "title": "Open on GitLab",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'GitLab'"
+        "enablement": "github1s:adapters:default:platformName == 'GitLab'"
       },
       {
-        "command": "github1s.commands.open-code-review-on-bitbucket",
+        "command": "github1s.commands.openCodeReviewOnBitbucket",
         "title": "Open on Bitbucket",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'Bitbucket'"
+        "enablement": "github1s:adapters:default:platformName == 'Bitbucket'"
       },
       {
-        "command": "github1s.commands.open-code-review-on-official-page",
+        "command": "github1s.commands.openCodeReviewOnOfficialPage",
         "title": "Open on Official Page",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name != 'GitHub' && github1s:adapters:default:platform-name != 'GitLab' && github1s:adapters:default:platform-name != 'Bitbucket'"
+        "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'"
       },
       {
-        "command": "github1s.commands.refresh-commit-list",
+        "command": "github1s.commands.refreshCommitList",
         "title": "Refresh",
         "category": "GitHub1s",
         "icon": "$(refresh)"
       },
       {
-        "command": "github1s.commands.search-commit",
+        "command": "github1s.commands.searchCommit",
         "title": "Search",
         "category": "GitHub1s",
         "icon": "$(search)"
       },
       {
-        "command": "github1s.commands.switch-to-commit",
+        "command": "github1s.commands.switchToCommit",
         "title": "Switch to Commit",
         "category": "GitHub1s",
         "icon": "$(log-in)"
       },
       {
-        "command": "github1s.commands.open-commit-on-github",
+        "command": "github1s.commands.openCommitOnGitHub",
         "title": "Open on GitHub",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'GitHub'"
+        "enablement": "github1s:adapters:default:platformName == 'GitHub'"
       },
       {
-        "command": "github1s.commands.open-commit-on-gitlab",
+        "command": "github1s.commands.openCommitOnGitLab",
         "title": "Open on GitLab",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'GitLab'"
+        "enablement": "github1s:adapters:default:platformName == 'GitLab'"
       },
       {
-        "command": "github1s.commands.open-commit-on-bitbucket",
+        "command": "github1s.commands.openCommitOnBitbucket",
         "title": "Open on Bitbucket",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name == 'Bitbucket'"
+        "enablement": "github1s:adapters:default:platformName == 'Bitbucket'"
       },
       {
-        "command": "github1s.commands.open-commit-on-official-page",
+        "command": "github1s.commands.openCommitOnOfficialPage",
         "title": "Open on Official Page",
         "category": "GitHub1s",
         "icon": "$(globe)",
-        "enablement": "github1s:adapters:default:platform-name != 'GitHub' && github1s:adapters:default:platform-name != 'GitLab' && github1s:adapters:default:platform-name != 'Bitbucket'"
+        "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'"
       },
       {
-        "command": "github1s.commands.diff-changed-file",
+        "command": "github1s.commands.diffChangedFile",
         "title": "Open Changes",
         "category": "GitHub1s",
         "icon": "$(compare-changes)"
       },
       {
-        "command": "github1s.commands.diff-view-open-left-file",
+        "command": "github1s.commands.diffViewOpenLeftFile",
         "title": "Open Left File",
         "category": "GitHub1s",
         "icon": {
@@ -199,7 +199,7 @@
         "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
       },
       {
-        "command": "github1s.commands.diff-view-open-right-file",
+        "command": "github1s.commands.diffViewOpenRightFile",
         "title": "Open Right File",
         "category": "GitHub1s",
         "icon": {
@@ -209,14 +209,14 @@
         "enablement": "isInDiffEditor && resourceScheme =~ /^github1s/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)head(=|%3D|%3d)github1s-empty-file)/"
       },
       {
-        "command": "github1s.commands.open-file-previous-revision",
+        "command": "github1s.commands.openFilePreviousRevision",
         "title": "Open Previous Revision",
         "category": "GitHub1s",
         "icon": "$(arrow-left)",
         "enablement": "resourceScheme =~ /^github1s$/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
       },
       {
-        "command": "github1s.commands.open-file-next-revision",
+        "command": "github1s.commands.openFileNextRevision",
         "title": "Open Next Revision",
         "category": "GitHub1s",
         "icon": "$(arrow-right)",
@@ -224,13 +224,13 @@
       },
 
       {
-        "command": "github1s.toggle-editor-gutter-blame",
+        "command": "github1s.toggleEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.open-editor-gutter-blame",
+        "command": "github1s.openEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "icon": {
@@ -240,7 +240,7 @@
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.close-editor-gutter-blame",
+        "command": "github1s.closeEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
         "icon": {
@@ -250,19 +250,19 @@
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.open-on-github",
+        "command": "github1s.openOnGitHub",
         "title": "Open on GitHub",
         "category": "GitHub1s"
       },
       {
-        "command": "github1s.open-authentication-page",
+        "command": "github1s.openAuthenticationPage",
         "title": "Open Authentication Page",
         "category": "GitHub1s"
       }
     ],
     "colors": [
       {
-        "id": "gitDecoration.addedResourceForeground",
+        "id": "github1s.colors.addedResourceForeground",
         "description": "%colors.added%",
         "defaults": {
           "light": "#587c0c",
@@ -271,7 +271,7 @@
         }
       },
       {
-        "id": "gitDecoration.deletedResourceForeground",
+        "id": "github1s.colors.deletedResourceForeground",
         "description": "%colors.deleted%",
         "defaults": {
           "light": "#ad0707",
@@ -280,7 +280,7 @@
         }
       },
       {
-        "id": "gitDecoration.modifiedResourceForeground",
+        "id": "github1s.colors.modifiedResourceForeground",
         "description": "%colors.modified%",
         "defaults": {
           "light": "#895503",
@@ -289,7 +289,7 @@
         }
       },
       {
-        "id": "gitDecoration.submoduleResourceForeground",
+        "id": "github1s.colors.submoduleResourceForeground",
         "description": "%colors.submodule%",
         "defaults": {
           "light": "#1258a7",
@@ -328,199 +328,199 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "github1s.commands.refresh-code-review-list",
+          "command": "github1s.commands.refreshCodeReviewList",
           "when": "false"
         },
         {
-          "command": "github1s.commands.search-code-review",
+          "command": "github1s.commands.searchCodeReview",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-code-review-on-github",
+          "command": "github1s.commands.openCodeReviewOnGitHub",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-code-review-on-gitlab",
+          "command": "github1s.commands.openCodeReviewOnGitLab",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-code-review-on-bitbucket",
+          "command": "github1s.commands.openCodeReviewOnBitbucket",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-code-review-on-official-page",
+          "command": "github1s.commands.openCodeReviewOnOfficialPage",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-commit-on-github",
+          "command": "github1s.commands.openCommitOnGitHub",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-commit-on-gitlab",
+          "command": "github1s.commands.openCommitOnGitLab",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-commit-on-bitbucket",
+          "command": "github1s.commands.openCommitOnBitbucket",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-commit-on-official-page",
+          "command": "github1s.commands.openCommitOnOfficialPage",
           "when": "false"
         },
         {
-          "command": "github1s.commands.diff-changed-file",
+          "command": "github1s.commands.diffChangedFile",
           "when": "false"
         },
         {
-          "command": "github1s.commands.diff-view-open-left-file",
+          "command": "github1s.commands.diffViewOpenLeftFile",
           "when": "false"
         },
         {
-          "command": "github1s.commands.diff-view-open-right-file",
+          "command": "github1s.commands.diffViewOpenRightFile",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-file-previous-revision",
+          "command": "github1s.commands.openFilePreviousRevision",
           "when": "false"
         },
         {
-          "command": "github1s.commands.open-file-next-revision",
+          "command": "github1s.commands.openFileNextRevision",
           "when": "false"
         },
 
         {
-          "command": "github1s.open-editor-gutter-blame",
+          "command": "github1s.openEditorGutterBlame",
           "when": "false"
         },
         {
-          "command": "github1s.close-editor-gutter-blame",
+          "command": "github1s.closeEditorGutterBlame",
           "when": "false"
         }
       ],
       "view/title": [
         {
-          "command": "github1s.commands.refresh-code-review-list",
-          "when": "view == 'github1s.views.code-review-list'",
+          "command": "github1s.commands.refreshCodeReviewList",
+          "when": "view == 'github1s.views.codeReviewList'",
           "group": "navigation@1"
         },
         {
-          "command": "github1s.commands.search-code-review",
-          "when": "view == 'github1s.views.code-review-list'",
+          "command": "github1s.commands.searchCodeReview",
+          "when": "view == 'github1s.views.codeReviewList'",
           "group": "navigation@2"
         },
         {
-          "command": "github1s.commands.refresh-commit-list",
-          "when": "view == 'github1s.views.commit-list'",
+          "command": "github1s.commands.refreshCommitList",
+          "when": "view == 'github1s.views.commitList'",
           "group": "navigation@1"
         },
         {
-          "command": "github1s.commands.search-commit",
-          "when": "view == 'github1s.views.commit-list'",
+          "command": "github1s.commands.searchCommit",
+          "when": "view == 'github1s.views.commitList'",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "github1s.commands.switch-to-pull-request",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:code-review-type == 'PullRequest'",
+          "command": "github1s.commands.switchToPullRequest",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:codeReviewType == 'PullRequest'",
           "group": "inline@1"
         },
         {
-          "command": "github1s.commands.switch-to-merge-request",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:code-review-type == 'MergeRequest'",
+          "command": "github1s.commands.switchToMergeRequest",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:codeReviewType == 'MergeRequest'",
           "group": "inline@1"
         },
         {
-          "command": "github1s.commands.switch-to-change-request",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:code-review-type == 'ChangeRequest'",
+          "command": "github1s.commands.switchToChangeRequest",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:codeReviewType == 'ChangeRequest'",
           "group": "inline@1"
         },
         {
-          "command": "github1s.commands.switch-to-code-review",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:code-review-type != 'PullRequest' && github1s:adapters:default:code-review-type != 'MergeRequest' && github1s:adapters:default:code-review-type != 'ChangeRequest'",
+          "command": "github1s.commands.switchToCodeReview",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:codeReviewType != 'PullRequest' && github1s:adapters:default:codeReviewType != 'MergeRequest' && github1s:adapters:default:codeReviewType != 'ChangeRequest'",
           "group": "inline@1"
         },
         {
-          "command": "github1s.commands.open-code-review-on-github",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:platform-name == 'GitHub'",
+          "command": "github1s.commands.openCodeReviewOnGitHub",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:platformName == 'GitHub'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-code-review-on-gitlab",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:platform-name == 'GitLab'",
+          "command": "github1s.commands.openCodeReviewOnGitLab",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:platformName == 'GitLab'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-code-review-on-bitbucket",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:platform-name == 'Bitbucket'",
+          "command": "github1s.commands.openCodeReviewOnBitbucket",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:platformName == 'Bitbucket'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-code-review-on-official-page",
-          "when": "viewItem == 'github1s:code-review-list-item' && github1s:adapters:default:platform-name != 'GitHub' && github1s:adapters:default:platform-name != 'GitLab' && github1s:adapters:default:platform-name != 'Bitbucket'",
+          "command": "github1s.commands.openCodeReviewOnOfficialPage",
+          "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.switch-to-commit",
-          "when": "viewItem == 'github1s:commit-list-item'",
+          "command": "github1s.commands.switchToCommit",
+          "when": "viewItem == 'github1s:viewItems:commitListItem'",
           "group": "inline@1"
         },
         {
-          "command": "github1s.commands.open-commit-on-github",
-          "when": "viewItem == 'github1s:commit-list-item' && github1s:adapters:default:platform-name == 'GitHub'",
+          "command": "github1s.commands.openCommitOnGitHub",
+          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'GitHub'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-commit-on-gitlab",
-          "when": "viewItem == 'github1s:commit-list-item' && github1s:adapters:default:platform-name == 'GitLab'",
+          "command": "github1s.commands.openCommitOnGitLab",
+          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'GitLab'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-commit-on-bitbucket",
-          "when": "viewItem == 'github1s:commit-list-item' && github1s:adapters:default:platform-name == 'Bitbucket'",
+          "command": "github1s.commands.openCommitOnBitbucket",
+          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'Bitbucket'",
           "group": "inline@2"
         },
         {
-          "command": "github1s.commands.open-commit-on-official-page",
-          "when": "viewItem == 'github1s:commit-list-item' && github1s:adapters:default:platform-name != 'GitHub' && github1s:adapters:default:platform-name != 'GitLab' && github1s:adapters:default:platform-name != 'Bitbucket'",
+          "command": "github1s.commands.openCommitOnOfficialPage",
+          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'",
           "group": "inline@2"
         }
       ],
       "editor/title": [
         {
-          "command": "github1s.commands.diff-changed-file",
-          "when": "!isInDiffEditor && github1s.context.show-open-changes-in-editor-title",
+          "command": "github1s.commands.diffChangedFile",
+          "when": "!isInDiffEditor && github1s:editors:showDiffChangedFile",
           "group": "navigation@1"
         },
         {
-          "command": "github1s.commands.diff-view-open-left-file",
+          "command": "github1s.commands.diffViewOpenLeftFile",
           "when": "isInDiffEditor",
           "group": "navigation@2"
         },
         {
-          "command": "github1s.commands.diff-view-open-right-file",
+          "command": "github1s.commands.diffViewOpenRightFile",
           "when": "isInDiffEditor",
           "group": "navigation@3"
         },
         {
-          "command": "github1s.commands.open-file-previous-revision",
+          "command": "github1s.commands.openFilePreviousRevision",
           "when": "resourceScheme =~ /^github1s/",
           "group": "navigation@98"
         },
         {
-          "command": "github1s.commands.open-file-next-revision",
+          "command": "github1s.commands.openFileNextRevision",
           "when": "resourceScheme =~ /^github1s/",
           "group": "navigation@99"
         },
 
         {
-          "command": "github1s.open-editor-gutter-blame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && !github1s.context.gutterBlameOpening",
+          "command": "github1s.openEditorGutterBlame",
+          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && !github1s:blames:gutterBlameOpening",
           "group": "navigation@4"
         },
         {
-          "command": "github1s.close-editor-gutter-blame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && github1s.context.gutterBlameOpening",
+          "command": "github1s.closeEditorGutterBlame",
+          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && github1s:blames:gutterBlameOpening",
           "group": "navigation@4"
         }
       ]

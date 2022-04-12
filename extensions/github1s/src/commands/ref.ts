@@ -45,7 +45,5 @@ const commandCheckoutTo = async () => {
 };
 
 export const registerRefCommands = (context: vscode.ExtensionContext) => {
-	return context.subscriptions.push(
-		vscode.commands.registerCommand('github1s.commands.checkout-to', commandCheckoutTo)
-	);
+	return context.subscriptions.push(vscode.commands.registerCommand('github1s.commands.checkoutTo', commandCheckoutTo));
 };
