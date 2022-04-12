@@ -11,9 +11,6 @@ import { adapterManager } from '@/adapters';
 class CodeReviewChangedFilesManager {
 	private static instancesMap = new Map<string, CodeReviewChangedFilesManager>();
 
-	private _scheme = '';
-	private _repo = '';
-	private _codeReviewId = '';
 	private _pageSize = 100;
 	private _currentPage = 1; // page is begin from 1
 	private _hasMore = true;
@@ -28,11 +25,7 @@ class CodeReviewChangedFilesManager {
 		return CodeReviewChangedFilesManager.instancesMap.get(mapKey)!;
 	}
 
-	constructor(scheme: string, repo: string, codeReviewId: string) {
-		this._scheme = scheme;
-		this._repo = repo;
-		this._codeReviewId = codeReviewId;
-	}
+	constructor(private _scheme: string, private _repo: string, private _codeReviewId: string) {}
 
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
@@ -74,8 +67,6 @@ class CodeReviewChangedFilesManager {
 export class CodeReviewManager {
 	private static instancesMap = new Map<string, CodeReviewManager>();
 
-	private _scheme = '';
-	private _repo = '';
 	private _codeReviewMap = new Map<string, CodeReview>(); // codeReviewId -> CodeReview
 	private _codeReviewList: CodeReview[] | null = null;
 	private _pageSize = 100;
@@ -90,10 +81,7 @@ export class CodeReviewManager {
 		return CodeReviewManager.instancesMap.get(mapKey)!;
 	}
 
-	private constructor(scheme: string, repo: string) {
-		this._scheme = scheme;
-		this._repo = repo;
-	}
+	private constructor(private _scheme: string, private _repo: string) {}
 
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<CodeReview[]> => {

@@ -11,9 +11,6 @@ import { adapterManager } from '@/adapters';
 class CommitChangedFilesManager {
 	private static instancesMap = new Map<string, CommitChangedFilesManager>();
 
-	private _scheme = '';
-	private _repo = '';
-	private _commitSha = '';
 	private _pageSize = 100;
 	private _currentPage = 1; // page is begin from 1
 	private _hasMore = true;
@@ -28,11 +25,7 @@ class CommitChangedFilesManager {
 		return CommitChangedFilesManager.instancesMap.get(mapKey)!;
 	}
 
-	constructor(scheme: string, repo: string, commitSha: string) {
-		this._scheme = scheme;
-		this._repo = repo;
-		this._commitSha = commitSha;
-	}
+	constructor(private _scheme: string, private _repo: string, private _commitSha: string) {}
 
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
@@ -82,8 +75,6 @@ type CommitRelation = {
 export class CommitManager {
 	private static instancesMap = new Map<string, CommitManager>();
 
-	private _scheme = '';
-	private _repo = '';
 	private _commitMap = new Map<string, Commit>(); // ref -> CommitWithDirection
 	private _relationMap = new Map<string, CommitRelation>(); // commitSha -> CommitRelation
 	private _pageSize = 100;
@@ -96,10 +87,7 @@ export class CommitManager {
 		return CommitManager.instancesMap.get(mapKey)!;
 	}
 
-	private constructor(scheme: string, repo: string) {
-		this._scheme = scheme;
-		this._repo = repo;
-	}
+	private constructor(private _scheme: string, private _repo: string) {}
 
 	// link two commitSha
 	private linkCommitShas(filePath: string, previousCommitSha: string | null, nextCommitSha: string | null) {

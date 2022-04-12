@@ -9,17 +9,7 @@
     "lib": "lib"
   },
   "activationEvents": [
-    "onFileSystem:github1s",
-    "onCommand:github1s.validate-token",
-    "onCommand:github1s.update-token",
-    "onCommand:github1s.clear-token",
-    "onCommand:github1s.get-current-authority",
-    "onCommand:github1s.switch-to-code-review",
-    "onCommand:github1s.switch-to-commit",
-    "onCommand:github1s.diff-view-open-left-file",
-    "onCommand:github1s.diff-view-open-right-file",
-    "onCommand:github1s.openOnGitHub",
-    "onView:github1s"
+    "onFileSystem:github1s"
   ],
   "browser": "./dist/extension",
   "engines": {
@@ -58,11 +48,6 @@
       ]
     },
     "commands": [
-      {
-        "command": "github1s.commands.devTest",
-        "title": "GitHub1s Dev Test",
-        "category": "GitHub1s"
-      },
       {
         "command": "github1s.commands.checkoutTo",
         "title": "Checkout to...",
@@ -250,14 +235,32 @@
         "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
       },
       {
-        "command": "github1s.openOnGitHub",
+        "command": "github1s.commands.openOnGitHub",
         "title": "Open on GitHub",
-        "category": "GitHub1s"
+        "category": "GitHub1s",
+        "icon": "$(globe)",
+        "enablement": "github1s:adapters:default:platformName == 'GitHub'"
       },
       {
-        "command": "github1s.openAuthenticationPage",
-        "title": "Open Authentication Page",
-        "category": "GitHub1s"
+        "command": "github1s.commands.openOnGitLab",
+        "title": "Open on GitLab",
+        "category": "GitHub1s",
+        "icon": "$(globe)",
+        "enablement": "github1s:adapters:default:platformName == 'GitLab'"
+      },
+      {
+        "command": "github1s.commands.openOnBitbucket",
+        "title": "Open on Bitbucket",
+        "category": "GitHub1s",
+        "icon": "$(globe)",
+        "enablement": "github1s:adapters:default:platformName == 'Bitbucket'"
+      },
+      {
+        "command": "github1s.commands.openOnOfficialPage",
+        "title": "Open on Official Page",
+        "category": "GitHub1s",
+        "icon": "$(globe)",
+        "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'"
       }
     ],
     "colors": [

@@ -15,13 +15,12 @@ const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | unde
 	// replace current url when user change active editor
 	const { repo, ref, pageType } = await router.getState();
 	const activeFileUri = editor?.document.uri;
+	const routerParser = await router.resolveParser();
 
 	// only `tree/blob` page will replace url with the active editor change
 	if (![PageType.Tree, PageType.Blob].includes(pageType)) {
 		return;
 	}
-
-	const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
 	// if the file which not belong to current workspace is opened, or no file
 	// is opened, only retain `repo` (and `ref` if need) in browser url
@@ -52,13 +51,12 @@ const handlegutterBlameOpenContextOnActiveEditorChange = async () => {
 // add the line number anchor when user selection lines in a editor
 const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor) => {
 	const { repo, ref, pageType } = await router.getState();
+	const routerParser = await router.resolveParser();
 
 	// only add the line number anchor when pageType is PageType.Blob
 	if (pageType !== PageType.Blob || !editor.selection) {
 		return;
 	}
-
-	const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
 	const activeFileUri = editor?.document.uri;
 	const browserPath = await routerParser.buildBlobPath(

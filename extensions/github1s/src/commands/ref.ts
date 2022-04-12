@@ -10,8 +10,7 @@ import { Repository } from '@/repository';
 
 // check out to branch/tag/commit
 const commandCheckoutTo = async () => {
-	const currentAdapter = adapterManager.getCurrentAdapter();
-	const routerParser = await currentAdapter.resolveRouterParser();
+	const routerParser = await router.resolveParser();
 	const routeState = await router.getState();
 
 	const scheme = adapterManager.getCurrentScheme();

@@ -46,6 +46,6 @@ export class GitHub1sRouterParser extends github1s.RouterParser {
 	}
 
 	buildExternalLink(path: string): string {
-		return `https://github.com${path}`;
+		return 'https://github.com' + (path.startsWith('/') ? path : `/${path}`);
 	}
 }

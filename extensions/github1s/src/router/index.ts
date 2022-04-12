@@ -64,6 +64,11 @@ export class Router extends EventEmitter<RouterState> {
 		return `${state.repo}+${state.ref}`;
 	}
 
+	public async getHistory() {
+		await this._barrier.wait();
+		return this._history!;
+	}
+
 	// push the url with current history
 	public async push(path: string) {
 		await this._barrier.wait();
