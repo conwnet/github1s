@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import router from '@/router';
 
 const resolveSponsors = async () => {
-	const { owner, repo, ref } = await router.getState();
+	const { repo, ref } = await router.getState();
 
 	return [
 		{
@@ -17,25 +17,19 @@ const resolveSponsors = async () => {
 		},
 		{
 			name: 'Sourcegraph',
-			link: `https://sourcegraph.com/github.com/${owner}/${repo}@${ref}`,
+			link: `https://sourcegraph.com/github.com/${repo}@${ref}`,
 			description: 'Universal code search',
 		},
 	];
 };
 
 export const showSponsors = async () => {
-	const titleItem = vscode.window.createStatusBarItem(
-		vscode.StatusBarAlignment.Left,
-		0
-	);
+	const titleItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
 	titleItem.text = '  $(heart) Sponsors:';
 	titleItem.show();
 
 	(await resolveSponsors()).forEach((sponsor) => {
-		const sponsorItem = vscode.window.createStatusBarItem(
-			vscode.StatusBarAlignment.Left,
-			0
-		);
+		const sponsorItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
 		sponsorItem.text = sponsor.name;
 		sponsorItem.tooltip = sponsor.description;
 		sponsorItem.command = {

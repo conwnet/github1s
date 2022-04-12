@@ -3,18 +3,18 @@
  * @author netcon
  */
 
-import * as vscode from 'vscode';
-import { setExtensionContext } from '@/helpers/context';
-import { registerGitHub1sCommands } from '@/commands';
-import { registerVSCodeProviders } from '@/providers';
-import { registerCustomViews } from '@/views';
-// import { showSponsors } from '@/sponsors';
-// import { showGitpod } from '@/gitpod';
-import { activateSourceControl } from '@/source-control';
-import { registerEventListeners } from '@/listeners';
-import { registerAdapters } from './adapters';
 import router from '@/router';
-// import { PageType } from './router/types';
+import * as vscode from 'vscode';
+import { showGitpod } from '@/gitpod';
+import { showSponsors } from '@/sponsors';
+import { PageType } from './adapters/types';
+import { registerCustomViews } from '@/views';
+import { registerEventListeners } from '@/listeners';
+import { registerVSCodeProviders } from '@/providers';
+import { registerGitHub1sCommands } from '@/commands';
+import { setExtensionContext } from '@/helpers/context';
+import { activateSourceControl } from '@/source-control';
+import { adapterManager, registerAdapters } from '@/adapters';
 
 const browserUrlManager = {
 	getUrl: () => vscode.commands.executeCommand('github1s.vscode.get-browser-url') as Promise<string>,
@@ -46,42 +46,45 @@ export async function activate(context: vscode.ExtensionContext) {
 	// activate SourceControl features,
 	activateSourceControl();
 
-	// // sponsors in Status Bar
-	// showSponsors();
-	// showGitpod();
+	// sponsors in Status Bar
+	showSponsors();
 
-	// // initialize the VSCode's state
-	// initialVSCodeState();
+	showGitpod();
+
+	// initialize the VSCode's state
+	initialVSCodeState();
 }
 
 // initialize the VSCode's state according to the router url
-// const initialVSCodeState = async () => {
-// 	const routerState = await router.getState();
-// 	const { filePath, pageType } = routerState;
-// 	const scheme = 'github1s';
+const initialVSCodeState = async () => {
+	const routerState = await router.getState();
+	const scheme = adapterManager.getCurrentScheme();
 
-// 	if (filePath && pageType === PageType.TREE) {
-// 		vscode.commands.executeCommand('revealInExplorer', vscode.Uri.parse('').with({ scheme, path: filePath }));
-// 	} else if (filePath && pageType === PageType.BLOB) {
-// 		const { startLineNumber, endLineNumber } = routerState;
-// 		const start = new vscode.Position(startLineNumber - 1, 0);
-// 		const end = new vscode.Position(endLineNumber - 1, 999999);
-// 		const documentShowOptions: vscode.TextDocumentShowOptions = startLineNumber
-// 			? { selection: new vscode.Range(start, end) }
-// 			: {};
-
-// 		// TODO: the selection of the opening file may be cleared
-// 		// when editor try to restore previous state in the same file
-// 		vscode.commands.executeCommand(
-// 			'vscode.open',
-// 			vscode.Uri.parse('').with({ scheme, path: filePath }),
-// 			documentShowOptions
-// 		);
-// 	} else if (pageType === PageType.PULL_LIST) {
-// 		vscode.commands.executeCommand('github1s.views.pull-request-list.focus');
-// 	} else if (pageType === PageType.COMMIT_LIST) {
-// 		vscode.commands.executeCommand('github1s.views.commitList.focus');
-// 	} else if ([PageType.PULL, PageType.COMMIT].includes(pageType)) {
-// 		vscode.commands.executeCommand('workbench.scm.focus');
-// 	}
-// };
+	if (routerState.pageType === PageType.Tree && routerState.filePath) {
+		vscode.commands.executeCommand(
+			'revealInExplorer',
+			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` })
+		);
+	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
+		const { startLine, endLine } = routerState;
+		let documentShowOptions: vscode.TextDocumentShowOptions = {};
+		if (startLine || endLine) {
+			const startPosition = new vscode.Position((startLine || endLine)! - 1, 0);
+			const endPosition = new vscode.Position((endLine || startLine)! - 1, 999999);
+			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
+		}
+		// TODO: the selection of the opening file may be cleared
+		// when editor try to restore previous state in the same file
+		vscode.commands.executeCommand(
+			'vscode.open',
+			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
+			documentShowOptions
+		);
+	} else if (routerState.pageType === PageType.CodeReviewList) {
+		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');
+	} else if (routerState.pageType === PageType.CommitList) {
+		vscode.commands.executeCommand('github1s.views.commitList.focus');
+	} else if ([PageType.CodeReview, PageType.Commit].includes(routerState.pageType)) {
+		vscode.commands.executeCommand('workbench.scm.focus');
+	}
+};

@@ -342,6 +342,7 @@ export class RouterParser {
 	}
 
 	// build the blob page path
+	// startLine/endLine begins from 1
 	// eslint-disable-next-line max-len
 	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): Promisable<string> {
 		return '/conwnet/github1s';
