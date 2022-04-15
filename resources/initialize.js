@@ -67,7 +67,7 @@
 	let targetOrigin = 'https://github.com';
 	let logoIcon = staticAssetsPrefix + '/config/github.svg';
 
-	if (hostname.match(/\.?(github1s\.com|github1s\.dev)$/i)) {
+	if (hostname.match(/\.?(github1s\.com|github1s\.dev|vercel\.app|localhost)$/i)) {
 		scheme = 'github1s';
 		logoTitle = 'Open on GitHub';
 		targetOrigin = 'https://github.com';
@@ -85,8 +85,9 @@
 	}
 
 	let repository = 'conwnet/github1s';
-	if (window.location.hostname.match(/\.?(github1s\.com|github1s\.dev|gitlab1s\.com|bitbucket1s\.org)$/i)) {
-		repository = window.location.pathname.split('/').filter(Boolean).slice(0, 2).join('/');
+	if (hostname.match(/\.?(github1s\.com|github1s\.dev|gitlab1s\.com|bitbucket1s\.org|vercel\.app|localhost)$/i)) {
+		const pathParts = window.location.pathname.split('/').filter(Boolean).slice(0, 2);
+		pathParts.length === 2 && (repository = pathParts.join('/'));
 	}
 
 	window.vscodeWeb = {
