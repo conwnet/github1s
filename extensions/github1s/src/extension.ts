@@ -5,20 +5,22 @@
 
 import router from '@/router';
 import * as vscode from 'vscode';
-import { showGitpod } from '@/gitpod';
-import { showSponsors } from '@/sponsors';
 import { PageType } from './adapters/types';
 import { registerCustomViews } from '@/views';
+import { decorateStatusBar } from '@/statusbar';
 import { registerEventListeners } from '@/listeners';
 import { registerVSCodeProviders } from '@/providers';
 import { registerGitHub1sCommands } from '@/commands';
+import { updateSourceControlChanges } from '@/changes';
 import { setExtensionContext } from '@/helpers/context';
-import { activateSourceControl } from '@/source-control';
 import { adapterManager, registerAdapters } from '@/adapters';
 
 const browserUrlManager = {
-	getUrl: () => vscode.commands.executeCommand('github1s.vscode.get-browser-url') as Promise<string>,
-	setUrl: (url: string) => vscode.commands.executeCommand('github1s.vscode.replace-browser-url', url) as Promise<void>,
+	href: () => vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl') as Promise<string>,
+	push: (url: string) =>
+		vscode.commands.executeCommand('github1s.commands.vscode.pushBrowserUrl', url) as Promise<void>,
+	replace: (url: string) =>
+		vscode.commands.executeCommand('github1s.commands.vscode.replaceBrowserUrl', url) as Promise<void>,
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -44,12 +46,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	registerCustomViews();
 
 	// activate SourceControl features,
-	activateSourceControl();
+	updateSourceControlChanges();
 
-	// sponsors in Status Bar
-	showSponsors();
-
-	showGitpod();
+	// decorate Status Bar
+	decorateStatusBar();
 
 	// initialize the VSCode's state
 	initialVSCodeState();

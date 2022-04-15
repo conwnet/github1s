@@ -4,15 +4,15 @@
  */
 
 import * as vscode from 'vscode';
-import { relativeTimeTo } from '@/helpers/date';
-import { GitHub1sSourceControlDecorationProvider } from '@/providers/source-control-decoration-provider';
-import adapterManager from '@/adapters/manager';
-import * as adapterTypes from '@/adapters/types';
 import * as queryString from 'query-string';
 import router from '@/router';
-import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/source-control/changes';
-import { Repository } from '../repository';
 import { Barrier } from '@/helpers/async';
+import { Repository } from '@/repository';
+import { relativeTimeTo } from '@/helpers/date';
+import adapterManager from '@/adapters/manager';
+import * as adapterTypes from '@/adapters/types';
+import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/changes/files';
+import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
 
 enum CodeReviewState {
 	OPEN = 'open',
@@ -125,9 +125,9 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 
 	async getCodeReviewItems(): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
-		const currentAdapter = adapterManager.getCurrentAdapter();
+		const currentScheme = adapterManager.getCurrentScheme();
 		const { repo } = await router.getState();
-		const repository = Repository.getInstance(currentAdapter.scheme, repo);
+		const repository = Repository.getInstance(currentScheme, repo);
 		const codeReviews = await repository.getCodeReviewList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
 			const label = getCodeReviewTreeItemLabel(codeReview);
@@ -168,8 +168,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				command,
 				description: true,
 				resourceUri: changedFile.headFileUri.with({
-					scheme: GitHub1sSourceControlDecorationProvider.fileSchema,
-					query: queryString.stringify({ status: changedFile.status }),
+					query: queryString.stringify({ changeStatus: changedFile.status }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};

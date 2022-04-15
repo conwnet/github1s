@@ -101,8 +101,7 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
-		const scheme = adapterManager.getCurrentScheme();
-		if (uri.scheme !== scheme) {
+		if (uri.scheme !== adapterManager.getCurrentScheme()) {
 			return null;
 		}
 

@@ -4,11 +4,11 @@
  */
 
 import * as vscode from 'vscode';
-import { GitHub1sChangedFileDecorationProvider } from '@/providers/changed-file-decoration-provider';
-import { GitHub1sSubmoduleDecorationProvider } from '@/providers/submodule-decoration-provider';
-import { GitHub1sSourceControlDecorationProvider } from '@/providers/source-control-decoration-provider';
-import { GitHub1sFileSearchProvider } from '@/providers/file-search-provider';
 import { PageType, RouterState } from '@/adapters/types';
+import { GitHub1sFileSearchProvider } from '@/providers/file-search';
+import { GitHub1sSubmoduleDecorationProvider } from '@/providers/decorations/submodule';
+import { GitHub1sChangedFileDecorationProvider } from '@/providers/decorations/changed-file';
+import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
 
 const sortedEqual = (source: any[], target: any[]) => {
 	const sortedSource = source.sort();

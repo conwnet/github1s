@@ -14,8 +14,8 @@ import {
 	ThemeColor,
 	Uri,
 } from 'vscode';
-import { GitHub1sFileSystemProvider } from './file-system-provider';
-import { Directory } from './file-system-provider/types';
+import { GitHub1sFileSystemProvider } from '../file-system';
+import { Directory } from '../file-system/types';
 
 export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvider, Disposable {
 	private static instance: GitHub1sSubmoduleDecorationProvider | null = null;

@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list-view';
+import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list';
 import { commitTreeDataProvider } from '@/views';
 import { adapterManager } from '@/adapters';
 import { Repository } from '@/repository';

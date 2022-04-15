@@ -4,15 +4,16 @@
  */
 
 import * as vscode from 'vscode';
-import { History, createMemoryHistory, parsePath } from 'history';
+import { History, createMemoryHistory, parsePath, Action } from 'history';
 import { RouterParser, RouterState } from '@/adapters/types';
 import { Barrier } from '@/helpers/async';
 import adapterManager from '@/adapters/manager';
 import { EventEmitter } from './events';
 
 export interface UrlManager {
-	getUrl: () => string | Promise<string>;
-	setUrl: (url: string) => void | Promise<void>;
+	href: () => string | Promise<string>; // get href
+	push: (url: string) => void | Promise<void>;
+	replace: (url: string) => void | Promise<void>;
 }
 
 export class Router extends EventEmitter<RouterState> {
@@ -34,18 +35,18 @@ export class Router extends EventEmitter<RouterState> {
 	// initialize the router with current url in browser
 	async initialize(urlManager: UrlManager) {
 		this._parser = await adapterManager.getCurrentAdapter().resolveRouterParser();
-		const { path: pathname, query, fragment } = vscode.Uri.parse(await urlManager.getUrl());
+		const { path: pathname, query, fragment } = vscode.Uri.parse(await urlManager.href());
 		const path = pathname + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 
 		this._state = await this._parser.parsePath(path);
 		this._history = createMemoryHistory({ initialEntries: [path] });
 
-		this._history.listen(async ({ location }) => {
+		this._history.listen(async ({ action, location }) => {
 			const prevState = this._state;
 			const targetPath = `${location.pathname}${location.search}${location.hash}`;
 			const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
-			urlManager.setUrl(targetPath);
+			urlManager[action === Action.Push ? 'push' : 'replace'](targetPath);
 			this._state = await routerParser.parsePath(targetPath);
 			super.notifyListeners(this._state, prevState);
 		});

@@ -10,7 +10,6 @@ import adapterManager from '@/adapters/manager';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
-import { GitHub1sQuickDiffProvider } from './quickDiffProviders';
 import { Repository } from '@/repository';
 
 interface VSCodeChangedFile {
@@ -148,24 +147,3 @@ export const getChangedFileDiffCommand = (changedFile: VSCodeChangedFile): vscod
 		arguments: [baseFileUri.with({ query }), headFileUri.with({ query }), title],
 	};
 };
-
-export const updateSourceControlChanges = (() => {
-	const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s');
-	const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
-	sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
-
-	return async () => {
-		const changedFiles = await getChangedFiles();
-
-		changesGroup.resourceStates = changedFiles.map((changedFile) => {
-			return {
-				resourceUri: changedFile.headFileUri,
-				decorations: {
-					strikeThrough: changedFile.status === adapterTypes.FileChangeStatus.Removed,
-					tooltip: changedFile.status,
-				},
-				command: getChangedFileDiffCommand(changedFile),
-			};
-		});
-	};
-})();

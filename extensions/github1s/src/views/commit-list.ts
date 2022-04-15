@@ -4,15 +4,15 @@
  */
 
 import * as vscode from 'vscode';
+import router from '@/router';
+import { Barrier } from '@/helpers/async';
+import { Repository } from '@/repository';
 import * as queryString from 'query-string';
 import { relativeTimeTo } from '@/helpers/date';
-import { GitHub1sSourceControlDecorationProvider } from '@/providers/source-control-decoration-provider';
-import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/source-control/changes';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
-import router from '@/router';
-import { Repository } from '../repository';
-import { Barrier } from '@/helpers/async';
+import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
+import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
 
 export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
 	return [commit.sha.slice(0, 7), commit.author, relativeTimeTo(commit.createTime)].join(', ');
@@ -122,8 +122,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				command,
 				description: true,
 				resourceUri: changedFile.headFileUri.with({
-					scheme: GitHub1sSourceControlDecorationProvider.fileSchema,
-					query: queryString.stringify({ status: changedFile.status }),
+					query: queryString.stringify({ changeStatus: changedFile.status }),
 				}),
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};

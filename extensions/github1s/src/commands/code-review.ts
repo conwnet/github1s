@@ -9,7 +9,7 @@ import {
 	CodeReviewTreeItem,
 	getCodeReviewTreeItemLabel,
 	getCodeReviewTreeItemDescription,
-} from '@/views/code-review-list-view';
+} from '@/views/code-review-list';
 import { codeReviewRequestTreeDataProvider } from '@/views';
 import { CodeReviewType } from '@/adapters/types';
 import { adapterManager } from '@/adapters';

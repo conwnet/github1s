@@ -4,15 +4,15 @@
  */
 
 import { RouterState } from '@/adapters/types';
-import { updateSourceControlChanges } from '@/source-control/changes';
-import { updateCheckoutRefOnStatusBar } from '@/source-control/status-bar';
+import { updateCheckoutTo } from '@/statusbar/checkout';
+import { updateSourceControlChanges } from '@/changes';
 import { commitTreeDataProvider } from '@/views';
 
 type NewType = RouterState;
 
 export const sourceControlRouterListener = (currentState: NewType, previousState: RouterState) => {
 	if (currentState.ref !== previousState.ref) {
-		updateCheckoutRefOnStatusBar();
+		updateCheckoutTo();
 		commitTreeDataProvider.updateTree();
 	}
 

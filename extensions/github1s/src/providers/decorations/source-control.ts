@@ -15,7 +15,7 @@ import {
 } from 'vscode';
 import router from '@/router';
 import * as queryString from 'query-string';
-import { changedFileDecorationDataMap } from './changed-file-decoration-provider';
+import { changedFileDecorationDataMap } from './changed-file';
 
 const selectedViewItemDecoration: FileDecoration = {
 	color: new ThemeColor('github1s.colors.selectedViewItem'),
@@ -24,7 +24,6 @@ const selectedViewItemDecoration: FileDecoration = {
 };
 
 export class GitHub1sSourceControlDecorationProvider implements FileDecorationProvider, Disposable {
-	public static fileSchema: string = 'github1s-source-control-file';
 	public static codeReviewSchema: string = 'github1s-source-control-code-review';
 	public static commitSchema: string = 'github1s-source-control-commit';
 	private static instance: GitHub1sSourceControlDecorationProvider | null = null;
@@ -51,9 +50,9 @@ export class GitHub1sSourceControlDecorationProvider implements FileDecorationPr
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
-		if (uri.scheme === GitHub1sSourceControlDecorationProvider.fileSchema) {
+		if (uri.query.includes('changeStatus')) {
 			const query = queryString.parse(uri.query);
-			return changedFileDecorationDataMap[query.status as string];
+			return changedFileDecorationDataMap[query.changeStatus as string];
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.codeReviewSchema) {

@@ -6,15 +6,15 @@
 import * as vscode from 'vscode';
 import adapterManager from '@/adapters/manager';
 import { getExtensionContext } from '@/helpers/context';
-import { GitHub1sFileSystemProvider } from './file-system-provider';
-import { GitHub1sFileSearchProvider } from './file-search-provider';
-import { GitHub1sTextSearchProvider } from './text-search-provider';
-import { GitHub1sSubmoduleDecorationProvider } from './submodule-decoration-provider';
-import { GitHub1sChangedFileDecorationProvider } from './changed-file-decoration-provider';
-import { GitHub1sSourceControlDecorationProvider } from './source-control-decoration-provider';
-import { GitHub1sDefinitionProvider } from './definition-provider';
-import { GitHub1sReferenceProvider } from './reference-provider';
-import { GitHub1sHoverProvider } from './hover-provider';
+import { GitHub1sFileSystemProvider } from './file-system';
+import { GitHub1sFileSearchProvider } from './file-search';
+import { GitHub1sTextSearchProvider } from './text-search';
+import { GitHub1sSubmoduleDecorationProvider } from './decorations/submodule';
+import { GitHub1sChangedFileDecorationProvider } from './decorations/changed-file';
+import { GitHub1sSourceControlDecorationProvider } from './decorations/source-control';
+import { GitHub1sDefinitionProvider } from './definition';
+import { GitHub1sReferenceProvider } from './reference';
+import { GitHub1sHoverProvider } from './hover';
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
 export const emptyFileUri = vscode.Uri.parse('').with({

@@ -4,7 +4,7 @@
   "publisher": "github1s",
   "description": "",
   "private": true,
-  "enableProposedApi": true,
+  "enabledApiProposals": ["fileSearchProvider", "textSearchProvider"],
   "directories": {
     "lib": "lib"
   },

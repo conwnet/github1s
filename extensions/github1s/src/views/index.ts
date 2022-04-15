@@ -4,8 +4,8 @@
 
 import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
-import { CodeReviewTreeDataProvider } from './code-review-list-view';
-import { CommitTreeDataProvider } from './commit-list-view';
+import { CodeReviewTreeDataProvider } from './code-review-list';
+import { CommitTreeDataProvider } from './commit-list';
 import { adapterManager } from '@/adapters';
 import { CodeReviewType } from '@/adapters/types';
 

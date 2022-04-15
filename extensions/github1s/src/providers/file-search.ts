@@ -16,7 +16,7 @@ import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import * as adapterTypes from '@/adapters/types';
-import { GitHub1sFileSystemProvider } from './file-system-provider';
+import { GitHub1sFileSystemProvider } from './file-system';
 import adapterManager from '@/adapters/manager';
 
 export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposable {

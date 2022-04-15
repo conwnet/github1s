@@ -10,7 +10,7 @@ import { emptyFileUri } from '@/providers';
 import { basename } from '@/helpers/util';
 import { FileChangeStatus } from '@/adapters/types';
 import { Repository } from '@/repository';
-import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/source-control/changes';
+import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/changes/files';
 
 export const getChangedFileFromSourceControl = async (fileUri: vscode.Uri) => {
 	// the file should belong to current workspace

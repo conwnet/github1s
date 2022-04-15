@@ -5,8 +5,8 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { PlatformName } from './adapters/types';
-import { adapterManager } from './adapters';
+import { PlatformName } from '../adapters/types';
+import { adapterManager } from '../adapters';
 
 const getGitpodRepoUri = async () => {
 	const { repo } = await router.getState();
