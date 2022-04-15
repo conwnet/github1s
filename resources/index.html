@@ -3,14 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<!-- Disable pinch zooming -->
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
-		/>
-		<!-- Workbench Configuration -->
-		<meta id="vscode-workbench-web-configuration" data-settings="" />
-		<!-- VS Code Extensions Configuration -->
-		<meta id="vscode-workbench-builtin-extensions" data-settings="[]" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
 		<!-- Workbench Icon/Manifest/CSS -->
 		<link rel="icon" media="(prefers-color-scheme:light)" href="/favicon-light.svg" type="image/svg+xml">
 		<link rel="icon" media="(prefers-color-scheme:dark)" href="/favicon-dark.svg" type="image/svg+xml">
@@ -104,13 +97,8 @@
 
 			@keyframes lds-grid {
 				0%,
-				100% {
-					opacity: 1;
-				}
-
-				50% {
-					opacity: 0.5;
-				}
+				100% { opacity: 1; }
+				50% { opacity: 0.5; }
 			}
 		</style>
 	</head>
@@ -121,72 +109,16 @@
 		</noscript>
 		<div id="load-spinner" aria-label="loading">
 			<div class="lds-grid">
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
+				<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
 			</div>
 		</div>
 	</body>
 
-	<script>
-		self.require = {
-			baseUrl: `${window.location.origin}/static/vscode`,
-			recordStats: true,
-			trustedTypesPolicy: window.trustedTypes ? window.trustedTypes.createPolicy('amdLoader', {
-				createScriptURL(value) {
-					if (value.startsWith(window.location.origin)) {
-						return value;
-					}
-					throw new Error(`Invalid script url: ${value}`);
-				},
-			}) : undefined,
-			paths: {
-				'vscode-textmate': `${window.location.origin}/static/node_modules/vscode-textmate/release/main`,
-				'vscode-oniguruma': `${window.location.origin}/static/node_modules/vscode-oniguruma/release/main`,
-				xterm: `${window.location.origin}/static/node_modules/xterm/lib/xterm.js`,
-				'xterm-addon-search': `${window.location.origin}/static/node_modules/xterm-addon-search/lib/xterm-addon-search.js`,
-				'xterm-addon-unicode11': `${window.location.origin}/static/node_modules/xterm-addon-unicode11/lib/xterm-addon-unicode11.js`,
-				'xterm-addon-webgl': `${window.location.origin}/static/node_modules/xterm-addon-webgl/lib/xterm-addon-webgl.js`,
-				'tas-client-umd': `${window.location.origin}/static/node_modules/tas-client-umd/lib/tas-client-umd.js`,
-				'iconv-lite-umd': `${window.location.origin}/static/node_modules/iconv-lite-umd/lib/iconv-lite-umd.js`,
-				jschardet: `${window.location.origin}/static/node_modules/jschardet/dist/jschardet.min.js`,
-			},
-		};
-	</script>
 	<script src="/static/vscode/vs/loader.js"></script>
-	<script src="/static/vscode/vs/workbench/workbench.web.api.js"></script>
-	<script>
-		fetch('/static/configure/extensions.json')
-			.then((response) => response.text())
-			.then((extensionsJson) => {
-				document
-					.getElementById('vscode-workbench-web-configuration')
-					.setAttribute(
-						'data-settings',
-						JSON.stringify({
-							// the empty authority means github1s should get it from `window.location.href`
-							folderUri: { scheme: 'github1s', authority: '', path: '/' },
-							staticExtensions: [],
-							enableSyncByDefault: false,
-							additionalBuiltinExtensions: [],
-							webviewEndpoint:
-								window.location.origin +
-								'/static/vscode/vs/workbench/contrib/webview/browser/pre',
-							webWorkerExtensionHostIframeSrc:
-								'/static/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
-						})
-					);
-				document
-					.getElementById('vscode-workbench-builtin-extensions')
-					.setAttribute('data-settings', extensionsJson);
-				require(['vs/code/browser/workbench/workbench'], function () {});
-			});
-	</script>
+	<script src="/static/config/extensions.js"></script>
+	<script src="/static/config/initialize.js"></script>
+	<script src="/static/vscode/vs/workbench/workbench.web.main.nls.js"></script>
+	<script src="/static/vscode/vs/workbench/workbench.web.main.js"></script>
+	<script src="/static/vscode/vs/code/browser/workbench/workbench.js"></script>
 	<script src="https://unpkg.com/favicon-switcher@1.2.2/dist/index.js" crossorigin="anonymous" type="application/javascript" async="async"></script>
 </html>

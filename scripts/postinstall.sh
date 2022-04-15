@@ -16,7 +16,7 @@ function main() {
 	done
 
 	# install dependencies for the @github1s/vscode-web
-	cd "${APP_ROOT}/vscode-web-github1s"
+	cd "${APP_ROOT}/vscode-web"
 	yarn --frozen-lockfile
 }
 
