@@ -42,7 +42,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 						if (data && data.error_description) {
 							vscode.window.showErrorMessage(data.error_description);
 						} else if (data && data.access_token) {
-							GitHubTokenManager.getInstance().setToken(message.data || '');
+							GitHubTokenManager.getInstance().setToken(data.access_token || '');
 						}
 						postMessage();
 					});

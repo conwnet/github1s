@@ -61,7 +61,7 @@ export class GitHub1sAuthenticationView {
 						if (data && data.error_description) {
 							vscode.window.showErrorMessage(data.error_description);
 						} else if (data && data.access_token) {
-							tokenManager.setToken(message.data || '').then(() => postMessage());
+							tokenManager.setToken(data.access_token || '').then(() => postMessage());
 						}
 						postMessage();
 					});
