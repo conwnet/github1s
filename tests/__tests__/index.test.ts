@@ -1,8 +1,5 @@
 import { chromium, Browser, Page } from 'playwright';
-import {
-	toMatchImageSnapshot,
-	MatchImageSnapshotOptions,
-} from 'jest-image-snapshot';
+import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot';
 
 jest.setTimeout(60000);
 expect.extend({ toMatchImageSnapshot });
@@ -32,9 +29,7 @@ beforeEach(async () => {
 	await page.goto(BASE_URL);
 	await page.click('.action-item .action-label[aria-label="GitHub1s"]');
 	await page.waitForTimeout(3000);
-	const extensionIFrameHandle = await page.$(
-		'#webview-webviewview-github1s-views-settings iframe'
-	);
+	const extensionIFrameHandle = await page.$('#webview-webviewview-github1s-views-settings iframe');
 	const extensionIFrame = await extensionIFrameHandle?.contentFrame();
 	const settingsIframeHandle = await extensionIFrame?.$('iframe#active-frame');
 	const settingsIframe = await settingsIframeHandle?.contentFrame();
@@ -59,19 +54,11 @@ it('should load successfully', async () => {
 	// GitHub repo Link available
 	await page.$eval('div.home-bar[role="toolbar"]', (el) => el.innerHTML);
 	// File explorer available
-	await page.$eval(
-		'div[role="tree"][aria-label="Files Explorer"]',
-		(el) => el.innerHTML
-	);
-	const tab = await page.$eval(
-		'div[role="tab"] .label-name',
-		(el: HTMLElement) => el.innerText
-	);
+	await page.$eval('div[role="tree"][aria-label="Files Explorer"]', (el) => el.innerHTML);
+	const tab = await page.$eval('div[role="tab"] .label-name', (el: HTMLElement) => el.innerText);
 	expect(tab).toBe('[Preview] README.md');
 	// Title updated based on the repo
-	expect(await page.title()).toMatch(
-		/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/
-	);
+	expect(await page.title()).toMatch(/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/);
 	await page.waitForTimeout(5000);
 
 	// README file will be rendered in an iframe
