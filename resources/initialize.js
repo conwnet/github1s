@@ -1,6 +1,7 @@
 (function () {
 	const staticAssetsPath = '/static' + (window.staticHashCode ? '/' + window.staticHashCode : '');
 	const staticAssetsPrefix = window.location.origin + staticAssetsPath;
+	const nodeModulesPrefix = staticAssetsPrefix + '/node_modules';
 
 	// config vscode loader
 	if (window.require && window.require.config) {
@@ -18,16 +19,16 @@
 				  })
 				: undefined,
 			paths: {
-				'vscode-textmate': staticAssetsPrefix + '/node_modules/vscode-textmate/release/main',
-				'vscode-oniguruma': staticAssetsPrefix + '/node_modules/vscode-oniguruma/release/main',
-				xterm: staticAssetsPrefix + '/node_modules/xterm/lib/xterm.js',
-				'xterm-addon-search': staticAssetsPrefix + '/node_modules/xterm-addon-search/lib/xterm-addon-search.js',
-				'xterm-addon-unicode11':
-					staticAssetsPrefix + '/node_modules/xterm-addon-unicode11/lib/xterm-addon-unicode11.js',
-				'xterm-addon-webgl': staticAssetsPrefix + '/node_modules/xterm-addon-webgl/lib/xterm-addon-webgl.js',
-				'tas-client-umd': staticAssetsPrefix + '/node_modules/tas-client-umd/lib/tas-client-umd.js',
-				'iconv-lite-umd': staticAssetsPrefix + '/node_modules/iconv-lite-umd/lib/iconv-lite-umd.js',
-				jschardet: staticAssetsPrefix + '/node_modules/jschardet/dist/jschardet.min.js',
+				'@vscode/iconv-lite-umd': nodeModulesPrefix + '/@vscode/iconv-lite-umd/lib/iconv-lite-umd.js',
+				'@vscode/vscode-languagedetection': nodeModulesPrefix + '/@vscode/vscode-languagedetection/dist/lib/index.js',
+				jschardet: nodeModulesPrefix + '/jschardet/dist/jschardet.min.js',
+				'tas-client-umd': nodeModulesPrefix + '/tas-client-umd/lib/tas-client-umd.js',
+				'vscode-oniguruma': nodeModulesPrefix + '/vscode-oniguruma/release/main.js',
+				'vscode-textmate': nodeModulesPrefix + '/vscode-textmate/release/main.js',
+				xterm: nodeModulesPrefix + '/xterm/lib/xterm.js',
+				'xterm-addon-search': nodeModulesPrefix + '/xterm-addon-search/lib/xterm-addon-search.js',
+				'xterm-addon-unicode11': nodeModulesPrefix + '/xterm-addon-unicode11/lib/xterm-addon-unicode11.js',
+				'xterm-addon-webgl': nodeModulesPrefix + '/xterm-addon-webgl/lib/xterm-addon-webgl.js',
 			},
 		});
 	}
@@ -119,6 +120,7 @@
 		product: productJson,
 		builtinExtensions: window.github1sExtensions || [],
 		folderUri: { scheme: scheme, authority: '', path: '/' },
+		workspaceId: `${scheme}:${repository}`,
 		workspaceLabel: repository,
 		hideTextFileReadonlyIcon: false,
 		logo: {

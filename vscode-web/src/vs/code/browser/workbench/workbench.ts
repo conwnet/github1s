@@ -21,7 +21,8 @@ declare global {
 	interface Window {
 		vscodeWeb?: Partial<IWorkbenchConstructionOptions> & {
 			folderUri?: UriComponents, // easy way to build single folder workspace
-			workspaceLabel?: string; // the workspace label shown on explorer
+			workspaceId?: string; // the identifier to distinguish workspace
+			workspaceLabel?: string; // the label shown on explorer
 			hideTextFileReadonlyIcon?: boolean; // if hide the readonly icon for readonly files
 			// custom builtin extensions
 			builtinExtensions?: IBundledExtension[] | ((builtinExtensions: IBundledExtension[]) => IBundledExtension[]);
