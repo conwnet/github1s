@@ -4,11 +4,13 @@
  */
 
 import * as vscode from 'vscode';
+import { setVSCodeContext } from '@/helpers/vscode';
 import { Adapter, Promisable } from './types';
 
 export class AdapterManager {
 	private static instance: AdapterManager | null = null;
 	private adaptersMap: Map<string, Adapter> = new Map();
+	private defaultAdapter: Adapter | null = null;
 
 	private constructor() {}
 
@@ -23,8 +25,13 @@ export class AdapterManager {
 		if (this.adaptersMap.has(adapter.scheme)) {
 			throw new Error(`Adapter scheme '${adapter.scheme}' is already registered.`);
 		}
+		if (this.defaultAdapter && this.defaultAdapter.deactivateAsDefault) {
+			this.defaultAdapter.deactivateAsDefault();
+		}
 		this.adaptersMap.set(adapter.scheme, adapter);
 		if (this.getCurrentScheme() === adapter.scheme && adapter.activateAsDefault) {
+			setVSCodeContext('github1s:adapters:default:platformName', adapter.platformName);
+			setVSCodeContext('github1s:adapters:default:codeReviewType', adapter.codeReviewType);
 			return adapter.activateAsDefault();
 		}
 	}

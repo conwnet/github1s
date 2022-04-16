@@ -355,6 +355,14 @@
           "when": "false"
         },
         {
+          "command": "github1s.commands.refreshCommitList",
+          "when": "false"
+        },
+        {
+          "command": "github1s.commands.searchCommit",
+          "when": "false"
+        },
+        {
           "command": "github1s.commands.openCommitOnGitHub",
           "when": "false"
         },
