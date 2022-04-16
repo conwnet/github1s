@@ -1,6 +1,6 @@
 (function () {
 	// resolves with `{ access_token: string; token_type?: string; scope?: string } | { error: string; error_description: string; }`
-	const getGitHubAccessToken = () => {
+	const ConnectToGitHub = () => {
 		const GITHUB_AUTH_URL = `https://github.com/login/oauth/authorize?scope=repo,user:email&client_id=eae6621348403ea49103`;
 		const OPEN_WINDOW_FEATURES =
 			'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=800,height=520,top=150,left=150';
@@ -150,8 +150,8 @@
 				},
 			},
 			{
-				id: 'github1s.commands.vscode.getGitHubAccessToken',
-				handler: getGitHubAccessToken,
+				id: 'github1s.commands.vscode.connectToGitHub',
+				handler: ConnectToGitHub,
 			},
 		],
 		product: productJson,

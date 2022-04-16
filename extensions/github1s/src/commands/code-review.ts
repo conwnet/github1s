@@ -19,6 +19,7 @@ const CodeReviewTypeName = {
 	[CodeReviewType.PullRequest]: 'pull request',
 	[CodeReviewType.MergeRequest]: 'merge request',
 	[CodeReviewType.ChangeRequest]: 'change request',
+	[CodeReviewType.CodeReview]: 'code review',
 };
 
 const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
@@ -27,7 +28,7 @@ const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
 	try {
 		return !!(await dataSoruce.provideCodeReview(repo, codeReviewId));
 	} catch (error) {
-		const typeName = CodeReviewTypeName[adapter.codeReviewType];
+		const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
 		const errorMessage =
 			(error as any)?.response?.status === 404
 				? `No ${typeName} found for id: ${codeReviewId}`
@@ -45,7 +46,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 		: '';
 	const adapter = adapterManager.getCurrentAdapter();
 	const { repo } = await router.getState();
-	const typeName = CodeReviewTypeName[adapter.codeReviewType];
+	const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
 	const repository = Repository.getInstance(adapter.scheme, repo);
 
 	// if the a codeReviewId isn't provided, use quickInput

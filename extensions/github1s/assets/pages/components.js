@@ -25,10 +25,9 @@ export const VscodeLoading = ({ blockWidth, blockSpacing, ...props }) => {
 	const _blockWidth = blockWidth || '5px';
 	const _blockSpacing = blockSpacing || '4px';
 	const styleStr = `width: ${_blockWidth}; margin-right: ${_blockSpacing}`;
-	const blocks = Array.from({ length: 5 }).map(() => `<span style=${styleStr}>`);
-	const blocksHtml = html`${blocks.join('')}`;
+	const blocks = Array.from({ length: 5 }).map(() => html`<span style=${styleStr} />`);
 
-	return html`<div class="vscode-loading" ...${props}>${blocksHtml}</div>`;
+	return html`<div class="vscode-loading" ...${props}>${blocks}</div>`;
 };
 
 export const VscodeLink = ({ to, external, ...props }) => {
@@ -40,7 +39,7 @@ export const VscodeLink = ({ to, external, ...props }) => {
 	return html` <a class="vscode-link" ...${combineProps} ...${props} /> `;
 };
 
-export const sendMessage = (() => {
+export const postMessage = (() => {
 	const vscode = acquireVsCodeApi();
 	const uniqueId = ((id) => () => id++)(1);
 	const messageMap = new Map();
@@ -49,9 +48,9 @@ export const sendMessage = (() => {
 		messageMap.has(data.id) && messageMap.get(data.id)(data.data);
 	});
 
-	return (message) => {
+	return (type, data) => {
 		const messageId = uniqueId();
-		vscode.postMessage({ ...message, id: messageId });
+		vscode.postMessage({ type, data, id: messageId });
 		return new Promise((resolve) => {
 			messageMap.set(messageId, resolve);
 		});

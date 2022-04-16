@@ -16,6 +16,7 @@ export const codeReviewViewTitle = {
 	[CodeReviewType.PullRequest]: 'Pull Requests',
 	[CodeReviewType.MergeRequest]: 'Merge Requests',
 	[CodeReviewType.ChangeRequest]: 'Change Requests',
+	[CodeReviewType.CodeReview]: 'Code Reviews',
 };
 
 export const registerCustomViews = () => {
@@ -26,7 +27,8 @@ export const registerCustomViews = () => {
 		treeDataProvider: codeReviewRequestTreeDataProvider,
 	});
 	// set code view list view title according code review type
-	treeView.title = codeReviewViewTitle[adapterManager.getCurrentAdapter().codeReviewType];
+	const codeReviewType = adapterManager.getCurrentAdapter().codeReviewType || CodeReviewType.CodeReview;
+	treeView.title = codeReviewViewTitle[codeReviewType];
 
 	context.subscriptions.push(
 		// register commit view which is in source control panel

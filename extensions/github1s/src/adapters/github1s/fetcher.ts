@@ -13,24 +13,24 @@ export const errorMessages = {
 		authenticated: 'You have no permission for this operation, please try another account',
 	},
 	rateLimited: {
-		anonymouns: 'API Rate Limit Exceeded, please authenticate to github and retry',
+		anonymous: 'API Rate Limit Exceeded, please authenticate to github and retry',
 		authenticated: 'API Rate Limit Exceeded for this token, please try another account',
 	},
 	badCredentials: {
-		anonymouns: 'Bad credentials, please authenticate to github and retry',
+		anonymous: 'Bad credentials, please authenticate to github and retry',
 		authenticated: 'This token is invalid, please try another one',
 	},
 };
 
 const detectErrorMessage = (response: any, authenticated: boolean) => {
-	if (response?.status === 403 && +response?.headers?.get?.('x-ratelimit-remaining') === 0) {
-		return errorMessages.rateLimited[authenticated ? 'authenticated' : 'anonymouns'];
+	if (response?.status === 403 && +response?.headers?.['x-ratelimit-remaining'] === 0) {
+		return errorMessages.rateLimited[authenticated ? 'authenticated' : 'anonymous'];
 	}
 	if (response?.status === 401 && +response?.data?.message?.includes?.('Bad credentials')) {
-		return errorMessages.badCredentials[authenticated ? 'authenticated' : 'anonymouns'];
+		return errorMessages.badCredentials[authenticated ? 'authenticated' : 'anonymous'];
 	}
 	if (response?.status === 403) {
-		return errorMessages.noPermission[authenticated ? 'authenticated' : 'anonymouns'];
+		return errorMessages.noPermission[authenticated ? 'authenticated' : 'anonymous'];
 	}
 	return response?.data?.message || '';
 };
@@ -64,6 +64,7 @@ export class GitHubFetcher {
 		const octokit = this.getOctokit();
 		return octokit.request(...args).catch(async (error) => {
 			if ([403, 401].includes((error as any)?.response?.status)) {
+				// maybe we have to acquire github access token to continue
 				const message = detectErrorMessage(error?.response, !!this.accessToken);
 				await GitHub1sAuthenticationView.getInstance().open(message, true);
 				return this.request(...args);

@@ -393,9 +393,10 @@ export interface Adapter {
 	// platform name, using for displaying text such as: `open on **GitHub**`
 	readonly platformName: PlatformName;
 	// the code review type
-	readonly codeReviewType: CodeReviewType;
+	readonly codeReviewType?: CodeReviewType;
 
 	resolveDataSource(): Promisable<DataSource>;
 	resolveRouterParser(): Promisable<RouterParser>;
-	registerAsDefault?(): Promisable<void>;
+	activateAsDefault?(): Promisable<void>;
+	deactivateAsDefault?(): Promisable<void>;
 }

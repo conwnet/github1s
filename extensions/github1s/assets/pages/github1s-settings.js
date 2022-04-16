@@ -1,26 +1,6 @@
 import { render } from 'https://unpkg.com/preact@latest?module';
 import { useState, useCallback, useEffect } from 'https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module';
-import { html, VscodeButton, VscodeInput, VscodeLink, sendMessage } from './components.js';
-
-const OpenAuthPageBlock = ({ onTokenChange, ...props }) => {
-	const [loading, setLoading] = useState(false);
-	const handleClick = useCallback(() => {
-		setLoading(true);
-		sendMessage({ type: 'open-github-auth-page' }).then((token) => {
-			onTokenChange(token);
-			setLoading(false);
-		});
-	}, [onTokenChange]);
-
-	return html`
-		<div class="authentication-method-block" ...${props}>
-			<h3 class="authentication-method-title">Authenticating OAuth App</h3>
-			<div class="flex-line">
-				<${VscodeButton} loading=${loading} onClick=${handleClick}>Connect to GitHub<//>
-			</div>
-		</div>
-	`;
-};
+import { html, VscodeButton, VscodeInput, VscodeLink, VscodeLoading, postMessage } from './components.js';
 
 const EditTokenDescription = () => {
 	return html`
@@ -31,35 +11,51 @@ const EditTokenDescription = () => {
 	`;
 };
 
-const TokenEditForm = ({ onTokenChange, ...props }) => {
+const ConnectToGitHubBlock = (props) => {
+	const [loading, setLoading] = useState(false);
+	const handleButtonClick = useCallback(() => {
+		setLoading(true);
+		postMessage('connect-to-github').then(() => setLoading(false));
+	}, []);
+
+	return html`
+		<div class="authentication-method-block" ...${props}>
+			<h3 class="authentication-method-title">Authenticating OAuth App</h3>
+			<div class="flex-line">
+				<${VscodeButton} loading=${loading} onClick=${handleButtonClick}>Connect to GitHub<//>
+			</div>
+		</div>
+	`;
+};
+
+const ManualInputTokenBlock = ({ onTokenChange, ...props }) => {
 	const createTokenLink = 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s';
 	const [inputToken, setInputToken] = useState('');
 	const [loading, setLoading] = useState(false);
 	const handleInputTokenChange = useCallback((event) => {
 		setInputToken(event.target.value);
 	}, []);
+
 	const handleSubmit = useCallback(() => {
 		if (inputToken) {
 			setLoading(true);
-			sendMessage({ type: 'validate-token', data: inputToken }).then((tokenStatus) => {
-				setLoading(false);
+			postMessage('validate-token', inputToken).then((tokenStatus) => {
 				if (!tokenStatus) {
-					sendMessage({
-						type: 'call-vscode-message-api',
-						data: { level: 'info', args: ['This OAuth Token is INVALID'] },
-					});
+					const messageArgs = { level: 'info', args: ['This AccessToken is invalid'] };
+					postMessage('call-vscode-message-api', messageArgs);
+					setLoading(false);
 					return;
 				}
-				onTokenChange(inputToken);
+				postMessage('set-token', inputToken).then(() => setLoading(false));
 			});
 		}
-	}, [onTokenChange, inputToken]);
+	}, [inputToken]);
 
 	return html`
 		<div class="authentication-method-block" ...${props}>
-			<h3 class="authentication-method-title">Use OAuth Token</h3>
+			<h3 class="authentication-method-title">Manual Input AccessToken</h3>
 			<div class="create-token-link">
-				<${VscodeLink} to=${createTokenLink} external> Generate New OAuth Token <//>
+				<${VscodeLink} to=${createTokenLink} external> Generate New AccessToken <//>
 			</div>
 			<div class="flex-line">
 				<${VscodeInput}
@@ -76,20 +72,21 @@ const TokenEditForm = ({ onTokenChange, ...props }) => {
 	`;
 };
 
-const TokenEditPage = ({ token, onCancel, onTokenChange, ...props }) => {
+const TokenEditPage = ({ token, onCancel, ...props }) => {
 	const cancelButton = token ? html`<${VscodeButton} onClick=${onCancel}>Cancel<//>` : '';
+
 	return html`
 		<div class="token-edit-page" ...${props}>
-			<div class="page-title">Set OAuth Token</div>
+			<div class="page-title">Set AccessToken</div>
 			<${EditTokenDescription} />
-			<${OpenAuthPageBlock} onTokenChange=${onTokenChange} />
-			<${TokenEditForm} onTokenChange=${onTokenChange} />
+			<${ConnectToGitHubBlock} />
+			<${ManualInputTokenBlock} />
 			<div class="flex-line">${cancelButton}</div>
 		</div>
 	`;
 };
 
-const TokenDetailPage = ({ token, onClearClick, onEditClick, ...props }) => {
+const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 	const displayToken = token.slice(0, 7) + '*********************************';
 	const [tokenStatus, setTokenStatus] = useState(null);
 	const [validating, setValidating] = useState(true);
@@ -97,13 +94,11 @@ const TokenDetailPage = ({ token, onClearClick, onEditClick, ...props }) => {
 	const tokenStatusText = validating ? '...' : tokenStatus ? 'VALID' : 'INVALID';
 	const tokenClasses = `token-text ${validating ? '' : tokenStatus ? 'token-valid' : 'token-invalid'}`;
 
-	const handleDetailClick = useCallback(() => {
-		sendMessage({ type: 'open-detail-page' });
-	}, []);
+	const handleDetailClick = useCallback(() => postMessage('open-detail-page'), []);
 
 	const validateToken = useCallback((token) => {
 		setValidating(true);
-		return sendMessage({ type: 'validate-token', data: token }).then((tokenStatus) => {
+		return postMessage('validate-token', token).then((tokenStatus) => {
 			setValidating(false);
 			setTokenStatus(tokenStatus);
 		});
@@ -111,26 +106,18 @@ const TokenDetailPage = ({ token, onClearClick, onEditClick, ...props }) => {
 
 	const handleValidateClick = useCallback(() => {
 		validateToken(token).then((tokenStatus) => {
-			const statusMessage = `Current OAuth Token is ${tokenStatus ? 'VALID' : 'INVALID'}`;
-			sendMessage({
-				type: 'call-vscode-message-api',
-				data: {
-					level: 'info',
-					args: [statusMessage],
-				},
-			});
+			const statusMessage = `Current AccessToken is ${tokenStatus ? 'VALID' : 'INVALID'}`;
+			const messageArgs = { level: 'info', args: [statusMessage] };
+			postMessage('call-vscode-message-api', messageArgs);
 		});
 	}, [validateToken, token]);
 
 	const handleClearClick = useCallback(() => {
-		sendMessage({
-			type: 'call-vscode-message-api',
-			data: {
-				level: 'warning',
-				args: ['Would you want to clear the saved GitHub OAuth Token?', { modal: true }, 'Confirm'],
-			},
-		}).then((choose) => choose === 'Confirm' && onClearClick());
-	}, [onClearClick]);
+		postMessage('call-vscode-message-api', {
+			level: 'warning',
+			args: ['Would you want to clear the saved GitHub AccessToken?', { modal: true }, 'Confirm'],
+		}).then((choose) => choose === 'Confirm' && postMessage('set-token', ''));
+	}, []);
 
 	useEffect(() => {
 		token && validateToken(token);
@@ -141,7 +128,7 @@ const TokenDetailPage = ({ token, onClearClick, onEditClick, ...props }) => {
 			<div class="page-title">You have authenticated</div>
 			<div class="description">
 				<div class="token-status">
-					Current OAuth Token is <span class="token-status-text">${tokenStatusText}</span>.
+					Current AccessToken is <span class="token-status-text">${tokenStatusText}</span>.
 				</div>
 				<div class=${tokenClasses}>${displayToken}</div>
 			</div>
@@ -161,50 +148,36 @@ const App = () => {
 	const switchToEdit = useCallback(() => setPageType('EDIT'), []);
 	const switchToDetail = useCallback(() => setPageType('DETAIL'), []);
 
-	const handleTokenSet = useCallback((token) => {
-		sendMessage({ type: 'set-token', data: token }).then(() => {
+	useEffect(() => {
+		postMessage('get-token').then((token) => {
 			setToken(token);
+			setLoading(false);
 			setPageType(token ? 'DETAIL' : 'EDIT');
 		});
 	}, []);
 
-	const handleClearClick = useCallback(() => {
-		return handleTokenSet('');
-	}, [handleTokenSet]);
-
-	const handleTokenChange = useCallback((token) => {
-		setToken(token);
-		setLoading(false);
-		setPageType(token ? 'DETAIL' : 'EDIT');
-	}, []);
-
-	useEffect(() => {
-		sendMessage({ type: 'get-token' }).then((token) => {
-			handleTokenChange(token);
-			const loadingElement = document.getElementById('page-loading');
-			loadingElement.parentNode.removeChild(loadingElement);
-		});
-	}, [handleTokenChange]);
-
 	useEffect(() => {
 		const handler = ({ data }) => {
 			if (data.type === 'token-changed') {
-				handleTokenChange(data.token);
+				setToken(data.token);
+				setPageType(data.token ? 'DETAIL' : 'EDIT');
 			}
 		};
 		window.addEventListener('message', handler);
 		return () => window.removeEventListener('message', handler);
-	}, [handleTokenChange]);
+	}, []);
 
 	if (loading) {
-		return null;
+		return html`<${VscodeLoading} />`;
 	}
 
 	if (pageType === 'DETAIL') {
-		return html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} onClearClick=${handleClearClick} />`;
+		return html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} />`;
 	}
 
-	return html`<${TokenEditPage} token=${token} onTokenChange=${handleTokenSet} onCancel=${switchToDetail} />`;
+	return html`<${TokenEditPage} token=${token} onCancel=${switchToDetail} />`;
 };
 
+const loadingElement = document.getElementById('page-loading');
+loadingElement.parentNode.removeChild(loadingElement);
 render(html`<${App} />`, document.getElementById('app'));

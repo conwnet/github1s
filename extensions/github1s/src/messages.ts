@@ -34,10 +34,10 @@ export const showSourcegraphSymbolMessage = (() => {
 
 export const showFileBlameAuthorizedRequiredMessage = async () => {
 	const selectedValue = await vscode.window.showInformationMessage(
-		'The file blame feature only works for authorized users due to the limit of [GitHub GraphQL API](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql), please provide an OAuth Token to enable it.',
-		'Set OAuth Token'
+		'The file blame feature only works for authorized users due to the limit of [GitHub GraphQL API](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql), please provide an AccessToken to enable it.',
+		'Set AccessToken'
 	);
-	if (selectedValue === 'Set OAuth Token') {
+	if (selectedValue === 'Set AccessToken') {
 		vscode.commands.executeCommand('github1s.views.settings.focus');
 	}
 };

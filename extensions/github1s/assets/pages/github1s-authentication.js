@@ -1,6 +1,6 @@
 import { render } from 'https://unpkg.com/preact@latest?module';
 import { useState, useCallback, useEffect } from 'https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module';
-import { html, VscodeButton, VscodeInput, VscodeLoading, VscodeLink } from './components.js';
+import { html, VscodeButton, VscodeInput, VscodeLoading, VscodeLink, postMessage } from './components.js';
 
 const AuthenticationFeatures = () => {
 	return html`
@@ -34,8 +34,15 @@ const AuthenticationFeatures = () => {
 };
 
 const AuthenticationButton = (props) => {
+	const [authenticating, setAuthenticating] = useState(false);
+
+	const handleButtonClick = useCallback(() => {
+		setAuthenticating(true);
+		postMessage('connect-to-github').then(() => setAuthenticating(false));
+	}, []);
+
 	return html`
-		<button class="authentication-button" disabled="${props.loading}" ...${props}>
+		<button class="authentication-button" disabled="${authenticating}" onClick=${handleButtonClick} ...${props}>
 			<svg class="github-logo" height="32" viewBox="0 0 16 16" version="1.1" width="32" aria-hidden="true">
 				<path
 					fill-rule="evenodd"
@@ -47,16 +54,41 @@ const AuthenticationButton = (props) => {
 	`;
 };
 
-const AuthenticationToken = () => {
+const ManualInputToken = () => {
 	const createTokenLink = 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s';
+	const [inputToken, setInputToken] = useState('');
+	const [loading, setLoading] = useState(false);
+	const handleInputTokenChange = useCallback((event) => {
+		setInputToken(event.target.value);
+	}, []);
+
+	const handleSubmit = useCallback(() => {
+		if (inputToken) {
+			setLoading(true);
+			postMessage('validate-token', inputToken).then((tokenStatus) => {
+				if (!tokenStatus) {
+					const messageArgs = { level: 'info', args: ['This AccessToken is invalid'] };
+					postMessage('call-vscode-message-api', messageArgs);
+					setLoading(false);
+					return;
+				}
+				postMessage('set-token', inputToken).then(() => setLoading(false));
+			});
+		}
+	}, [inputToken]);
 
 	return html`
 		<div class="authentication-token">
 			<div class="token-input-line">
-				<${VscodeInput} />
-				<${VscodeButton}>Submit<//>
+				<${VscodeInput}
+					autocomplete="off"
+					value=${inputToken}
+					disabled="${loading}"
+					onInput=${handleInputTokenChange}
+				/>
+				<${VscodeButton} loading=${loading} onClick=${handleSubmit}>Submit<//>
 			</div>
-			<${VscodeLink} to="${createTokenLink}" external>Create New OAuth Token<//>
+			<${VscodeLink} to="${createTokenLink}" external>Create New AccessToken<//>
 		</div>
 	`;
 };
@@ -65,53 +97,131 @@ const SplitLine = () => {
 	return html`<div class="split-line"></div>`;
 };
 
-const AuthenticationForm = (props) => {
-	const [authenticating, setAuthenticating] = useState(false);
-
+const AuthenticationFooter = () => {
 	return html`
-		<div class="authentication-form">
-			<div class="form-title">${props.title || 'Authenticating to GitHub'}</div>
-			<${AuthenticationFeatures} />
-			<div class="form-content">
-				<${AuthenticationButton} disabled=${authenticating}>Connect to GitHub<//>
-				<${SplitLine} />
-				<${AuthenticationToken} />
-				<${AuthenticationNotice} />
-			</div>
-		</div>
-	`;
-};
-
-const AuthenticationNotice = () => {
-	return html`
-		<div class="authentication-notice">
+		<div class="authentication-footer">
 			<div>The access token will only store in your browser.</div>
 			<div>Don't forget to clean it while you are using a device that doesn't belong to you.</div>
 		</div>
 	`;
 };
 
-const AuthenticationDetail = () => {
-	return html`<div></div>`;
+const AuthenticationForm = (props) => {
+	return html`
+		<div class="authentication-form">
+			<div class="form-title">${props.title || 'Authenticating to GitHub'}</div>
+			<${AuthenticationFeatures} />
+			<div class="form-content">
+				<${AuthenticationButton}>Connect to GitHub<//>
+				<${SplitLine} />
+				<${ManualInputToken} />
+			</div>
+		</div>
+	`;
+};
+
+const StatusNumberText = ({ count }) => {
+	if (count <= 0) {
+		return html`<span class="error-text">${count}</span>`;
+	}
+	if (count <= 99) {
+		return html`<span class="warning-text">${count}</span>`;
+	}
+
+	return html`<span class="success-text">${count}</span>`;
+};
+
+const AuthenticationDetail = ({ accessToken }) => {
+	const ratteLimitDocumentationLink = 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting';
+	const [tokenStatus, setTokenStatus] = useState(null);
+
+	const handleRefreshTokenStatus = useCallback(() => {
+		postMessage('validate-token', accessToken).then((tokenStatus) => {
+			setTokenStatus(tokenStatus);
+		});
+	}, [accessToken]);
+
+	const handleClearToken = useCallback(() => {
+		postMessage('call-vscode-message-api', {
+			level: 'warning',
+			args: ['Would you want to clear the saved GitHub AccessToken?', { modal: true }, 'Confirm'],
+		}).then((choose) => choose === 'Confirm' && postMessage('set-token', ''));
+	}, []);
+
+	useEffect(() => {
+		handleRefreshTokenStatus();
+	}, [handleRefreshTokenStatus]);
+
+	if (!tokenStatus) {
+		return html`<${VscodeLoading} />`;
+	}
+
+	return html`
+		<div class="authentication-detail">
+			<div class="detail-title">Access Token Info</div>
+			<div class="token-status">
+				<div class="status-title">
+					<span>Rate Limit Info: </span>
+					<span class="refresh-button" onClick=${handleRefreshTokenStatus}>↻</span>
+				</div>
+				<ul class="rate-limit-info">
+					<li>------------------------------</li>
+					<li>X-RateLimit-Limit: <${StatusNumberText} count=${tokenStatus.ratelimitLimit} /></li>
+					<li>X-RateLimit-Remaining: <${StatusNumberText} count=${tokenStatus.ratelimitRemaining} /></li>
+					<li>X-RateLimit-Used: ${tokenStatus.ratelimitUsed}</li>
+					<li>X-RateLimit-Reset: ${tokenStatus.ratelimitReset}</li>
+					<li>------------------------------</li>
+					<li class="rate-limit-description">
+						<span>Current rate limit window will reset after </span>
+						<span>${Math.max(tokenStatus.ratelimitReset - Math.ceil(Date.now() / 1000), 0)}s</span>
+					</li>
+					<li>
+						<a href=${ratteLimitDocumentationLink} target="_blank">GitHub Rate limiting Documentation</a>
+					</li>
+				</ul>
+			</div>
+			<div class="token-operations">
+				<${VscodeButton} size="middle" onClick=${handleClearToken}>Clear Access Token<//>
+			</div>
+		</div>
+	`;
 };
 
 const App = () => {
 	const [loading, setLoading] = useState(true);
 	const [accessToken, setAccessToken] = useState('');
+	const [notice, setNotice] = useState('');
 
 	useEffect(() => {
-		setTimeout(() => setLoading(false));
+		postMessage('get-token').then((token) => {
+			setAccessToken(token);
+			setLoading(false);
+		});
+		postMessage('get-notice').then((notice) => setNotice(notice));
 	}, []);
+
+	useEffect(() => {
+		const handler = ({ data }) => {
+			if (data.type === 'token-changed') {
+				setAccessToken(data.token);
+				postMessage('get-notice').then((notice) => setNotice(notice));
+			}
+		};
+		window.addEventListener('message', handler);
+		return () => window.removeEventListener('message', handler);
+	}, [setAccessToken]);
 
 	if (loading) {
 		return html`<${VscodeLoading} />`;
 	}
 
-	if (accessToken) {
-		return html`<${AuthenticationDetail} accessToken=${accessToken} />`;
-	}
-
-	return html`<${AuthenticationForm} />`;
+	return html`
+		<div class="authentication-page">
+			${notice ? html`<div class="page-notice">${notice}</div>` : null}
+			<${accessToken ? AuthenticationDetail : AuthenticationForm} accessToken=${accessToken} />
+			<${AuthenticationFooter} />
+		</div>
+	`;
 };
 
 const loadingElement = document.getElementById('page-loading');

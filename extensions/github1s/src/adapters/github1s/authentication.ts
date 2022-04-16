@@ -8,6 +8,7 @@ import { getExtensionContext } from '@/helpers/context';
 import * as vscode from 'vscode';
 import { GitHubTokenManager } from './token';
 import { createPageHtml, getWebviewOptions } from '@/helpers/page';
+import { messageApiMap } from './settings';
 
 export class GitHub1sAuthenticationView {
 	private static instance: GitHub1sAuthenticationView | null = null;
@@ -31,49 +32,48 @@ export class GitHub1sAuthenticationView {
 		if (!this.webviewPanel) {
 			throw new Error('webview is not inited yet');
 		}
+		const tokenManager = GitHubTokenManager.getInstance();
+
 		this.webviewPanel.webview.onDidReceiveMessage((message) => {
+			const commonResponse = { id: message.id, type: message.type };
+			const postMessage = (data?: unknown) => this.webviewPanel!.webview.postMessage({ ...commonResponse, data });
+
 			switch (message.type) {
 				case 'get-notice':
-					this.webviewPanel!.webview.postMessage({
-						id: message.id,
-						type: message.type,
-						data: this.notice,
-					});
+					postMessage(this.notice);
 					break;
 				case 'get-token':
-					this.webviewPanel!.webview.postMessage({
-						id: message.id,
-						type: message.type,
-						data: GitHubTokenManager.getInstance().getToken(),
-					});
+					postMessage(tokenManager.getToken());
 					break;
 				case 'set-token':
-					GitHubTokenManager.getInstance()
-						.setToken(message.data || '')
-						.then(() => {
-							this.tokenBarrier && this.tokenBarrier.open();
-							this.tokenBarrier && (this.tokenBarrier = null);
-							this.webviewPanel!.webview.postMessage({
-								id: message.id,
-								type: message.type,
-							});
-						});
+					message.data && (this.notice = '');
+					tokenManager.setToken(message.data || '').then(() => {
+						this.tokenBarrier && this.tokenBarrier.open();
+						this.tokenBarrier && (this.tokenBarrier = null);
+						return postMessage();
+					});
 					break;
 				case 'validate-token':
-					GitHubTokenManager.getInstance()
-						.validateToken(message.data)
-						.then((tokenStatus) =>
-							this.webviewPanel!.webview.postMessage({
-								id: message.id,
-								type: message.type,
-								data: tokenStatus,
-							})
-						);
+					tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
+					break;
+				case 'connect-to-github':
+					vscode.commands.executeCommand('github1s.commands.vscode.connectToGitHub').then((data: any) => {
+						if (data && data.error_description) {
+							vscode.window.showErrorMessage(data.error_description);
+						} else if (data && data.access_token) {
+							tokenManager.setToken(message.data || '').then(() => postMessage());
+						}
+						postMessage();
+					});
+					break;
+				case 'call-vscode-message-api':
+					const messageApi = messageApiMap[message.data?.level];
+					messageApi && messageApi(...message.data?.args).then((response) => postMessage(response));
 					break;
 			}
 		});
 
-		GitHubTokenManager.getInstance().onDidChangeToken((token) => {
+		tokenManager.onDidChangeToken((token) => {
 			this.webviewPanel!.webview.postMessage({ type: 'token-changed', token });
 		});
 	}

@@ -1,3 +1,17 @@
+.authentication-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.authentication-page .page-notice {
+  font-size: 16px;
+  margin-bottom: 24px;
+  font-weight: bold;
+  color: #cca700;
+  max-width: 500px;
+}
+
 .authentication-form .form-title {
   font-size: 24px;
   text-align: center;
@@ -121,12 +135,13 @@
   font-weight: bold;
 }
 
-.authentication-notice {
+.authentication-footer {
   margin-top: 24px;
   color: var(--vscode-foreground);
+  width: 320px;
 }
 
-.authentication-notice > div:first-child {
+.authentication-footer > div:first-child {
   margin-bottom: 4px;
 }
 
@@ -135,6 +150,74 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.authentication-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.authentication-detail .detail-title {
+  width: 320px;
+  font-size: 24px;
+  margin-bottom: 32px;
+  color: var(--vscode-button-foreground);
+}
+
+.authentication-detail .token-status {
+  width: 320px;
+}
+
+.authentication-detail .token-status ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.authentication-detail .token-status ul li {
+  margin-bottom: 8px;
+}
+
+.authentication-detail .status-title {
+  font-weight: 200;
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 18px;
+  line-height: normal;
+}
+
+.authentication-detail .refresh-button {
+	cursor: pointer;
+  margin-left: 4px;
+}
+
+.authentication-detail .refresh-button:hover {
+  color: #3794ff;
+}
+
+.authentication-detail .refresh-button:active {
+  color: #094771;
+}
+
+.authentication-detail .token-operations {
+  width: 320px;
+  margin-top: 12px;
+}
+
+.authentication-detail .token-operations > * {
+  width: 240px;
+}
+
+.success-text {
+  color: #89d185;
+}
+
+.warning-text {
+  color: #cca700;
+}
+
+.error-text {
+  color: #f48771;
 }
 
 #app {

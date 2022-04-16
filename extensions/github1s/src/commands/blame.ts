@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { relativeTimeTo } from '@/helpers/date';
 import { last } from '@/helpers/util';
-import { hasValidToken } from '@/helpers/context';
 import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
 import { Repository } from '@/repository';
@@ -258,28 +257,20 @@ class EditorGitBlame {
 	}
 }
 
-const ensureUserAuthorized = () => {
-	if (hasValidToken()) {
-		return true;
-	}
-	showFileBlameAuthorizedRequiredMessage();
-	return false;
-};
-
 const commandToggleEditorGutterBlame = () => {
-	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
+	if (vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).toggle();
 	}
 };
 
 const commandOpenEditorGutterBlame = () => {
-	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
+	if (vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).open();
 	}
 };
 
 const commandCloseEditorGutterBlame = () => {
-	if (ensureUserAuthorized() && vscode.window.activeTextEditor) {
+	if (vscode.window.activeTextEditor) {
 		return EditorGitBlame.getInstance(vscode.window.activeTextEditor).close();
 	}
 };

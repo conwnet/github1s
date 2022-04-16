@@ -24,8 +24,8 @@ export class AdapterManager {
 			throw new Error(`Adapter scheme '${adapter.scheme}' is already registered.`);
 		}
 		this.adaptersMap.set(adapter.scheme, adapter);
-		if (this.getCurrentScheme() === adapter.scheme && adapter.registerAsDefault) {
-			return adapter.registerAsDefault();
+		if (this.getCurrentScheme() === adapter.scheme && adapter.activateAsDefault) {
+			return adapter.activateAsDefault();
 		}
 	}
 
