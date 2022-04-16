@@ -24,7 +24,13 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	private readonly disposable: Disposable;
 	private fileUrisMap: Map<string, Uri[]> = new Map();
 
-	private constructor() {}
+	private constructor() {
+		// Preload the files for better `ctrl/command + p` experience.
+		// Once we have loaded the files, it will also populate the files into
+		// fileSystemProvider's cache. So after that, we don't have to send
+		// a request when you open the new directory in explorer late
+		this.loadFilesForCurrentAuthority();
+	}
 
 	public static getInstance(): GitHub1sFileSearchProvider {
 		if (GitHub1sFileSearchProvider.instance) {
