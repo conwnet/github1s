@@ -53,10 +53,11 @@ export class GitHubFetcher {
 	}
 
 	private getOctokit() {
-		if (this.accessToken === GitHubTokenManager.getInstance().getToken()) {
+		const currentAccessToken = GitHubTokenManager.getInstance().getToken();
+		if (this.accessToken === currentAccessToken) {
 			return this.octokit!;
 		}
-		this.accessToken = GitHubTokenManager.getInstance().getToken();
+		this.accessToken = currentAccessToken;
 		return (this.octokit = new Octokit({ auth: this.accessToken, request: { fetcher: fetch } }));
 	}
 

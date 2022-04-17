@@ -53,7 +53,7 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// so we use the parents[0].sha as the parent commitSha
-	const baseRef = commit?.parents?.[0]?.sha;
+	const baseRef = commit?.parents?.[0];
 	const baseRootUri = vscode.Uri.parse('').with({
 		scheme: currentAdapter.scheme,
 		authority: `${repo}+${baseRef || 'HEAD'}`,

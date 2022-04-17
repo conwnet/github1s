@@ -46,7 +46,7 @@ const getOriginalResourceForCommit = async (uri: vscode.Uri, commitSha: string) 
 		return emptyFileUri;
 	}
 
-	const parentCommitSha = commit!.parents?.[0]?.sha;
+	const parentCommitSha = commit!.parents?.[0] || 'HEAD';
 
 	if (!parentCommitSha) {
 		return emptyFileUri;

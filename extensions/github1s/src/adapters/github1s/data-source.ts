@@ -186,6 +186,7 @@ export class GitHub1sDataSource extends DataSource {
 			message: item.commit.message,
 			committer: item.commit.committer.name,
 			createTime: new Date(item.commit.author.date),
+			parents: item.parents.map((parent) => parent.sha) || [],
 			avatarUrl: item.author.avatar_url,
 		}));
 	}
@@ -203,6 +204,7 @@ export class GitHub1sDataSource extends DataSource {
 			message: data.commit.message,
 			committer: data.commit.committer.name,
 			createTime: new Date(data.commit.author.date),
+			parents: data.parents.map((parent) => parent.sha) || [],
 			files: data.files.map((item) => ({
 				path: item.filename,
 				previousPath: item.previous_filename,

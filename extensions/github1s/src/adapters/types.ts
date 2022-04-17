@@ -57,9 +57,9 @@ export interface Commit {
 	author: string; // original commit author
 	email: string;
 	message: string;
-	committer?: string;
+	committer: string;
 	createTime: Date;
-	parents?: Commit[];
+	parents: string[]; // empty array for first commit
 	avatarUrl: string;
 }
 

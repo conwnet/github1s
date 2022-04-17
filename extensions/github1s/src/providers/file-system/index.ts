@@ -13,6 +13,7 @@ import {
 	FileStat,
 	FileType,
 	Uri,
+	workspace,
 } from 'vscode';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
@@ -238,9 +239,9 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
 			let { scheme, authority, path } = uri;
-			// if `authority` is empty, try to find it with `this.lookupAsFile`, we can't
-			// use `router.getAuthority()` directly because this file may be in submodule
-			if (!authority) {
+			// if `authority` is same with currnet, try to find it with `this.lookupAsFile`,
+			// we can't use `router.getAuthority()` directly because this file may be in submodule
+			if (authority === workspace.workspaceFolders?.[0].uri.authority) {
 				const file = (await this.lookupAsFile(uri, false))!;
 				scheme = file.uri.scheme;
 				authority = file.uri.authority;

@@ -4,7 +4,7 @@
  */
 
 import * as jsonStableStringify from 'json-stable-stringify';
-import * as pFinally from 'p-finally';
+import pFinally from 'p-finally';
 
 const defaultComputeCacheKey = (...args) => jsonStableStringify([...args]);
 

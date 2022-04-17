@@ -4,7 +4,10 @@
   "publisher": "github1s",
   "description": "",
   "private": true,
-  "enabledApiProposals": ["fileSearchProvider", "textSearchProvider"],
+  "enabledApiProposals": [
+    "fileSearchProvider",
+    "textSearchProvider"
+  ],
   "directories": {
     "lib": "lib"
   },
@@ -207,7 +210,6 @@
         "icon": "$(arrow-right)",
         "enablement": "resource =~ /^[^?]*\\?[^#]*(%26|\\b)hasNextRevision(=|%3D|%3d)true/"
       },
-
       {
         "command": "github1s.commands.toggleEditorGutterBlame",
         "title": "Toggle File Blame",
@@ -398,7 +400,6 @@
           "command": "github1s.commands.openFileNextRevision",
           "when": "false"
         },
-
         {
           "command": "github1s.commands.openEditorGutterBlame",
           "when": "false"
@@ -546,24 +547,24 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@apollo/client": "^3.3.9",
+    "@apollo/client": "^3.5.10",
     "@octokit/core": "^3.6.0",
-    "dayjs": "^1.10.4",
-    "graphql": "^15.5.0",
-    "history": "^5.0.0",
-    "js-base64": "^3.6.0",
+    "dayjs": "^1.11.1",
+    "graphql": "^16.3.0",
+    "history": "^5.3.0",
+    "js-base64": "^3.7.2",
     "json-stable-stringify": "^1.0.1",
-    "match-sorter": "^6.3.0",
-    "p-finally": "^2.0.1",
+    "match-sorter": "^6.3.1",
+    "p-finally": "^3.0.0",
     "process": "^0.11.10",
-    "query-string": "^7.0.0",
-    "webpack-cli": "^4.6.0"
+    "query-string": "^7.1.1"
   },
   "devDependencies": {
-    "@types/vscode": "1.55.0",
+    "@types/vscode": "^1.66.0",
     "node-polyfill-webpack-plugin": "^1.1.4",
-    "ts-loader": "^8.1.0",
-    "typescript": "^4.2.3",
-    "webpack": "^5.30.0"
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   }
 }
