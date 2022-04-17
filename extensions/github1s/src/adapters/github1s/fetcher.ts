@@ -58,7 +58,8 @@ export class GitHubFetcher {
 			return this.octokit!;
 		}
 		this.accessToken = currentAccessToken;
-		return (this.octokit = new Octokit({ auth: this.accessToken, request: { fetcher: fetch } }));
+		this.octokit = new Octokit({ auth: this.accessToken, request: { fetch } });
+		return this.octokit;
 	}
 
 	public request(...args: Parameters<Octokit['request']>): ReturnType<Octokit['request']> {

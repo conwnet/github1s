@@ -74,7 +74,7 @@ export class GitHub1sAuthenticationView {
 		});
 
 		tokenManager.onDidChangeToken((token) => {
-			this.webviewPanel!.webview.postMessage({ type: 'token-changed', token });
+			this.webviewPanel?.webview.postMessage({ type: 'token-changed', token });
 		});
 	}
 
