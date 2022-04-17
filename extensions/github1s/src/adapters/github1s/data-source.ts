@@ -52,7 +52,7 @@ const FileTypeMap = {
 	commit: FileType.Submodule,
 };
 
-const getPullState = (pull: { state: string; merged_at?: string }): CodeReviewState => {
+const getPullState = (pull: { state: string; merged_at: string | null }): CodeReviewState => {
 	// current pull request is open
 	if (pull.state === 'open') {
 		return CodeReviewState.Open;
@@ -180,14 +180,14 @@ export class GitHub1sDataSource extends DataSource {
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits', requestParams);
 		return data.map((item) => ({
 			sha: item.sha,
-			creator: item.author.login,
-			author: item.commit.author.name,
-			email: item.commit.author.email,
+			creator: item.author?.login,
+			author: item.commit.author?.name,
+			email: item.commit.author?.email,
 			message: item.commit.message,
-			committer: item.commit.committer.name,
-			createTime: new Date(item.commit.author.date),
+			committer: item.commit.committer?.name,
+			createTime: item.commit.author?.date ? new Date(item.commit.author.date) : undefined,
 			parents: item.parents.map((parent) => parent.sha) || [],
-			avatarUrl: item.author.avatar_url,
+			avatarUrl: item.author?.avatar_url,
 		}));
 	}
 
@@ -198,19 +198,19 @@ export class GitHub1sDataSource extends DataSource {
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
 		return {
 			sha: data.sha,
-			creator: data.author.login,
-			author: data.commit.author.name,
-			email: data.commit.author.email,
+			creator: data.author?.login,
+			author: data.commit.author?.name,
+			email: data.commit.author?.email,
 			message: data.commit.message,
-			committer: data.commit.committer.name,
-			createTime: new Date(data.commit.author.date),
+			committer: data.commit.committer?.name,
+			createTime: data.commit.author?.date ? new Date(data.commit.author.date) : undefined,
 			parents: data.parents.map((parent) => parent.sha) || [],
-			files: data.files.map((item) => ({
-				path: item.filename,
+			files: data.files?.map((item) => ({
+				path: item.filename || item.previous_filename!,
 				previousPath: item.previous_filename,
 				status: item.status as FileChangeStatus,
 			})),
-			avatarUrl: data.author.avatar_url,
+			avatarUrl: data.author?.avatar_url,
 		};
 	}
 
@@ -223,11 +223,13 @@ export class GitHub1sDataSource extends DataSource {
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
-		return data.files.map((item) => ({
-			path: item.filename,
-			previousPath: item.previous_filename,
-			status: item.status as FileChangeStatus,
-		}));
+		return (
+			data.files?.map((item) => ({
+				path: item.filename || item.previous_filename!,
+				previousPath: item.previous_filename,
+				status: item.status as FileChangeStatus,
+			})) || []
+		);
 	}
 
 	async provideCodeReviews(
@@ -245,13 +247,13 @@ export class GitHub1sDataSource extends DataSource {
 			id: `${item.number}`,
 			title: item.title,
 			state: getPullState(item),
-			creator: item.user.login,
+			creator: item.user?.login,
 			createTime: new Date(item.created_at),
 			mergeTime: item.merged_at ? new Date(item.merged_at) : null,
 			closeTime: item.closed_at ? new Date(item.closed_at) : null,
 			head: { label: item.head.label, commitSha: item.head.sha },
 			base: { label: item.base.label, commitSha: item.base.sha },
-			avatarUrl: item.user.avatar_url,
+			avatarUrl: item.user?.avatar_url,
 		}));
 	}
 
@@ -265,13 +267,13 @@ export class GitHub1sDataSource extends DataSource {
 			id: `${data.number}`,
 			title: data.title,
 			state: getPullState(data),
-			creator: data.user.login,
+			creator: data.user?.login,
 			createTime: new Date(data.created_at),
 			mergeTime: data.merged_at ? new Date(data.merged_at) : null,
 			closeTime: data.closed_at ? new Date(data.closed_at) : null,
 			head: { label: data.head.label, commitSha: data.head.sha },
 			base: { label: data.base.label, commitSha: data.base.sha },
-			avatarUrl: data.user.avatar_url,
+			avatarUrl: data.user?.avatar_url,
 		};
 	}
 

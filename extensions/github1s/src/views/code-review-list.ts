@@ -133,7 +133,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			const label = getCodeReviewTreeItemLabel(codeReview);
 			const description = getCodeReviewTreeItemDescription(codeReview);
 			const tooltip = `${label} (${description})`;
-			const iconPath = vscode.Uri.parse(codeReview.avatarUrl);
+			const iconPath = vscode.Uri.parse(codeReview?.avatarUrl || '');
 			const contextValue = 'github1s:viewItems:codeReviewListItem';
 
 			return {

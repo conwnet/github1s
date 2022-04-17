@@ -120,7 +120,7 @@ const createFirstLineDecorationType = (blameRange: BlameRange) => {
 		text-overflow: ellipsis;
 		vertical-align: bottom;
 		text-indent: 2em;
-		background-image: url(${encodeURI(blameRange.commit.avatarUrl)});
+		background-image: url(${encodeURI(blameRange.commit?.avatarUrl || '')});
 		background-size: auto 95%;
 		background-position: 0 50%;
 		background-repeat: no-repeat`;

@@ -53,14 +53,14 @@ export interface Tag {
 
 export interface Commit {
 	sha: string;
-	creator: string; // website login user
-	author: string; // original commit author
-	email: string;
+	creator?: string; // website login user
+	author?: string; // original commit author
+	email?: string;
 	message: string;
-	committer: string;
-	createTime: Date;
+	committer?: string;
+	createTime?: Date;
 	parents: string[]; // empty array for first commit
-	avatarUrl: string;
+	avatarUrl?: string;
 }
 
 export interface TextSearchQuery {
@@ -122,7 +122,7 @@ export interface CodeReview {
 	id: string;
 	title: string;
 	state: CodeReviewState;
-	creator: string;
+	creator?: string;
 	createTime: Date;
 	mergeTime: Date | null;
 	closeTime: Date | null;
@@ -134,7 +134,7 @@ export interface CodeReview {
 		label: string;
 		commitSha: string;
 	};
-	avatarUrl: string;
+	avatarUrl?: string;
 }
 
 export enum FileChangeStatus {
@@ -148,7 +148,7 @@ export interface ChangedFile {
 	scope?: ResourceScope;
 	status: FileChangeStatus;
 	path: string;
-	// changed file may be renamed
+	// only exists for renamed file
 	previousPath?: string;
 }
 

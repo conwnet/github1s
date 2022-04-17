@@ -33,9 +33,10 @@ export class GitHubTokenManager {
 	}
 
 	public setToken(token: string) {
+		const isTokenChanged = this.getToken() !== token;
 		return getExtensionContext()
 			.globalState.update(GITHUB_OAUTH_TOKEN, token)
-			.then(() => this._emitter.fire(token));
+			.then(() => isTokenChanged && this._emitter.fire(token));
 	}
 
 	public async validateToken(token?: string): Promise<TokenStatus | null> {

@@ -88,7 +88,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			const label = `${commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
 			const tooltip = `${label} (${description})`;
-			const iconPath = vscode.Uri.parse(commit.avatarUrl);
+			const iconPath = vscode.Uri.parse(commit.avatarUrl || '');
 			const contextValue = 'github1s:viewItems:commitListItem';
 
 			return {
