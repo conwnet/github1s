@@ -30,65 +30,16 @@ export const createPageHtml = (title: string, styles: string[] = [], scripts: st
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
 			<title>${title}</title>
 			${styles.map((style) => `<link rel="stylesheet" nonce="${nonce}" href="${style}" />`).join('')}
 			<style nonce="${nonce}">
-				body {
-					margin: 0;
-					padding: 0;
-					background-color: transparent;
-				}
-				#page-loading {
-					width: 100%;
-					text-align: center;
-					height: 40px;
-					margin-top: 60px;
-				}
-
-				#page-loading > span {
-					height: 100%;
-					width: 8px;
-					display: inline-block;
-					margin-right: 6px;
-					background: var(--vscode-button-background);
-					animation: pageLoading 1.2s infinite ease-in-out;
-				}
-
-				#page-loading > span:nth-child(2) {
-					animation-delay: -1s;
-				}
-				
-				#page-loading > span:nth-child(3) {
-					animation-delay: -0.9s;
-				}
-				
-				#page-loading > span:nth-child(4) {
-					animation-delay: -0.8s;
-				}
-				
-				#page-loading > span:nth-child(5) {
-					margin-right: 0 !important;
-					animation-delay: -0.7s;
-				}
-				
-				@keyframes pageLoading {
-					0% { transform: scaleY(0.4); }
-					25% {
-						transform: scaleY(1);
-					}
-					50% {
-						transform: scaleY(0.4);
-					}
-					75% {
-						transform: scaleY(0.4);
-					}
-					100% {
-						transform: scaleY(0.4);
-					}
-				}
+			body{margin:0;padding:0;background-color:transparent}
+			#page-loading{width:100%;text-align:center;height:40px;margin-top:60px}
+			#page-loading>span{height:100%;width:8px;display:inline-block;margin-right:6px;background:var(--vscode-button-background);animation:pageLoading 1.2s infinite ease-in-out}
+			#page-loading>span:nth-child(2){animation-delay:-1s}#page-loading>span:nth-child(3){animation-delay:-.9s}#page-loading>span:nth-child(4){animation-delay:-.8s}#page-loading>span:nth-child(5){margin-right:0!important;animation-delay:-.7s}
+			@keyframes pageLoading{0%{transform:scaleY(.4)}25%{transform:scaleY(1)}50%{transform:scaleY(.4)}75%{transform:scaleY(.4)}100%{transform:scaleY(.4)}}
 			</style>
 		</head>
 		<body>

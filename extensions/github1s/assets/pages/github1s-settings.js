@@ -1,5 +1,5 @@
-import { render } from 'https://unpkg.com/preact@latest?module';
-import { useState, useCallback, useEffect } from 'https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module';
+import { render } from './preact.module.js';
+import { useState, useCallback, useEffect } from './preact-hooks.module.js';
 import { html, VscodeButton, VscodeInput, VscodeLink, VscodeLoading, postMessage } from './components.js';
 
 const EditTokenDescription = () => {

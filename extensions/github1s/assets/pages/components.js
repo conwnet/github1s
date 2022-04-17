@@ -1,5 +1,5 @@
-import { h } from 'https://unpkg.com/preact@latest?module';
-import htm from 'https://unpkg.com/htm@3.1.0?module';
+import { h } from './preact.module.js';
+import htm from './htm.module.js';
 
 export const html = htm.bind(h);
 
@@ -40,7 +40,7 @@ export const VscodeLink = ({ to, external, ...props }) => {
 };
 
 export const postMessage = (() => {
-	const vscode = acquireVsCodeApi();
+	const vscode = window.acquireVsCodeApi();
 	const uniqueId = ((id) => () => id++)(1);
 	const messageMap = new Map();
 

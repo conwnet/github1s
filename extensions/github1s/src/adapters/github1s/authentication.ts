@@ -103,7 +103,8 @@ export class GitHub1sAuthenticationView {
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-authentication.js').toString(),
 		];
 
-		this.webviewPanel.webview.html = createPageHtml('Authenticating To GitHub', styles, scripts);
+		const webview = this.webviewPanel.webview;
+		webview.html = createPageHtml('Authenticating To GitHub', styles, scripts);
 		return withBarriar ? this.tokenBarrier!.wait() : Promise.resolve();
 	}
 }

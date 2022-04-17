@@ -1,5 +1,5 @@
-import { render } from 'https://unpkg.com/preact@latest?module';
-import { useState, useCallback, useEffect } from 'https://unpkg.com/preact@latest/hooks/dist/hooks.module.js?module';
+import { render } from './preact.module.js';
+import { useState, useCallback, useEffect } from './preact-hooks.module.js';
 import { html, VscodeButton, VscodeInput, VscodeLoading, VscodeLink, postMessage } from './components.js';
 
 const AuthenticationFeatures = () => {
@@ -137,7 +137,7 @@ const AuthenticationDetail = ({ accessToken }) => {
 
 	const handleRefreshTokenStatus = useCallback(() => {
 		postMessage('validate-token', accessToken).then((tokenStatus) => {
-			setTokenStatus(tokenStatus);
+			setTokenStatus(tokenStatus || { invalid: true });
 		});
 	}, [accessToken]);
 
@@ -165,6 +165,7 @@ const AuthenticationDetail = ({ accessToken }) => {
 					<span class="refresh-button" onClick=${handleRefreshTokenStatus}>↻</span>
 				</div>
 				<ul class="rate-limit-info">
+					${tokenStatus.invalid ? html`<li>Token Status: <span class="error-text">invalid</span></li>` : ''}
 					<li>------------------------------</li>
 					<li>X-RateLimit-Limit: <${StatusNumberText} count=${tokenStatus.ratelimitLimit} /></li>
 					<li>X-RateLimit-Remaining: <${StatusNumberText} count=${tokenStatus.ratelimitRemaining} /></li>

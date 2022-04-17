@@ -4,3 +4,6 @@ out
 node_modules
 vscode-web/src/vs
 vscode-web/extensions
+htm.module.js
+preact.module.js
+preact-hooks.module.js

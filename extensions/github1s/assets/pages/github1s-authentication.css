@@ -83,6 +83,7 @@
   font-size: 16px;
   transition: all 0.1s;
   cursor: pointer;
+  color: #000;
 }
 
 .authentication-button:not([disabled]):hover {
