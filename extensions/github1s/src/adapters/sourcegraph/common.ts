@@ -7,10 +7,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core
 import { trimEnd, trimStart } from '@/helpers/util';
 
 const sourcegraphLink = createHttpLink({
-	// Since the Sourcegraph refused the CORS check now,
-	// use Vercel Serverless Function to proxy it temporarily
-	// See `/api/sourcegraph.js`
-	uri: '/api/sourcegraph',
+	uri: 'https://sourcegraph.com/.api/graphql',
 });
 
 export const sourcegraphClient = new ApolloClient({
