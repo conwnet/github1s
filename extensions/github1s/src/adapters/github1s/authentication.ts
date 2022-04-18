@@ -47,11 +47,7 @@ export class GitHub1sAuthenticationView {
 					break;
 				case 'set-token':
 					message.data && (this.notice = '');
-					tokenManager.setToken(message.data || '').then(() => {
-						this.tokenBarrier && this.tokenBarrier.open();
-						this.tokenBarrier && (this.tokenBarrier = null);
-						return postMessage();
-					});
+					tokenManager.setToken(message.data || '').then(() => postMessage());
 					break;
 				case 'validate-token':
 					tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
@@ -74,6 +70,8 @@ export class GitHub1sAuthenticationView {
 		});
 
 		tokenManager.onDidChangeToken((token) => {
+			this.tokenBarrier && this.tokenBarrier.open();
+			this.tokenBarrier && (this.tokenBarrier = null);
 			this.webviewPanel?.webview.postMessage({ type: 'token-changed', token });
 		});
 	}
@@ -82,7 +80,7 @@ export class GitHub1sAuthenticationView {
 		const extensionContext = getExtensionContext();
 
 		this.notice = notice;
-		withBarriar && !this.tokenBarrier && (this.tokenBarrier = new Barrier(300 * 1000));
+		withBarriar && !this.tokenBarrier && (this.tokenBarrier = new Barrier(600 * 1000));
 
 		if (!this.webviewPanel) {
 			this.webviewPanel = vscode.window.createWebviewPanel(
