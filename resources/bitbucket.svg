@@ -1,2 +1,13 @@
-<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1650017632755" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1262" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><defs><style type="text/css">@font-face { font-family: feedback-iconfont; src: url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff2?t=1630033759944") format("woff2"), url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff?t=1630033759944") format("woff"), url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.ttf?t=1630033759944") format("truetype"); }
-</style></defs><path d="M59.424 403.424l452.576 580-496-360q-10.272-7.424-14.272-19.712t0-24.288l57.728-176zM323.424 403.424l377.152 0-188.576 580zM210.272 53.728l113.152 349.728-264 0 113.152-349.728q4.576-13.152 18.848-13.152t18.848 13.152zM964.576 403.424l57.728 176q4 12 0 24.288t-14.272 19.712l-496 360 452.576-580zM964.576 403.424l-264 0 113.152-349.728q4.576-13.152 18.848-13.152t18.848 13.152z" p-id="1263"></path></svg>
+<?xml version="1.0"?>
+<svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <symbol height="15px" id="svg_17" viewBox="0 0 15 15" width="15px" xmlns="http://www.w3.org/2000/svg">
+   <path d="m0.5,0c-0.14,0 -0.28,0.06 -0.38,0.17c-0.09,0.11 -0.14,0.26 -0.11,0.4l2,14c0.03,0.25 0.24,0.43 0.49,0.43l10,0c0.25,0 0.46,-0.18 0.49,-0.43l1.23,-8.57l-4.85,0l-0.33,4l-3.08,0l-0.42,-5l8.82,0l0.63,-4.43c0.03,-0.14 -0.02,-0.29 -0.11,-0.4c-0.1,-0.11 -0.24,-0.17 -0.38,-0.17l-14,0z" fill="#ffffff"/>
+  </symbol>
+ </defs>
+ <g class="layer">
+  <title>Layer 1</title>
+  <circle cx="250" cy="250" fill="#ffffff" fill-opacity="0.00" id="svg_6" r="230" stroke="#ffffff" stroke-width="40"/>
+  <use id="svg_19" transform="matrix(17.1074 0 0 17.1074 -83.8313 -45.9421)" x="12.06" xlink:href="#svg_17" y="10.2"/>
+ </g>
+</svg>

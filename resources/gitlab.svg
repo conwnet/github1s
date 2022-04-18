@@ -1,2 +1,13 @@
-<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1650017632755" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1262" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><defs><style type="text/css">@font-face { font-family: feedback-iconfont; src: url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff2?t=1630033759944") format("woff2"), url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff?t=1630033759944") format("woff"), url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.ttf?t=1630033759944") format("truetype"); }
-</style></defs><path d="M59.424 403.424l452.576 580-496-360q-10.272-7.424-14.272-19.712t0-24.288l57.728-176zM323.424 403.424l377.152 0-188.576 580zM210.272 53.728l113.152 349.728-264 0 113.152-349.728q4.576-13.152 18.848-13.152t18.848 13.152zM964.576 403.424l57.728 176q4 12 0 24.288t-14.272 19.712l-496 360 452.576-580zM964.576 403.424l-264 0 113.152-349.728q4.576-13.152 18.848-13.152t18.848 13.152z" p-id="1263"></path></svg>
+<?xml version="1.0"?>
+<svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <symbol height="256px" id="svg_13" viewBox="0 0 256 256" width="256px" xmlns="http://www.w3.org/2000/svg">
+   <path fill="#ffffff" d="m238.28,152.5l-27.33,-102.48a12,12 0 0 0 -22.83,-1.12l-20.66,55.1l-78.92,0l-20.66,-55.1a12,12 0 0 0 -22.83,1.12l-27.33,102.48a16.04,16.04 0 0 0 6.35,17.28l94.82,65.64a15.92,15.92 0 0 0 7.1,2.7c0.22,0.04 0.44,0.05 0.67,0.07c0.09,0.01 0.18,0.02 0.28,0.02c0.13,0.01 0.27,0.04 0.4,0.04c0.07,0 0.13,-0.01 0.2,-0.01c0.15,0 0.31,0.01 0.46,0.01s0.31,-0.01 0.46,-0.01c0.07,0 0.13,0.01 0.2,0.01c0.13,0 0.27,-0.03 0.4,-0.04q0.14,-0.01 0.28,-0.02c0.23,-0.02 0.45,-0.03 0.67,-0.07a15.92,15.92 0 0 0 7.1,-2.7l94.82,-65.64a16.04,16.04 0 0 0 6.35,-17.28zm-205.1,4.13l9.77,-36.63l34.51,0l34.07,90.87l-78.35,-54.24zm111.29,54.24l34.07,-90.87l34.51,0l9.77,36.63l-78.35,54.24z"/>
+  </symbol>
+ </defs>
+ <g class="layer">
+  <title>Layer 1</title>
+  <circle cx="250" cy="250" fill="#ffffff" fill-opacity="0" id="svg_6" r="234" stroke="#ffffff" stroke-width="32"/>
+  <use id="svg_16" stroke-width="36" transform="matrix(1.60461 0 0 1.61922 42.0487 -61.0641)" x="1.85" xlink:href="#svg_13" y="59.8"/>
+ </g>
+</svg>
