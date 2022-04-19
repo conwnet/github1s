@@ -85,7 +85,8 @@
 	/*** begin connect to github block ***/
 	// resolves with `{ access_token: string; token_type?: string; scope?: string } | { error: string; error_description: string; }`
 	const ConnectToGitHub = () => {
-		const GITHUB_AUTH_URL = `https://github.com/login/oauth/authorize?scope=repo,user:email&client_id=eae6621348403ea49103`;
+		const GITHUB_AUTH_URL =
+			'https://github.com/login/oauth/authorize?scope=repo,user:email&client_id=eae6621348403ea49103';
 		const OPEN_WINDOW_FEATURES =
 			'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=800,height=520,top=150,left=150';
 		const AUTH_PAGE_ORIGIN = 'https://auth.github1s.com';
@@ -184,8 +185,8 @@
 	/*** end notificaton block ***/
 
 	window.vscodeWeb = {
-		additionalBuiltinExtensions: [],
 		windowIndicator: { label: repository },
+		additionalBuiltinExtensions: ['ms-vscode.anycode'],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		webWorkerExtensionHostIframeSrc:
 			staticAssetsPrefix + '/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
@@ -216,7 +217,7 @@
 		product: productJson,
 		builtinExtensions: window.github1sExtensions || [],
 		folderUri: { scheme: scheme, authority: '', path: '/' },
-		workspaceId: `${scheme}:${repository}`,
+		workspaceId: scheme + ':' + repository,
 		workspaceLabel: repository,
 		hideTextFileReadonlyIcon: false,
 		logo: {
