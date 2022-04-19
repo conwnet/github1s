@@ -89,6 +89,7 @@ export class GitHub1sDataSource extends DataSource {
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
 			path: treeItem.path,
 			type: FileTypeMap[treeItem.type] || FileType.File,
+			commitSha: FileTypeMap[treeItem.type] === FileType.Submodule ? treeItem.sha || 'HEAD' : undefined,
 			size: treeItem.size,
 		});
 

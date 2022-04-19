@@ -20,7 +20,8 @@ export interface CommonQueryOptions {
 
 export type DirectoryEntry =
 	| { type: FileType.Directory; path: string } // for director or link
-	| { type: FileType.File; path: string; size?: number }; // for a file
+	| { type: FileType.File; path: string; size?: number } // for a file
+	| { type: FileType.Submodule; path: string; commitSha?: string }; // for a submodule
 
 export interface Directory {
 	entries: DirectoryEntry[];
