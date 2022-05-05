@@ -71,6 +71,7 @@ export class GitHub1sDataSource extends DataSource {
 	private static instance: GitHub1sDataSource | null = null;
 	private cachedBranches: Branch[] | null = null;
 	private cachedTags: Branch[] | null = null;
+	public useSourcegraphAPIFirst = false;
 
 	public static getInstance(): GitHub1sDataSource {
 		if (GitHub1sDataSource.instance) {

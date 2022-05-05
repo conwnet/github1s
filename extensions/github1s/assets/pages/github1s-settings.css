@@ -24,6 +24,15 @@
 	margin-bottom: 10px;
 }
 
+.page-footer {
+  margin-top: 12px;
+}
+
+.page-footer input {
+ margin-right: 4px;
+}
+
+
 .description {
   font-size: 12px;
 	margin-bottom: 10px;

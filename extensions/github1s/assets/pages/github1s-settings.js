@@ -140,6 +140,12 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 	`;
 };
 
+const PageFooter = () => {
+	return html`
+		<div class="page-footer"><input type="checkbox" /><span>Use Sourcegraph API first ${preferSGApi}</span></div>
+	`;
+};
+
 const App = () => {
 	const [loading, setLoading] = useState(true);
 	const [pageType, setPageType] = useState('EDIT');
@@ -171,11 +177,17 @@ const App = () => {
 		return html`<${VscodeLoading} />`;
 	}
 
-	if (pageType === 'DETAIL') {
-		return html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} />`;
-	}
+	const tokenPage =
+		pageType === 'DETAIL'
+			? html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} />`
+			: html`<${TokenEditPage} token=${token} onCancel=${switchToDetail} />`;
 
-	return html`<${TokenEditPage} token=${token} onCancel=${switchToDetail} />`;
+	return html`
+		<div>
+			${tokenPage}
+			<${PageFooter} />
+		</div>
+	`;
 };
 
 const loadingElement = document.getElementById('page-loading');
