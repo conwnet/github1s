@@ -186,7 +186,7 @@
 
 	window.vscodeWeb = {
 		windowIndicator: { label: repository },
-		additionalBuiltinExtensions: ['ms-vscode.anycode'],
+		additionalBuiltinExtensions: [],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		webWorkerExtensionHostIframeSrc:
 			staticAssetsPrefix + '/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',

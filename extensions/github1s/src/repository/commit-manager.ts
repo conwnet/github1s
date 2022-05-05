@@ -161,7 +161,7 @@ export class CommitManager {
 			const commits = await dataSource.provideCommits(this._repo, queryOptions);
 
 			// also map `ref` to the first commit
-			commits.length && this._commitMap.set(ref, commits[0]);
+			!filePath && commits.length && this._commitMap.set(ref, commits[0]);
 			commits.forEach((commit) => {
 				this._commitMap.set(commit.sha, commit);
 				// directly set changed files if they are in response

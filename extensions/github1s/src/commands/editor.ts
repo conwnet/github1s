@@ -81,6 +81,7 @@ const getConcreteFileUri = async (fileUri: vscode.Uri) => {
 
 // show the file's diff between current commit and previous commit
 const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
+	console.log(fileUri.toString());
 	const queryBaseUriStr = queryString.parse(fileUri.query).base;
 	const rightFileUri = await getConcreteFileUri(
 		// if the `queryBaseUriStr` is empty, which means this command is called from
@@ -93,6 +94,8 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 	const leftCommit = await repository.getPreviousCommit(rightCommitSha, fileUri.path.slice(1));
 	// if we can't find previous commit, use the the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? rightFileUri.with({ authority: `${repo}+${leftCommit.sha}` }) : emptyFileUri;
+
+	console.log('left', leftCommit?.sha, 'right', rightCommitSha);
 
 	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;
 	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path.slice(1)));

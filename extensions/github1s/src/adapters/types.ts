@@ -13,7 +13,7 @@ export enum FileType {
 }
 
 export interface CommonQueryOptions {
-	page: number;
+	page: number; // starts from 1
 	pageSize: number;
 	query?: string;
 }
@@ -54,7 +54,6 @@ export interface Tag {
 
 export interface Commit {
 	sha: string;
-	creator?: string; // website login user
 	author?: string; // original commit author
 	email?: string;
 	message: string;
@@ -155,9 +154,9 @@ export interface ChangedFile {
 
 export interface BlameRange {
 	age: number;
-	startingLine: number;
+	startingLine: number; // starts from 1
 	endingLine: number;
-	commit: Commit;
+	commit: Commit & { parents?: string[] };
 }
 
 export interface CodeLocation {
@@ -176,6 +175,8 @@ export type SymbolHover = { markdown: string };
 
 export class DataSource {
 	// if `recursive` is true, it should try to return all subtrees
+	// the returned Directory.entries.path is relative the `path` in arguments,
+	// so if `recursive` is false, the returned path should be the file name
 	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory | null> {
 		return null;
 	}
@@ -212,7 +213,8 @@ export class DataSource {
 	}
 
 	// optionally return changed files (if `files` exists can reduce api calls)
-	// should return by the order of `new to old`
+	// commits should be returned by the order of `new to old`, if `options.path` is not empty,
+	// the first commit should be the latest commit that related the `options.path` file (maybe not `ref`)
 	provideCommits(
 		repo: string,
 		options: CommonQueryOptions & { from?: string; author?: string; path?: string }

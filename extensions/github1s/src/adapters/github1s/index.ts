@@ -10,6 +10,7 @@ import { GitHub1sDataSource } from './data-source';
 import { GitHub1sRouterParser } from './router-parser';
 import { GitHub1sAuthenticationView } from './authentication';
 import { GitHub1sSettingsViewProvider } from './settings';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 export class GitHub1sAdapter implements Adapter {
 	public scheme: string = 'github1s';
@@ -17,6 +18,7 @@ export class GitHub1sAdapter implements Adapter {
 	public codeReviewType: CodeReviewType = CodeReviewType.PullRequest;
 
 	resolveDataSource(): Promisable<DataSource> {
+		return Promise.resolve(SourcegraphDataSource.getInstance('github'));
 		return Promise.resolve(GitHub1sDataSource.getInstance());
 	}
 

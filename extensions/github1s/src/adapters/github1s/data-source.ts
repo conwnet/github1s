@@ -1,6 +1,6 @@
 /**
  * @file github1s data-source-provider
- * @author conwnet
+ * @author netcon
  */
 
 import {
@@ -160,6 +160,7 @@ export class GitHub1sDataSource extends DataSource {
 		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
 		return getTextSearchResults(repoPattern, ref, query, options);
 	}
+
 	async provideCommits(
 		repoFullName: string,
 		options: CommonQueryOptions & {
@@ -181,7 +182,6 @@ export class GitHub1sDataSource extends DataSource {
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits', requestParams);
 		return data.map((item) => ({
 			sha: item.sha,
-			creator: item.author?.login,
 			author: item.commit.author?.name,
 			email: item.commit.author?.email,
 			message: item.commit.message,
@@ -199,7 +199,6 @@ export class GitHub1sDataSource extends DataSource {
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
 		return {
 			sha: data.sha,
-			creator: data.author?.login,
 			author: data.commit.author?.name,
 			email: data.commit.author?.email,
 			message: data.commit.message,
@@ -309,10 +308,10 @@ export class GitHub1sDataSource extends DataSource {
 			endingLine: item.endingLine as number,
 			commit: {
 				sha: item.commit.sha as string,
-				creator: item.commit.author.name as string,
 				author: item.commit.author.name as string,
 				email: item.commit.author.email as string,
 				message: item.commit.message as string,
+				committer: item.commit.committer.name as string,
 				createTime: new Date(item.commit.authoredDate),
 				avatarUrl: item.commit.author.avatarUrl as string,
 			},
