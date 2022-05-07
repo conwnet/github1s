@@ -34,7 +34,7 @@
     "build": "./scripts/build.sh",
     "yalc": "yalc publish vscode-web && yalc add -D @github1s/vscode-web",
     "build:vscode": "cd vscode-web && yarn build",
-    "vercel-build": "yarn build && yarn hash && mv dist public",
+    "vercel-build": "yarn build && yarn hash && rm -rf public && mv dist public",
     "hash": "./scripts/hash.sh",
     "package": "./scripts/package.sh",
     "watch": "rm -rf dist && run-p watch:*",
