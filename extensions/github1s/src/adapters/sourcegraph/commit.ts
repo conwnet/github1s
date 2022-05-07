@@ -43,19 +43,27 @@ const CommitsQuery = gql`
 	}
 `;
 
-const formatCommit = (commit: any) => {
+const getGitHubUserAvatarUrl = (username) => {
+	if (username.includes(' ')) {
+		return `https://github.com/github.png`;
+	}
+	return `https://github.com/${username.slice(-5) === '[bot]' ? username.slice(0, -5) : username}.png`;
+};
+
+const formatCommit = (commit: any, isGitHub: boolean) => {
 	if (!commit) {
 		return null;
 	}
+	const authorName = commit?.author?.person?.name;
 	return {
 		sha: commit?.oid,
-		author: commit?.author?.person?.name,
+		author: authorName,
 		email: commit?.committer?.person?.email,
 		message: commit?.message,
 		committer: commit?.commiter?.person?.name,
 		createTime: new Date(commit?.author?.date),
 		parents: commit?.parents?.map?.((item) => item?.oid) || [],
-		avatarUrl: commit?.author?.person?.avatarURL,
+		avatarUrl: commit?.author?.person?.avatarURL || (isGitHub ? getGitHubUserAvatarUrl(authorName) : ''),
 	};
 };
 
@@ -66,8 +74,9 @@ export const getCommits = async (repository: string, ref: string, path?: string)
 	});
 
 	const firstCommit = repositoryData.commit;
-	const restCommits = firstCommit?.ancestors?.nodes?.map?.((item) => formatCommit(item)) || [];
-	return path ? restCommits : [formatCommit(firstCommit), ...restCommits].filter(Boolean);
+	const isGitHub = repository.startsWith('github.com/');
+	const restCommits = firstCommit?.ancestors?.nodes?.map?.((item) => formatCommit(item, isGitHub)) || [];
+	return path ? restCommits : [formatCommit(firstCommit, isGitHub), ...restCommits].filter(Boolean);
 };
 
 const CommitQuery = gql`
@@ -85,5 +94,6 @@ export const getCommit = async (repository: string, ref: string): Promise<Commit
 		query: CommitQuery,
 		variables: { repository, ref },
 	});
-	return formatCommit(repositoryData.commit);
+	const isGitHub = repository.startsWith('github.com/');
+	return formatCommit(repositoryData.commit, isGitHub);
 };

@@ -28,12 +28,8 @@ import {
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
-import { getTextSearchResults } from '../sourcegraph/search';
-import { getSymbolDefinitions } from '../sourcegraph/definition';
-import { getSymbolReferences } from '../sourcegraph/reference';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
-import { getSymbolHover } from '../sourcegraph/hover';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 const parseRepoFullName = (repoFullName: string) => {
@@ -65,10 +61,8 @@ const getPullState = (pull: { state: string; merged_at: string | null }): CodeRe
 	return CodeReviewState.Merged;
 };
 
-export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-
+const sourcegraphDataSource = SourcegraphDataSource.getInstance('github');
 const trySourcegraphApiFirst = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-	const sourcegraphDataSource = SourcegraphDataSource.getInstance('github');
 	const originalMethod = descriptor.value;
 
 	descriptor.value = async <T extends (...args) => Promise<any>>(...args: Parameters<T>) => {
@@ -172,15 +166,13 @@ export class GitHub1sDataSource extends DataSource {
 		return this.cachedTags.find((item) => item.name === tagName) || null;
 	}
 
-	@trySourcegraphApiFirst
 	async provideTextSearchResults(
 		repoFullName: string,
 		ref: string,
 		query: TextSearchQuery,
 		options: TextSearchOptions
 	): Promise<TextSearchResults> {
-		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
-		return getTextSearchResults(repoPattern, ref, query, options);
+		return sourcegraphDataSource.provideTextSearchResults(repoFullName, ref, query, options);
 	}
 
 	@trySourcegraphApiFirst
@@ -352,8 +344,7 @@ export class GitHub1sDataSource extends DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolDefinitions> {
-		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
-		return getSymbolDefinitions(repoPattern, ref, path, line, character, symbol);
+		return sourcegraphDataSource.provideSymbolDefinitions(repoFullName, ref, path, line, character, symbol);
 	}
 
 	async provideSymbolReferences(
@@ -364,8 +355,7 @@ export class GitHub1sDataSource extends DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolReferences> {
-		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
-		return getSymbolReferences(repoPattern, ref, path, line, character, symbol);
+		return sourcegraphDataSource.provideSymbolReferences(repoFullName, ref, path, line, character, symbol);
 	}
 
 	async provideSymbolHover(
@@ -376,8 +366,7 @@ export class GitHub1sDataSource extends DataSource {
 		character: number,
 		_symbol: string
 	): Promise<SymbolHover | null> {
-		const repoPattern = `^${escapeRegexp(`github\.com/${repoFullName}`)}$`;
-		return getSymbolHover(repoPattern, ref, path, line, character);
+		return sourcegraphDataSource.provideSymbolHover(repoFullName, ref, path, line, character, _symbol);
 	}
 
 	provideUserAvatarLink(user: string): string {
