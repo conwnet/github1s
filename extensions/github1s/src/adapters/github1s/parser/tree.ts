@@ -6,6 +6,23 @@
 import { PageType, RouterState } from '../../types';
 import { parsePath } from 'history';
 import { GitHubFetcher } from '../fetcher';
+import { SourcegraphDataSource } from '@/adapters/sourcegraph/data-source';
+
+const detectRefWithSourcegraphApi = async (repoFullName: string, refAndFilePath: string) => {
+	const dataSource = SourcegraphDataSource.getInstance('github');
+	const [firstPart] = refAndFilePath.split('/');
+
+	const searchOptions = { page: 1, pageSize: 99999, query: firstPart };
+	const [matchedBranches, matchedTags] = await Promise.all([
+		dataSource.provideBranches(repoFullName, searchOptions),
+		dataSource.provideTags(repoFullName, searchOptions),
+	]);
+	const exactRef = [...matchedBranches, ...matchedTags].find(
+		(ref) => refAndFilePath === ref.name || refAndFilePath.startsWith(`${ref.name}/`)
+	);
+	const ref = exactRef ? exactRef.name : firstPart;
+	return { ref, path: refAndFilePath.slice(ref.length + 1) };
+};
 
 export const extractGitHubRef = async (
 	repoFullName: string,
@@ -14,9 +31,16 @@ export const extractGitHubRef = async (
 	if (!refAndFilePath) {
 		return { ref: 'HEAD', path: '' };
 	}
-	if (refAndFilePath.startsWith('HEAD/')) {
+	if (refAndFilePath.match(/^HEAD(\/.*)?$/i)) {
 		return { ref: 'HEAD', path: refAndFilePath.slice(5) };
 	}
+
+	if (GitHubFetcher.getInstance().useSourcegraphApiFirst()) {
+		try {
+			return await detectRefWithSourcegraphApi(repoFullName, refAndFilePath);
+		} catch (e) {}
+	}
+
 	return GitHubFetcher.getInstance()
 		.request(`GET /repos/${repoFullName}/git/extract-ref/${refAndFilePath}`)
 		.then((response) => {

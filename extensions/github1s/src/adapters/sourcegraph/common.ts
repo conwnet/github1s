@@ -3,8 +3,8 @@
  * @author netcon
  */
 
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
-import { trimEnd, trimStart } from '@/helpers/util';
+import { ApolloClient, ApolloQueryResult, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import { isNil, trimEnd, trimStart } from '@/helpers/util';
 
 const sourcegraphLink = createHttpLink({
 	uri: 'https://sourcegraph.com/.api/graphql',
@@ -14,6 +14,18 @@ export const sourcegraphClient = new ApolloClient({
 	link: sourcegraphLink,
 	cache: new InMemoryCache(),
 });
+
+export const querySourcegraphRepository = async (
+	...args: Parameters<typeof sourcegraphClient.query>
+): Promise<Record<string, any>> => {
+	const response = await sourcegraphClient.query(...args);
+	if (isNil((response.data as any).repository)) {
+		const error = new Error('repository is not found');
+		(error as any).repositoryNotFound = true;
+		throw error;
+	}
+	return (response.data as any).repository;
+};
 
 export const canBeConvertToRegExp = (str: string) => {
 	try {

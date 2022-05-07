@@ -5,7 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { SymbolHover } from '../types';
-import { sourcegraphClient } from './common';
+import { querySourcegraphRepository } from './common';
 
 const LSIFHoverQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
@@ -34,7 +34,7 @@ const getLSIFHover = async (
 	line: number,
 	character: number
 ): Promise<SymbolHover | null> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: LSIFHoverQuery,
 		variables: {
 			repository: repository,
@@ -44,7 +44,7 @@ const getLSIFHover = async (
 			character,
 		},
 	});
-	const markdown = response?.data?.repository?.commit?.blob?.lsif?.hover?.markdown?.text;
+	const markdown = repositoryData.commit?.blob?.lsif?.hover?.markdown?.text;
 
 	if (!markdown) {
 		return null;

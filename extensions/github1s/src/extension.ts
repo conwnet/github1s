@@ -33,25 +33,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Ensure the router has been initialized
 	await router.initialize(browserUrlManager);
 
-	// register VS Code providers
-	registerVSCodeProviders();
+	// do follow-up works in parallel
+	await Promise.all([
+		registerVSCodeProviders(),
+		registerEventListeners(),
+		registerGitHub1sCommands(),
+		registerCustomViews(),
+		updateSourceControlChanges(),
+		decorateStatusBar(),
+	]);
 
-	// register the necessary event listeners
-	registerEventListeners();
-
-	// register GitHub1s Commands
-	registerGitHub1sCommands();
-
-	// register custom views
-	registerCustomViews();
-
-	// activate SourceControl features,
-	updateSourceControlChanges();
-
-	// decorate Status Bar
-	decorateStatusBar();
-
-	// initialize the VSCode's state
 	initialVSCodeState();
 }
 

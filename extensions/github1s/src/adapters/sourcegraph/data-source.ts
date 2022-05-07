@@ -30,6 +30,7 @@ import { readDirectory, readFile } from './file';
 import { getSymbolHover } from './hover';
 import { getAllRefs } from './ref';
 import { getSymbolReferences } from './reference';
+import { getRepository } from './repository';
 import { getTextSearchResults } from './search';
 
 type SupportedPlatfrom = 'github' | 'gitlab' | 'bitbucket';
@@ -71,6 +72,10 @@ export class SourcegraphDataSource extends DataSource {
 
 	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
 		return readDirectory(this.buildRepository(repo), ref, path, recursive);
+	}
+
+	async provideRepository(repo: string) {
+		return getRepository(this.buildRepository(repo));
 	}
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {

@@ -40,6 +40,7 @@ module.exports = /** @type WebpackConfig */ {
 							compilerOptions: {
 								sourceMap: true,
 								declaration: false,
+								experimentalDecorators: true,
 							},
 						},
 					},

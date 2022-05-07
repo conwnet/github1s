@@ -5,7 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { Commit } from '../types';
-import { sourcegraphClient } from './common';
+import { querySourcegraphRepository } from './common';
 
 const CommitDetail = `
 	oid
@@ -60,11 +60,12 @@ const formatCommit = (commit: any) => {
 };
 
 export const getCommits = async (repository: string, ref: string, path?: string): Promise<Commit[]> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: CommitsQuery,
 		variables: { repository, ref, path: path || '' },
 	});
-	const firstCommit = response?.data?.repository?.commit;
+
+	const firstCommit = repositoryData.commit;
 	const restCommits = firstCommit?.ancestors?.nodes?.map?.((item) => formatCommit(item)) || [];
 	return path ? restCommits : [formatCommit(firstCommit), ...restCommits].filter(Boolean);
 };
@@ -80,9 +81,9 @@ query($repository: String!, $ref: String!) {
 `;
 
 export const getCommit = async (repository: string, ref: string): Promise<Commit | null> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: CommitQuery,
 		variables: { repository, ref },
 	});
-	return formatCommit(response?.data?.repository?.commit);
+	return formatCommit(repositoryData.commit);
 };

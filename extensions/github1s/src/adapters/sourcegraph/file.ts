@@ -4,8 +4,8 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { sourcegraphClient } from './common';
-import { File, Directory, FileType } from '../types';
+import { querySourcegraphRepository } from './common';
+import { Directory, FileType } from '../types';
 
 const DirectoryQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $recursive: Boolean = false) {
@@ -32,11 +32,11 @@ export const readDirectory = async (
 	path: string,
 	recursive = false
 ): Promise<Directory> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: DirectoryQuery,
 		variables: { repository, ref, path, recursive },
 	});
-	const files = (await response?.data?.repository?.commit?.tree?.entries) || [];
+	const files = repositoryData.commit?.tree?.entries || [];
 	const pathParts = path.split('/').filter(Boolean);
 	return {
 		entries: files.map((file) => ({
@@ -67,10 +67,10 @@ export const readFile = async (
 	path: string,
 	recursive = false
 ): Promise<{ content: string; binary: boolean }> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: FileQuery,
 		variables: { repository, ref, path, recursive },
 	});
-	const blob = await response?.data?.repository?.commit?.blob;
+	const blob = repositoryData.commit?.blob;
 	return { content: blob?.content || '', binary: blob?.binary || false };
 };

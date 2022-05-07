@@ -4,7 +4,7 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { sourcegraphClient } from './common';
+import { querySourcegraphRepository } from './common';
 import { getSymbolPositions } from './position';
 import { SymbolReferences } from '../types';
 
@@ -53,11 +53,11 @@ const getLSIFReferences = async (
 	line: number,
 	character: number
 ): Promise<SymbolReferences> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: LSIFReferencesQuery,
 		variables: { repository, ref, path, line, character },
 	});
-	const referenceNodes = response?.data?.repository?.commit?.blob?.lsif?.references?.nodes;
+	const referenceNodes = repositoryData.commit?.blob?.lsif?.references?.nodes;
 	// TODO: cross-repository symbols
 	return (referenceNodes || []).map(({ resource, range }) => {
 		return { path: resource.path, range };

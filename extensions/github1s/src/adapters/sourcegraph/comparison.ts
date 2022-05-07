@@ -5,7 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { ChangedFile, FileChangeStatus } from '../types';
-import { sourcegraphClient } from './common';
+import { querySourcegraphRepository } from './common';
 
 const ComparisonQuery = gql`
 	query($repository: String!, $base: String!, $head: String!) {
@@ -36,11 +36,11 @@ const getFileChangeStatus = (oldPath: string | null, newPath: string | null): Fi
 };
 
 export const compareCommits = async (repository: string, base: string, head: string): Promise<ChangedFile[]> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: ComparisonQuery,
 		variables: { repository, base, head },
 	});
-	const diffFiles = response?.data?.repository?.comparison?.fileDiffs?.nodes || [];
+	const diffFiles = repositoryData.comparison?.fileDiffs?.nodes || [];
 
 	return diffFiles.map((file) => {
 		const status = getFileChangeStatus(file.oldPath, file.newPath);

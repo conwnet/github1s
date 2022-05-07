@@ -3,9 +3,8 @@
  * @author netcon
  */
 
-import * as vscode from 'vscode';
-
 export const noop = () => {};
+export const isNil = (value: any) => value === undefined || value === null;
 
 export const trimStart = (str: string, chars: string = ' '): string => {
 	let index = 0;

@@ -5,7 +5,7 @@
 
 import { gql } from '@apollo/client/core';
 import { BlameRange } from '../types';
-import { sourcegraphClient } from './common';
+import { querySourcegraphRepository } from './common';
 
 const BlameRangesQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!) {
@@ -45,12 +45,12 @@ const computeBlameRangeAge = (time: number, oldestTime: number, newestTime: numb
 };
 
 export const getFileBlameRanges = async (repository: string, ref: string, path: string): Promise<BlameRange[]> => {
-	const response = await sourcegraphClient.query({
+	const repositoryData = await querySourcegraphRepository({
 		query: BlameRangesQuery,
 		variables: { repository, ref, path },
 	});
 
-	const blames = response?.data?.repository?.commit?.blob?.blame || [];
+	const blames = repositoryData.commit?.blob?.blame || [];
 	const commitTimes = blames.map((blame) => new Date(blame?.commit?.author?.date).getTime()).sort();
 	const oldestTime = commitTimes[0];
 	const newestTime = commitTimes[commitTimes.length - 1];

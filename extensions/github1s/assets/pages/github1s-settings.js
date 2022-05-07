@@ -141,8 +141,32 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 };
 
 const PageFooter = () => {
+	const [sgApiFirst, setSgApiFirst] = useState(false);
+
+	const updateSgApiFirst = useCallback(() => {
+		postMessage('get-use-sourcegraph-api').then((value) => {
+			setSgApiFirst(value);
+		});
+	}, []);
+
+	const handleCheckboxChange = useCallback(
+		(event) => {
+			postMessage('set-use-sourcegraph-api', event.target.checked).then(() => {
+				updateSgApiFirst();
+			});
+		},
+		[updateSgApiFirst]
+	);
+
+	useEffect(() => {
+		updateSgApiFirst();
+	}, [updateSgApiFirst]);
+
 	return html`
-		<div class="page-footer"><input type="checkbox" /><span>Use Sourcegraph API first ${preferSGApi}</span></div>
+		<div class="page-footer">
+			<input type="checkbox" checked=${sgApiFirst} onChange=${handleCheckboxChange} />
+			<span>Use Sourcegraph API first for this repository</span>
+		</div>
 	`;
 };
 

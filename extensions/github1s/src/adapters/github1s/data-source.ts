@@ -25,7 +25,6 @@ import {
 	ChangedFile,
 	SymbolHover,
 } from '../types';
-(self as any).global = self;
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
@@ -35,6 +34,7 @@ import { getSymbolReferences } from '../sourcegraph/reference';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
 import { getSymbolHover } from '../sourcegraph/hover';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -67,11 +67,25 @@ const getPullState = (pull: { state: string; merged_at: string | null }): CodeRe
 
 export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
+const trySourcegraphApiFirst = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+	const sourcegraphDataSource = SourcegraphDataSource.getInstance('github');
+	const originalMethod = descriptor.value;
+
+	descriptor.value = async <T extends (...args) => Promise<any>>(...args: Parameters<T>) => {
+		const githubFetcher = GitHubFetcher.getInstance();
+		if (githubFetcher.useSourcegraphApiFirst()) {
+			try {
+				return await sourcegraphDataSource[propertyKey](...args);
+			} catch (e) {}
+		}
+		return originalMethod.apply(target, args);
+	};
+};
+
 export class GitHub1sDataSource extends DataSource {
 	private static instance: GitHub1sDataSource | null = null;
 	private cachedBranches: Branch[] | null = null;
 	private cachedTags: Branch[] | null = null;
-	public useSourcegraphAPIFirst = false;
 
 	public static getInstance(): GitHub1sDataSource {
 		if (GitHub1sDataSource.instance) {
@@ -80,6 +94,7 @@ export class GitHub1sDataSource extends DataSource {
 		return (GitHub1sDataSource.instance = new GitHub1sDataSource());
 	}
 
+	@trySourcegraphApiFirst
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
 		const fetcher = GitHubFetcher.getInstance();
 		const encodedPath = encodeFilePath(path);
@@ -100,6 +115,7 @@ export class GitHub1sDataSource extends DataSource {
 		};
 	}
 
+	@trySourcegraphApiFirst
 	async provideFile(repoFullName: string, ref: string, path: string): Promise<File> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -118,6 +134,7 @@ export class GitHub1sDataSource extends DataSource {
 		}
 	);
 
+	@trySourcegraphApiFirst
 	async provideBranches(repoFullName: string, options: CommonQueryOptions): Promise<Branch[]> {
 		if (!this.cachedBranches) {
 			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
@@ -128,6 +145,7 @@ export class GitHub1sDataSource extends DataSource {
 		return matchedBranches.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
+	@trySourcegraphApiFirst
 	async provideBranch(repoFullName: string, branchName: string): Promise<Branch | null> {
 		if (!this.cachedBranches) {
 			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
@@ -135,6 +153,7 @@ export class GitHub1sDataSource extends DataSource {
 		return this.cachedBranches.find((item) => item.name === branchName) || null;
 	}
 
+	@trySourcegraphApiFirst
 	async provideTags(repoFullName: string, options: CommonQueryOptions): Promise<Tag[]> {
 		if (!this.cachedTags) {
 			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'tags')) as Tag[];
@@ -145,6 +164,7 @@ export class GitHub1sDataSource extends DataSource {
 		return matchedTags.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
 	}
 
+	@trySourcegraphApiFirst
 	async provideTag(repoFullName: string, tagName: string): Promise<Tag | null> {
 		if (!this.cachedTags) {
 			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'heads')) as Tag[];
@@ -152,6 +172,7 @@ export class GitHub1sDataSource extends DataSource {
 		return this.cachedTags.find((item) => item.name === tagName) || null;
 	}
 
+	@trySourcegraphApiFirst
 	async provideTextSearchResults(
 		repoFullName: string,
 		ref: string,
@@ -162,6 +183,7 @@ export class GitHub1sDataSource extends DataSource {
 		return getTextSearchResults(repoPattern, ref, query, options);
 	}
 
+	@trySourcegraphApiFirst
 	async provideCommits(
 		repoFullName: string,
 		options: CommonQueryOptions & {
@@ -193,6 +215,7 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
+	@trySourcegraphApiFirst
 	async provideCommit(repoFullName: string, ref: string): Promise<Commit & { files?: ChangedFile[] }> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -215,6 +238,7 @@ export class GitHub1sDataSource extends DataSource {
 		};
 	}
 
+	@trySourcegraphApiFirst
 	async provideCommitChangedFiles(
 		repoFullName: string,
 		ref: string,
@@ -296,6 +320,7 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
+	@trySourcegraphApiFirst
 	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);

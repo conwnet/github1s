@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { getExtensionContext } from '@/helpers/context';
 import { createPageHtml, getWebviewOptions } from '@/helpers/page';
 import { GitHubTokenManager } from './token';
+import { GitHubFetcher } from './fetcher';
 
 export const messageApiMap = {
 	info: vscode.window.showInformationMessage,
@@ -19,6 +20,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 
 	public registerListeners(webviewView: vscode.WebviewView) {
 		const tokenManager = GitHubTokenManager.getInstance();
+		const githubFetcher = GitHubFetcher.getInstance();
 
 		webviewView.webview.onDidReceiveMessage((message) => {
 			const commonResponse = { id: message.id, type: message.type };
@@ -51,11 +53,21 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 					const messageApi = messageApiMap[message.data?.level];
 					messageApi && messageApi(...message.data?.args).then((response) => postMessage(response));
 					break;
+				case 'get-use-sourcegraph-api':
+					postMessage(githubFetcher.useSourcegraphApiFirst());
+					break;
+				case 'set-use-sourcegraph-api':
+					githubFetcher.setUseSourcegraphApiFirst(message.data);
+					postMessage(message.data);
+					break;
 			}
 		});
 
 		tokenManager.onDidChangeToken((token) => {
 			webviewView.webview.postMessage({ type: 'token-changed', token });
+		});
+		githubFetcher.onDidChangeUseSourcegraphApiFirst((value) => {
+			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-changed', value });
 		});
 	}
 
