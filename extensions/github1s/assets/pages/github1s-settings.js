@@ -165,7 +165,7 @@ const PageFooter = () => {
 	return html`
 		<div class="page-footer">
 			<input type="checkbox" checked=${sgApiFirst} onChange=${handleCheckboxChange} />
-			<span>Use Sourcegraph API first for this repository</span>
+			<span>Use Sourcegraph API first in this repository</span>
 		</div>
 	`;
 };

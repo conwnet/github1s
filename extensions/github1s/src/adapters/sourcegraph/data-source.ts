@@ -4,6 +4,7 @@
  */
 
 import { reuseable } from '@/helpers/func';
+import { joinPath } from '@/helpers/util';
 import { matchSorter } from 'match-sorter';
 import {
 	Branch,
@@ -22,6 +23,7 @@ import {
 	SymbolReferences,
 	SymbolDefinitions,
 	CommitsQueryOptions,
+	FileType,
 } from '../types';
 import { getFileBlameRanges } from './blame';
 import { getCommit, getCommits } from './commit';
@@ -41,7 +43,9 @@ const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
 	private cachedRefs: { branches: Branch[]; tags: Tag[] } | null = null;
+	private fileTypes = new Map<string, FileType>(); // cache if path is a directory
 	private textEncodder = new TextEncoder();
+	private pathRefs: string[] = [];
 
 	public static getInstance(platfrom: SupportedPlatfrom): SourcegraphDataSource {
 		if (!SourcegraphDataSource.instanceMap.has(platfrom)) {
@@ -62,7 +66,7 @@ export class SourcegraphDataSource extends DataSource {
 			return `gitlab.com/${repo}`;
 		}
 		if (this.platform === 'bitbucket') {
-			return `bitbucket.com/${repo}`;
+			return `bitbucket.org/${repo}`;
 		}
 		return repo;
 	}
@@ -71,9 +75,26 @@ export class SourcegraphDataSource extends DataSource {
 		return `^${escapeRegexp(this.buildRepository(repo))}$`;
 	}
 
-	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
-		return readDirectory(this.buildRepository(repo), ref, path, recursive);
+	async provideDirectory(repo: string, ref: string, path: string, recursive = false): Promise<Directory> {
+		const directories = await readDirectory(this.buildRepository(repo), ref, path, recursive);
+		directories.entries.forEach((entry) => {
+			this.fileTypes.set(joinPath(path, entry.path), FileType.Directory);
+		});
+		return directories;
 	}
+
+	detectPathFileType = reuseable(async (repo: string, ref: string, path: string) => {
+		const pathParts = path.split('/').filter(Boolean);
+		const trimmedPath = pathParts.join('/');
+		if (!trimmedPath) {
+			return FileType.Directory;
+		}
+		if (this.fileTypes.has(trimmedPath)) {
+			return this.fileTypes.get(trimmedPath)!;
+		}
+		await this.provideDirectory(repo, ref, pathParts.slice(0, -1).join('/'), false);
+		return this.fileTypes.get(trimmedPath) || FileType.File;
+	});
 
 	async provideRepository(repo: string) {
 		return getRepository(this.buildRepository(repo));
@@ -96,13 +117,17 @@ export class SourcegraphDataSource extends DataSource {
 		return (this.cachedRefs = { branches, tags });
 	});
 
-	async extractRefPath(repo: string, refAndFilePath: string): Promise<{ ref: string; path: string }> {
+	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
+		const pathRef = this.pathRefs.find(matchPathRef);
+		if (pathRef) {
+			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
+		}
 		const { branches, tags } = this.cachedRefs || (await this.prepareAllRefs(repo));
-		const exactRef = [...branches, ...tags].find(
-			(ref) => refAndFilePath === ref.name || refAndFilePath.startsWith(`${ref.name}/`)
-		);
-		const ref = exactRef ? exactRef.name : refAndFilePath.split('/')[0] || 'HEAD';
-		return { ref, path: refAndFilePath.slice(ref.length + 1) };
+		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
+		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
+		this.pathRefs.push(ref);
+		return { ref, path: refAndPath.slice(ref.length + 1) };
 	}
 
 	async provideBranches(repo: string, options?: CommonQueryOptions): Promise<Branch[]> {

@@ -31,13 +31,7 @@
 	let logoIcon = staticAssetsPrefix + '/config/github.svg';
 	let repository = 'conwnet/github1s';
 
-	if (hostname.match(/\.?(github1s\.com|github1s\.dev|vercel\.app)$/i)) {
-		scheme = 'github1s';
-		platformName = 'GitHub';
-		platformOrigin = 'https://github.com';
-		logoIcon = staticAssetsPrefix + '/config/github.svg';
-		repository = 'conwnet/github1s';
-	} else if (hostname.match(/\.?gitlab1s\.com$/i)) {
+	if (hostname.match(/\.?gitlab1s\.com$/i)) {
 		scheme = 'gitlab1s';
 		platformName = 'GitLab';
 		platformOrigin = 'https://gitlab.com';
@@ -51,9 +45,13 @@
 		repository = 'atlassian/clover';
 	}
 
-	if (hostname.match(/\.?(github1s\.com|github1s\.dev|gitlab1s\.com|bitbucket1s\.org|vercel\.app|localhost)$/i)) {
-		const pathParts = window.location.pathname.split('/').filter(Boolean).slice(0, 2);
-		pathParts.length === 2 && (repository = pathParts.join('/'));
+	if (hostname.match(/\.?(github1s\.com|github1s\.dev|bitbucket1s\.org|vercel\.app|localhost)$/i)) {
+		const repoParts = window.location.pathname.split('/').filter(Boolean).slice(0, 2);
+		repoParts.length === 2 && (repository = repoParts.join('/'));
+	} else if (hostname.match(/\.?gitlab1s\.com$/i)) {
+		const pathParts = window.location.pathname.split('/').filter(Boolean);
+		const dashIndex = pathParts.indexOf('-');
+		dashIndex > 0 && (repository = pathParts.slice(0, dashIndex).join('/'));
 	}
 
 	// set product.json

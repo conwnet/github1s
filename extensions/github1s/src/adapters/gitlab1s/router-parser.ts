@@ -4,7 +4,7 @@
  */
 
 import * as adapterTypes from '../types';
-import { parseGitLabPath } from './parser/index';
+import { parseGitLabPath } from './parser';
 
 export class GitLab1sRouterParser extends adapterTypes.RouterParser {
 	private static instance: GitLab1sRouterParser | null = null;

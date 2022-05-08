@@ -82,6 +82,7 @@ export class GitHub1sDataSource extends DataSource {
 	private static instance: GitHub1sDataSource | null = null;
 	private cachedBranches: Branch[] | null = null;
 	private cachedTags: Branch[] | null = null;
+	private pathRefs: string[] = [];
 
 	public static getInstance(): GitHub1sDataSource {
 		if (GitHub1sDataSource.instance) {
@@ -91,7 +92,7 @@ export class GitHub1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideDirectory(repoFullName: string, ref: string, path: string, recursive: boolean): Promise<Directory> {
+	async provideDirectory(repoFullName: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const fetcher = GitHubFetcher.getInstance();
 		const encodedPath = encodeFilePath(path);
 		// github api will return all files if `recursive` exists, even the value if false
@@ -132,11 +133,16 @@ export class GitHub1sDataSource extends DataSource {
 
 	@trySourcegraphApiFirst
 	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+		const pathRef = this.pathRefs.find((ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref);
+		if (pathRef) {
+			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
+		}
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, refAndPath };
 		const response = await fetcher.request(`GET /repos/{owner}/{repo}/git/extract-ref/{refAndPath}`, requestParams);
-		return response.data;
+		response.data?.ref && this.pathRefs.push(response.data.ref);
+		return response.data || { ref: 'HEAD', path: '' };
 	}
 
 	@trySourcegraphApiFirst

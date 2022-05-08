@@ -25,11 +25,14 @@
 }
 
 .page-footer {
+  display: flex;
+  align-items: center;
   margin-top: 12px;
 }
 
 .page-footer input {
  margin-right: 4px;
+ margin-left: 0;
 }
 
 

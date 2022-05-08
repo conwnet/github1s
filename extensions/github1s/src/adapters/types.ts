@@ -175,7 +175,7 @@ export class DataSource {
 	// if `recursive` is true, it should try to return all subtrees
 	// the returned Directory.entries.path is relative the `path` in arguments,
 	// so if `recursive` is false, the returned path should be the file name
-	provideDirectory(repo: string, ref: string, path: string, recursive: boolean): Promisable<Directory | null> {
+	provideDirectory(repo: string, ref: string, path: string, recursive = false): Promisable<Directory | null> {
 		return null;
 	}
 
