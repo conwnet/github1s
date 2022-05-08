@@ -13,7 +13,6 @@ export class Repository {
 	private static instanceMap = new Map<string, Repository>();
 
 	private _branchTagManager: BranchTagManager;
-	private _commitManager: CommitManager;
 	private _codeReviewManager: CodeReviewManager;
 	private _blameRangesCache: Map<string, BlameRange[]>;
 
@@ -27,7 +26,6 @@ export class Repository {
 
 	private constructor(private _scheme: string, private _repo: string) {
 		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
-		this._commitManager = CommitManager.getInstance(_scheme, _repo);
 		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
 		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
@@ -64,44 +62,44 @@ export class Repository {
 		return this._branchTagManager.hasMoreTags(...args);
 	}
 
-	getCommitList(...args: Parameters<CommitManager['getList']>) {
-		return this._commitManager.getList(...args);
+	getCommitList(ref: string = 'HEAD', filePath: string = '', forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
 	}
 
-	getCommitItem(...args: Parameters<CommitManager['getItem']>) {
-		return this._commitManager.getItem(...args);
+	getCommitItem(ref: string, forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getItem(forceUpdate);
 	}
 
-	loadMoreCommits(...args: Parameters<CommitManager['loadMore']>) {
-		return this._commitManager.loadMore(...args);
+	loadMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
 	}
 
-	hasMoreCommits(...args: Parameters<CommitManager['hasMore']>) {
-		return this._commitManager.hasMore(...args);
+	hasMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
 	}
 
-	getCommitChangedFiles(...args: Parameters<CommitManager['getChangedFiles']>) {
-		return this._commitManager.getChangedFiles(...args);
+	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getChangedFiles(forceUpdate);
 	}
 
-	loadMoreCommitChangedFiles(...args: Parameters<CommitManager['loadMoreChangedFiles']>) {
-		return this._commitManager.loadMoreChangedFiles(...args);
+	loadMoreCommitChangedFiles(ref: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').loadMoreChangedFiles();
 	}
 
-	hasMoreCommitChangedFiles(...args: Parameters<CommitManager['hasMoreChangedFiles']>) {
-		return this._commitManager.hasMoreChangedFiles(...args);
+	hasMoreCommitChangedFiles(ref: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').hasMoreChangedFiles();
 	}
 
-	getFileLatestCommit(...args: Parameters<CommitManager['getFileLatestCommit']>) {
-		return this._commitManager.getFileLatestCommit(...args);
+	getFileLatestCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getLatestCommit();
 	}
 
-	getPreviousCommit(...args: Parameters<CommitManager['getPreviousCommit']>) {
-		return this._commitManager.getPreviousCommit(...args);
+	getPreviousCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getPreviousCommit();
 	}
 
-	getNextCommit(...args: Parameters<CommitManager['getNextCommit']>) {
-		return this._commitManager.getNextCommit(...args);
+	getNextCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getNextCommit();
 	}
 
 	getCodeReviewList(...args: Parameters<CodeReviewManager['getList']>) {

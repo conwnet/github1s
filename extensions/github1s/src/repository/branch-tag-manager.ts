@@ -12,13 +12,13 @@ export class BranchTagManager {
 
 	private _branchMap = new Map<string, Branch>(); // branchName -> Branch
 	private _branchList: Branch[] | null = null;
-	private _branchPageSize = 100;
+	private _branchPageSize = 1000;
 	private _branchCurrentPage = 1; // page number is begin from 1
 	private _branchHasMore = true;
 
 	private _tagMap = new Map<string, Tag>(); // tagName -> Tag
 	private _tagList: Tag[] | null = null;
-	private _tagPageSize = 100;
+	private _tagPageSize = 1000;
 	private _tagCurrentPage = 1; // page number is begin from 1
 	private _tagHasMore = true;
 
