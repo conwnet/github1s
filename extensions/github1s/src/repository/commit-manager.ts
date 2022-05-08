@@ -30,8 +30,8 @@ class CommitChangedFilesManager {
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
 			if (forceUpdate || !this._changedFilesList) {
-				this._changedFilesList = [];
 				this._currentPage = 1;
+				this._changedFilesList = [];
 				await this.loadMore();
 			}
 			return this._changedFilesList;
@@ -78,6 +78,7 @@ export class CommitManager {
 	private _commitMap = new Map<string, Commit>(); // ref -> CommitWithDirection
 	private _relationMap = new Map<string, CommitRelation>(); // commitSha -> CommitRelation
 	private _pageSize = 100;
+	private _currentPage = 1;
 
 	public static getInstance(scheme: string, repo: string) {
 		const mapKey = `${scheme} ${repo}`;
@@ -129,6 +130,9 @@ export class CommitManager {
 			const commitList = this.resolveCommitList(ref, filePath);
 			const neverLoadMore = hasMore && commitList.length < this._pageSize;
 			if (forceUpdate || neverLoadMore) {
+				this._currentPage = 1;
+				this._commitMap = new Map<string, Commit>();
+				this._relationMap = new Map<string, CommitRelation>();
 				await this.loadMore(ref, filePath);
 			}
 			return this.resolveCommitList(ref, filePath);
@@ -155,13 +159,12 @@ export class CommitManager {
 	loadMore = reuseable(
 		async (ref: string = 'HEAD', filePath: string = ''): Promise<Commit[]> => {
 			const commitList = this.resolveCommitList(ref, filePath);
-			const latestRef = commitList?.[commitList.length - 1]?.sha || ref;
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const queryOptions = { pageSize: this._pageSize, page: 1, from: latestRef, path: filePath };
+			const queryOptions = { page: this._currentPage, pageSize: this._pageSize, from: ref, path: filePath };
 			const commits = await dataSource.provideCommits(this._repo, queryOptions);
 
-			// also map `ref` to the first commit
-			!filePath && commits.length && this._commitMap.set(ref, commits[0]);
+			// also map `ref` to the first commit if filePath is empty and currentPage is 1
+			!filePath && this._currentPage === 1 && commits.length && this._commitMap.set(ref, commits[0]);
 			commits.forEach((commit) => {
 				this._commitMap.set(commit.sha, commit);
 				// directly set changed files if they are in response
@@ -170,11 +173,15 @@ export class CommitManager {
 					manager.setChangedFiles(commit.files);
 				}
 			});
+			if (this._currentPage > 1 && commitList.length && commits.length) {
+				this.linkCommitShas(filePath, commits[0].sha, commitList[commitList.length - 1].sha);
+			}
 			for (let i = 1, len = commits.length; i < len; i++) {
 				const previousCommitSha = commits[i].sha;
 				const nextCommitSha = commits[i - 1].sha;
 				this.linkCommitShas(filePath, previousCommitSha, nextCommitSha);
 			}
+			this._currentPage += 1;
 			// if has more commits
 			const hasMore = commits.length === this._pageSize;
 			if (commits.length && !hasMore) {

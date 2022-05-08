@@ -30,8 +30,8 @@ class CodeReviewChangedFilesManager {
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
 			if (forceUpdate || !this._changedFilesList) {
-				this._changedFilesList = [];
 				this._currentPage = 1;
+				this._changedFilesList = [];
 				await this.loadMore();
 			}
 			return this._changedFilesList;
@@ -86,8 +86,8 @@ export class CodeReviewManager {
 	getList = reuseable(
 		async (forceUpdate: boolean = false): Promise<CodeReview[]> => {
 			if (forceUpdate || !this._codeReviewList) {
-				this._codeReviewList = [];
 				this._currentPage = 1;
+				this._codeReviewList = [];
 				await this.loadMore();
 			}
 			return this._codeReviewList;

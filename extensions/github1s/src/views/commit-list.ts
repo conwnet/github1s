@@ -61,8 +61,8 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = await router.getState();
-			await Repository.getInstance(scheme, repo).loadMoreCommits();
+			const { repo, ref } = await router.getState();
+			await Repository.getInstance(scheme, repo).loadMoreCommits(ref);
 			this._loadingBarrier.open();
 		}
 	}
