@@ -11,6 +11,7 @@ import {
 	FileSearchOptions,
 	ProviderResult,
 	Uri,
+	window,
 } from 'vscode';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
@@ -71,6 +72,8 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 			if (!rootDirectoryData?.truncated) {
 				const fsProvider = GitHub1sFileSystemProvider.getInstance();
 				fsProvider.populateWithDirectoryEntities(rootDirectoryUri, rootDirectoryData?.entries || []);
+			} else {
+				window.showWarningMessage('Too many files in this repository, file search feature may be limited.');
 			}
 
 			const fileUris = (rootDirectoryData?.entries || [])

@@ -7,12 +7,14 @@ import { gql } from '@apollo/client/core';
 import { querySourcegraphRepository } from './common';
 import { Directory, FileType } from '../types';
 
+const FILE_COUNT_LIMIT = 50000;
+
 const DirectoryQuery = gql`
 	query($repository: String!, $ref: String!, $path: String!, $recursive: Boolean = false) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				tree(path: $path) {
-					entries(recursive: $recursive, recursiveSingleChild: false) {
+					entries(first: ${FILE_COUNT_LIMIT}, recursive: $recursive, recursiveSingleChild: false) {
 						path
 						isDirectory
 						# TODO submodule don't work now
@@ -44,7 +46,7 @@ export const readDirectory = async (
 			type: file.isDirectory ? FileType.Directory : file.submodule ? FileType.Submodule : FileType.File,
 			commitSha: file.submodule?.sha,
 		})),
-		truncated: false,
+		truncated: files.length >= FILE_COUNT_LIMIT,
 	};
 };
 
