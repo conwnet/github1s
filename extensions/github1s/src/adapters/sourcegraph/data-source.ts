@@ -21,6 +21,7 @@ import {
 	SymbolHover,
 	SymbolReferences,
 	SymbolDefinitions,
+	CommitsQueryOptions,
 } from '../types';
 import { getFileBlameRanges } from './blame';
 import { getCommit, getCommits } from './commit';
@@ -92,27 +93,46 @@ export class SourcegraphDataSource extends DataSource {
 
 	prepareAllRefs = reuseable(async (repo: string) => {
 		const { branches, tags } = await getAllRefs(this.buildRepository(repo));
-		this.cachedRefs = { branches, tags };
+		return (this.cachedRefs = { branches, tags });
 	});
 
-	async provideBranches(repo: string, options: CommonQueryOptions): Promise<Branch[]> {
-		if (!this.cachedRefs) {
-			await this.prepareAllRefs(repo);
-		}
-		const matchedBranches = options.query
-			? matchSorter(this.cachedRefs?.branches || [], options.query, { keys: ['name'] })
-			: this.cachedRefs?.branches || [];
-		return matchedBranches.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
+	async extractGitHubRef(repo: string, refAndFilePath: string): Promise<{ ref: string; path: string }> {
+		const { branches, tags } = this.cachedRefs || (await this.prepareAllRefs(repo));
+		const exactRef = [...branches, ...tags].find(
+			(ref) => refAndFilePath === ref.name || refAndFilePath.startsWith(`${ref.name}/`)
+		);
+		const ref = exactRef ? exactRef.name : refAndFilePath.split('/')[0] || 'HEAD';
+		return { ref, path: refAndFilePath.slice(ref.length + 1) };
 	}
 
-	async provideTags(repo: string, options: CommonQueryOptions): Promise<Tag[]> {
+	async provideBranches(repo: string, options?: CommonQueryOptions): Promise<Branch[]> {
 		if (!this.cachedRefs) {
 			await this.prepareAllRefs(repo);
 		}
-		const matchedTags = options.query
+		const matchedBranches = options?.query
+			? matchSorter(this.cachedRefs?.branches || [], options.query, { keys: ['name'] })
+			: this.cachedRefs?.branches || [];
+		if (options?.pageSize) {
+			const page = options.page || 1;
+			const pageSize = options.pageSize;
+			return matchedBranches.slice(pageSize * (page - 1), pageSize * page);
+		}
+		return matchedBranches;
+	}
+
+	async provideTags(repo: string, options?: CommonQueryOptions): Promise<Tag[]> {
+		if (!this.cachedRefs) {
+			await this.prepareAllRefs(repo);
+		}
+		const matchedTags = options?.query
 			? matchSorter(this.cachedRefs?.tags || [], options.query, { keys: ['name'] })
 			: this.cachedRefs?.tags || [];
-		return matchedTags.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
+		if (options?.pageSize) {
+			const page = options.page || 1;
+			const pageSize = options.pageSize;
+			return matchedTags.slice(pageSize * (page - 1), pageSize * page);
+		}
+		return matchedTags;
 	}
 
 	async provideTextSearchResults(
@@ -125,24 +145,26 @@ export class SourcegraphDataSource extends DataSource {
 		return getTextSearchResults(repoPattern, ref, query, options);
 	}
 
-	async provideCommits(
-		repo: string,
-		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
-	): Promise<(Commit & { files?: ChangedFile[] | undefined })[]> {
-		let commits = await getCommits(this.buildRepository(repo), options.from || 'HEAD', options.path);
-		if (options.path && commits.length) {
+	async provideCommits(repo: string, options?: CommitsQueryOptions): Promise<(Commit & { files?: ChangedFile[] })[]> {
+		let commits = await getCommits(
+			this.buildRepository(repo),
+			options?.from || 'HEAD',
+			options?.path,
+			options?.pageSize ? options.pageSize * (options.page || 1) : undefined
+		);
+		if (options?.path && commits.length) {
 			// find the latested that related the `options.path` file
-			const changedFiles = await this.provideCommitChangedFiles(repo, commits[0].sha, { page: 1, pageSize: 999 });
+			const changedFiles = await this.provideCommitChangedFiles(repo, commits[0].sha);
 			commits = changedFiles.find((file) => file.path === options.path) ? commits : commits.slice(1);
 		}
-		return commits.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
+		return options?.pageSize ? commits.slice(options.pageSize * ((options.page || 1) - 1)) : commits;
 	}
 
 	async provideCommit(repo: string, ref: string): Promise<Commit | null> {
 		return getCommit(this.buildRepository(repo), ref);
 	}
 
-	async provideCommitChangedFiles(repo: string, ref: string, options: CommonQueryOptions): Promise<ChangedFile[]> {
+	async provideCommitChangedFiles(repo: string, ref: string, _options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		return compareCommits(this.buildRepository(repo), `${ref}~`, ref);
 	}
 

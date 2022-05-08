@@ -12,11 +12,9 @@ export enum FileType {
 	Submodule = 'Submodule',
 }
 
-export interface CommonQueryOptions {
-	page: number; // starts from 1
-	pageSize: number;
-	query?: string;
-}
+// `page` starts from 1
+type PaginationOptions = { page: number; pageSize: number } | { page?: number; pageSize?: number };
+export type CommonQueryOptions = { query?: string } & PaginationOptions;
 
 export type DirectoryEntry =
 	| { type: FileType.Directory; path: string } // for director or link
@@ -52,6 +50,8 @@ export interface Tag {
 	commitSha: string;
 }
 
+export type CommitsQueryOptions = { from?: string; author?: string; path?: string } & CommonQueryOptions;
+
 export interface Commit {
 	sha: string;
 	author?: string; // original commit author
@@ -71,12 +71,8 @@ export interface TextSearchQuery {
 	isWordMatch?: boolean;
 }
 
-export interface TextSearchOptions {
-	page: number;
-	pageSize: number;
-	includes: string[]; // glob string
-	excludes: string[]; // glob string
-}
+// `includes` and `excludes` both are glob strings
+export type TextSearchOptions = { includes?: string[]; excludes?: string[] } & PaginationOptions;
 
 export interface TextSearchResults {
 	results: {
@@ -114,6 +110,8 @@ export enum CodeReviewState {
 	Merged = 'Merged', // icon: 🟣
 	Closed = 'Closed', // icon: 🔴
 }
+
+export type CodeReviewsQueryOptions = { state?: CodeReviewState; creator?: string } & CommonQueryOptions;
 
 // may be a Pull Request for GitHub,
 // or a Merge Request for GitLab,
@@ -186,7 +184,7 @@ export class DataSource {
 		return null;
 	}
 
-	provideBranches(repo: string, options: CommonQueryOptions): Promisable<Branch[]> {
+	provideBranches(repo: string, options?: CommonQueryOptions): Promisable<Branch[]> {
 		return [];
 	}
 
@@ -194,7 +192,7 @@ export class DataSource {
 		return null;
 	}
 
-	provideTags(repo: string, options: CommonQueryOptions): Promisable<Tag[]> {
+	provideTags(repo: string, options?: CommonQueryOptions): Promisable<Tag[]> {
 		return [];
 	}
 
@@ -207,7 +205,7 @@ export class DataSource {
 		repo: string,
 		ref: string,
 		query: TextSearchQuery,
-		options: TextSearchOptions
+		options?: TextSearchOptions
 	): Promisable<TextSearchResults> {
 		return { results: [], truncated: false };
 	}
@@ -215,10 +213,7 @@ export class DataSource {
 	// optionally return changed files (if `files` exists can reduce api calls)
 	// commits should be returned by the order of `new to old`, if `options.path` is not empty,
 	// the first commit should be the latest commit that related the `options.path` file (maybe not `ref`)
-	provideCommits(
-		repo: string,
-		options: CommonQueryOptions & { from?: string; author?: string; path?: string }
-	): Promisable<(Commit & { files?: ChangedFile[] })[]> {
+	provideCommits(repo: string, options?: CommitsQueryOptions): Promisable<(Commit & { files?: ChangedFile[] })[]> {
 		return [];
 	}
 
@@ -228,14 +223,14 @@ export class DataSource {
 		return null;
 	}
 
-	provideCommitChangedFiles(repo: string, ref: string, options: CommonQueryOptions): Promisable<ChangedFile[]> {
+	provideCommitChangedFiles(repo: string, ref: string, options?: CommonQueryOptions): Promisable<ChangedFile[]> {
 		return [];
 	}
 
 	// optionally return changed files (if `files` exists can reduce api calls)
 	provideCodeReviews(
 		repo: string,
-		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
+		options?: CodeReviewsQueryOptions
 	): Promisable<(CodeReview & { files?: ChangedFile[] })[]> {
 		return [];
 	}
@@ -245,7 +240,7 @@ export class DataSource {
 		return null;
 	}
 
-	provideCodeReviewChangedFiles(repo: string, id: string, options: CommonQueryOptions): Promisable<ChangedFile[]> {
+	provideCodeReviewChangedFiles(repo: string, id: string, options?: CommonQueryOptions): Promisable<ChangedFile[]> {
 		return [];
 	}
 

@@ -24,6 +24,8 @@ import {
 	FileChangeStatus,
 	ChangedFile,
 	SymbolHover,
+	CommitsQueryOptions,
+	CodeReviewsQueryOptions,
 } from '../types';
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
@@ -62,17 +64,17 @@ const getPullState = (pull: { state: string; merged_at: string | null }): CodeRe
 };
 
 const sourcegraphDataSource = SourcegraphDataSource.getInstance('github');
-const trySourcegraphApiFirst = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 	const originalMethod = descriptor.value;
 
-	descriptor.value = async <T extends (...args) => Promise<any>>(...args: Parameters<T>) => {
+	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
 		const githubFetcher = GitHubFetcher.getInstance();
 		if (githubFetcher.useSourcegraphApiFirst()) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
 			} catch (e) {}
 		}
-		return originalMethod.apply(target, args);
+		return originalMethod.apply(this, args);
 	};
 };
 
@@ -129,14 +131,28 @@ export class GitHub1sDataSource extends DataSource {
 	);
 
 	@trySourcegraphApiFirst
-	async provideBranches(repoFullName: string, options: CommonQueryOptions): Promise<Branch[]> {
+	async extractGitHubRef(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+		const fetcher = GitHubFetcher.getInstance();
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo, refAndPath };
+		const response = await fetcher.request(`GET /repos/{owner}/{repo}/git/extract-ref/{refAndPath}`, requestParams);
+		return response.data;
+	}
+
+	@trySourcegraphApiFirst
+	async provideBranches(repoFullName: string, options?: CommonQueryOptions): Promise<Branch[]> {
 		if (!this.cachedBranches) {
 			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
 		}
-		const matchedBranches = options.query
+		const matchedBranches = options?.query
 			? matchSorter(this.cachedBranches, options.query, { keys: ['name'] })
 			: this.cachedBranches;
-		return matchedBranches.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
+		if (options?.pageSize) {
+			const page = options.page || 1;
+			const pageSize = options.pageSize;
+			return matchedBranches.slice(pageSize * (page - 1), pageSize * page);
+		}
+		return matchedBranches;
 	}
 
 	@trySourcegraphApiFirst
@@ -148,14 +164,19 @@ export class GitHub1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideTags(repoFullName: string, options: CommonQueryOptions): Promise<Tag[]> {
+	async provideTags(repoFullName: string, options?: CommonQueryOptions): Promise<Tag[]> {
 		if (!this.cachedTags) {
 			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'tags')) as Tag[];
 		}
-		const matchedTags = options.query
+		const matchedTags = options?.query
 			? matchSorter(this.cachedTags, options.query, { keys: ['name'] })
 			: this.cachedTags;
-		return matchedTags.slice(options.pageSize * (options.page - 1), options.pageSize * options.page);
+		if (options?.pageSize) {
+			const page = options.page || 1;
+			const pageSize = options.pageSize;
+			return matchedTags.slice(pageSize * (page - 1), pageSize * page);
+		}
+		return matchedTags;
 	}
 
 	@trySourcegraphApiFirst
@@ -178,20 +199,16 @@ export class GitHub1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideCommits(
 		repoFullName: string,
-		options: CommonQueryOptions & {
-			from?: string;
-			author?: string;
-			path?: string;
-		}
+		options?: CommitsQueryOptions
 	): Promise<(Commit & { files?: ChangedFile[] })[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const queryParams = {
-			page: options.page,
-			per_page: options.pageSize,
-			sha: options.from,
-			path: options.path,
-			author: options.author,
+			page: options?.page,
+			per_page: options?.pageSize,
+			sha: options?.from,
+			path: options?.path,
+			author: options?.author,
 		};
 		const requestParams = { owner, repo, ...queryParams };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits', requestParams);
@@ -234,7 +251,7 @@ export class GitHub1sDataSource extends DataSource {
 	async provideCommitChangedFiles(
 		repoFullName: string,
 		ref: string,
-		_options: CommonQueryOptions
+		_options?: CommonQueryOptions
 	): Promise<ChangedFile[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -251,12 +268,12 @@ export class GitHub1sDataSource extends DataSource {
 
 	async provideCodeReviews(
 		repoFullName: string,
-		options: CommonQueryOptions & { state?: CodeReviewState; creator?: string }
+		options?: CodeReviewsQueryOptions
 	): Promise<(CodeReview & { files?: ChangedFile[] })[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
-		const state = options.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
-		const queryParams = { state, page: options.page, per_page: options.pageSize, creator: options.creator };
+		const state = options?.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
+		const queryParams = { state, page: options?.page, per_page: options?.pageSize, creator: options?.creator };
 		const requestParams = { owner, repo, ...queryParams };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/pulls', requestParams as any);
 
@@ -297,11 +314,11 @@ export class GitHub1sDataSource extends DataSource {
 	async provideCodeReviewChangedFiles(
 		repoFullName: string,
 		id: string,
-		options: CommonQueryOptions
+		options?: CommonQueryOptions
 	): Promise<ChangedFile[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
-		const pageParams = { per_page: options.pageSize, page: options.page };
+		const pageParams = { per_page: options?.pageSize, page: options?.page };
 		const filesRequestParams = { owner, repo, pull_number: Number(id), ...pageParams };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', filesRequestParams);
 

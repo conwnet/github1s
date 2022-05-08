@@ -29,11 +29,11 @@ const CommitDetail = `
 `;
 
 const CommitsQuery = gql`
-	query($repository: String!, $ref: String!, $path: String!) {
+	query($repository: String!, $ref: String!, $path: String!, $first: Int) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				${CommitDetail}
-				ancestors(path: $path) {
+				ancestors(path: $path, first: $first) {
 					nodes {
 						${CommitDetail}
 					}
@@ -67,10 +67,10 @@ const formatCommit = (commit: any, isGitHub: boolean) => {
 	};
 };
 
-export const getCommits = async (repository: string, ref: string, path?: string): Promise<Commit[]> => {
+export const getCommits = async (repository: string, ref: string, path?: string, limit?: number): Promise<Commit[]> => {
 	const repositoryData = await querySourcegraphRepository({
 		query: CommitsQuery,
-		variables: { repository, ref, path: path || '' },
+		variables: { repository, ref, path: path || '', first: limit ? limit - 1 : undefined },
 	});
 
 	const firstCommit = repositoryData.commit;
