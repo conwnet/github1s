@@ -12,7 +12,9 @@
     "lib": "lib"
   },
   "activationEvents": [
-    "onFileSystem:github1s"
+    "onFileSystem:github1s",
+    "onFileSystem:gitlab1s",
+    "onFileSystem:bitbucket1s"
   ],
   "browser": "./dist/extension",
   "engines": {
@@ -214,7 +216,7 @@
         "command": "github1s.commands.toggleEditorGutterBlame",
         "title": "Toggle File Blame",
         "category": "GitHub1s",
-        "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
+        "enablement": "!isInDiffEditor"
       },
       {
         "command": "github1s.commands.openEditorGutterBlame",
@@ -224,7 +226,7 @@
           "dark": "assets/icons/dark/open-blame.svg",
           "light": "assets/icons/light/open-blame.svg"
         },
-        "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
+        "enablement": "!isInDiffEditor"
       },
       {
         "command": "github1s.commands.closeEditorGutterBlame",
@@ -234,7 +236,7 @@
           "dark": "assets/icons/dark/close-blame.svg",
           "light": "assets/icons/light/close-blame.svg"
         },
-        "enablement": "!isInDiffEditor && resourceScheme =~ /^github1s$/"
+        "enablement": "!isInDiffEditor"
       },
       {
         "command": "github1s.commands.openOnGitHub",
@@ -526,12 +528,12 @@
         },
         {
           "command": "github1s.commands.openEditorGutterBlame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && !github1s:blames:gutterBlameOpen",
+          "when": "!isInDiffEditor && !github1s:blames:gutterBlameOpen",
           "group": "navigation@4"
         },
         {
           "command": "github1s.commands.closeEditorGutterBlame",
-          "when": "!isInDiffEditor && resourceScheme =~ /^github1s$/ && github1s:blames:gutterBlameOpen",
+          "when": "!isInDiffEditor && github1s:blames:gutterBlameOpen",
           "group": "navigation@4"
         }
       ]

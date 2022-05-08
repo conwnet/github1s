@@ -1,11 +1,11 @@
 /**
- * @file GitHub Tree Url Parser
+ * @file GitLab Tree Url Parser
  * @author netcon
  */
 
 import { parsePath } from 'history';
-import { GitHub1sDataSource } from '../data-source';
 import { PageType, RouterState } from '../../types';
+import { SourcegraphDataSource } from '@/adapters/sourcegraph/data-source';
 
 export const extractRefPath = async (
 	repoFullName: string,
@@ -18,14 +18,15 @@ export const extractRefPath = async (
 		return { ref: 'HEAD', path: refAndFilePath.slice(5) };
 	}
 
-	return GitHub1sDataSource.getInstance().extractRefPath(repoFullName, refAndFilePath);
+	return SourcegraphDataSource.getInstance('gitlab').extractRefPath(repoFullName, refAndFilePath);
 };
 
 export const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
-	const [owner, repo, _pageType, ...restParts] = pathParts;
-	const repoFullName = `${owner}/${repo}`;
-	const { ref, path: filePath } = await extractRefPath(repoFullName, restParts.join('/'));
+	const dashIndex = pathParts.indexOf('-');
+	const repo = pathParts.slice(0, dashIndex).join('/');
+	const restParts = pathParts.slice(dashIndex + 2);
+	const { ref, path: filePath } = await extractRefPath(repo, restParts.join('/'));
 
-	return { pageType: PageType.Tree, repo: repoFullName, ref, filePath };
+	return { pageType: PageType.Tree, repo, ref, filePath };
 };

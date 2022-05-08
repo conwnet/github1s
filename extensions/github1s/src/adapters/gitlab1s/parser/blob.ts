@@ -1,0 +1,29 @@
+/**
+ * @file GitLab Blob Url Parser
+ * @author netcon
+ */
+
+import { parsePath } from 'history';
+import { PageType, RouterState } from '../../types';
+import { parseTreeUrl } from './tree';
+
+export const parseBlobUrl = async (path: string): Promise<RouterState> => {
+	const routerState = (await parseTreeUrl(path)) as any;
+	const { hash: routerHash } = parsePath(path);
+
+	if (!routerHash) {
+		return { ...routerState, pageType: PageType.Blob };
+	}
+
+	// get selected line number range from path which looks like:
+	// `/gitlab-org/gitlab/-/blob/HEAD/package.json#L10-L20`
+	const matches = routerHash.match(/^#L(\d+)(?:-L(\d+))?/);
+	const [_, startLineNumber = '0', endLineNumber] = matches ? matches : [];
+
+	return {
+		...routerState,
+		pageType: PageType.Blob,
+		startLine: parseInt(startLineNumber, 10),
+		endLine: parseInt(endLineNumber || startLineNumber, 10),
+	};
+};

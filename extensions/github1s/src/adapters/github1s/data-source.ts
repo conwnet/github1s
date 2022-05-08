@@ -131,7 +131,7 @@ export class GitHub1sDataSource extends DataSource {
 	);
 
 	@trySourcegraphApiFirst
-	async extractGitHubRef(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, refAndPath };

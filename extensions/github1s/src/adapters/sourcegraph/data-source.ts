@@ -96,7 +96,7 @@ export class SourcegraphDataSource extends DataSource {
 		return (this.cachedRefs = { branches, tags });
 	});
 
-	async extractGitHubRef(repo: string, refAndFilePath: string): Promise<{ ref: string; path: string }> {
+	async extractRefPath(repo: string, refAndFilePath: string): Promise<{ ref: string; path: string }> {
 		const { branches, tags } = this.cachedRefs || (await this.prepareAllRefs(repo));
 		const exactRef = [...branches, ...tags].find(
 			(ref) => refAndFilePath === ref.name || refAndFilePath.startsWith(`${ref.name}/`)
@@ -209,6 +209,9 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	provideUserAvatarLink(user: string): string {
-		return `https://github.com/${user}.png`;
+		if (this.platform === 'github') {
+			return `https://github.com/${user}.png`;
+		}
+		return `https://www.gravatar.com/avatar/${user}?d=identicon`;
 	}
 }

@@ -29,25 +29,28 @@
 	let platformName = 'GitHub';
 	let platformOrigin = 'https://github.com';
 	let logoIcon = staticAssetsPrefix + '/config/github.svg';
+	let repository = 'conwnet/github1s';
 
 	if (hostname.match(/\.?(github1s\.com|github1s\.dev|vercel\.app)$/i)) {
 		scheme = 'github1s';
 		platformName = 'GitHub';
 		platformOrigin = 'https://github.com';
 		logoIcon = staticAssetsPrefix + '/config/github.svg';
+		repository = 'conwnet/github1s';
 	} else if (hostname.match(/\.?gitlab1s\.com$/i)) {
 		scheme = 'gitlab1s';
 		platformName = 'GitLab';
 		platformOrigin = 'https://gitlab.com';
+		repository = 'gitlab-org/gitlab-docs';
 		logoIcon = staticAssetsPrefix + '/config/gitlab.svg';
 	} else if (hostname.match(/\.?bitbucket1s\.org$/)) {
 		scheme = 'bitbucket1s';
 		platformName = 'Bitbucket';
 		platformOrigin = 'https://bitbucket1s.com';
 		logoIcon = staticAssetsPrefix + '/config/bitbucket.svg';
+		repository = 'atlassian/clover';
 	}
 
-	let repository = 'conwnet/github1s';
 	if (hostname.match(/\.?(github1s\.com|github1s\.dev|gitlab1s\.com|bitbucket1s\.org|vercel\.app|localhost)$/i)) {
 		const pathParts = window.location.pathname.split('/').filter(Boolean).slice(0, 2);
 		pathParts.length === 2 && (repository = pathParts.join('/'));

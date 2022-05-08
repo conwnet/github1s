@@ -1,5 +1,5 @@
 /**
- * @file GitHub Commit Url Parser
+ * @file GitLab Commit Url Parser
  * @author netcon
  */
 
@@ -8,8 +8,9 @@ import { RouterState, PageType } from '../../types';
 
 export const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
-	const [owner, repo, _pageType, ...refParts] = pathParts;
-	const commitSha = refParts.join('/');
+	const dashIndex = pathParts.indexOf('-');
+	const repo = pathParts.slice(0, dashIndex).join('/');
+	const commitSha = pathParts.slice(dashIndex + 2).join('/');
 
-	return { repo: `${owner}/${repo}`, pageType: PageType.Commit, ref: commitSha, commitSha };
+	return { repo, pageType: PageType.Commit, ref: commitSha, commitSha };
 };

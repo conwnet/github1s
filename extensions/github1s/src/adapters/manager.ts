@@ -29,10 +29,10 @@ export class AdapterManager {
 			this.defaultAdapter.deactivateAsDefault();
 		}
 		this.adaptersMap.set(adapter.scheme, adapter);
-		if (this.getCurrentScheme() === adapter.scheme && adapter.activateAsDefault) {
+		if (this.getCurrentScheme() === adapter.scheme) {
 			setVSCodeContext('github1s:adapters:default:platformName', adapter.platformName);
 			setVSCodeContext('github1s:adapters:default:codeReviewType', adapter.codeReviewType);
-			return adapter.activateAsDefault();
+			return adapter.activateAsDefault && adapter.activateAsDefault();
 		}
 	}
 

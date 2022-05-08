@@ -3,10 +3,10 @@
  * @author netcon
  */
 
-import * as github1s from '../types';
+import * as adapterTypes from '../types';
 import { parseGitHubPath } from './parser';
 
-export class GitHub1sRouterParser extends github1s.RouterParser {
+export class GitHub1sRouterParser extends adapterTypes.RouterParser {
 	private static instance: GitHub1sRouterParser | null = null;
 
 	public static getInstance(): GitHub1sRouterParser {
@@ -16,7 +16,7 @@ export class GitHub1sRouterParser extends github1s.RouterParser {
 		return (GitHub1sRouterParser.instance = new GitHub1sRouterParser());
 	}
 
-	parsePath(path: string): Promise<github1s.RouterState> {
+	parsePath(path: string): Promise<adapterTypes.RouterState> {
 		return parseGitHubPath(path);
 	}
 
@@ -41,7 +41,7 @@ export class GitHub1sRouterParser extends github1s.RouterParser {
 		return `/${repo}/pulls`;
 	}
 
-	buildCodeReviewPath(repo: string, codeReviewId: string): github1s.Promisable<string> {
+	buildCodeReviewPath(repo: string, codeReviewId: string): adapterTypes.Promisable<string> {
 		return `/${repo}/pull/${codeReviewId}`;
 	}
 

@@ -43,11 +43,11 @@ const CommitsQuery = gql`
 	}
 `;
 
-const getGitHubUserAvatarUrl = (username) => {
-	if (username.includes(' ')) {
-		return `https://github.com/github.png`;
+const getUserAvatarUrl = (username: string, isGitHub: boolean) => {
+	if (isGitHub && !username.includes(' ')) {
+		return `https://github.com/${username.slice(-5) === '[bot]' ? username.slice(0, -5) : username}.png`;
 	}
-	return `https://github.com/${username.slice(-5) === '[bot]' ? username.slice(0, -5) : username}.png`;
+	return `https://www.gravatar.com/avatar/${username}?d=identicon`;
 };
 
 const formatCommit = (commit: any, isGitHub: boolean) => {
@@ -63,7 +63,7 @@ const formatCommit = (commit: any, isGitHub: boolean) => {
 		committer: commit?.commiter?.person?.name,
 		createTime: new Date(commit?.author?.date),
 		parents: commit?.parents?.map?.((item) => item?.oid) || [],
-		avatarUrl: commit?.author?.person?.avatarURL || (isGitHub ? getGitHubUserAvatarUrl(authorName) : ''),
+		avatarUrl: commit?.author?.person?.avatarURL || getUserAvatarUrl(authorName, isGitHub),
 	};
 };
 
