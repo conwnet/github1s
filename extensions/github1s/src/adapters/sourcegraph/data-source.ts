@@ -44,6 +44,7 @@ export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
 	private cachedRefs: { branches: Branch[]; tags: Tag[] } | null = null;
 	private fileTypes = new Map<string, FileType>(); // cache if path is a directory
+	private repositories = new Map<string, { name: string; defaultBranch: string }>();
 	private textEncodder = new TextEncoder();
 	private pathRefs: string[] = [];
 
@@ -96,9 +97,14 @@ export class SourcegraphDataSource extends DataSource {
 		return this.fileTypes.get(trimmedPath) || FileType.File;
 	});
 
-	async provideRepository(repo: string) {
-		return getRepository(this.buildRepository(repo));
-	}
+	provideRepository = reuseable(async (repo: string) => {
+		if (this.repositories.has(repo)) {
+			return this.repositories.get(repo)!;
+		}
+		const repository = await getRepository(this.buildRepository(repo));
+		repository && this.repositories.set(repo, repository);
+		return repository;
+	});
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		const { content, binary } = await readFile(this.buildRepository(repo), ref, path);

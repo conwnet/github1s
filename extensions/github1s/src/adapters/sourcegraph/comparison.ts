@@ -42,13 +42,15 @@ export const compareCommits = async (repository: string, base: string, head: str
 	});
 	const diffFiles = repositoryData.comparison?.fileDiffs?.nodes || [];
 
-	return diffFiles.map((file) => {
-		const status = getFileChangeStatus(file.oldPath, file.newPath);
+	return diffFiles
+		.filter((file) => file.oldPath || file.newPath)
+		.map((file) => {
+			const status = getFileChangeStatus(file.oldPath, file.newPath);
 
-		return {
-			status,
-			path: file.newPath || file.oldPath,
-			previousPath: status === FileChangeStatus.Renamed ? file.oldPath : undefined,
-		};
-	});
+			return {
+				status,
+				path: file.newPath || file.oldPath,
+				previousPath: status === FileChangeStatus.Renamed ? file.oldPath : undefined,
+			};
+		});
 };

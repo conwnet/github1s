@@ -7,6 +7,14 @@ import { parsePath } from 'history';
 import { PageType, RouterState } from '../types';
 import { SourcegraphDataSource } from '@/adapters/sourcegraph/data-source';
 
+const resolveBranchName = async (repo: string, ref = '') => {
+	if (ref && ref.toUpperCase() !== 'HEAD') {
+		return ref;
+	}
+	const dataSource = SourcegraphDataSource.getInstance('gitlab');
+	return (await dataSource.provideRepository(repo))?.defaultBranch || 'HEAD';
+};
+
 const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const dashIndex = pathParts.indexOf('-');
@@ -15,7 +23,7 @@ const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const dataSource = SourcegraphDataSource.getInstance('gitlab');
 	const { ref, path: filePath } = await dataSource.extractRefPath(repo, restParts.join('/'));
 
-	return { pageType: PageType.Tree, repo, ref, filePath };
+	return { pageType: PageType.Tree, repo, ref: await resolveBranchName(repo, ref), filePath };
 };
 
 const parseBlobUrl = async (path: string): Promise<RouterState> => {
@@ -43,7 +51,7 @@ const parseCommitsUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const dashIndex = pathParts.indexOf('-');
 	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
-	const ref = (dashIndex < 0 ? ['HEAD'] : pathParts.slice(dashIndex + 2)).join('/');
+	const ref = await resolveBranchName(repo, (dashIndex < 0 ? [] : pathParts.slice(dashIndex + 2)).join('/'));
 
 	return { repo, pageType: PageType.CommitList, ref };
 };
@@ -52,7 +60,7 @@ const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const dashIndex = pathParts.indexOf('-');
 	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
-	const commitSha = (dashIndex < 0 ? ['HEAD'] : pathParts.slice(dashIndex + 2)).join('/');
+	const commitSha = await resolveBranchName(repo, (dashIndex < 0 ? [] : pathParts.slice(dashIndex + 2)).join('/'));
 
 	return { repo, pageType: PageType.Commit, ref: commitSha, commitSha };
 };
@@ -85,9 +93,10 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 	}
 
 	// fallback to default
+	const fallbackRepository = 'gitlab-org/gitlab-docs';
 	return {
-		repo: 'gitlab-org/gitlab-docs',
-		ref: 'HEAD',
+		repo: fallbackRepository,
+		ref: await resolveBranchName(fallbackRepository),
 		pageType: PageType.Tree,
 		filePath: '',
 	};
