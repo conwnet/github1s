@@ -218,7 +218,8 @@
 			icon: logoIcon,
 			title: 'Open on ' + platformName,
 			onClick() {
-				const targetPath = window.location.pathname + window.location.search + window.location.hash;
+				const pathname = window.location.pathname > 1 ? window.location.pathname : '/' + repository;
+				const targetPath = pathname + window.location.search + window.location.hash;
 				window.open(platformOrigin + targetPath, '_blank');
 			},
 		},
