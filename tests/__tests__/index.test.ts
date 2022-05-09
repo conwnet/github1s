@@ -25,16 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	page = await browser.newPage();
-	// setup github oauth token
 	await page.goto(BASE_URL);
-	await page.click('.action-item .action-label[aria-label="GitHub1s"]');
-	await page.waitForTimeout(3000);
-	const extensionIFrameHandle = await page.$('#webview-webviewview-github1s-views-settings iframe');
-	const extensionIFrame = await extensionIFrameHandle?.contentFrame();
-	const settingsIframeHandle = await extensionIFrame?.$('iframe#active-frame');
-	const settingsIframe = await settingsIframeHandle?.contentFrame();
-	await settingsIframe?.fill('#token-input', process.env.GITHUB_TOKEN || '');
-	await settingsIframe?.dispatchEvent('#save-button', 'click');
 	await page.waitForTimeout(3000);
 });
 
@@ -81,25 +72,15 @@ it('should open file correctly', async () => {
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
 
-it('should show PR list', async () => {
-	await page.goto(`${BASE_URL}/xcv58/grocery-delivery-times`);
+it('should show Commit files', async () => {
+	await page.goto(`${BASE_URL}/conwnet/github1s/commit/ecd252fa54de41b1cb622ff5a1f8a1b715d3b621`);
 	await page.waitForSelector(
 		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
 	);
 	await page.press('body', 'Control+Shift+G');
-	await page.press('body', 'Tab');
-	await page.press('body', 'Tab');
-	await page.press('body', ' ');
-	await page.press('body', 'Shift+Tab');
-	await page.press('body', ' ');
 	await page.waitForTimeout(3000);
 
 	const container = await page.$('[id="workbench.parts.sidebar"]');
 	let image = await container?.screenshot();
-	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
-
-	await page.click('.monaco-list-row[aria-posinset="3"]');
-	await page.waitForTimeout(3000);
-	image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });
