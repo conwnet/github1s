@@ -133,6 +133,9 @@ export class GitHub1sDataSource extends DataSource {
 
 	@trySourcegraphApiFirst
 	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+			return { ref: 'HEAD', path: refAndPath.slice(5) };
+		}
 		const pathRef = this.pathRefs.find((ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref);
 		if (pathRef) {
 			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };

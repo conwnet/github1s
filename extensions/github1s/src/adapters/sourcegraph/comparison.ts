@@ -27,7 +27,7 @@ const getFileChangeStatus = (oldPath: string | null, newPath: string | null): Fi
 		return FileChangeStatus.Added;
 	}
 	if (!newPath) {
-		return FileChangeStatus.Modified;
+		return FileChangeStatus.Removed;
 	}
 	if (oldPath !== newPath) {
 		return FileChangeStatus.Renamed;

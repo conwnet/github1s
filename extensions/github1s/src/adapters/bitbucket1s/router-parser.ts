@@ -4,7 +4,7 @@
  */
 
 import * as adapterTypes from '../types';
-import { parseBitbucketPath } from './parser';
+import { parseBitbucketPath } from './parse-path';
 
 export class BitbucketRouterParser extends adapterTypes.RouterParser {
 	private static instance: BitbucketRouterParser | null = null;

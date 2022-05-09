@@ -118,6 +118,9 @@ export class SourcegraphDataSource extends DataSource {
 	});
 
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+			return { ref: 'HEAD', path: refAndPath.slice(5) };
+		}
 		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
 		const pathRef = this.pathRefs.find(matchPathRef);
 		if (pathRef) {
@@ -126,7 +129,7 @@ export class SourcegraphDataSource extends DataSource {
 		const { branches, tags } = this.cachedRefs || (await this.prepareAllRefs(repo));
 		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
 		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
-		this.pathRefs.push(ref);
+		exactRef && this.pathRefs.push(ref);
 		return { ref, path: refAndPath.slice(ref.length + 1) };
 	}
 
