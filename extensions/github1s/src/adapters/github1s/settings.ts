@@ -54,7 +54,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 					messageApi && messageApi(...message.data?.args).then((response) => postMessage(response));
 					break;
 				case 'get-use-sourcegraph-api':
-					postMessage(githubFetcher.useSourcegraphApiFirst());
+					githubFetcher.useSourcegraphApiFirst().then((value) => postMessage(value));
 					break;
 				case 'set-use-sourcegraph-api':
 					githubFetcher.setUseSourcegraphApiFirst(message.data);

@@ -51,48 +51,31 @@ const USE_SOURCEGRAPH_API_FIRST = 'USE_SOURCEGRAPH_API_FIRST';
 
 export class GitHubFetcher {
 	private static instance: GitHubFetcher | null = null;
-	private _useSourcegraphApiFirst: boolean | null | undefined = null;
 	private _emitter = new vscode.EventEmitter<boolean | null | undefined>();
 	private _ownerAndRepoPromise: Promise<[string, string]> | null = null;
-	private _foundRepositoryPromise: Promise<boolean> | null = null;
+	private _repositoryPromise: Promise<{ private: boolean } | null> | null = null;
 	private _originalRequest: Octokit['request'] | null = null;
 	public onDidChangeUseSourcegraphApiFirst = this._emitter.event;
 
 	public request: Octokit['request'];
 	public graphql: Octokit['graphql'];
 
+	public static getInstance(): GitHubFetcher {
+		if (GitHubFetcher.instance) {
+			return GitHubFetcher.instance;
+		}
+		return (GitHubFetcher.instance = new GitHubFetcher());
+	}
+
 	private constructor() {
 		this.initFetcherMethods();
-		this.initUseSourcegraphApiFirst();
-
-		GitHubTokenManager.getInstance().onDidChangeToken(() => {
-			this.initFetcherMethods();
-		});
-	}
-
-	private getOwnerAndRepo() {
-		if (this._ownerAndRepoPromise) {
-			return this._ownerAndRepoPromise;
-		}
-		return (this._ownerAndRepoPromise = new Promise(async (resolve) => {
-			const browserUrl = (await vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl')) as string;
-			const [owner = 'conwnet', repo = 'github1s'] = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
-			return resolve([owner, repo]);
-		}));
-	}
-
-	private accessCurrentRepository() {
-		if (this._foundRepositoryPromise) {
-			return this._foundRepositoryPromise;
-		}
-		return (this._foundRepositoryPromise = new Promise(async (resolve) => {
-			// check if current repository can be access
-			const [owner, repo] = await this.getOwnerAndRepo();
-			this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo }).then(
-				(response) => resolve(response.data.name ? true : false),
-				() => resolve(false)
-			);
-		}));
+		// turn off `useSourcegraphApiFirst` if current repository is private
+		this.useSourcegraphApiFirst().then((useSourcegraphApiFirst) =>
+			this.resolveCurrentRepository(useSourcegraphApiFirst).then(
+				(repository) => repository?.private && !this.setUseSourcegraphApiFirst(false)
+			)
+		);
+		GitHubTokenManager.getInstance().onDidChangeToken(() => this.initFetcherMethods());
 	}
 
 	// initial fetcher methods in this way for correct `request/graphql` type inference
@@ -106,8 +89,8 @@ export class GitHubFetcher {
 				const errorStatus = (error as any)?.response?.status;
 				if ([401, 403, 404].includes(errorStatus)) {
 					// maybe we have to acquire github access token to continue
-					const accessRepository = await this.accessCurrentRepository();
-					const message = detectErrorMessage(error?.response, !!accessToken, accessRepository);
+					const repository = await this.resolveCurrentRepository(false);
+					const message = detectErrorMessage(error?.response, !!accessToken, !!repository);
 					await GitHub1sAuthenticationView.getInstance().open(message, true);
 					return octokit.request(...args);
 				}
@@ -124,41 +107,51 @@ export class GitHubFetcher {
 		}, octokit.graphql);
 	}
 
-	private async initUseSourcegraphApiFirst() {
-		if (this.useSourcegraphApiFirst()) {
-			// if sourcegraph api can not found current repository,
-			// then mark use github api for this repository
-			SourcegraphDataSource.getInstance('github')
-				.provideRepository((await this.getOwnerAndRepo()).join('/'))
-				.then((repository) => !repository && this.setUseSourcegraphApiFirst(false));
+	private getCurrentOwnerAndRepo() {
+		if (this._ownerAndRepoPromise) {
+			return this._ownerAndRepoPromise;
 		}
+		return (this._ownerAndRepoPromise = new Promise((resolve) => {
+			return vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl').then(
+				(browserUrl: string) => {
+					const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
+					resolve(pathParts.length >= 2 ? (pathParts.slice(0, 2) as [string, string]) : ['conwnet', 'github1s']);
+				},
+				() => resolve(['conwnet', 'github1s'])
+			);
+		}));
 	}
 
-	public useSourcegraphApiFirst(): boolean {
-		if (!isNil(this._useSourcegraphApiFirst)) {
-			return this._useSourcegraphApiFirst!;
+	private resolveCurrentRepository(useSourcegraphApiFirst: boolean) {
+		if (this._repositoryPromise) {
+			return this._repositoryPromise;
 		}
-
-		const workspaceState = getExtensionContext().workspaceState;
-		this._useSourcegraphApiFirst = workspaceState.get(USE_SOURCEGRAPH_API_FIRST);
-
-		if (!isNil(this._useSourcegraphApiFirst)) {
-			return this._useSourcegraphApiFirst!;
-		}
-
-		return (this._useSourcegraphApiFirst = true);
+		return (this._repositoryPromise = new Promise(async (resolve) => {
+			const [owner = 'conwnet', repo = 'github1s'] = await this.getCurrentOwnerAndRepo();
+			const dataSource = SourcegraphDataSource.getInstance('github');
+			if (useSourcegraphApiFirst && !!(await dataSource.provideRepository(`${owner}/${repo}`))) {
+				return resolve({ private: false });
+			}
+			return this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo }).then(
+				(response) => resolve(response?.data || null),
+				() => resolve(null)
+			);
+		}));
 	}
 
-	public setUseSourcegraphApiFirst(value: boolean | null | undefined) {
-		this._useSourcegraphApiFirst = value;
-		getExtensionContext().workspaceState.update(USE_SOURCEGRAPH_API_FIRST, value);
+	public async useSourcegraphApiFirst(repoFullName?: string): Promise<boolean> {
+		const targetRepo = repoFullName || (await this.getCurrentOwnerAndRepo()).join('/');
+		const globalState = getExtensionContext().globalState;
+		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
+		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
+	}
+
+	public async setUseSourcegraphApiFirst(repoOrValue: string | boolean, value?: boolean) {
+		const targetRepo = !isNil(value) ? (repoOrValue as string) : (await this.getCurrentOwnerAndRepo()).join('/');
+		const targetValue = !isNil(value) ? value : !!repoOrValue;
+		const globalState = getExtensionContext().globalState;
+		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
+		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: targetValue });
 		this._emitter.fire(value);
-	}
-
-	public static getInstance(): GitHubFetcher {
-		if (GitHubFetcher.instance) {
-			return GitHubFetcher.instance;
-		}
-		return (GitHubFetcher.instance = new GitHubFetcher());
 	}
 }

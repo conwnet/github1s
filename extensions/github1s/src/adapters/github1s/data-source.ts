@@ -69,7 +69,7 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 
 	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
 		const githubFetcher = GitHubFetcher.getInstance();
-		if (githubFetcher.useSourcegraphApiFirst()) {
+		if (await githubFetcher.useSourcegraphApiFirst(args[0])) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
 			} catch (e) {}
@@ -346,18 +346,17 @@ export class GitHub1sDataSource extends DataSource {
 		const data = await fetcher.graphql(FILE_BLAME_QUERY, requestParams);
 		const blameRanges = (data as any)?.repository?.object?.blame?.ranges;
 
-		return blameRanges?.map((item) => ({
+		return (blameRanges || []).map((item) => ({
 			age: item.age as number,
 			startingLine: item.startingLine as number,
 			endingLine: item.endingLine as number,
 			commit: {
-				sha: item.commit.sha as string,
-				author: item.commit.author.name as string,
-				email: item.commit.author.email as string,
-				message: item.commit.message as string,
-				committer: item.commit.committer.name as string,
-				createTime: new Date(item.commit.authoredDate),
-				avatarUrl: item.commit.author.avatarUrl as string,
+				sha: item.commit?.sha as string,
+				author: item.commit?.author?.name as string,
+				email: item.commit?.author?.email as string,
+				message: item.commit?.message as string,
+				createTime: new Date(item.commit?.authoredDate),
+				avatarUrl: item.commit?.author?.avatarUrl as string,
 			},
 		}));
 	}
