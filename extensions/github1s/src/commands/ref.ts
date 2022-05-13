@@ -5,41 +5,43 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import repository from '@/repository';
+import { adapterManager } from '@/adapters';
+import { Repository } from '@/repository';
 
-export const commandGetCurrentAuthority = () => router.getAuthority();
+// check out to branch/tag/commit
+const commandCheckoutTo = async () => {
+	const routerParser = await router.resolveParser();
+	const routeState = await router.getState();
 
-export const commandCheckoutRef = async () => {
-	const [branchRefs, tagRefs] = await Promise.all([
-		repository.getBranches(),
-		repository.getTags(),
-	]);
-	const branchPickerItems: vscode.QuickPickItem[] = branchRefs.map(
-		(branchRef) => ({
-			label: branchRef.name,
-			description: (branchRef.object?.sha || '').slice(0, 8),
-		})
-	);
+	const scheme = adapterManager.getCurrentScheme();
+	const repository = Repository.getInstance(scheme, routeState.repo);
+	const [branchRefs, tagRefs] = await Promise.all([repository.getBranchList(), repository.getTagList()]);
+	const branchPickerItems: vscode.QuickPickItem[] = branchRefs.map((branchRef) => ({
+		label: branchRef.name,
+		description: (branchRef.commitSha || '').slice(0, 8),
+	}));
 	const tagPickerItems: vscode.QuickPickItem[] = tagRefs.map((tagRef) => ({
 		label: tagRef.name,
-		description: `Tag at ${(tagRef.object?.sha || '').slice(0, 8)}`,
+		description: `Tag at ${(tagRef.commitSha || '').slice(0, 8)}`,
 	}));
 
 	const quickPick = vscode.window.createQuickPick();
-	const routerState = await router.getState();
-	quickPick.placeholder = routerState.ref;
+	quickPick.placeholder = routeState.ref;
 	quickPick.items = [...branchPickerItems, ...tagPickerItems];
 
 	quickPick.show();
-	const choice = await new Promise<vscode.QuickPickItem | undefined>(
-		(resolve) => quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
+	const choice = await new Promise<vscode.QuickPickItem | undefined>((resolve) =>
+		quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
 	);
 	quickPick.hide();
 
-	const targetRef = choice?.label || quickPick.value;
-	if (targetRef.toUpperCase() === 'HEAD') {
-		router.replace(`/${routerState.owner}/${routerState.repo}`);
-		return;
+	const selectedRef = choice?.label || quickPick.value;
+	if (selectedRef) {
+		const targetRef = selectedRef.toUpperCase() !== 'HEAD' ? selectedRef : undefined;
+		router.push(await routerParser.buildTreePath(routeState.repo, targetRef));
 	}
-	router.replace(`/${routerState.owner}/${routerState.repo}/tree/${targetRef}`);
+};
+
+export const registerRefCommands = (context: vscode.ExtensionContext) => {
+	return context.subscriptions.push(vscode.commands.registerCommand('github1s.commands.checkoutTo', commandCheckoutTo));
 };

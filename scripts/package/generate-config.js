@@ -4,26 +4,30 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const APP_ROOT = path.join(__dirname, '../..');
-const VSCODE_PATH = path.join(
-	APP_ROOT,
-	'node_modules/@github1s/vscode-web/dist'
-);
-const enableExtensions = require(path.join(
-	APP_ROOT,
-	'vscode-web-github1s/resources/builtin-extensions.json'
-));
 
-/**
- * Loosely based on `getExtensionKind` from `src/vs/workbench/services/extensions/common/extensionsUtil.ts`
- */
+// vscode-web/lib/vscode/build/lib/extensions.ts
 const isWebExtension = (manifest) => {
-	if (manifest && typeof manifest.extensionKind !== 'undefined') {
-		const extensionKind = Array.isArray(manifest.extensionKind)
-			? manifest.extensionKind
-			: [manifest.extensionKind];
-		return extensionKind.indexOf('web') >= 0;
+	if (Boolean(manifest.browser)) {
+		return true;
 	}
-	return !Boolean(manifest.main) || Boolean(manifest.browser);
+	if (Boolean(manifest.main)) {
+		return false;
+	}
+	// neither browser nor main
+	if (typeof manifest.extensionKind !== 'undefined') {
+		const extensionKind = Array.isArray(manifest.extensionKind) ? manifest.extensionKind : [manifest.extensionKind];
+		if (extensionKind.indexOf('web') >= 0) {
+			return true;
+		}
+	}
+	if (typeof manifest.contributes !== 'undefined') {
+		for (const id of ['debuggers', 'terminal', 'typescriptServerPlugins']) {
+			if (manifest.contributes.hasOwnProperty(id)) {
+				return false;
+			}
+		}
+	}
+	return true;
 };
 
 const getExtensionData = (absolutePath) => {
@@ -32,27 +36,17 @@ const getExtensionData = (absolutePath) => {
 		if (!fs.existsSync(packageJSONPath)) {
 			return null;
 		}
-		const packageJSON = JSON.parse(
-			fs.readFileSync(packageJSONPath).toString('utf8')
-		);
+		const packageJSON = JSON.parse(fs.readFileSync(packageJSONPath).toString('utf8'));
 		if (!isWebExtension(packageJSON)) {
 			return null;
 		}
 		const children = fs.readdirSync(absolutePath);
-		const packageNLSPath = children.filter(
-			(child) => child === 'package.nls.json'
-		)[0];
+		const packageNLSPath = children.filter((child) => child === 'package.nls.json')[0];
 		const packageNLS = packageNLSPath
-			? JSON.parse(
-					fs.readFileSync(path.join(absolutePath, packageNLSPath)).toString()
-			  )
+			? JSON.parse(fs.readFileSync(path.join(absolutePath, packageNLSPath)).toString())
 			: undefined;
-		const readme = children.filter((child) =>
-			/^readme(\.txt|\.md|)$/i.test(child)
-		)[0];
-		const changelog = children.filter((child) =>
-			/^changelog(\.txt|\.md|)$/i.test(child)
-		)[0];
+		const readme = children.filter((child) => /^readme(\.txt|\.md|)$/i.test(child))[0];
+		const changelog = children.filter((child) => /^changelog(\.txt|\.md|)$/i.test(child))[0];
 		const extensionFolder = path.basename(absolutePath);
 
 		return {
@@ -60,37 +54,39 @@ const getExtensionData = (absolutePath) => {
 			packageJSON,
 			packageNLS,
 			readmePath: readme ? path.join(extensionFolder, readme) : undefined,
-			changelogPath: changelog
-				? path.join(extensionFolder, changelog)
-				: undefined,
+			changelogPath: changelog ? path.join(extensionFolder, changelog) : undefined,
 		};
 	} catch {
 		return null;
 	}
 };
 
-const scanBuiltinExtensions = () => {
-	return enableExtensions
-		.map((item) => getExtensionData(path.join(VSCODE_PATH, item.path)))
-		.filter(Boolean);
+const scanVSCodeExtensions = () => {
+	const extensionsPath = path.join(APP_ROOT, 'node_modules/@github1s/vscode-web/dist/extensions');
+	const extensionFolders = fs.existsSync(extensionsPath) ? fs.readdirSync(extensionsPath) : [];
+
+	return extensionFolders.map((item) => getExtensionData(path.join(extensionsPath, item))).filter(Boolean);
 };
 
 const scanGitHub1sExtensions = () => {
 	const extensions = fs.readdirSync(path.join(APP_ROOT, 'extensions'));
-	return extensions
-		.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item)))
-		.filter(Boolean);
+	return extensions.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item))).filter(Boolean);
 };
 
 const main = () => {
-	const CONFIGURE_PATH = path.join(APP_ROOT, 'dist/static/configure');
-	const extensions = [...scanBuiltinExtensions(), ...scanGitHub1sExtensions()];
+	const CONFIG_PATH = path.join(APP_ROOT, 'dist/static/config');
+	const vscodeExtensions = process.env.DEV_VSCODE ? scanVSCodeExtensions() : [];
+	const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
 
-	fs.ensureDirSync(CONFIGURE_PATH);
+	fs.ensureDirSync(CONFIG_PATH);
 	fs.writeFileSync(
-		path.join(CONFIGURE_PATH, 'extensions.json'),
-		JSON.stringify(extensions)
+		path.join(CONFIG_PATH, 'extensions.js'),
+		`window.github1sExtensions = ${JSON.stringify(extensions)};`
 	);
+	fs.copyFileSync(path.join(APP_ROOT, 'resources/initialize.js'), path.join(CONFIG_PATH, 'initialize.js'));
+	fs.copyFileSync(path.join(APP_ROOT, 'resources/github.svg'), path.join(CONFIG_PATH, 'github.svg'));
+	fs.copyFileSync(path.join(APP_ROOT, 'resources/gitlab.svg'), path.join(CONFIG_PATH, 'gitlab.svg'));
+	fs.copyFileSync(path.join(APP_ROOT, 'resources/bitbucket.svg'), path.join(CONFIG_PATH, 'bitbucket.svg'));
 };
 
 main();

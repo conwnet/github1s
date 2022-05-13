@@ -20,10 +20,7 @@ module.exports = async (req, res) => {
 	const requestUrl = `https://${publisher}.vscode-unpkg.net/${publisher}/${restPartsPath}`;
 	const responsePromise = got(requestUrl);
 	const bufferPromise = responsePromise.buffer();
-	const [response, buffer] = await Promise.all([
-		responsePromise,
-		bufferPromise,
-	]);
+	const [response, buffer] = await Promise.all([responsePromise, bufferPromise]);
 
 	res.status(response.statusCode);
 	res.setHeader('cache-control', response.headers['cache-control']);

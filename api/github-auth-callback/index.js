@@ -44,13 +44,10 @@ module.exports = async (req, res) => {
 
 	try {
 		// https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
-		const response = await got.post(
-			'https://github.com/login/oauth/access_token',
-			{
-				json: { client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code },
-				responseType: 'json',
-			}
-		);
+		const response = await got.post('https://github.com/login/oauth/access_token', {
+			json: { client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code },
+			responseType: 'json',
+		});
 		return sendResponseHtml(response.statusCode, response.body);
 	} catch (e) {
 		// the error is responded by GitHub

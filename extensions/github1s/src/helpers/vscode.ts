@@ -5,5 +5,4 @@
 
 import * as vscode from 'vscode';
 
-export const setVSCodeContext = (key, value) =>
-	vscode.commands.executeCommand('setContext', key, value);
+export const setVSCodeContext = (key, value) => vscode.commands.executeCommand('setContext', key, value);
