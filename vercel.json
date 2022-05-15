@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/sourcegraph",
-      "destination": "https://sourcegraph.com/.api/graphql"
-    },
-    {
       "source": "/api/github-auth-callback",
       "destination": "/api/github-auth-callback"
     },
