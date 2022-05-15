@@ -185,7 +185,7 @@ export class CommitManager {
 				this.linkCommitShas(previousCommitSha, nextCommitSha);
 			}
 			// if has more commits
-			const hasMore = commits.length >= this._pageSize;
+			const hasMore = commits.length === this._pageSize;
 			if (!hasMore) {
 				const latestCommit = commits.length ? commits[commits.length - 1] : commitList[commitList.length - 1];
 				this.linkCommitShas(null, latestCommit.sha);

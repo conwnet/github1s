@@ -70,11 +70,17 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 	router.replace(browserPath);
 };
 
+// refresh file history view if active editor changed
+const handleRefreshFileHistoryView = () => {
+	vscode.commands.executeCommand('github1s.commands.refreshFileHistoryCommitList', false);
+};
+
 export const registerVSCodeEventListeners = () => {
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		handleRouterOnActiveEditorChange(editor);
 		handleOpenChangesContextOnActiveEditorChange(editor);
 		handlegutterBlameOpenContextOnActiveEditorChange();
+		handleRefreshFileHistoryView();
 	});
 
 	// debounce to update the browser url

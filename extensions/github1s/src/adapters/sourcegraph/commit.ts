@@ -70,13 +70,16 @@ const formatCommit = (commit: any, isGitHub: boolean) => {
 export const getCommits = async (repository: string, ref: string, path?: string, limit?: number): Promise<Commit[]> => {
 	const repositoryData = await querySourcegraphRepository({
 		query: CommitsQuery,
-		variables: { repository, ref, path: path || '', first: limit ? limit - 1 : undefined },
+		variables: { repository, ref, path: path || '', first: limit ? limit : undefined },
 	});
 
 	const firstCommit = repositoryData.commit;
 	const isGitHub = repository.startsWith('github.com/');
 	const restCommits = firstCommit?.ancestors?.nodes?.map?.((item) => formatCommit(item, isGitHub)) || [];
-	return path ? restCommits : [formatCommit(firstCommit, isGitHub), ...restCommits].filter(Boolean);
+	if (firstCommit.oid === restCommits[0]?.sha) {
+		return restCommits.filter(Boolean);
+	}
+	return [formatCommit(firstCommit, isGitHub), ...restCommits].slice(0, limit).filter(Boolean);
 };
 
 const CommitQuery = gql`
