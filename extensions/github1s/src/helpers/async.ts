@@ -9,11 +9,12 @@ export class Barrier {
 	private _promise: Promise<boolean>;
 	private _completePromise!: (v: boolean) => void;
 
-	constructor() {
+	constructor(timeout = 0) {
 		this._isOpen = false;
 		this._promise = new Promise<boolean>((c, e) => {
 			this._completePromise = c;
 		});
+		timeout && setTimeout(() => this.open(), timeout);
 	}
 
 	isOpen(): boolean {

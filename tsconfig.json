@@ -12,8 +12,8 @@
 		"target": "es2017",
 		"paths": {
 			"vs/*": [
-				"./vscode-web-github1s/src/vs/*",
-				"./vscode-web-github1s/lib/vscode/src/vs/*"
+				"./vscode-web/src/vs/*",
+				"./vscode-web/lib/vscode/src/vs/*"
 			]
 		},
 		"lib": [

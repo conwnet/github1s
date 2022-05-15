@@ -39,10 +39,11 @@ const autoSyncGitHub1sExtension = async () => {
 
 // regenerate the config when `extensions/github1s/packages.json` has changed
 const autoRegenerateConfig = async () => {
+	const resourcesPath = path.join(APP_ROOT, 'resources');
 	const packagePath = path.join(APP_ROOT, 'extensions/github1s/package.json');
 	const scriptPath = path.join(APP_ROOT, 'scripts/package/generate-config.js');
 
-	chokidar.watch(packagePath).on(
+	chokidar.watch([resourcesPath, packagePath]).on(
 		'all',
 		debounce(() => {
 			cp.exec(`node ${scriptPath}`);

@@ -5,7 +5,7 @@
 
 import router from '@/router';
 import { explorerRouterListener } from './explorer';
-import { sourceControlRouterListener } from './source-control';
+import { sourceControlRouterListener } from './changes';
 
 export const registerRouterEventListeners = () => {
 	router.addListener(explorerRouterListener);

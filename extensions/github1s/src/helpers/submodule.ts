@@ -75,29 +75,32 @@ export function parseGitmodules(raw: string): Submodule[] {
 
 export const parseSubmoduleUrl = (url: string) => {
 	try {
-		let authority = '';
+		let host = '';
 		let path = '';
 		// the url is looks like git@github.com:xcv58/rc_config_files.git
 		if (url.startsWith('git@')) {
 			const colonIndex = url.indexOf(':');
-			authority = url.slice(0, colonIndex);
+			host = url.slice(0, colonIndex);
 			path = url.slice(colonIndex + 1);
 		} else {
 			const submoduleUri = Uri.parse(url);
-			authority = submoduleUri.authority;
+			host = submoduleUri.authority;
 			path = submoduleUri.path;
 		}
-		if (!/\bgithub\.com$/.test(authority)) {
-			throw FileSystemError.Unavailable(
-				'only github submodules are supported now'
-			);
+		let submoduleScheme = 'github1s';
+		if (/\bgithub\.com/i.test(host)) {
+			submoduleScheme = 'github1s';
+		} else if (/\bgitlab\.com/i.test(host)) {
+			submoduleScheme = 'gitlab1s';
+		} else if (/\bbitbucket\.org/i.test(host)) {
+			submoduleScheme = 'bitbucket1s';
+		} else {
+			throw FileSystemError.Unavailable('only github submodules are supported now');
 		}
 		const [submoduleOwner, submoduleRepoPart] = path.split('/').filter(Boolean);
 		// if there are a repo which the name endsWith '.git' (likes conwnet/demo.git), this ambiguity may cause a problem
-		const submoduleRepo = submoduleRepoPart.endsWith('.git')
-			? submoduleRepoPart.slice(0, -4)
-			: submoduleRepoPart;
-		return [submoduleOwner, submoduleRepo];
+		const submoduleRepo = submoduleRepoPart.endsWith('.git') ? submoduleRepoPart.slice(0, -4) : submoduleRepoPart;
+		return [submoduleScheme, `${submoduleOwner}/${submoduleRepo}`];
 	} catch (e) {
 		throw FileSystemError.Unavailable('Can not found valid submodule declare');
 	}

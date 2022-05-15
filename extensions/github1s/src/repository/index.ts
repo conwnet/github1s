@@ -3,91 +3,140 @@
  * @author netcon
  */
 
-import { reuseable } from '@/helpers/func';
-import router from '@/router';
-import {
-	getGitHubBranchRefs,
-	getGitHubTagRefs,
-} from '@/interfaces/github-api-rest';
-import { apolloClient } from '@/interfaces/client';
-import { githubFileBlameQuery } from '@/interfaces/github-api-gql';
-import { getFetchOptions } from '@/helpers/fetch';
-import { GitHubPullManager } from './github-pull-manager';
-import { GitHubCommitManager } from './github-commit-manager';
-import { RepositoryRef, BlameRange, PullManager } from './types';
+import { adapterManager } from '@/adapters';
+import { CommitManager } from './commit-manager';
+import { CodeReviewManager } from './code-review-manager';
+import { BranchTagManager } from './branch-tag-manager';
+import { BlameRange } from '@/adapters/types';
 
 export class Repository {
-	private static instance: Repository;
-	private _fileBlameMap: Map<string, BlameRange[]>;
-	private _pullManager: PullManager;
-	private _commitManager: GitHubCommitManager;
+	private static instanceMap = new Map<string, Repository>();
 
-	public static getInstance() {
-		if (Repository.instance) {
-			return this.instance;
+	private _branchTagManager: BranchTagManager;
+	private _codeReviewManager: CodeReviewManager;
+	private _blameRangesCache: Map<string, BlameRange[]>;
+
+	public static getInstance(scheme: string, repo: string) {
+		const mapKey = `${scheme} ${repo}`;
+		if (!Repository.instanceMap.has(mapKey)) {
+			Repository.instanceMap.set(mapKey, new Repository(scheme, repo));
 		}
-		return (Repository.instance = new Repository());
+		return Repository.instanceMap.get(mapKey)!;
 	}
 
-	constructor() {
-		this._pullManager = new GitHubPullManager(this);
-		this._commitManager = new GitHubCommitManager(this);
-		this._fileBlameMap = new Map();
+	private constructor(private _scheme: string, private _repo: string) {
+		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
+		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
+		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
 
-	public getPullManager(): GitHubPullManager {
-		return this._pullManager as GitHubPullManager;
+	getBranchList(...args: Parameters<BranchTagManager['getBranchList']>) {
+		return this._branchTagManager.getBranchList(...args);
 	}
 
-	public getCommitManager(): GitHubCommitManager {
-		return this._commitManager as GitHubCommitManager;
+	getBranchItem(...args: Parameters<BranchTagManager['getBranchItem']>) {
+		return this._branchTagManager.getBranchItem(...args);
 	}
 
-	// get current repo owner
-	public getOwner() {
-		const pathname = router.history.location.pathname;
-		return pathname.split('/').filter(Boolean)[0] || 'conwnet';
+	loadMoreBranches(...args: Parameters<BranchTagManager['loadMoreBranches']>) {
+		return this._branchTagManager.loadMoreBranches(...args);
 	}
 
-	// get current repo name
-	public getRepo() {
-		const pathname = router.history.location.pathname;
-		return pathname.split('/').filter(Boolean)[1] || 'github1s';
+	hasMoreBranches(...args: Parameters<BranchTagManager['hasMoreBranches']>) {
+		return this._branchTagManager.hasMoreBranches(...args);
 	}
 
-	// get all branches for current repository
-	public getBranches = reuseable(
-		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
-			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGitHubBranchRefs(owner, repo, getFetchOptions(forceUpdate));
+	getTagList(...args: Parameters<BranchTagManager['getTagList']>) {
+		return this._branchTagManager.getTagList(...args);
+	}
+
+	getTagItem(...args: Parameters<BranchTagManager['getTagItem']>) {
+		return this._branchTagManager.getTagItem(...args);
+	}
+
+	loadMoreTags(...args: Parameters<BranchTagManager['loadMoreTags']>) {
+		return this._branchTagManager.loadMoreTags(...args);
+	}
+
+	hasMoreTags(...args: Parameters<BranchTagManager['hasMoreTags']>) {
+		return this._branchTagManager.hasMoreTags(...args);
+	}
+
+	getCommitList(ref: string = 'HEAD', filePath: string = '', forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
+	}
+
+	getCommitItem(ref: string, forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getItem(forceUpdate);
+	}
+
+	loadMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
+	}
+
+	hasMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
+	}
+
+	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getChangedFiles(forceUpdate);
+	}
+
+	loadMoreCommitChangedFiles(ref: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').loadMoreChangedFiles();
+	}
+
+	hasMoreCommitChangedFiles(ref: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '').hasMoreChangedFiles();
+	}
+
+	getFileLatestCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getLatestCommit();
+	}
+
+	getPreviousCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getPreviousCommit();
+	}
+
+	getNextCommit(ref: string, filePath: string) {
+		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getNextCommit();
+	}
+
+	getCodeReviewList(...args: Parameters<CodeReviewManager['getList']>) {
+		return this._codeReviewManager.getList(...args);
+	}
+
+	getCodeReviewItem(...args: Parameters<CodeReviewManager['getItem']>) {
+		return this._codeReviewManager.getItem(...args);
+	}
+
+	loadMoreCodeReviews(...args: Parameters<CodeReviewManager['loadMore']>) {
+		return this._codeReviewManager.loadMore(...args);
+	}
+
+	hasMoreCodeReviews(...args: Parameters<CodeReviewManager['hasMore']>) {
+		return this._codeReviewManager.hasMore(...args);
+	}
+
+	getCodeReviewChangedFiles(...args: Parameters<CodeReviewManager['getChangedFiles']>) {
+		return this._codeReviewManager.getChangedFiles(...args);
+	}
+
+	loadMoreCodeReviewChangedFiles(...args: Parameters<CodeReviewManager['loadMoreChangedFiles']>) {
+		return this._codeReviewManager.loadMoreChangedFiles(...args);
+	}
+
+	hasMoreCodeReviewChangedFiles(...args: Parameters<CodeReviewManager['hasMoreChangedFiles']>) {
+		return this._codeReviewManager.hasMoreChangedFiles(...args);
+	}
+
+	async getFileBlameRanges(ref: string, path: string) {
+		const cacheKey = `${ref} ${path}`;
+		if (!this._blameRangesCache.has(cacheKey)) {
+			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
+			this._blameRangesCache.set(cacheKey, blameRanges);
 		}
-	);
-
-	// get all tags for current repository
-	public getTags = reuseable(
-		async (forceUpdate: boolean = false): Promise<RepositoryRef[]> => {
-			const [owner, repo] = [this.getOwner(), this.getRepo()];
-			return getGitHubTagRefs(owner, repo, getFetchOptions(forceUpdate));
-		}
-	);
-
-	public getFileBlame = reuseable(
-		async (filePath: string, commitSha: string): Promise<BlameRange[]> => {
-			const cacheKey = `${commitSha}:${filePath}`;
-
-			if (!this._fileBlameMap.has(cacheKey)) {
-				const [owner, repo] = [this.getOwner(), this.getRepo()];
-				const response = await apolloClient.query({
-					query: githubFileBlameQuery,
-					variables: { owner, repo, ref: commitSha, path: filePath.slice(1) },
-				});
-				const blameRanges =
-					response.data?.repository?.object?.blame?.ranges || [];
-				this._fileBlameMap.set(cacheKey, blameRanges);
-			}
-			return this._fileBlameMap.get(cacheKey);
-		}
-	);
+		return this._blameRangesCache.get(cacheKey) || [];
+	}
 }
-
-export default Repository.getInstance();

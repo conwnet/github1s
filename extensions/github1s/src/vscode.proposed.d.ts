@@ -108,9 +108,7 @@ declare module 'vscode' {
 		 * @param provider The authentication provider provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerAuthenticationProvider(
-			provider: AuthenticationProvider
-		): Disposable;
+		export function registerAuthenticationProvider(provider: AuthenticationProvider): Disposable;
 
 		/**
 		 * @deprecated - getSession should now trigger extension activation.
@@ -143,10 +141,7 @@ declare module 'vscode' {
 		 * @param sessionId The session id to remove
 		 * provider
 		 */
-		export function logout(
-			providerId: string,
-			sessionId: string
-		): Thenable<void>;
+		export function logout(providerId: string, sessionId: string): Thenable<void>;
 
 		/**
 		 * Retrieve a password that was stored with key. Returns undefined if there
@@ -233,27 +228,17 @@ declare module 'vscode' {
 		elevationRequired?: boolean;
 	}
 
-	export type ResolverResult = ResolvedAuthority &
-		ResolvedOptions &
-		TunnelInformation;
+	export type ResolverResult = ResolvedAuthority & ResolvedOptions & TunnelInformation;
 
 	export class RemoteAuthorityResolverError extends Error {
-		static NotAvailable(
-			message?: string,
-			handled?: boolean
-		): RemoteAuthorityResolverError;
-		static TemporarilyNotAvailable(
-			message?: string
-		): RemoteAuthorityResolverError;
+		static NotAvailable(message?: string, handled?: boolean): RemoteAuthorityResolverError;
+		static TemporarilyNotAvailable(message?: string): RemoteAuthorityResolverError;
 
 		constructor(message?: string);
 	}
 
 	export interface RemoteAuthorityResolver {
-		resolve(
-			authority: string,
-			context: RemoteAuthorityResolverContext
-		): ResolverResult | Thenable<ResolverResult>;
+		resolve(authority: string, context: RemoteAuthorityResolverContext): ResolverResult | Thenable<ResolverResult>;
 		/**
 		 * Can be optionally implemented if the extension can forward ports better than the core.
 		 * When not implemented, the core will use its default forwarding logic.
@@ -270,11 +255,7 @@ declare module 'vscode' {
 		/**
 		 * Provides filtering for candidate ports.
 		 */
-		showCandidatePort?: (
-			host: string,
-			port: number,
-			detail: string
-		) => Thenable<boolean>;
+		showCandidatePort?: (host: string, port: number, detail: string) => Thenable<boolean>;
 	}
 
 	export namespace workspace {
@@ -323,9 +304,7 @@ declare module 'vscode' {
 			authorityPrefix: string,
 			resolver: RemoteAuthorityResolver
 		): Disposable;
-		export function registerResourceLabelFormatter(
-			formatter: ResourceLabelFormatter
-		): Disposable;
+		export function registerResourceLabelFormatter(formatter: ResourceLabelFormatter): Disposable;
 	}
 
 	//#endregion
@@ -355,25 +334,10 @@ declare module 'vscode' {
 	//#region read/write in chunks: https://github.com/microsoft/vscode/issues/84515
 
 	export interface FileSystemProvider {
-		open?(
-			resource: Uri,
-			options: { create: boolean }
-		): number | Thenable<number>;
+		open?(resource: Uri, options: { create: boolean }): number | Thenable<number>;
 		close?(fd: number): void | Thenable<void>;
-		read?(
-			fd: number,
-			pos: number,
-			data: Uint8Array,
-			offset: number,
-			length: number
-		): number | Thenable<number>;
-		write?(
-			fd: number,
-			pos: number,
-			data: Uint8Array,
-			offset: number,
-			length: number
-		): number | Thenable<number>;
+		read?(fd: number, pos: number, data: Uint8Array, offset: number, length: number): number | Thenable<number>;
+		write?(fd: number, pos: number, data: Uint8Array, offset: number, length: number): number | Thenable<number>;
 	}
 
 	//#endregion
@@ -663,10 +627,7 @@ declare module 'vscode' {
 		 * @param provider The provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerFileSearchProvider(
-			scheme: string,
-			provider: FileSearchProvider
-		): Disposable;
+		export function registerFileSearchProvider(scheme: string, provider: FileSearchProvider): Disposable;
 
 		/**
 		 * Register a text search provider.
@@ -677,10 +638,7 @@ declare module 'vscode' {
 		 * @param provider The provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerTextSearchProvider(
-			scheme: string,
-			provider: TextSearchProvider
-		): Disposable;
+		export function registerTextSearchProvider(scheme: string, provider: TextSearchProvider): Disposable;
 	}
 
 	//#endregion
@@ -1048,9 +1006,7 @@ declare module 'vscode' {
 		 * of the extension and the `StatusBarItemOptions.name` will be the extension name.
 		 * @return A new status bar item.
 		 */
-		export function createStatusBarItem(
-			options?: StatusBarItemOptions
-		): StatusBarItem;
+		export function createStatusBarItem(options?: StatusBarItemOptions): StatusBarItem;
 	}
 
 	//#endregion
@@ -1157,21 +1113,14 @@ declare module 'vscode' {
 		readonly metadata?: NotebookCellOutputMetadata;
 	}
 
-	export type CellOutput =
-		| CellStreamOutput
-		| CellErrorOutput
-		| CellDisplayOutput;
+	export type CellOutput = CellStreamOutput | CellErrorOutput | CellDisplayOutput;
 
 	export class NotebookCellOutputItem {
 		readonly mime: string;
 		readonly value: unknown;
 		readonly metadata?: Record<string, string | number | boolean>;
 
-		constructor(
-			mime: string,
-			value: unknown,
-			metadata?: Record<string, string | number | boolean>
-		);
+		constructor(mime: string, value: unknown, metadata?: Record<string, string | number | boolean>);
 	}
 
 	//TODO@jrieken add id?
@@ -1179,10 +1128,7 @@ declare module 'vscode' {
 		readonly outputs: NotebookCellOutputItem[];
 		readonly metadata?: Record<string, string | number | boolean>;
 
-		constructor(
-			outputs: NotebookCellOutputItem[],
-			metadata?: Record<string, string | number | boolean>
-		);
+		constructor(outputs: NotebookCellOutputItem[], metadata?: Record<string, string | number | boolean>);
 
 		//TODO@jrieken HACK to workaround dependency issues...
 		toJSON(): any;
@@ -1398,10 +1344,7 @@ declare module 'vscode' {
 	export interface NotebookEditorEdit {
 		replaceMetadata(value: NotebookDocumentMetadata): void;
 		replaceCells(start: number, end: number, cells: NotebookCellData[]): void;
-		replaceCellOutput(
-			index: number,
-			outputs: (NotebookCellOutput | CellOutput)[]
-		): void;
+		replaceCellOutput(index: number, outputs: (NotebookCellOutput | CellOutput)[]): void;
 		replaceCellMetadata(index: number, metadata: NotebookCellMetadata): void;
 	}
 
@@ -1488,19 +1431,11 @@ declare module 'vscode' {
 		 * @param callback A function which can create edits using an [edit-builder](#NotebookEditorEdit).
 		 * @return A promise that resolves with a value indicating if the edits could be applied.
 		 */
-		edit(
-			callback: (editBuilder: NotebookEditorEdit) => void
-		): Thenable<boolean>;
+		edit(callback: (editBuilder: NotebookEditorEdit) => void): Thenable<boolean>;
 
-		setDecorations(
-			decorationType: NotebookEditorDecorationType,
-			range: NotebookCellRange
-		): void;
+		setDecorations(decorationType: NotebookEditorDecorationType, range: NotebookCellRange): void;
 
-		revealRange(
-			range: NotebookCellRange,
-			revealType?: NotebookEditorRevealType
-		): void;
+		revealRange(range: NotebookCellRange, revealType?: NotebookEditorRevealType): void;
 	}
 
 	export interface NotebookOutputSelector {
@@ -1686,31 +1621,16 @@ declare module 'vscode' {
 	export interface NotebookContentProvider {
 		readonly options?: NotebookDocumentContentOptions;
 		readonly onDidChangeNotebookContentOptions?: Event<NotebookDocumentContentOptions>;
-		readonly onDidChangeNotebook: Event<
-			NotebookDocumentContentChangeEvent | NotebookDocumentEditEvent
-		>;
+		readonly onDidChangeNotebook: Event<NotebookDocumentContentChangeEvent | NotebookDocumentEditEvent>;
 
 		/**
 		 * Content providers should always use [file system providers](#FileSystemProvider) to
 		 * resolve the raw content for `uri` as the resource is not necessarily a file on disk.
 		 */
-		openNotebook(
-			uri: Uri,
-			openContext: NotebookDocumentOpenContext
-		): NotebookData | Promise<NotebookData>;
-		resolveNotebook(
-			document: NotebookDocument,
-			webview: NotebookCommunication
-		): Promise<void>;
-		saveNotebook(
-			document: NotebookDocument,
-			cancellation: CancellationToken
-		): Promise<void>;
-		saveNotebookAs(
-			targetResource: Uri,
-			document: NotebookDocument,
-			cancellation: CancellationToken
-		): Promise<void>;
+		openNotebook(uri: Uri, openContext: NotebookDocumentOpenContext): NotebookData | Promise<NotebookData>;
+		resolveNotebook(document: NotebookDocument, webview: NotebookCommunication): Promise<void>;
+		saveNotebook(document: NotebookDocument, cancellation: CancellationToken): Promise<void>;
+		saveNotebookAs(targetResource: Uri, document: NotebookDocument, cancellation: CancellationToken): Promise<void>;
 		backupNotebook(
 			document: NotebookDocument,
 			context: NotebookDocumentBackupContext,
@@ -1731,23 +1651,16 @@ declare module 'vscode' {
 		cancelAllCellsExecution(document: NotebookDocument): void;
 	}
 
-	export type NotebookFilenamePattern =
-		| GlobPattern
-		| { include: GlobPattern; exclude: GlobPattern };
+	export type NotebookFilenamePattern = GlobPattern | { include: GlobPattern; exclude: GlobPattern };
 
 	export interface NotebookDocumentFilter {
 		viewType?: string | string[];
 		filenamePattern?: NotebookFilenamePattern;
 	}
 
-	export interface NotebookKernelProvider<
-		T extends NotebookKernel = NotebookKernel
-	> {
+	export interface NotebookKernelProvider<T extends NotebookKernel = NotebookKernel> {
 		onDidChangeKernels?: Event<NotebookDocument | undefined>;
-		provideKernels(
-			document: NotebookDocument,
-			token: CancellationToken
-		): ProviderResult<T[]>;
+		provideKernels(document: NotebookDocument, token: CancellationToken): ProviderResult<T[]>;
 		resolveKernel?(
 			kernel: T,
 			document: NotebookDocument,
@@ -1826,10 +1739,7 @@ declare module 'vscode' {
 		export function createNotebookEditorDecorationType(
 			options: NotebookDecorationRenderOptions
 		): NotebookEditorDecorationType;
-		export function openNotebookDocument(
-			uri: Uri,
-			viewType?: string
-		): Promise<NotebookDocument>;
+		export function openNotebookDocument(uri: Uri, viewType?: string): Promise<NotebookDocument>;
 		export const onDidOpenNotebookDocument: Event<NotebookDocument>;
 		export const onDidCloseNotebookDocument: Event<NotebookDocument>;
 		export const onDidSaveNotebookDocument: Event<NotebookDocument>;
@@ -1880,9 +1790,7 @@ declare module 'vscode' {
 		export const visibleNotebookEditors: NotebookEditor[];
 		export const onDidChangeVisibleNotebookEditors: Event<NotebookEditor[]>;
 		export const activeNotebookEditor: NotebookEditor | undefined;
-		export const onDidChangeActiveNotebookEditor: Event<
-			NotebookEditor | undefined
-		>;
+		export const onDidChangeActiveNotebookEditor: Event<NotebookEditor | undefined>;
 		export const onDidChangeNotebookEditorSelection: Event<NotebookEditorSelectionChangeEvent>;
 		export const onDidChangeNotebookEditorVisibleRanges: Event<NotebookEditorVisibleRangesChangeEvent>;
 		export function showNotebookDocument(
@@ -2064,11 +1972,7 @@ declare module 'vscode' {
 		 * @return The [timeline result](#TimelineResult) or a thenable that resolves to such. The lack of a result
 		 * can be signaled by returning `undefined`, `null`, or an empty array.
 		 */
-		provideTimeline(
-			uri: Uri,
-			options: TimelineOptions,
-			token: CancellationToken
-		): ProviderResult<Timeline>;
+		provideTimeline(uri: Uri, options: TimelineOptions, token: CancellationToken): ProviderResult<Timeline>;
 	}
 
 	export namespace workspace {
@@ -2083,10 +1987,7 @@ declare module 'vscode' {
 		 * @param provider A timeline provider.
 		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
 		 */
-		export function registerTimelineProvider(
-			scheme: string | string[],
-			provider: TimelineProvider
-		): Disposable;
+		export function registerTimelineProvider(scheme: string | string[], provider: TimelineProvider): Disposable;
 	}
 
 	//#endregion
@@ -2158,31 +2059,23 @@ declare module 'vscode' {
 		 * selectors. It is activated when either tests need to be enumerated, or
 		 * a document matching the selector is opened.
 		 */
-		export function registerTestProvider<T extends TestItem>(
-			testProvider: TestProvider<T>
-		): Disposable;
+		export function registerTestProvider<T extends TestItem>(testProvider: TestProvider<T>): Disposable;
 
 		/**
 		 * Runs tests with the given options. If no options are given, then
 		 * all tests are run. Returns the resulting test run.
 		 */
-		export function runTests<T extends TestItem>(
-			options: TestRunOptions<T>
-		): Thenable<void>;
+		export function runTests<T extends TestItem>(options: TestRunOptions<T>): Thenable<void>;
 
 		/**
 		 * Returns an observer that retrieves tests in the given workspace folder.
 		 */
-		export function createWorkspaceTestObserver(
-			workspaceFolder: WorkspaceFolder
-		): TestObserver;
+		export function createWorkspaceTestObserver(workspaceFolder: WorkspaceFolder): TestObserver;
 
 		/**
 		 * Returns an observer that retrieves tests in the given text document.
 		 */
-		export function createDocumentTestObserver(
-			document: TextDocument
-		): TestObserver;
+		export function createDocumentTestObserver(document: TextDocument): TestObserver;
 	}
 
 	export interface TestObserver {
@@ -2311,10 +2204,7 @@ declare module 'vscode' {
 		 * fire with update test states during the run.
 		 * @todo this will eventually need to be able to return a summary report, coverage for example.
 		 */
-		runTests?(
-			options: TestRunOptions<T>,
-			cancellationToken: CancellationToken
-		): ProviderResult<void>;
+		runTests?(options: TestRunOptions<T>, cancellationToken: CancellationToken): ProviderResult<void>;
 	}
 
 	/**
@@ -2422,11 +2312,7 @@ declare module 'vscode' {
 		 * @param messages List of associated messages for the test
 		 * @param duration Length of time the test run took, if appropriate.
 		 */
-		constructor(
-			runState: TestRunState,
-			messages?: TestMessage[],
-			duration?: number
-		);
+		constructor(runState: TestRunState, messages?: TestMessage[], duration?: number);
 	}
 
 	/**

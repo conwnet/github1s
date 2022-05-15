@@ -9,8 +9,8 @@
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 const webpack = require('webpack');
-
 const path = require('path');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = /** @type WebpackConfig */ {
 	context: __dirname,
@@ -40,6 +40,7 @@ module.exports = /** @type WebpackConfig */ {
 							compilerOptions: {
 								sourceMap: true,
 								declaration: false,
+								experimentalDecorators: true,
 							},
 						},
 					},
@@ -63,5 +64,6 @@ module.exports = /** @type WebpackConfig */ {
 		new webpack.ProvidePlugin({
 			process: 'process/browser.js',
 		}),
+		new NodePolyfillPlugin(),
 	],
 };

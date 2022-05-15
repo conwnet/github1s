@@ -2,3 +2,6 @@
 **/lib/vscode/**
 **/dist/**
 **/src/vs/**
+htm.module.js
+preact.module.js
+preact-hooks.module.js

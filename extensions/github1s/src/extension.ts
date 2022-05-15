@@ -3,80 +3,79 @@
  * @author netcon
  */
 
-import * as vscode from 'vscode';
-import { setExtensionContext } from '@/helpers/context';
-import { registerGitHub1sCommands } from '@/commands';
-import { registerVSCodeProviders } from '@/providers';
-import { registerCustomViews } from '@/views';
-import { GitHub1sFileSystemProvider } from '@/providers/fileSystemProvider';
-import { showSponsors } from '@/sponsors';
-import { showGitpod } from '@/gitpod';
 import router from '@/router';
-import { activateSourceControl } from '@/source-control';
+import * as vscode from 'vscode';
+import { PageType } from './adapters/types';
+import { registerCustomViews } from '@/views';
+import { decorateStatusBar } from '@/statusbar';
 import { registerEventListeners } from '@/listeners';
-import { PageType } from './router/types';
+import { registerVSCodeProviders } from '@/providers';
+import { registerGitHub1sCommands } from '@/commands';
+import { updateSourceControlChanges } from '@/changes';
+import { setExtensionContext } from '@/helpers/context';
+import { adapterManager, registerAdapters } from '@/adapters';
+
+const browserUrlManager = {
+	href: () => vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl') as Promise<string>,
+	push: (url: string) =>
+		vscode.commands.executeCommand('github1s.commands.vscode.pushBrowserUrl', url) as Promise<void>,
+	replace: (url: string) =>
+		vscode.commands.executeCommand('github1s.commands.vscode.replaceBrowserUrl', url) as Promise<void>,
+};
 
 export async function activate(context: vscode.ExtensionContext) {
-	const browserUrl = (await vscode.commands.executeCommand(
-		'github1s.vscode.get-browser-url'
-	)) as string;
-
 	// set the global context for convenient
 	setExtensionContext(context);
-	// Ensure the router has been initialized at first
-	await router.initialize(browserUrl);
 
-	// register the necessary event listeners
-	registerEventListeners();
-	// register VS Code providers
-	registerVSCodeProviders();
-	// register custom views
-	registerCustomViews();
-	// register GitHub1s Commands
-	registerGitHub1sCommands();
+	// register platform adapters
+	await registerAdapters();
 
-	// activate SourceControl features,
-	activateSourceControl();
+	// Ensure the router has been initialized
+	await router.initialize(browserUrlManager);
 
-	// sponsors in Status Bar
-	showSponsors();
-	showGitpod();
+	// do follow-up works in parallel
+	await Promise.all([
+		registerVSCodeProviders(),
+		registerEventListeners(),
+		registerGitHub1sCommands(),
+		registerCustomViews(),
+		updateSourceControlChanges(),
+		decorateStatusBar(),
+	]);
 
-	// initialize the VSCode's state
 	initialVSCodeState();
 }
 
 // initialize the VSCode's state according to the router url
 const initialVSCodeState = async () => {
 	const routerState = await router.getState();
-	const { filePath, pageType } = routerState;
-	const scheme = GitHub1sFileSystemProvider.scheme;
+	const scheme = adapterManager.getCurrentScheme();
 
-	if (filePath && pageType === PageType.TREE) {
+	if (routerState.pageType === PageType.Tree && routerState.filePath) {
 		vscode.commands.executeCommand(
 			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: filePath })
+			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` })
 		);
-	} else if (filePath && pageType === PageType.BLOB) {
-		const { startLineNumber, endLineNumber } = routerState;
-		const start = new vscode.Position(startLineNumber - 1, 0);
-		const end = new vscode.Position(endLineNumber - 1, 999999);
-		const documentShowOptions: vscode.TextDocumentShowOptions = startLineNumber
-			? { selection: new vscode.Range(start, end) }
-			: {};
-
+	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
+		const { startLine, endLine } = routerState;
+		let documentShowOptions: vscode.TextDocumentShowOptions = {};
+		if (startLine || endLine) {
+			const startPosition = new vscode.Position((startLine || endLine)! - 1, 0);
+			const endPosition = new vscode.Position((endLine || startLine)! - 1, 999999);
+			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
+		}
 		// TODO: the selection of the opening file may be cleared
 		// when editor try to restore previous state in the same file
 		vscode.commands.executeCommand(
 			'vscode.open',
-			vscode.Uri.parse('').with({ scheme, path: filePath }),
+			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
 			documentShowOptions
 		);
-	} else if (pageType === PageType.PULL_LIST) {
-		vscode.commands.executeCommand('github1s.views.pull-request-list.focus');
-	} else if (pageType === PageType.COMMIT_LIST) {
-		vscode.commands.executeCommand('github1s.views.commit-list.focus');
-	} else if ([PageType.PULL, PageType.COMMIT].includes(pageType)) {
+	} else if (routerState.pageType === PageType.CodeReviewList) {
+		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');
+	} else if (routerState.pageType === PageType.CommitList) {
+		vscode.commands.executeCommand('github1s.views.commitList.focus');
+	} else if ([PageType.CodeReview, PageType.Commit].includes(routerState.pageType)) {
 		vscode.commands.executeCommand('workbench.scm.focus');
 	}
 };

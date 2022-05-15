@@ -3,6 +3,7 @@ module.exports = {
 	useTabs: true,
 	semi: true,
 	singleQuote: true,
+	printWidth: 120,
 	overrides: [
 		{
 			files: ['*.yml', '*.yaml', '*.json'],
