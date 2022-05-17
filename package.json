@@ -27,7 +27,7 @@
     "yalc": "^1.0.0-pre.50"
   },
   "scripts": {
-    "preinstall": "./scripts/pre-install.sh",
+    "preinstall": "./scripts/preinstall.sh",
     "postinstall": "husky install && ./scripts/postinstall.sh",
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
