@@ -10,7 +10,6 @@ import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
 import { Repository } from '@/repository';
 import { BlameRange, PlatformName } from '@/adapters/types';
-import { showFileBlameAuthorizedRequiredMessage } from '@/messages';
 import { adapterManager } from '@/adapters';
 
 const ageColors = [

@@ -22,34 +22,38 @@ export interface CommitTreeItem extends vscode.TreeItem {
 	commit: adapterTypes.Commit;
 }
 
-const loadMoreCommitItem: vscode.TreeItem = {
-	label: 'Load more',
-	tooltip: 'Load more commits',
-	command: {
-		title: 'Load more commits',
-		command: 'github1s.commands.load-more-commits',
-		tooltip: 'Load more commits',
-	},
-};
-
-const createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => ({
-	label: 'Load more',
-	tooltip: 'Load more changed files',
-	command: {
-		title: 'Load more changed files',
-		command: 'github1s.commands.load-more-commit-changed-files',
-		tooltip: 'Load more changed files',
-		arguments: [commitSha],
-	},
-});
-
 export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	public static viewType = 'github1s.views.commitList';
 
-	private _forceUpdate = false;
-	private _loadingBarrier: Barrier | null = null;
-	private _onDidChangeTreeData = new vscode.EventEmitter<void>();
+	protected _forceUpdate = false;
+	protected _loadingBarrier: Barrier | null = null;
+	protected _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+	protected loadMoreCommitItem: vscode.TreeItem = {
+		label: 'Load more',
+		tooltip: 'Load more commits',
+		command: {
+			title: 'Load more commits',
+			command: 'github1s.commands.loadMoreCommits',
+			tooltip: 'Load more commits',
+		},
+	};
+
+	protected createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => ({
+		label: 'Load more',
+		tooltip: 'Load more changed files',
+		command: {
+			title: 'Load more changed files',
+			command: 'github1s.commands.loadMoreCommitChangedFiles',
+			tooltip: 'Load more changed files',
+			arguments: [commitSha],
+		},
+	});
+
+	async resolveFilePath() {
+		return '';
+	}
 
 	public updateTree(forceUpdate = true) {
 		this._forceUpdate = forceUpdate;
@@ -62,7 +66,8 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
 			const { repo, ref } = await router.getState();
-			await Repository.getInstance(scheme, repo).loadMoreCommits(ref);
+			const repository = Repository.getInstance(scheme, repo);
+			await repository.loadMoreCommits(ref, await this.resolveFilePath());
 			this._loadingBarrier.open();
 		}
 	}
@@ -80,10 +85,11 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 
 	async getCommitItems(): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
+		const filePath = await this.resolveFilePath();
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const { repo, ref } = await router.getState();
 		const repository = Repository.getInstance(currentAdapter.scheme, repo);
-		const repositoryCommits = await repository.getCommitList(ref, '', this._forceUpdate);
+		const repositoryCommits = await repository.getCommitList(ref, filePath, this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = `${commit.message}`;
 			const description = getCommitTreeItemDescription(commit);
@@ -106,8 +112,8 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			};
 		});
 		this._forceUpdate = false;
-		const hasMore = await repository.hasMoreCommits(ref);
-		return hasMore ? [...commitTreeItems, loadMoreCommitItem] : commitTreeItems;
+		const hasMore = await repository.hasMoreCommits(ref, filePath);
+		return hasMore ? [...commitTreeItems, this.loadMoreCommitItem] : commitTreeItems;
 	}
 
 	async getCommitFileItems(commit: adapterTypes.Commit): Promise<vscode.TreeItem[]> {
@@ -131,7 +137,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		const { repo } = await router.getState();
 		const repository = Repository.getInstance(scheme, repo);
 		const hasMore = await repository.hasMoreCommitChangedFiles(commit.sha);
-		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(commit.sha);
+		const loadMoreChangedFilesItem = this.createLoadMoreChangedFilesItem(commit.sha);
 		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;
 	}
 
@@ -145,5 +151,43 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		}
 		const commit = (element as CommitTreeItem)?.commit;
 		return commit ? this.getCommitFileItems(commit) : [];
+	}
+}
+
+export class FileHistoryTreeDataProvider extends CommitTreeDataProvider {
+	public static viewType = 'github1s.views.fileHistory';
+
+	protected loadMoreCommitItem: vscode.TreeItem = {
+		label: 'Load more',
+		tooltip: 'Load more commits',
+		command: {
+			title: 'Load more commits',
+			command: 'github1s.commands.loadMoreFileHistoryCommits',
+			tooltip: 'Load more commits',
+		},
+	};
+
+	protected createLoadMoreChangedFilesItem = (commitSha: string): vscode.TreeItem => ({
+		label: 'Load more',
+		tooltip: 'Load more changed files',
+		command: {
+			title: 'Load more changed files',
+			command: 'github1s.commands.loadMoreFileHistoryCommitChangedFiles',
+			tooltip: 'Load more changed files',
+			arguments: [commitSha],
+		},
+	});
+
+	async resolveFilePath() {
+		const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
+		const currentScheme = adapterManager.getCurrentScheme();
+		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path.slice(1) : '';
+	}
+
+	async getCommitItems() {
+		if (!(await this.resolveFilePath())) {
+			return [];
+		}
+		return super.getCommitItems();
 	}
 }
