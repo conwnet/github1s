@@ -6,11 +6,11 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list';
-import { commitTreeDataProvider } from '@/views';
+import { commitTreeDataProvider, fileHistoryTreeDataProvider } from '@/views';
 import { adapterManager } from '@/adapters';
 import { Repository } from '@/repository';
 
-const checkCommitExists = async (repo: string, commitSha: string) => {
+export const checkCommitExists = async (repo: string, commitSha: string) => {
 	const adapter = adapterManager.getCurrentAdapter();
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
@@ -110,6 +110,18 @@ const commandLoadMoreCommitChangedFiles = async (commitSha: string) => {
 	return commitTreeDataProvider.loadMoreChangedFiles(commitSha);
 };
 
+const commandRefreshFileHistoryCommitList = (forceUpdate = true) => {
+	return fileHistoryTreeDataProvider.updateTree(forceUpdate);
+};
+
+const commandLoadMoreFileHistoryCommits = async () => {
+	return fileHistoryTreeDataProvider.loadMoreCommits();
+};
+
+const commandLoadMoreFileHistoryCommitChangedFiles = async (commitSha: string) => {
+	return fileHistoryTreeDataProvider.loadMoreChangedFiles(commitSha);
+};
+
 export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.commands.refreshCommitList', commandRefreshCommitList),
@@ -119,10 +131,16 @@ export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openCommitOnGitLab', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnBitbucket', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnOfficialPage', commandOpenCommitOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.load-more-commits', commandLoadMoreCommits),
+		vscode.commands.registerCommand('github1s.commands.loadMoreCommits', commandLoadMoreCommits),
+		vscode.commands.registerCommand('github1s.commands.loadMoreCommitChangedFiles', commandLoadMoreCommitChangedFiles),
+		vscode.commands.registerCommand('github1s.commands.loadMoreFileHistoryCommits', commandLoadMoreFileHistoryCommits),
 		vscode.commands.registerCommand(
-			'github1s.commands.load-more-commit-changed-files',
-			commandLoadMoreCommitChangedFiles
+			'github1s.commands.loadMoreFileHistoryCommitChangedFiles',
+			commandLoadMoreFileHistoryCommitChangedFiles
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.refreshFileHistoryCommitList',
+			commandRefreshFileHistoryCommitList
 		)
 	);
 };

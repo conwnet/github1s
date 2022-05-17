@@ -41,14 +41,19 @@
       ],
       "scm": [
         {
-          "id": "github1s.views.codeReviewList",
-          "name": "Code Reviews",
-          "when": "github1s:views:codeReviewList:visible == true"
+          "id": "github1s.views.fileHistory",
+          "name": "File History",
+          "when": "github1s:views:fileHistory:visible == true"
         },
         {
           "id": "github1s.views.commitList",
           "name": "Commits",
           "when": "github1s:views:commitList:visible == true"
+        },
+        {
+          "id": "github1s.views.codeReviewList",
+          "name": "Code Reviews",
+          "when": "github1s:views:codeReviewList:visible == true"
         }
       ]
     },
@@ -125,6 +130,12 @@
         "category": "GitHub1s",
         "icon": "$(globe)",
         "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'"
+      },
+      {
+        "command": "github1s.commands.refreshFileHistoryCommitList",
+        "title": "Refresh",
+        "category": "GitHub1s",
+        "icon": "$(refresh)"
       },
       {
         "command": "github1s.commands.refreshCommitList",
@@ -420,6 +431,16 @@
         {
           "command": "github1s.commands.searchCodeReview",
           "when": "view == 'github1s.views.codeReviewList'",
+          "group": "navigation@2"
+        },
+        {
+          "command": "github1s.commands.refreshFileHistoryCommitList",
+          "when": "view == 'github1s.views.fileHistory'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s.commands.searchCommit",
+          "when": "view == 'github1s.views.fileHistory'",
           "group": "navigation@2"
         },
         {
