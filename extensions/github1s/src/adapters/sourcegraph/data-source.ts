@@ -107,14 +107,14 @@ export class SourcegraphDataSource extends DataSource {
 	});
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
-		const { content, binary } = await readFile(this.buildRepository(repo), ref, path);
-		// sourcegraph api break binary files, so we use github api here
-		// TODO: fix fetch binary files in gitlab/bitbucket
-		if (binary && this.platform === 'github') {
+		// sourcegraph api break binary files and text coding, so we use github api here
+		if (this.platform === 'github') {
 			return fetch(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`)
 				.then((response) => response.arrayBuffer())
 				.then((buffer) => ({ content: new Uint8Array(buffer) }));
 		}
+		// TODO: support binary files for other platforms
+		const { content } = await readFile(this.buildRepository(repo), ref, path);
 		return { content: this.textEncodder.encode(content) };
 	}
 
