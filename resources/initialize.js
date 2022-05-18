@@ -42,7 +42,7 @@
 	} else if (hostname.match(/\.?bitbucket1s\.org$/)) {
 		scheme = 'bitbucket1s';
 		platformName = 'Bitbucket';
-		platformOrigin = 'https://bitbucket1s.com';
+		platformOrigin = 'https://bitbucket.org';
 		logoIcon = staticAssetsPrefix + '/config/bitbucket.svg';
 		repository = pathParts >= 2 ? pathParts.slice(0, 2).join('/') : 'atlassian/clover';
 	}
@@ -218,7 +218,7 @@
 			icon: logoIcon,
 			title: 'Open on ' + platformName,
 			onClick() {
-				const pathname = window.location.pathname > 1 ? window.location.pathname : '/' + repository;
+				const pathname = window.location.pathname.length > 1 ? window.location.pathname : '/' + repository;
 				const targetPath = pathname + window.location.search + window.location.hash;
 				window.open(platformOrigin + targetPath, '_blank');
 			},
