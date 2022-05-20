@@ -54,7 +54,7 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 	const routerParser = await router.resolveParser();
 
 	// only add the line number anchor when pageType is PageType.Blob
-	if (pageType !== PageType.Blob || !editor.selection) {
+	if (pageType !== PageType.Blob || !editor?.selection) {
 		return;
 	}
 
@@ -63,11 +63,11 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 		repo,
 		ref,
 		activeFileUri.path.slice(1),
-		editor.selection.start.line + 1,
+		!editor.selection.isEmpty ? editor.selection.start.line + 1 : undefined,
 		editor.selection.end.line !== editor.selection.start.line ? editor.selection.end.line + 1 : undefined
 	);
 
-	router.replace(browserPath);
+	browserPath !== (await router.getPath()) && router.replace(browserPath);
 };
 
 // refresh file history view if active editor changed
