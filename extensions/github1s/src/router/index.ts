@@ -70,6 +70,12 @@ export class Router extends EventEmitter<RouterState> {
 		return this._history!;
 	}
 
+	public async getPath() {
+		await this._barrier.wait();
+		const { pathname, search, hash } = this._history!.location;
+		return `${pathname}${search}${hash}`;
+	}
+
 	// push the url with current history
 	public async push(path: string) {
 		await this._barrier.wait();
