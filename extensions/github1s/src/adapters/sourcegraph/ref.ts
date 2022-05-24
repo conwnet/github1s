@@ -43,10 +43,12 @@ export const getAllRefs = async (repository: string): Promise<{ branches: Branch
 	const branches = (repositoryData.branches?.nodes || []).map?.((branch) => ({
 		name: branch.displayName,
 		commitSha: branch.target?.commit?.oid,
+		description: `Branch at ${branch.target?.commit?.oid?.slice(0, 8)}`,
 	}));
 	const tags = (repositoryData.tags?.nodes || []).map?.((tag) => ({
 		name: tag?.displayName,
 		commitSha: tag?.target?.commit?.oid,
+		description: `Tag at ${tag?.target?.commit?.oid?.slice(0, 8)}`,
 	}));
 	return { branches, tags };
 };

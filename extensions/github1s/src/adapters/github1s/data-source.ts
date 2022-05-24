@@ -127,7 +127,11 @@ export class GitHub1sDataSource extends DataSource {
 			const { owner, repo } = parseRepoFullName(repoFullName);
 			const requestParams = { owner, repo, ref };
 			const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
-			return data.map((item) => ({ name: item.ref.slice(ref === 'heads' ? 11 : 10), commitSha: item.object.sha }));
+			return data.map((item) => ({
+				name: item.ref.slice(ref === 'heads' ? 11 : 10),
+				commitSha: item.object.sha,
+				description: `${ref === 'heads' ? 'Branch' : 'Tag'} at ${item.object.sha.slice(0, 8)}`,
+			}));
 		}
 	);
 

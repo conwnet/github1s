@@ -42,12 +42,14 @@ export interface SymbolicLink {
 
 export interface Branch {
 	name: string;
-	commitSha: string;
+	commitSha?: string;
+	description?: string;
 }
 
 export interface Tag {
 	name: string;
-	commitSha: string;
+	commitSha?: string;
+	description?: string;
 }
 
 export type CommitsQueryOptions = { from?: string; author?: string; path?: string } & CommonQueryOptions;
