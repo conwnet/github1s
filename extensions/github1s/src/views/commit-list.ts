@@ -15,7 +15,9 @@ import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/file
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
 
 export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
-	return [commit.sha.slice(0, 7), commit.author, relativeTimeTo(commit.createTime)].join(', ');
+	const shortCommitSha = commit.sha.slice(0, 7);
+	const relativeTimeStr = commit.createTime ? relativeTimeTo(commit.createTime) : null;
+	return [shortCommitSha, commit.author, relativeTimeStr].filter(Boolean).join(', ');
 };
 
 export interface CommitTreeItem extends vscode.TreeItem {
@@ -91,9 +93,9 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		const repository = Repository.getInstance(currentAdapter.scheme, repo);
 		const repositoryCommits = await repository.getCommitList(ref, filePath, this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
-			const label = `${commit.message}`;
+			const label = commit.message.split(/[\r\n]/)[0];
 			const description = getCommitTreeItemDescription(commit);
-			const tooltip = `${label} (${description})`;
+			const tooltip = `${commit.message}\n(${description})`;
 			const iconPath = vscode.Uri.parse(commit.avatarUrl || '');
 			const contextValue = 'github1s:viewItems:commitListItem';
 
