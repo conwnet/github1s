@@ -43,7 +43,7 @@ const statusIconMap = {
 
 export const getCodeReviewTreeItemLabel = (codeReview: adapterTypes.CodeReview) => {
 	const statusIcon = statusIconMap[getCodeReviewStatus(codeReview)];
-	return `${statusIcon} #${codeReview.id} ${codeReview.title}`;
+	return `${statusIcon} #${codeReview.id} ${codeReview.title.split(/[\r\n]/)[0]}`;
 };
 
 export const getCodeReviewTreeItemDescription = (codeReview: adapterTypes.CodeReview) => {
