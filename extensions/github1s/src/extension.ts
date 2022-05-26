@@ -61,13 +61,10 @@ const initialVSCodeState = async () => {
 		let documentShowOptions: vscode.TextDocumentShowOptions = {};
 		if (startLine || endLine) {
 			const startPosition = new vscode.Position((startLine || endLine)! - 1, 0);
-			const endPosition = new vscode.Position((endLine || startLine)! - 1, 999999);
+			const endPosition = new vscode.Position((endLine || startLine)! - 1, 1 << 20);
 			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
 		}
-		// TODO: the selection of the opening file may be cleared
-		// when editor try to restore previous state in the same file
-		vscode.commands.executeCommand(
-			'vscode.open',
+		vscode.window.showTextDocument(
 			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
 			documentShowOptions
 		);

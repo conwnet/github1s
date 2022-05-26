@@ -18,12 +18,13 @@ module.exports = async (req, res) => {
 	const publisher = matches[1];
 	const restPartsPath = matches[2];
 	const requestUrl = `https://${publisher}.vscode-unpkg.net/${publisher}/${restPartsPath}`;
-	const responsePromise = got(requestUrl);
-	const bufferPromise = responsePromise.buffer();
-	const [response, buffer] = await Promise.all([responsePromise, bufferPromise]);
+	const response = await got(requestUrl).catch((error) => {
+		return error.response || { statusCode: 500, headers: {}, body: error.message };
+	});
 
 	res.status(response.statusCode);
-	res.setHeader('cache-control', response.headers['cache-control']);
-	res.setHeader('content-type', response.headers['content-type']);
-	return res.send(buffer);
+	['cache-control', 'content-type'].forEach((headerKey) => {
+		response.headers[headerKey] && res.setHeader(headerKey, response.headers[headerKey]);
+	});
+	return res.send(response.body);
 };
