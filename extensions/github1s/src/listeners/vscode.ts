@@ -45,7 +45,7 @@ const handleOpenChangesContextOnActiveEditorChange = async (editor: vscode.TextE
 
 // set the `gutterBlameOpen` to false when the active editor changed
 const handlegutterBlameOpenContextOnActiveEditorChange = async () => {
-	return setVSCodeContext('github1s:blames:gutterBlameOpen', false);
+	return setVSCodeContext('github1s:features:gutterBlame:open', false);
 };
 
 // add the line number anchor when user selection lines in a editor

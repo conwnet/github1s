@@ -41,7 +41,7 @@ export class BitbucketRouterParser extends adapterTypes.RouterParser {
 		return `/${repo}/pull-requests`;
 	}
 
-	buildCodeReviewPath(repo: string, codeReviewId: string): adapterTypes.Promisable<string> {
+	buildCodeReviewPath(repo: string, codeReviewId: string): string {
 		return `/${repo}/pull-requests/${codeReviewId}`;
 	}
 

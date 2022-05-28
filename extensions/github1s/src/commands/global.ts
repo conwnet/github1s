@@ -30,6 +30,7 @@ export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openOnGitHub', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnGitLab', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnBitbucket', commandOpenOnOfficialPage),
+		vscode.commands.registerCommand('github1s.commands.openOnNpm', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnOfficialPage', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnGitPod', commandOpenGitpod)
 	);
