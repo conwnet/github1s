@@ -14,6 +14,8 @@ For example, try it on the VS Code repo:
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
 
+You can also use [https://gitlab1s.com](https://gitlab1s.com) or [https://npmjs1s.com](https://npmjs1s.com) in the same way.
+
 For browser extensions, see [Third-party Related Projects](https://github.com/conwnet/github1s#third-party-related-projects).
 
 Or save the following code snippet as a bookmarklet, you can use it to quickly switch between github.com and github1s.com (GitHub markdown doesn't allow js links, so just copy it into a bookmark).
@@ -151,7 +153,7 @@ The continued development and maintenance of GitHub1s is made possible by these 
 - Github1s Extension ([Darkempire78/GitHub1s-Extension](https://github.com/Darkempire78/GitHub1s-Extension))
 - [Github Web IDE](https://chrome.google.com/webstore/detail/adjiklnjodbiaioggfpbpkhbfcnhgkfe) ([zvizvi/Github-Web-IDE](https://github.com/zvizvi/Github-Web-IDE))
 - [shortcut to github1s](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo) ([katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut))
-- [Github1s Shortut - Open source](https://github.com/Fauzdar1/Github1s) 
+- [Github1s Shortut - Open source](https://github.com/Fauzdar1/Github1s)
 
 ### Firefox Extensions
 

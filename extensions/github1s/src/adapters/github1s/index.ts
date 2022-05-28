@@ -30,6 +30,7 @@ export class GitHub1sAdapter implements Adapter {
 		setVSCodeContext('github1s:views:codeReviewList:visible', true);
 		setVSCodeContext('github1s:views:commitList:visible', true);
 		setVSCodeContext('github1s:views:fileHistory:visible', true);
+		setVSCodeContext('github1s:features:gutterBlame:enabled', true);
 
 		vscode.window.registerWebviewViewProvider(
 			GitHub1sSettingsViewProvider.viewType,
@@ -45,5 +46,6 @@ export class GitHub1sAdapter implements Adapter {
 		setVSCodeContext('github1s:views:codeReviewList:visible', false);
 		setVSCodeContext('github1s:views:commitList:visible', false);
 		setVSCodeContext('github1s:views:fileHistory:visible', false);
+		setVSCodeContext('github1s:features:gutterBlame:enabled', false);
 	}
 }

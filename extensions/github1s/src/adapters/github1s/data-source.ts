@@ -29,7 +29,6 @@ import {
 } from '../types';
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
-import { reuseable } from '@/helpers/func';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
@@ -80,9 +79,10 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 
 export class GitHub1sDataSource extends DataSource {
 	private static instance: GitHub1sDataSource | null = null;
-	private cachedBranches: Branch[] | null = null;
-	private cachedTags: Branch[] | null = null;
-	private pathRefs: string[] = [];
+	private branchesPromiseMap: Map<string, Promise<Branch[]>> = new Map();
+	private tagsPromiseMap: Map<string, Promise<Tag[]>> = new Map();
+	private refPathPromiseMap: Map<string, Promise<{ ref: string; path: string }>> = new Map();
+	private matchedRefsMap = new Map<string, string[]>();
 
 	public static getInstance(): GitHub1sDataSource {
 		if (GitHub1sDataSource.instance) {
@@ -121,83 +121,92 @@ export class GitHub1sDataSource extends DataSource {
 		return { content: toUint8Array((data as any).content) };
 	}
 
-	getMatchingRefs = reuseable(
-		async (repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch | Tag[]> => {
-			const fetcher = GitHubFetcher.getInstance();
-			const { owner, repo } = parseRepoFullName(repoFullName);
-			const requestParams = { owner, repo, ref };
-			const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
-			return data.map((item) => ({
-				name: item.ref.slice(ref === 'heads' ? 11 : 10),
-				commitSha: item.object.sha,
-				description: `${ref === 'heads' ? 'Branch' : 'Tag'} at ${item.object.sha.slice(0, 8)}`,
-			}));
-		}
-	);
+	async getMatchingRefs(repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
+		const fetcher = GitHubFetcher.getInstance();
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo, ref };
+		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', requestParams);
+		return data.map((item) => ({
+			name: item.ref.slice(ref === 'heads' ? 11 : 10),
+			commitSha: item.object.sha,
+			description: `${ref === 'heads' ? 'Branch' : 'Tag'} at ${item.object.sha.slice(0, 8)}`,
+		}));
+	}
 
 	@trySourcegraphApiFirst
 	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
-		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
-			return { ref: 'HEAD', path: refAndPath.slice(5) };
+		if (!this.matchedRefsMap.has(repoFullName)) {
+			this.matchedRefsMap.set(repoFullName, []);
 		}
-		const pathRef = this.pathRefs.find((ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref);
-		if (pathRef) {
-			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
+		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
+		const matchedRef = this.matchedRefsMap.get(repoFullName)?.find(matchPathRef);
+		if (matchedRef) {
+			return { ref: matchedRef, path: refAndPath.slice(matchedRef.length + 1) };
 		}
-		const fetcher = GitHubFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, refAndPath };
-		const response = await fetcher.request(`GET /repos/{owner}/{repo}/git/extract-ref/{refAndPath}`, requestParams);
-		response.data?.ref && this.pathRefs.push(response.data.ref);
-		return response.data || { ref: 'HEAD', path: '' };
+		const mapKey = `${repoFullName} ${refAndPath}`;
+		if (!this.refPathPromiseMap.has(mapKey)) {
+			const refPathPromise = new Promise<{ ref: string; path: string }>(async (resolve, reject) => {
+				if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+					return resolve({ ref: 'HEAD', path: refAndPath.slice(5) });
+				}
+
+				const fetcher = GitHubFetcher.getInstance();
+				const { owner, repo } = parseRepoFullName(repoFullName);
+				const requestParams = { owner, repo, refAndPath };
+				const requestUrl = `GET /repos/{owner}/{repo}/git/extract-ref/{refAndPath}`;
+				const response = await fetcher.request(requestUrl, requestParams).catch(reject);
+				response?.data?.ref && this.matchedRefsMap.get(repoFullName)?.push(response.data.ref);
+				return resolve(response?.data || { ref: 'HEAD', path: '' });
+			});
+			this.refPathPromiseMap.set(mapKey, refPathPromise);
+		}
+		return this.refPathPromiseMap.get(mapKey)!;
 	}
 
 	@trySourcegraphApiFirst
 	async provideBranches(repoFullName: string, options?: CommonQueryOptions): Promise<Branch[]> {
-		if (!this.cachedBranches) {
-			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
+		if (!this.branchesPromiseMap.has(repoFullName)) {
+			this.branchesPromiseMap.set(repoFullName, this.getMatchingRefs(repoFullName, 'heads'));
 		}
-		const matchedBranches = options?.query
-			? matchSorter(this.cachedBranches, options.query, { keys: ['name'] })
-			: this.cachedBranches;
-		if (options?.pageSize) {
-			const page = options.page || 1;
-			const pageSize = options.pageSize;
-			return matchedBranches.slice(pageSize * (page - 1), pageSize * page);
-		}
-		return matchedBranches;
+		return this.branchesPromiseMap.get(repoFullName)!.then((branches) => {
+			const matchOptions = { keys: ['name'] };
+			const matchedBranches = options?.query ? matchSorter(branches, options.query, matchOptions) : branches;
+			if (options?.pageSize) {
+				const page = options.page || 1;
+				const pageSize = options.pageSize;
+				return matchedBranches.slice(pageSize * (page - 1), pageSize * page);
+			}
+			return matchedBranches;
+		});
 	}
 
 	@trySourcegraphApiFirst
 	async provideBranch(repoFullName: string, branchName: string): Promise<Branch | null> {
-		if (!this.cachedBranches) {
-			this.cachedBranches = (await this.getMatchingRefs(repoFullName, 'heads')) as Branch[];
-		}
-		return this.cachedBranches.find((item) => item.name === branchName) || null;
+		const branches = await this.provideBranches(repoFullName);
+		return branches.find((item) => item.name === branchName) || null;
 	}
 
 	@trySourcegraphApiFirst
 	async provideTags(repoFullName: string, options?: CommonQueryOptions): Promise<Tag[]> {
-		if (!this.cachedTags) {
-			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'tags')) as Tag[];
+		if (!this.tagsPromiseMap.has(repoFullName)) {
+			this.tagsPromiseMap.set(repoFullName, this.getMatchingRefs(repoFullName, 'tags'));
 		}
-		const matchedTags = options?.query
-			? matchSorter(this.cachedTags, options.query, { keys: ['name'] })
-			: this.cachedTags;
-		if (options?.pageSize) {
-			const page = options.page || 1;
-			const pageSize = options.pageSize;
-			return matchedTags.slice(pageSize * (page - 1), pageSize * page);
-		}
-		return matchedTags;
+		return this.tagsPromiseMap.get(repoFullName)!.then((tags) => {
+			const matchOptions = { keys: ['name'] };
+			const matchedTags = options?.query ? matchSorter(tags, options.query, matchOptions) : tags;
+			if (options?.pageSize) {
+				const page = options.page || 1;
+				const pageSize = options.pageSize;
+				return matchedTags.slice(pageSize * (page - 1), pageSize * page);
+			}
+			return matchedTags;
+		});
 	}
 
 	@trySourcegraphApiFirst
 	async provideTag(repoFullName: string, tagName: string): Promise<Tag | null> {
-		if (!this.cachedTags) {
-			this.cachedTags = (await this.getMatchingRefs(repoFullName, 'heads')) as Tag[];
-		}
-		return this.cachedTags.find((item) => item.name === tagName) || null;
+		const tags = await this.provideTags(repoFullName);
+		return tags.find((item) => item.name === tagName) || null;
 	}
 
 	async provideTextSearchResults(

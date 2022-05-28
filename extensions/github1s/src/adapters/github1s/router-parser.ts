@@ -41,7 +41,7 @@ export class GitHub1sRouterParser extends adapterTypes.RouterParser {
 		return `/${repo}/pulls`;
 	}
 
-	buildCodeReviewPath(repo: string, codeReviewId: string): adapterTypes.Promisable<string> {
+	buildCodeReviewPath(repo: string, codeReviewId: string): string {
 		return `/${repo}/pull/${codeReviewId}`;
 	}
 
