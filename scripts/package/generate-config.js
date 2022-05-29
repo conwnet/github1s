@@ -87,6 +87,7 @@ const main = () => {
 	fs.copyFileSync(path.join(APP_ROOT, 'resources/github.svg'), path.join(CONFIG_PATH, 'github.svg'));
 	fs.copyFileSync(path.join(APP_ROOT, 'resources/gitlab.svg'), path.join(CONFIG_PATH, 'gitlab.svg'));
 	fs.copyFileSync(path.join(APP_ROOT, 'resources/bitbucket.svg'), path.join(CONFIG_PATH, 'bitbucket.svg'));
+	fs.copyFileSync(path.join(APP_ROOT, 'resources/npm.svg'), path.join(CONFIG_PATH, 'npm.svg'));
 };
 
 main();

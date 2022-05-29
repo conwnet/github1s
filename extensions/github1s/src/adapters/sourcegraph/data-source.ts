@@ -3,7 +3,6 @@
  * @author netcon
  */
 
-import { reuseable } from '@/helpers/func';
 import { joinPath } from '@/helpers/util';
 import { matchSorter } from 'match-sorter';
 import {
@@ -42,11 +41,11 @@ const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|
 
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
-	private cachedRefs: { branches: Branch[]; tags: Tag[] } | null = null;
-	private fileTypes = new Map<string, FileType>(); // cache if path is a directory
-	private repositories = new Map<string, { name: string; defaultBranch: string }>();
+	private refsPromiseMap: Map<string, Promise<{ branches: Branch[]; tags: Tag[] }>> = new Map();
+	private repositoryPromiseMap: Map<string, Promise<{ name: string; defaultBranch: string } | null>> = new Map();
+	private fileTypeMap: Map<string, FileType> = new Map(); // cache if path is a directory
+	private matchedRefsMap: Map<string, string[]> = new Map();
 	private textEncodder = new TextEncoder();
-	private pathRefs: string[] = [];
 
 	public static getInstance(platfrom: SupportedPlatfrom): SourcegraphDataSource {
 		if (!SourcegraphDataSource.instanceMap.has(platfrom)) {
@@ -79,73 +78,78 @@ export class SourcegraphDataSource extends DataSource {
 	async provideDirectory(repo: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const directories = await readDirectory(this.buildRepository(repo), ref, path, recursive);
 		directories.entries.forEach((entry) => {
-			this.fileTypes.set(joinPath(path, entry.path), FileType.Directory);
+			const mapKey = `${repo} ${ref} ${joinPath(path, entry.path)}`;
+			this.fileTypeMap.set(mapKey, entry.type);
 		});
 		return directories;
 	}
 
-	detectPathFileType = reuseable(async (repo: string, ref: string, path: string) => {
+	async detectPathFileType(repo: string, ref: string, path: string) {
 		const pathParts = path.split('/').filter(Boolean);
 		const trimmedPath = pathParts.join('/');
 		if (!trimmedPath) {
 			return FileType.Directory;
 		}
-		if (this.fileTypes.has(trimmedPath)) {
-			return this.fileTypes.get(trimmedPath)!;
+		const mapKey = `${repo} ${ref} ${trimmedPath}`;
+		if (this.fileTypeMap.has(mapKey)) {
+			return this.fileTypeMap.get(mapKey)!;
 		}
 		await this.provideDirectory(repo, ref, pathParts.slice(0, -1).join('/'), false);
-		return this.fileTypes.get(trimmedPath) || FileType.File;
-	});
+		return this.fileTypeMap.get(trimmedPath) || FileType.File;
+	}
 
-	provideRepository = reuseable(async (repo: string) => {
-		if (this.repositories.has(repo)) {
-			return this.repositories.get(repo)!;
+	async provideRepository(repo: string) {
+		if (!this.repositoryPromiseMap.has(repo)) {
+			this.repositoryPromiseMap.set(repo, getRepository(this.buildRepository(repo)));
 		}
-		const repository = await getRepository(this.buildRepository(repo));
-		repository && this.repositories.set(repo, repository);
-		return repository;
-	});
+		return this.repositoryPromiseMap.get(repo);
+	}
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
-		// sourcegraph api break binary files and text coding, so we use github api here
+		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
-			return fetch(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`)
-				.then((response) => response.arrayBuffer())
-				.then((buffer) => ({ content: new Uint8Array(buffer) }));
+			try {
+				return await fetch(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`)
+					.then((response) => response.arrayBuffer())
+					.then((buffer) => ({ content: new Uint8Array(buffer) }));
+			} catch (e) {}
 		}
 		// TODO: support binary files for other platforms
 		const { content } = await readFile(this.buildRepository(repo), ref, path);
 		return { content: this.textEncodder.encode(content) };
 	}
 
-	prepareAllRefs = reuseable(async (repo: string) => {
-		const { branches, tags } = await getAllRefs(this.buildRepository(repo));
-		return (this.cachedRefs = { branches, tags });
-	});
+	async prepareAllRefs(repo: string) {
+		if (!this.refsPromiseMap.has(repo)) {
+			this.refsPromiseMap.set(repo, getAllRefs(this.buildRepository(repo)));
+		}
+		return this.refsPromiseMap.get(repo)!;
+	}
 
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
 			return { ref: 'HEAD', path: refAndPath.slice(5) };
 		}
+		if (!this.matchedRefsMap.has(repo)) {
+			this.matchedRefsMap.set(repo, []);
+		}
 		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
-		const pathRef = this.pathRefs.find(matchPathRef);
+		const pathRef = this.matchedRefsMap.get(repo)?.find(matchPathRef);
 		if (pathRef) {
 			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
 		}
-		const { branches, tags } = this.cachedRefs || (await this.prepareAllRefs(repo));
+		const { branches, tags } = await this.prepareAllRefs(repo);
 		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
 		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
-		exactRef && this.pathRefs.push(ref);
+		exactRef && this.matchedRefsMap.get(repo)?.push(ref);
 		return { ref, path: refAndPath.slice(ref.length + 1) };
 	}
 
 	async provideBranches(repo: string, options?: CommonQueryOptions): Promise<Branch[]> {
-		if (!this.cachedRefs) {
-			await this.prepareAllRefs(repo);
-		}
+		const cachedRefs = await this.prepareAllRefs(repo);
 		const matchedBranches = options?.query
-			? matchSorter(this.cachedRefs?.branches || [], options.query, { keys: ['name'] })
-			: this.cachedRefs?.branches || [];
+			? matchSorter(cachedRefs?.branches || [], options.query, { keys: ['name'] })
+			: cachedRefs?.branches || [];
 		if (options?.pageSize) {
 			const page = options.page || 1;
 			const pageSize = options.pageSize;
@@ -155,12 +159,10 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	async provideTags(repo: string, options?: CommonQueryOptions): Promise<Tag[]> {
-		if (!this.cachedRefs) {
-			await this.prepareAllRefs(repo);
-		}
+		const cachedRefs = await this.prepareAllRefs(repo);
 		const matchedTags = options?.query
-			? matchSorter(this.cachedRefs?.tags || [], options.query, { keys: ['name'] })
-			: this.cachedRefs?.tags || [];
+			? matchSorter(cachedRefs?.tags || [], options.query, { keys: ['name'] })
+			: cachedRefs?.tags || [];
 		if (options?.pageSize) {
 			const page = options.page || 1;
 			const pageSize = options.pageSize;

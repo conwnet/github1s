@@ -205,7 +205,7 @@ class EditorGitBlame {
 
 	async open() {
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
-		setVSCodeContext('github1s:blames:gutterBlameOpen', true);
+		setVSCodeContext('github1s:features:gutterBlame:open', true);
 		const { platformName } = adapterManager.getCurrentAdapter();
 
 		(await this.getBlameRanges()).forEach((blameRange) => {
@@ -245,7 +245,7 @@ class EditorGitBlame {
 	}
 
 	close() {
-		setVSCodeContext('github1s:blames:gutterBlameOpen', false);
+		setVSCodeContext('github1s:features:gutterBlame:open', false);
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
 		this.selectionDisposables.forEach((disposable) => disposable.dispose());
 		this.opening = false;

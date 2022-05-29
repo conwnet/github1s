@@ -41,7 +41,7 @@ export class GitLab1sRouterParser extends adapterTypes.RouterParser {
 		return `/${repo}/-/merge_requests`;
 	}
 
-	buildCodeReviewPath(repo: string, codeReviewId: string): adapterTypes.Promisable<string> {
+	buildCodeReviewPath(repo: string, codeReviewId: string): string {
 		return `/${repo}/-/merge_requests/${codeReviewId}`;
 	}
 

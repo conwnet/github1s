@@ -39,12 +39,20 @@
 		logoIcon = staticAssetsPrefix + '/config/gitlab.svg';
 		const dashIndex = pathParts.indexOf('-');
 		repository = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/') || 'gitlab-org/gitlab-docs';
-	} else if (hostname.match(/\.?bitbucket1s\.org$/)) {
+	} else if (hostname.match(/\.?bitbucket1s\.org$/i)) {
 		scheme = 'bitbucket1s';
 		platformName = 'Bitbucket';
 		platformOrigin = 'https://bitbucket.org';
 		logoIcon = staticAssetsPrefix + '/config/bitbucket.svg';
 		repository = pathParts >= 2 ? pathParts.slice(0, 2).join('/') : 'atlassian/clover';
+	} else if (hostname.match(/\.?npmjs1s\.com$/i)) {
+		scheme = 'npmjs1s';
+		platformName = 'npm';
+		platformOrigin = 'https://npmjs.com';
+		logoIcon = staticAssetsPrefix + '/config/npm.svg';
+		const trimedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
+		const packageParts = trimedParts.slice(0, trimedParts[0] && trimedParts[0][0] === '@' ? 2 : 1);
+		repository = pathParts.length ? packageParts.join('/') || 'package' : 'lodash';
 	}
 
 	// set product.json
@@ -68,6 +76,8 @@
 			'*.gitlab1s.com',
 			'*.bitbucket.org',
 			'*.bitbucket1s.org',
+			'*.npmjs.com',
+			'*.npmjs1s.com',
 			'*.microsoft.com',
 			'*.vercel.com',
 			'*.sourcegraph.com',
