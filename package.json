@@ -51,7 +51,7 @@
     "watch:github1s-extension": "cd extensions/github1s && yarn dev",
     "format": "prettier --write .",
     "eslint": "eslint --ext .ts --ext .js .",
-    "test:ci": "start-test serve 5000 test",
+    "test:ci": "start-test watch:dev-server 5000 test",
     "test": "cd tests && yarn && yarn jest"
   },
   "lint-staged": {
