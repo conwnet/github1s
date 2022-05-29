@@ -102,10 +102,7 @@ const VSCODE_NODE_MODULES = [
 
 module.exports = {
 	mode: 'development',
-	entry: './empty.js',
-	output: {
-		filename: '[name].js',
-	},
+	entry: './resources/manifest.json',
 	plugins: [
 		new CopyPlugin({
 			patterns: [
