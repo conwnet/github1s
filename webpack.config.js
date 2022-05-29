@@ -169,11 +169,12 @@ module.exports = {
 			progress: true,
 		},
 		historyApiFallback: {
-			index: 'index.html',
+			rewrites: [{ from: /./, to: '/index.html' }],
 		},
 		proxy: {
-			context: () => true,
-			target: 'http://localhost:1234',
+			'/api/vscode-unpkg': {
+				target: 'http://localhost:5001',
+			},
 		},
 		port: 5000,
 	},
