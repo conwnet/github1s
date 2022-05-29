@@ -168,6 +168,9 @@ module.exports = {
 		historyApiFallback: {
 			rewrites: [{ from: /./, to: '/index.html' }],
 		},
+		devMiddleware: {
+			writeToDisk: true,
+		},
 		proxy: {
 			'/api/vscode-unpkg': {
 				target: 'http://localhost:5001',
