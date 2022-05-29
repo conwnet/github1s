@@ -126,7 +126,7 @@ module.exports = {
 						return `static/extensions/${relativeDir}/[name][ext]`;
 					},
 				},
-				devVscode && {
+				!devVscode && {
 					from: 'node_modules/@github1s/vscode-web/dist/vscode/',
 					to({ context, absoluteFilename }) {
 						const relativePath = path.relative(context, absoluteFilename);
