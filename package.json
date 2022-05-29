@@ -46,7 +46,7 @@
     "watch": "rm -rf dist && run-p watch:*",
     "watch-with-vscode": "DEV_VSCODE=true run-p watch watch-vscode",
     "watch-vscode": "cd vscode-web && yarn watch",
-    "watch:webpack": "DEV_VSCODE=true yarn webpack --watch",
+    "watch:webpack": "yarn webpack --watch",
     "webpack": "webpack --config webpack.config.js",
     "watch:github1s-extension": "cd extensions/github1s && yarn dev",
     "1watch:setup": "./scripts/watch-setup.sh",

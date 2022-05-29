@@ -5,10 +5,8 @@ const fs = require('fs-extra');
 
 const APP_ROOT = path.join(__dirname, '.');
 
-const devMode = !!process.env.DEV_VSCODE;
+const devVscode = !!process.env.DEV_VSCODE;
 
-// `window.github1sExtensions = ${JSON.stringify(extensions)};`
-// vscode-web/lib/vscode/build/lib/extensions.ts
 const isWebExtension = (manifest) => {
 	if (Boolean(manifest.browser)) {
 		return true;
@@ -115,8 +113,7 @@ module.exports = {
 				{ from: 'resources/manifest.json', to: '[name][ext]' },
 				{ from: 'resources/robots.txt', to: '[name][ext]' },
 				{
-					// from: devMode ? 'resources/index-dev-vscode.html' : 'resources/index.html',
-					from: devMode ? 'resources/index.html' : 'resources/index.html',
+					from: devVscode ? 'resources/index-dev-vscode.html' : 'resources/index.html',
 					to: 'index[ext]',
 				},
 				{
@@ -129,7 +126,7 @@ module.exports = {
 						return `static/extensions/${relativeDir}/[name][ext]`;
 					},
 				},
-				devMode && {
+				devVscode && {
 					from: 'node_modules/@github1s/vscode-web/dist/vscode/',
 					to({ context, absoluteFilename }) {
 						const relativePath = path.relative(context, absoluteFilename);
@@ -157,9 +154,8 @@ module.exports = {
 		generate({
 			file: 'static/config/extensions.js',
 			content: () => {
-				// const vscodeExtensions = devMode ? scanVSCodeExtensions() : [];
-				// const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
-				const extensions = [...scanGitHub1sExtensions()];
+				const vscodeExtensions = devVscode ? scanVSCodeExtensions() : [];
+				const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
 				return `window.github1sExtensions = ${JSON.stringify(extensions)};`;
 			},
 		}),
