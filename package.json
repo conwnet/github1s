@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "extensions/*"
+  ],
   "directories": {
     "lib": "lib"
   },
@@ -26,6 +30,7 @@
     "prettier": "^2.2.1",
     "serve-handler": "^6.1.3",
     "start-server-and-test": "^1.12.0",
+    "turbo": "^1.2.14",
     "typescript": "^4.1.3",
     "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2",
@@ -38,7 +43,7 @@
     "postinstall": "husky install && ./scripts/postinstall.sh",
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
-    "build": "./scripts/build.sh",
+    "build": "turbo run build && yarn webpack",
     "yalc": "yalc publish vscode-web && yalc add -D @github1s/vscode-web",
     "build:vscode": "cd vscode-web && yarn build",
     "vercel-build": "USE_HASH_HTML=true yarn build && yarn hash && rm -rf public && mv dist public",
