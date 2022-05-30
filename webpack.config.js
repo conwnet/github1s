@@ -1,11 +1,13 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const generate = require('generate-file-webpack-plugin');
 const fs = require('fs-extra');
 
 const APP_ROOT = path.join(__dirname, '.');
 
 const devVscode = !!process.env.DEV_VSCODE;
+const useHashHtml = !!process.env.USE_HASH_HTML;
 
 const isWebExtension = (manifest) => {
 	if (Boolean(manifest.browser)) {
@@ -110,10 +112,6 @@ module.exports = {
 				{ from: 'resources/manifest.json', to: '[name][ext]' },
 				{ from: 'resources/robots.txt', to: '[name][ext]' },
 				{
-					from: devVscode ? 'resources/index-dev-vscode.html' : 'resources/index.html',
-					to: 'index[ext]',
-				},
-				{
 					from: 'node_modules/@github1s/vscode-web/dist/extensions/**',
 					to({ context, absoluteFilename }) {
 						const relativePath = path.relative(context, absoluteFilename);
@@ -147,6 +145,17 @@ module.exports = {
 				},
 				...VSCODE_NODE_MODULES,
 			].filter(Boolean),
+		}),
+		new HtmlWebpackPlugin({
+			templateParameters: {
+				titleScript: fs.readFileSync('resources/titleScript.js'),
+			},
+			template: useHashHtml
+				? 'resources/index-hash.html'
+				: devVscode
+				? 'resources/index-dev-vscode.html'
+				: 'resources/index.html',
+			inject: false,
 		}),
 		generate({
 			file: 'static/config/extensions.js',
