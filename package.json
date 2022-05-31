@@ -43,7 +43,7 @@
     "postinstall": "husky install && ./scripts/postinstall.sh",
     "clean-build": "./scripts/clean-build.sh",
     "clean": "./scripts/clean.sh",
-    "build": "turbo run build && yarn webpack",
+    "build": "turbo run compile && yarn webpack",
     "yalc": "yalc publish vscode-web && yalc add -D @github1s/vscode-web",
     "build:vscode": "cd vscode-web && yarn build",
     "vercel-build": "USE_HASH_HTML=true yarn build && yarn hash && rm -rf public && mv dist public",
