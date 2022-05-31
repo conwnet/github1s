@@ -33,7 +33,6 @@
     "yalc": "^1.0.0-pre.50"
   },
   "scripts": {
-    "dev": "run-p watch serve",
     "preinstall": "./scripts/preinstall.sh",
     "postinstall": "husky install && ./scripts/postinstall.sh",
     "clean-build": "./scripts/clean-build.sh",
