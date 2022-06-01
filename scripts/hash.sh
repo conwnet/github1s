@@ -12,7 +12,7 @@ if [ -e "${APP_ROOT}/dist/static" ]; then
 	mv "${APP_ROOT}/dist/static" "${APP_ROOT}/dist/${STATIC_HASH_CODE}"
 	mkdir -p "${APP_ROOT}/dist/static"
 	mv "${APP_ROOT}/dist/${STATIC_HASH_CODE}" "${APP_ROOT}/dist/static/${STATIC_HASH_CODE}"
-	sed "s/{STATIC_HASH_CODE}/${STATIC_HASH_CODE}/" "${APP_ROOT}/resources/index-hash.html" > "${APP_ROOT}/dist/index.html"
+	sed -i'' "s/{STATIC_HASH_CODE}/${STATIC_HASH_CODE}/" "${APP_ROOT}/dist/index.html"
 	echo "hash static files done"
 else
 	echo "Please build github1s first"
