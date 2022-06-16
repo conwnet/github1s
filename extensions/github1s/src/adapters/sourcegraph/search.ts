@@ -41,7 +41,7 @@ export const buildTextSearchQueryString = (
 };
 
 const textSearchQuery = gql`
-	query($query: String!) {
+	query ($query: String!) {
 		search(query: $query) {
 			results {
 				__typename

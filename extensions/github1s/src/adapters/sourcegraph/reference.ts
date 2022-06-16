@@ -9,7 +9,7 @@ import { getSymbolPositions } from './position';
 import { SymbolReferences } from '../types';
 
 const LSIFReferencesQuery = gql`
-	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
+	query ($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {
