@@ -327,8 +327,8 @@ export type RouterState = { repo: string; ref: string } & (
 	| { pageType: PageType.CommitList } // for commit list page
 	| { pageType: PageType.Commit; commitSha: string } // for commit detail page
 	| { pageType: PageType.CodeReviewList } // for code review list page
-	| { pageType: PageType.CodeReview; codeReviewId: string } // for code review detail page
-);
+	| { pageType: PageType.CodeReview; codeReviewId: string }
+); // for code review detail page
 
 export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,

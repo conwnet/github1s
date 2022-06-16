@@ -41,7 +41,10 @@ export const VscodeLink = ({ to, external, ...props }) => {
 
 export const postMessage = (() => {
 	const vscode = window.acquireVsCodeApi();
-	const uniqueId = ((id) => () => id++)(1);
+	const uniqueId = (
+		(id) => () =>
+			id++
+	)(1);
 	const messageMap = new Map();
 
 	window.addEventListener('message', ({ data }) => {

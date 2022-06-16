@@ -8,7 +8,7 @@ import { SymbolHover } from '../types';
 import { sourcegraphClient } from './common';
 
 const LSIFHoverQuery = gql`
-	query($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
+	query ($repository: String!, $ref: String!, $path: String!, $line: Int!, $character: Int!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {
