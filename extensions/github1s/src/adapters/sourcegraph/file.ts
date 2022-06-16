@@ -51,7 +51,7 @@ export const readDirectory = async (
 };
 
 const FileQuery = gql`
-	query($repository: String!, $ref: String!, $path: String!) {
+	query ($repository: String!, $ref: String!, $path: String!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {

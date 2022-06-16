@@ -42,7 +42,10 @@ export const basename = (path: string): string => {
 	return trimmedPath.substr(trimmedPath.lastIndexOf('/') + 1) || '';
 };
 
-export const uniqueId = ((id) => () => id++)(1);
+export const uniqueId = (
+	(id) => () =>
+		id++
+)(1);
 
 export const prop = (obj: object, path: (string | number)[] = []): any => {
 	let cur = obj;

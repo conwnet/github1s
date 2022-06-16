@@ -8,7 +8,7 @@ import { ChangedFile, FileChangeStatus } from '../types';
 import { querySourcegraphRepository } from './common';
 
 const ComparisonQuery = gql`
-	query($repository: String!, $base: String!, $head: String!) {
+	query ($repository: String!, $base: String!, $head: String!) {
 		repository(name: $repository) {
 			comparison(base: $base, head: $head) {
 				fileDiffs {

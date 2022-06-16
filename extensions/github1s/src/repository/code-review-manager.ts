@@ -27,32 +27,28 @@ class CodeReviewChangedFilesManager {
 
 	constructor(private _scheme: string, private _repo: string, private _codeReviewId: string) {}
 
-	getList = reuseable(
-		async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
-			if (forceUpdate || !this._changedFilesList) {
-				this._currentPage = 1;
-				this._changedFilesList = [];
-				await this.loadMore();
-			}
-			return this._changedFilesList;
+	getList = reuseable(async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
+		if (forceUpdate || !this._changedFilesList) {
+			this._currentPage = 1;
+			this._changedFilesList = [];
+			await this.loadMore();
 		}
-	);
+		return this._changedFilesList;
+	});
 
-	loadMore = reuseable(
-		async (): Promise<ChangedFile[]> => {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const changedFiles = await dataSource.provideCodeReviewChangedFiles(this._repo, this._codeReviewId, {
-				pageSize: this._pageSize,
-				page: this._currentPage,
-			});
+	loadMore = reuseable(async (): Promise<ChangedFile[]> => {
+		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const changedFiles = await dataSource.provideCodeReviewChangedFiles(this._repo, this._codeReviewId, {
+			pageSize: this._pageSize,
+			page: this._currentPage,
+		});
 
-			this._currentPage += 1;
-			this._hasMore = changedFiles.length === this._pageSize;
-			(this._changedFilesList || (this._changedFilesList = [])).push(...changedFiles);
+		this._currentPage += 1;
+		this._hasMore = changedFiles.length === this._pageSize;
+		(this._changedFilesList || (this._changedFilesList = [])).push(...changedFiles);
 
-			return changedFiles;
-		}
-	);
+		return changedFiles;
+	});
 
 	hasMore = reuseable(async () => {
 		return this._hasMore;
@@ -83,53 +79,47 @@ export class CodeReviewManager {
 
 	private constructor(private _scheme: string, private _repo: string) {}
 
-	getList = reuseable(
-		async (forceUpdate: boolean = false): Promise<CodeReview[]> => {
-			if (forceUpdate || !this._codeReviewList) {
-				this._currentPage = 1;
-				this._codeReviewList = [];
-				await this.loadMore();
-			}
-			return this._codeReviewList;
+	getList = reuseable(async (forceUpdate: boolean = false): Promise<CodeReview[]> => {
+		if (forceUpdate || !this._codeReviewList) {
+			this._currentPage = 1;
+			this._codeReviewList = [];
+			await this.loadMore();
 		}
-	);
+		return this._codeReviewList;
+	});
 
-	getItem = reuseable(
-		async (codeReviewId: string, forceUpdate = false): Promise<CodeReview | null> => {
-			if (forceUpdate || !this._codeReviewMap.has(codeReviewId)) {
-				const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-				const codeReview = await dataSource.provideCodeReview(this._repo, codeReviewId);
-				codeReview && this._codeReviewMap.set(codeReviewId, codeReview);
-				if (codeReview?.files) {
-					const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
-					manager.setChangedFiles(codeReview.files);
-				}
-			}
-			return this._codeReviewMap.get(codeReviewId) || null;
-		}
-	);
-
-	loadMore = reuseable(
-		async (): Promise<CodeReview[]> => {
+	getItem = reuseable(async (codeReviewId: string, forceUpdate = false): Promise<CodeReview | null> => {
+		if (forceUpdate || !this._codeReviewMap.has(codeReviewId)) {
 			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const queryOptions = { pageSize: this._pageSize, page: this._currentPage };
-			const codeReviews = await dataSource.provideCodeReviews(this._repo, queryOptions);
-
-			codeReviews.forEach((codeReview) => {
-				this._codeReviewMap.set(codeReview.id, codeReview);
-				// directly set changed files if they are in response
-				if (codeReview.files) {
-					const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReview.id);
-					manager.setChangedFiles(codeReview.files);
-				}
-			});
-			this._currentPage += 1;
-			this._hasMore = codeReviews.length === this._pageSize;
-			(this._codeReviewList || (this._codeReviewList = [])).push(...codeReviews);
-
-			return codeReviews;
+			const codeReview = await dataSource.provideCodeReview(this._repo, codeReviewId);
+			codeReview && this._codeReviewMap.set(codeReviewId, codeReview);
+			if (codeReview?.files) {
+				const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
+				manager.setChangedFiles(codeReview.files);
+			}
 		}
-	);
+		return this._codeReviewMap.get(codeReviewId) || null;
+	});
+
+	loadMore = reuseable(async (): Promise<CodeReview[]> => {
+		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const queryOptions = { pageSize: this._pageSize, page: this._currentPage };
+		const codeReviews = await dataSource.provideCodeReviews(this._repo, queryOptions);
+
+		codeReviews.forEach((codeReview) => {
+			this._codeReviewMap.set(codeReview.id, codeReview);
+			// directly set changed files if they are in response
+			if (codeReview.files) {
+				const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReview.id);
+				manager.setChangedFiles(codeReview.files);
+			}
+		});
+		this._currentPage += 1;
+		this._hasMore = codeReviews.length === this._pageSize;
+		(this._codeReviewList || (this._codeReviewList = [])).push(...codeReviews);
+
+		return codeReviews;
+	});
 
 	hasMore = reuseable(async () => {
 		return this._hasMore;
