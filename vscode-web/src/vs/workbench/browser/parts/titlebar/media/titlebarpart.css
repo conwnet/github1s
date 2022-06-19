@@ -316,6 +316,10 @@
 	opacity: 0.4;
 }
 
+.monaco-workbench .activitybar .menubar {
+	padding-top: 0;
+}
+
 .monaco-workbench .gettingStarted .index-list ul li:last-child {
 	display: none;
 }
