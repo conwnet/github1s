@@ -49,13 +49,13 @@ export class BuiltinExtensionsScannerService implements IBuiltinExtensionsScanne
 					}
 				}
 
-	      // below codes are changed by github1s
+				// below codes are changed by github1s
 				if (Array.isArray((window as any)?.vscodeWeb?.builtinExtensions)) {
 					bundledExtensions.push(...(window as any)?.vscodeWeb?.builtinExtensions);
 				} else if (typeof (window as any)?.vscodeWeb?.builtinExtensions === 'function') {
 					bundledExtensions = (window as any)?.vscodeWeb?.builtinExtensions(bundledExtensions);
 				}
-	      // above codes are changed by github1s
+				// above codes are changed by github1s
 
 				this.builtinExtensions = bundledExtensions.map(e => ({
 					identifier: { id: getGalleryExtensionId(e.packageJSON.publisher, e.packageJSON.name) },
@@ -66,6 +66,8 @@ export class BuiltinExtensionsScannerService implements IBuiltinExtensionsScanne
 					readmeUrl: e.readmePath ? uriIdentityService.extUri.joinPath(builtinExtensionsServiceUrl!, e.readmePath) : undefined,
 					changelogUrl: e.changelogPath ? uriIdentityService.extUri.joinPath(builtinExtensionsServiceUrl!, e.changelogPath) : undefined,
 					targetPlatform: TargetPlatform.WEB,
+					validations: [],
+					isValid: true
 				}));
 			}
 		}

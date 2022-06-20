@@ -4,22 +4,14 @@
 	const staticAssetsPrefix = window.location.origin + staticAssetsPath;
 	const nodeModulesPrefix = staticAssetsPrefix + '/node_modules';
 
+	Object.keys(self.webPackagePaths).forEach((key) => {
+		self.webPackagePaths[key] = `${nodeModulesPrefix}/${key}/${self.webPackagePaths[key]}`;
+	});
 	// config vscode loader
 	if (window.require && window.require.config) {
 		window.require.config({
 			baseUrl: staticAssetsPrefix + '/vscode',
-			paths: {
-				'@vscode/iconv-lite-umd': nodeModulesPrefix + '/@vscode/iconv-lite-umd/lib/iconv-lite-umd.js',
-				'@vscode/vscode-languagedetection': nodeModulesPrefix + '/@vscode/vscode-languagedetection/dist/lib/index.js',
-				jschardet: nodeModulesPrefix + '/jschardet/dist/jschardet.min.js',
-				'tas-client-umd': nodeModulesPrefix + '/tas-client-umd/lib/tas-client-umd.js',
-				'vscode-oniguruma': nodeModulesPrefix + '/vscode-oniguruma/release/main.js',
-				'vscode-textmate': nodeModulesPrefix + '/vscode-textmate/release/main.js',
-				xterm: nodeModulesPrefix + '/xterm/lib/xterm.js',
-				'xterm-addon-search': nodeModulesPrefix + '/xterm-addon-search/lib/xterm-addon-search.js',
-				'xterm-addon-unicode11': nodeModulesPrefix + '/xterm-addon-unicode11/lib/xterm-addon-unicode11.js',
-				'xterm-addon-webgl': nodeModulesPrefix + '/xterm-addon-webgl/lib/xterm-addon-webgl.js',
-			},
+			paths: self.webPackagePaths,
 		});
 	}
 
@@ -56,7 +48,7 @@
 	}
 
 	// set product.json
-	const productJson = {
+	const productConfiguration = {
 		nameShort: platformName + '1s',
 		nameLong: platformName + '1s',
 		applicationName: platformName + '1s',
@@ -218,12 +210,18 @@
 				handler: ConnectToGitHub,
 			},
 		],
-		product: productJson,
+		productConfiguration: productConfiguration,
+		initialColorTheme: { themeType: 'dark' },
+		configurationDefaults: {
+			'workbench.colorTheme': 'Default Dark+',
+			'telemetry.telemetryLevel': 'off',
+			'workbench.startupEditor': 'readme',
+		},
 		builtinExtensions: window.github1sExtensions || [],
 		folderUri: { scheme: scheme, authority: '', path: '/' },
 		workspaceId: scheme + ':' + repository,
 		workspaceLabel: repository,
-		hideTextFileReadonlyIcon: false,
+		hideTextFileLabelDecorations: true,
 		logo: {
 			icon: logoIcon,
 			title: 'Open on ' + platformName,

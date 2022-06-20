@@ -74,9 +74,7 @@ it('should open file correctly', async () => {
 
 it('should show Commit files', async () => {
 	await page.goto(`${BASE_URL}/conwnet/github1s/commit/ecd252fa54de41b1cb622ff5a1f8a1b715d3b621`);
-	await page.waitForSelector(
-		'.monaco-action-bar.vertical ul.actions-container[role="toolbar"][aria-label="Active View Switcher"]'
-	);
+	await page.waitForSelector('.monaco-action-bar.vertical ul.actions-container[aria-label="Active View Switcher"]');
 	await page.press('body', 'Control+Shift+G');
 	await page.waitForTimeout(3000);
 
