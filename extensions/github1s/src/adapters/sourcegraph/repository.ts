@@ -7,7 +7,7 @@ import { gql } from '@apollo/client/core';
 import { sourcegraphClient } from './common';
 
 const RepositoryQuery = gql`
-	query($repository: String!) {
+	query ($repository: String!) {
 		repository(name: $repository) {
 			name
 			defaultBranch {

@@ -8,7 +8,7 @@ import { escapeRegexp, sourcegraphClient } from './common';
 import { CodeLocation } from '../types';
 
 const searchPositionsQuery = gql`
-	query($query: String!) {
+	query ($query: String!) {
 		search(query: $query) {
 			results {
 				results {

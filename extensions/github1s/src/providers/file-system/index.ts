@@ -179,39 +179,37 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	//     isSubmodule: true, // this Directory must be a submodule
 	//     ...otherFields
 	// }
-	private _updateSubmoduleDirectory = reuseable(
-		async (directory: Directory): Promise<[string, FileType][]> => {
-			// if the directory is not submodule, or it has be called already
-			if (!directory.isSubmodule || directory.entries) {
-				return directory.getNameTypePairs() || [];
-			}
-			const parentRepositoryRoot = await this.lookupAsDirectory(directory.uri.with({ path: '/' }), false);
-			if (!parentRepositoryRoot?.entries || !parentRepositoryRoot.entries.has('.gitmodules')) {
-				throw FileSystemError.FileNotFound('.gitmodules can not be found');
-			}
-			const submodulesFileContent = textDecoder.decode(
-				await this.readFile(Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules'))
-			);
-			// the path should declared in .gitmodules file
-			const submodulePath = trimStart(Uri.joinPath(directory.uri, directory.name).path, '/');
-			const gitmoduleData = parseGitmodules(submodulesFileContent).find((item) => item.path === submodulePath);
-			if (!gitmoduleData) {
-				throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
-			}
-			const [submoduleScheme, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
-			const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
-			directory.name = ''; // update the name field to '' to indicated it is an root directory
-			// update the uri field to indicated it is belong the `submodule repository`
-			directory.uri = Uri.parse('').with({
-				scheme: submoduleScheme,
-				authority: submoduleAuthority,
-				path: '/',
-			});
-			// insert the directory in to this.root map because it indicated another repository
-			this.root.set(submoduleAuthority, directory);
-			return [];
+	private _updateSubmoduleDirectory = reuseable(async (directory: Directory): Promise<[string, FileType][]> => {
+		// if the directory is not submodule, or it has be called already
+		if (!directory.isSubmodule || directory.entries) {
+			return directory.getNameTypePairs() || [];
 		}
-	);
+		const parentRepositoryRoot = await this.lookupAsDirectory(directory.uri.with({ path: '/' }), false);
+		if (!parentRepositoryRoot?.entries || !parentRepositoryRoot.entries.has('.gitmodules')) {
+			throw FileSystemError.FileNotFound('.gitmodules can not be found');
+		}
+		const submodulesFileContent = textDecoder.decode(
+			await this.readFile(Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules'))
+		);
+		// the path should declared in .gitmodules file
+		const submodulePath = trimStart(Uri.joinPath(directory.uri, directory.name).path, '/');
+		const gitmoduleData = parseGitmodules(submodulesFileContent).find((item) => item.path === submodulePath);
+		if (!gitmoduleData) {
+			throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
+		}
+		const [submoduleScheme, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
+		const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
+		directory.name = ''; // update the name field to '' to indicated it is an root directory
+		// update the uri field to indicated it is belong the `submodule repository`
+		directory.uri = Uri.parse('').with({
+			scheme: submoduleScheme,
+			authority: submoduleAuthority,
+			path: '/',
+		});
+		// insert the directory in to this.root map because it indicated another repository
+		this.root.set(submoduleAuthority, directory);
+		return [];
+	});
 
 	readDirectory = reuseable(
 		async (uri: Uri): Promise<[string, FileType][]> => {
