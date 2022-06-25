@@ -8,7 +8,7 @@ import { querySourcegraphRepository } from './common';
 import { Branch, Tag } from '../types';
 
 const BranchTagQuery = gql`
-	query($repository: String!) {
+	query ($repository: String!) {
 		repository(name: $repository) {
 			branches {
 				nodes {

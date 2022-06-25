@@ -8,7 +8,7 @@ import { BlameRange } from '../types';
 import { querySourcegraphRepository } from './common';
 
 const BlameRangesQuery = gql`
-	query($repository: String!, $ref: String!, $path: String!) {
+	query ($repository: String!, $ref: String!, $path: String!) {
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				blob(path: $path) {

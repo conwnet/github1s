@@ -55,34 +55,32 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	 * we should not insert the response to the fileSystemProvider's
 	 * cache, and the fuzzy search maybe not work fine
 	 */
-	getFileUris = reuseable(
-		async (authority: string): Promise<Uri[]> => {
-			if (this.fileUrisMap.has(authority)) {
-				return this.fileUrisMap.get(authority)!;
-			}
-
-			const [repo, ref] = authority.split('+');
-			const currentAdapter = adapterManager.getCurrentAdapter();
-			const dataSource = await currentAdapter.resolveDataSource();
-			const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '', true);
-			const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });
-
-			// the number of items in the tree array maybe exceeded maximum limit, only
-			// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
-			if (!rootDirectoryData?.truncated) {
-				const fsProvider = GitHub1sFileSystemProvider.getInstance();
-				fsProvider.populateWithDirectoryEntities(rootDirectoryUri, rootDirectoryData?.entries || []);
-			} else {
-				window.showWarningMessage('Too many files in this repository, file search feature may be limited.');
-			}
-
-			const fileUris = (rootDirectoryData?.entries || [])
-				.filter((item) => item.type === adapterTypes.FileType.File)
-				.map((item) => Uri.joinPath(rootDirectoryUri, item.path));
-			this.fileUrisMap.set(authority, fileUris);
-			return fileUris;
+	getFileUris = reuseable(async (authority: string): Promise<Uri[]> => {
+		if (this.fileUrisMap.has(authority)) {
+			return this.fileUrisMap.get(authority)!;
 		}
-	);
+
+		const [repo, ref] = authority.split('+');
+		const currentAdapter = adapterManager.getCurrentAdapter();
+		const dataSource = await currentAdapter.resolveDataSource();
+		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '', true);
+		const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });
+
+		// the number of items in the tree array maybe exceeded maximum limit, only
+		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
+		if (!rootDirectoryData?.truncated) {
+			const fsProvider = GitHub1sFileSystemProvider.getInstance();
+			fsProvider.populateWithDirectoryEntities(rootDirectoryUri, rootDirectoryData?.entries || []);
+		} else {
+			window.showWarningMessage('Too many files in this repository, file search feature may be limited.');
+		}
+
+		const fileUris = (rootDirectoryData?.entries || [])
+			.filter((item) => item.type === adapterTypes.FileType.File)
+			.map((item) => Uri.joinPath(rootDirectoryUri, item.path));
+		this.fileUrisMap.set(authority, fileUris);
+		return fileUris;
+	});
 
 	provideFileSearchResults(
 		query: FileSearchQuery,
