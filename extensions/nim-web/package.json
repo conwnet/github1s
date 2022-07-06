@@ -32,8 +32,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^18.0.0",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.17.17",
     "@types/vscode": "^1.27.0",
     "ovsx": "0.1.0-next.e000fdb",
     "typescript": "^2.6.1",
