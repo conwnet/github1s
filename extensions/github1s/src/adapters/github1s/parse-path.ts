@@ -6,6 +6,7 @@
 import { parsePath } from 'history';
 import { PageType, RouterState } from '@/adapters/types';
 import { GitHub1sDataSource } from './data-source';
+import * as queryString from 'query-string';
 
 const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
@@ -81,6 +82,16 @@ const parsePullUrl = async (path: string): Promise<RouterState> => {
 	};
 };
 
+const parseSearchUrl = async (path: string): Promise<RouterState> => {
+	const { pathname, search } = parsePath(path);
+	const pathParts = pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType] = pathParts;
+	const queryOptions = queryString.parse(search || '');
+	const query = typeof queryOptions.q === 'string' ? queryOptions.q : '';
+
+	return { repo: `${owner}/${repo}`, pageType: PageType.Search, ref: 'HEAD', query };
+};
+
 const PAGE_TYPE_MAP = {
 	tree: PageType.Tree,
 	blob: PageType.Blob,
@@ -88,6 +99,7 @@ const PAGE_TYPE_MAP = {
 	pull: PageType.CodeReview,
 	commit: PageType.Commit,
 	commits: PageType.CommitList,
+	search: PageType.Search,
 };
 
 export const parseGitHubPath = async (path: string): Promise<RouterState> => {
@@ -110,6 +122,8 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 				return parseCommitUrl(path);
 			case PageType.CommitList:
 				return parseCommitsUrl(path);
+			case PageType.Search:
+				return parseSearchUrl(path);
 		}
 	}
 
