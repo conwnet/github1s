@@ -331,7 +331,15 @@ export type RouterState = { repo: string; ref: string } & (
 	| { pageType: PageType.Commit; commitSha: string } // for commit detail page
 	| { pageType: PageType.CodeReviewList } // for code review list page
 	| { pageType: PageType.CodeReview; codeReviewId: string }
-	| { pageType: PageType.Search; query: string }
+	| {
+			pageType: PageType.Search;
+			query?: string;
+			isRegex?: boolean;
+			isCaseSensitive?: boolean;
+			matchWholeWord?: boolean;
+			filesToInclude?: string;
+			filesToExclude?: string;
+	  }
 );
 
 export class RouterParser {

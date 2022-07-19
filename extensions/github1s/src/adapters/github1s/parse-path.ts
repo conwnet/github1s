@@ -88,8 +88,23 @@ const parseSearchUrl = async (path: string): Promise<RouterState> => {
 	const [owner, repo, _pageType] = pathParts;
 	const queryOptions = queryString.parse(search || '');
 	const query = typeof queryOptions.q === 'string' ? queryOptions.q : '';
+	const isRegex = queryOptions.regex === 'yes';
+	const isCaseSensitive = queryOptions.case === 'yes';
+	const matchWholeWord = queryOptions.whole === 'yes';
+	const filesToInclude = typeof queryOptions['files-to-include'] === 'string' ? queryOptions['files-to-include'] : '';
+	const filesToExclude = typeof queryOptions['files-to-exclude'] === 'string' ? queryOptions['files-to-exclude'] : '';
 
-	return { repo: `${owner}/${repo}`, pageType: PageType.Search, ref: 'HEAD', query };
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.Search,
+		ref: 'HEAD',
+		query,
+		isRegex,
+		isCaseSensitive,
+		matchWholeWord,
+		filesToInclude,
+		filesToExclude,
+	};
 };
 
 const PAGE_TYPE_MAP = {
