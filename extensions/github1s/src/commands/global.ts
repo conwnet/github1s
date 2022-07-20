@@ -5,6 +5,9 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { relativeTimeTo } from '@/helpers/date';
+import { getRecentRepositories, removeRecentRepository } from '@/helpers/context';
+import { adapterManager } from '@/adapters';
 
 export const commandOpenOnOfficialPage = async () => {
 	const location = (await router.getHistory()).location;
@@ -25,6 +28,55 @@ export const commandOpenGitpod = () => {
 	});
 };
 
+const repoPickItemButtons = [{ iconPath: new vscode.ThemeIcon('close') }];
+
+const getRecentRepoPickItems = () =>
+	getRecentRepositories().map((record) => ({
+		label: record.name,
+		description: relativeTimeTo(record.timestamp),
+		buttons: repoPickItemButtons,
+	}));
+
+export const commandOpenRepository = async () => {
+	const quickPick = vscode.window.createQuickPick();
+	const manualInputItem = { label: '' };
+	let recentRepoPickItems = getRecentRepoPickItems();
+
+	const updatePickerItems = () => {
+		if (manualInputItem.label) {
+			return (quickPick.items = [...recentRepoPickItems, manualInputItem]);
+		}
+		return (quickPick.items = recentRepoPickItems);
+	};
+
+	quickPick.placeholder = 'Select to open...';
+	updatePickerItems();
+
+	quickPick.show();
+	quickPick.onDidTriggerItemButton(async (event) => {
+		if (event.button === repoPickItemButtons[0]) {
+			await removeRecentRepository(event.item.label);
+			recentRepoPickItems = getRecentRepoPickItems();
+			updatePickerItems();
+		}
+	});
+
+	quickPick.onDidChangeValue((value) => {
+		manualInputItem.label = value ? `Open ${value}...` : '';
+		updatePickerItems();
+	});
+
+	quickPick.onDidAccept(async () => {
+		const choice = quickPick.activeItems[0];
+		const repository = choice === manualInputItem ? quickPick.value : choice.label;
+		const tagetLink = vscode.Uri.parse((await router.href()) || '').with({
+			path: await (await router.resolveParser()).buildTreePath(repository),
+		});
+		vscode.commands.executeCommand('vscode.open', tagetLink);
+		quickPick.hide();
+	});
+};
+
 export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.commands.openOnGitHub', commandOpenOnOfficialPage),
@@ -32,6 +84,7 @@ export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openOnBitbucket', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnNpm', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnOfficialPage', commandOpenOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.openOnGitPod', commandOpenGitpod)
+		vscode.commands.registerCommand('github1s.commands.openOnGitPod', commandOpenGitpod),
+		vscode.commands.registerCommand('github1s.commands.openRepository', commandOpenRepository)
 	);
 };
