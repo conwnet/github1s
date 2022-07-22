@@ -74,5 +74,7 @@ const initialVSCodeState = async () => {
 		vscode.commands.executeCommand('github1s.views.commitList.focus');
 	} else if ([PageType.CodeReview, PageType.Commit].includes(routerState.pageType)) {
 		vscode.commands.executeCommand('workbench.scm.focus');
+	} else if (routerState.pageType === PageType.Search) {
+		vscode.commands.executeCommand('workbench.action.findInFiles', routerState);
 	}
 };

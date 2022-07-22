@@ -317,6 +317,9 @@ export enum PageType {
 	// e.g. https://github.com/conwnet/github1s/blame/master/.gitignore
 	FileBlame = 'FileBlame',
 
+	// show search result
+	Search = 'Search',
+
 	// branches, tags, wiki, gist should be on the way
 	Unknown = 'Unknown',
 }
@@ -328,7 +331,16 @@ export type RouterState = { repo: string; ref: string } & (
 	| { pageType: PageType.Commit; commitSha: string } // for commit detail page
 	| { pageType: PageType.CodeReviewList } // for code review list page
 	| { pageType: PageType.CodeReview; codeReviewId: string }
-); // for code review detail page
+	| {
+			pageType: PageType.Search;
+			query?: string;
+			isRegex?: boolean;
+			isCaseSensitive?: boolean;
+			matchWholeWord?: boolean;
+			filesToInclude?: string;
+			filesToExclude?: string;
+	  }
+);
 
 export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,
