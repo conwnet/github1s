@@ -60,6 +60,11 @@
     },
     "commands": [
       {
+        "command": "github1s.commands.openRepository",
+        "title": "Open Repository...",
+        "category": "GitHub1s"
+      },
+      {
         "command": "github1s.commands.checkoutTo",
         "title": "Checkout to...",
         "category": "GitHub1s"

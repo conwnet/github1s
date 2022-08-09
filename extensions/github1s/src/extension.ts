@@ -12,8 +12,8 @@ import { registerEventListeners } from '@/listeners';
 import { registerVSCodeProviders } from '@/providers';
 import { registerGitHub1sCommands } from '@/commands';
 import { updateSourceControlChanges } from '@/changes';
-import { setExtensionContext } from '@/helpers/context';
 import { adapterManager, registerAdapters } from '@/adapters';
+import { addRecentRepositories, setExtensionContext } from '@/helpers/context';
 
 const browserUrlManager = {
 	href: () => vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl') as Promise<string>,
@@ -77,4 +77,5 @@ const initialVSCodeState = async () => {
 	} else if (routerState.pageType === PageType.Search) {
 		vscode.commands.executeCommand('workbench.action.findInFiles', routerState);
 	}
+	routerState.repo && addRecentRepositories(routerState.repo);
 };

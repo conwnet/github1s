@@ -181,7 +181,7 @@
 	/*** end notificaton block ***/
 
 	window.vscodeWeb = {
-		windowIndicator: { label: repository },
+		windowIndicator: { label: repository, command: 'github1s.commands.openRepository' },
 		additionalBuiltinExtensions: [],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		webWorkerExtensionHostIframeSrc:

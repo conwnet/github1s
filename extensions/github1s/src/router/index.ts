@@ -24,6 +24,7 @@ export class Router extends EventEmitter<RouterState> {
 	private _parser: RouterParser | null = null;
 	// ensure router has been initialized
 	private _barrier: Barrier = new Barrier();
+	private _manager: UrlManager | null = null;
 
 	public static getInstance() {
 		if (Router.instance) {
@@ -34,8 +35,9 @@ export class Router extends EventEmitter<RouterState> {
 
 	// initialize the router with current url in browser
 	async initialize(urlManager: UrlManager) {
+		this._manager = urlManager;
 		this._parser = await adapterManager.getCurrentAdapter().resolveRouterParser();
-		const { path: pathname, query, fragment } = vscode.Uri.parse(await urlManager.href());
+		const { path: pathname, query, fragment } = vscode.Uri.parse(await this._manager.href());
 		const path = pathname + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 
 		this._state = await this._parser.parsePath(path);
@@ -46,7 +48,7 @@ export class Router extends EventEmitter<RouterState> {
 			const targetPath = `${location.pathname}${location.search}${location.hash}`;
 			const routerParser = await adapterManager.getCurrentAdapter().resolveRouterParser();
 
-			urlManager[action === Action.Push ? 'push' : 'replace'](targetPath);
+			this._manager?.[action === Action.Push ? 'push' : 'replace'](targetPath);
 			this._state = await routerParser.parsePath(targetPath);
 			super.notifyListeners(this._state, prevState);
 		});
@@ -93,6 +95,10 @@ export class Router extends EventEmitter<RouterState> {
 	public async resolveParser(): Promise<RouterParser> {
 		await this._barrier.wait();
 		return this._parser!;
+	}
+
+	public async href(): Promise<string | undefined> {
+		return this._manager?.href();
 	}
 }
 
