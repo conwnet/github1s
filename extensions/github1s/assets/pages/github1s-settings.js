@@ -101,6 +101,7 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 		return postMessage('validate-token', token).then((tokenStatus) => {
 			setValidating(false);
 			setTokenStatus(tokenStatus);
+			return tokenStatus;
 		});
 	}, []);
 
