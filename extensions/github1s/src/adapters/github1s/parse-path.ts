@@ -6,6 +6,7 @@
 import { parsePath } from 'history';
 import { PageType, RouterState } from '@/adapters/types';
 import { GitHub1sDataSource } from './data-source';
+import * as queryString from 'query-string';
 
 const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
@@ -81,6 +82,31 @@ const parsePullUrl = async (path: string): Promise<RouterState> => {
 	};
 };
 
+const parseSearchUrl = async (path: string): Promise<RouterState> => {
+	const { pathname, search } = parsePath(path);
+	const pathParts = pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType] = pathParts;
+	const queryOptions = queryString.parse(search || '');
+	const query = typeof queryOptions.q === 'string' ? queryOptions.q : '';
+	const isRegex = queryOptions.regex === 'yes';
+	const isCaseSensitive = queryOptions.case === 'yes';
+	const matchWholeWord = queryOptions.whole === 'yes';
+	const filesToInclude = typeof queryOptions['files-to-include'] === 'string' ? queryOptions['files-to-include'] : '';
+	const filesToExclude = typeof queryOptions['files-to-exclude'] === 'string' ? queryOptions['files-to-exclude'] : '';
+
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.Search,
+		ref: 'HEAD',
+		query,
+		isRegex,
+		isCaseSensitive,
+		matchWholeWord,
+		filesToInclude,
+		filesToExclude,
+	};
+};
+
 const PAGE_TYPE_MAP = {
 	tree: PageType.Tree,
 	blob: PageType.Blob,
@@ -88,6 +114,7 @@ const PAGE_TYPE_MAP = {
 	pull: PageType.CodeReview,
 	commit: PageType.Commit,
 	commits: PageType.CommitList,
+	search: PageType.Search,
 };
 
 export const parseGitHubPath = async (path: string): Promise<RouterState> => {
@@ -110,6 +137,8 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 				return parseCommitUrl(path);
 			case PageType.CommitList:
 				return parseCommitsUrl(path);
+			case PageType.Search:
+				return parseSearchUrl(path);
 		}
 	}
 

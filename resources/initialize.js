@@ -75,6 +75,7 @@
 			'*.sourcegraph.com',
 			'*.gitpod.io',
 		],
+		extensionEnabledApiProposals: { 'ms-vscode.anycode': ['extensionsAny'] },
 	};
 	/*** end config block ***/
 
@@ -181,8 +182,8 @@
 	/*** end notificaton block ***/
 
 	window.vscodeWeb = {
-		windowIndicator: { label: repository },
-		additionalBuiltinExtensions: [],
+		windowIndicator: { label: repository, command: 'github1s.commands.openRepository' },
+		additionalBuiltinExtensions: ['ms-vscode.anycode'],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		webWorkerExtensionHostIframeSrc:
 			staticAssetsPrefix + '/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
@@ -216,6 +217,16 @@
 			'workbench.colorTheme': 'Default Dark+',
 			'telemetry.telemetryLevel': 'off',
 			'workbench.startupEditor': 'readme',
+			'anycode.language.features': {
+				completions: false,
+				definitions: false,
+				references: false,
+				highlights: true,
+				outline: true,
+				workspaceSymbols: true,
+				folding: false,
+				diagnostics: false,
+			},
 		},
 		builtinExtensions: window.github1sExtensions || [],
 		folderUri: { scheme: scheme, authority: '', path: '/' },

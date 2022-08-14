@@ -6,5 +6,8 @@
   "private": true,
   "dependencies": {
     "got": "^11.8.5"
+  },
+  "devDependencies": {
+    "@vercel/node": "^2.5.7"
   }
 }

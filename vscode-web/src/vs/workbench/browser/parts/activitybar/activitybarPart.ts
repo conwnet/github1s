@@ -45,7 +45,7 @@ import { HoverPosition } from 'vs/base/browser/ui/hover/hoverWidget';
 import { GestureEvent } from 'vs/base/browser/touch';
 import { IPaneCompositePart, IPaneCompositeSelectorPart } from 'vs/workbench/browser/parts/paneCompositePart';
 import { Registry } from 'vs/platform/registry/common/platform';
-import { Extensions, IProfileStorageRegistry } from 'vs/workbench/services/profiles/common/profileStorageRegistry';
+import { Extensions, IProfileStorageRegistry } from 'vs/workbench/services/userDataProfile/common/userDataProfileStorageRegistry';
 
 interface IPlaceholderViewContainer {
 	readonly id: string;
@@ -256,7 +256,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 		this.paneCompositePart.onDidPaneCompositeClose(e => this.onDidChangeViewContainerVisibility(e.getId(), false));
 
 		// Extension registration
-		let disposables = this._register(new DisposableStore());
+		const disposables = this._register(new DisposableStore());
 		this._register(this.extensionService.onDidRegisterExtensions(() => {
 			disposables.clear();
 			this.onDidRegisterExtensions();
@@ -513,9 +513,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 			this.keyboardNavigationDisposables.add(addDisposableListener(this.compositeBarContainer, EventType.KEY_DOWN, e => {
 				const kbEvent = new StandardKeyboardEvent(e);
 				if (kbEvent.equals(KeyCode.DownArrow) || kbEvent.equals(KeyCode.RightArrow)) {
-					if (this.globalActivityActionBar) {
-						this.globalActivityActionBar.focus(true);
-					}
+					this.globalActivityActionBar?.focus(true);
 				} else if (kbEvent.equals(KeyCode.UpArrow) || kbEvent.equals(KeyCode.LeftArrow)) {
 					if (this.menuBar) {
 						this.menuBar.toggleFocus();
@@ -529,9 +527,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 			this.keyboardNavigationDisposables.add(addDisposableListener(this.globalActivitiesContainer, EventType.KEY_DOWN, e => {
 				const kbEvent = new StandardKeyboardEvent(e);
 				if (kbEvent.equals(KeyCode.UpArrow) || kbEvent.equals(KeyCode.LeftArrow)) {
-					if (this.compositeBar) {
-						this.compositeBar.focus(this.getVisiblePaneCompositeIds().length - 1);
-					}
+					this.compositeBar?.focus(this.getVisiblePaneCompositeIds().length - 1);
 				}
 			}));
 		}
@@ -617,6 +613,9 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	}
 
 	private toggleAccountsActivity() {
+		if (!!this.accountsActivityAction === this.accountsVisibilityPreference) {
+			return;
+		}
 		if (this.globalActivityActionBar) {
 			if (this.accountsActivityAction) {
 				this.globalActivityActionBar.pull(ActivitybarPart.ACCOUNTS_ACTION_INDEX);
@@ -879,7 +878,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	}
 
 	private onDidStorageValueChange(e: IStorageValueChangeEvent): void {
-		if (e.key === ActivitybarPart.PINNED_VIEW_CONTAINERS && e.scope === StorageScope.GLOBAL
+		if (e.key === ActivitybarPart.PINNED_VIEW_CONTAINERS && e.scope === StorageScope.PROFILE
 			&& this.pinnedViewContainersValue !== this.getStoredPinnedViewContainersValue() /* This checks if current window changed the value or not */) {
 			this._pinnedViewContainersValue = undefined;
 			this._cachedViewContainers = undefined;
@@ -900,14 +899,20 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 			for (let index = 0; index < compositeItems.length; index++) {
 				// Add items currently exists but does not exist in new.
 				if (!newCompositeItems.some(({ id }) => id === compositeItems[index].id)) {
-					newCompositeItems.splice(index, 0, compositeItems[index]);
+					const viewContainer = this.viewDescriptorService.getViewContainerById(compositeItems[index].id);
+					newCompositeItems.splice(index, 0, {
+						...compositeItems[index],
+						pinned: true,
+						visible: true,
+						order: viewContainer?.order,
+					});
 				}
 			}
 
 			this.compositeBar.setCompositeBarItems(newCompositeItems);
 		}
 
-		if (e.key === AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY && e.scope === StorageScope.GLOBAL) {
+		if (e.key === AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY && e.scope === StorageScope.PROFILE) {
 			this.toggleAccountsActivity();
 		}
 	}
@@ -1004,11 +1009,11 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	}
 
 	private getStoredPinnedViewContainersValue(): string {
-		return this.storageService.get(ActivitybarPart.PINNED_VIEW_CONTAINERS, StorageScope.GLOBAL, '[]');
+		return this.storageService.get(ActivitybarPart.PINNED_VIEW_CONTAINERS, StorageScope.PROFILE, '[]');
 	}
 
 	private setStoredPinnedViewContainersValue(value: string): void {
-		this.storageService.store(ActivitybarPart.PINNED_VIEW_CONTAINERS, value, StorageScope.GLOBAL, StorageTarget.USER);
+		this.storageService.store(ActivitybarPart.PINNED_VIEW_CONTAINERS, value, StorageScope.PROFILE, StorageTarget.USER);
 	}
 
 	private getPlaceholderViewContainers(): IPlaceholderViewContainer[] {
@@ -1036,11 +1041,11 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	}
 
 	private getStoredPlaceholderViewContainersValue(): string {
-		return this.storageService.get(ActivitybarPart.PLACEHOLDER_VIEW_CONTAINERS, StorageScope.GLOBAL, '[]');
+		return this.storageService.get(ActivitybarPart.PLACEHOLDER_VIEW_CONTAINERS, StorageScope.PROFILE, '[]');
 	}
 
 	private setStoredPlaceholderViewContainersValue(value: string): void {
-		this.storageService.store(ActivitybarPart.PLACEHOLDER_VIEW_CONTAINERS, value, StorageScope.GLOBAL, StorageTarget.MACHINE);
+		this.storageService.store(ActivitybarPart.PLACEHOLDER_VIEW_CONTAINERS, value, StorageScope.PROFILE, StorageTarget.MACHINE);
 	}
 
 	private get accountsVisibilityPreference(): boolean {
@@ -1051,7 +1056,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	}
 
 	private set accountsVisibilityPreference(value: boolean) {
-		this.storageService.store(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, value, StorageScope.GLOBAL, StorageTarget.USER);
+		this.storageService.store(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, value, StorageScope.PROFILE, StorageTarget.USER);
 	}
 
 	toJSON(): object {
