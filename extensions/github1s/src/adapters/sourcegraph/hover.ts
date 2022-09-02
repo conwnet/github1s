@@ -37,7 +37,7 @@ const getLSIFHover = async (
 	const response = await sourcegraphClient.query({
 		query: LSIFHoverQuery,
 		variables: {
-			repository: repository,
+			repository,
 			ref,
 			path: path.slice(1),
 			line,

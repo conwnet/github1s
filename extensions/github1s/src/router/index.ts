@@ -82,14 +82,14 @@ export class Router extends EventEmitter<RouterState> {
 	public async push(path: string) {
 		await this._barrier.wait();
 		const emptyState = { pathname: '', search: '', hash: '' };
-		return this._history!.push({ ...emptyState, ...parsePath(path) });
+		return this._history!.push({ ...emptyState, ...parsePath(encodeURI(path)) });
 	}
 
 	// replace the url with current history
 	public async replace(path: string) {
 		await this._barrier.wait();
 		const emptyState = { pathname: '', search: '', hash: '' };
-		return this._history!.replace({ ...emptyState, ...parsePath(path) });
+		return this._history!.replace({ ...emptyState, ...parsePath(encodeURI(path)) });
 	}
 
 	public async resolveParser(): Promise<RouterParser> {

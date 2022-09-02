@@ -5,17 +5,18 @@
 
 import { gql } from '@apollo/client/core';
 import { TextSearchOptions, TextSearchQuery, TextSearchResults } from '../types';
-import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp } from './common';
+import { escapeRegexp, sourcegraphClient, combineGlobsToRegExp, buildRepoPattern } from './common';
 
 // build text search query for sourcegraph graphql request
 export const buildTextSearchQueryString = (
-	repo: string,
+	repository: string,
 	ref: string,
 	query: TextSearchQuery,
 	options: TextSearchOptions
 ): string => {
+	const repoPattern = buildRepoPattern(repository);
 	const countString = `count:${options.pageSize ? (options.page || 1) * options.pageSize : 100}`;
-	const repoRefQueryString = ref.toUpperCase() === 'HEAD' ? `repo:${repo}` : `repo:${repo}@${ref}`;
+	const repoRefString = ref.toUpperCase() === 'HEAD' ? `repo:${repoPattern}` : `repo:${repoPattern}@${ref}`;
 	// the string may looks like `case:yse file:src -file:node_modules`
 	const optionsString = [
 		query.isCaseSensitive ? `case:yes` : '',
@@ -37,7 +38,7 @@ export const buildTextSearchQueryString = (
 		return `/\b${patternString}\b/`;
 	}
 
-	return [repoRefQueryString, optionsString, patternString, countString].filter(Boolean).join(' ');
+	return [repoRefString, optionsString, patternString, countString].filter(Boolean).join(' ');
 };
 
 const textSearchQuery = gql`
