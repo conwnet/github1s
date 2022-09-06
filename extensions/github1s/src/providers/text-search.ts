@@ -39,7 +39,7 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		return router.getAuthority().then(async (authority) => {
 			const [repo, ref] = authority.split('+');
 			const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
-			const searchOptions = { page: 1, pageSize: 30, includes: options.includes, excludes: options.excludes };
+			const searchOptions = { page: 1, pageSize: 100, includes: options.includes, excludes: options.excludes };
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
 			const currentScheme = adapterManager.getCurrentScheme();
 
