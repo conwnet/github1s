@@ -37,8 +37,6 @@ import { getTextSearchResults } from './search';
 
 type SupportedPlatfrom = 'github' | 'gitlab' | 'bitbucket';
 
-const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
 	private refsPromiseMap: Map<string, Promise<{ branches: Branch[]; tags: Tag[] }>> = new Map();
@@ -69,10 +67,6 @@ export class SourcegraphDataSource extends DataSource {
 			return `bitbucket.org/${repo}`;
 		}
 		return repo;
-	}
-
-	buildRepoPattern(repo: string) {
-		return `^${escapeRegexp(this.buildRepository(repo))}$`;
 	}
 
 	async provideDirectory(repo: string, ref: string, path: string, recursive = false): Promise<Directory> {
@@ -109,7 +103,7 @@ export class SourcegraphDataSource extends DataSource {
 		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
 			try {
-				return await fetch(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`)
+				return await fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
 					.then((response) => response.arrayBuffer())
 					.then((buffer) => ({ content: new Uint8Array(buffer) }));
 			} catch (e) {}
@@ -177,8 +171,7 @@ export class SourcegraphDataSource extends DataSource {
 		query: TextSearchQuery,
 		options: TextSearchOptions
 	): Promise<TextSearchResults> {
-		const repoPattern = this.buildRepoPattern(repo);
-		return getTextSearchResults(repoPattern, ref, query, options);
+		return getTextSearchResults(this.buildRepository(repo), ref, query, options);
 	}
 
 	async provideCommits(repo: string, options?: CommitsQueryOptions): Promise<(Commit & { files?: ChangedFile[] })[]> {
@@ -216,8 +209,7 @@ export class SourcegraphDataSource extends DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolDefinitions> {
-		const repoPattern = this.buildRepoPattern(repo);
-		return getSymbolDefinitions(repoPattern, ref, path, line, character, symbol);
+		return getSymbolDefinitions(this.buildRepository(repo), ref, path, line, character, symbol);
 	}
 
 	async provideSymbolReferences(
@@ -228,8 +220,7 @@ export class SourcegraphDataSource extends DataSource {
 		character: number,
 		symbol: string
 	): Promise<SymbolReferences> {
-		const repoPattern = this.buildRepoPattern(repo);
-		return getSymbolReferences(repoPattern, ref, path, line, character, symbol);
+		return getSymbolReferences(this.buildRepository(repo), ref, path, line, character, symbol);
 	}
 
 	async provideSymbolHover(
@@ -240,8 +231,7 @@ export class SourcegraphDataSource extends DataSource {
 		character: number,
 		_symbol: string
 	): Promise<SymbolHover | null> {
-		const repoPattern = this.buildRepoPattern(repo);
-		return getSymbolHover(repoPattern, ref, path, line, character);
+		return getSymbolHover(this.buildRepository(repo), ref, path, line, character);
 	}
 
 	provideUserAvatarLink(user: string): string {

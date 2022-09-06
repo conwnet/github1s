@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import { ApolloClient, ApolloQueryResult, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { isNil, trimEnd, trimStart } from '@/helpers/util';
 
 const sourcegraphLink = createHttpLink({
@@ -49,3 +49,7 @@ export const combineGlobsToRegExp = (globs: string[]) => {
 };
 
 export const escapeRegexp = (text: string): string => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
+export const buildRepoPattern = (repo: string) => {
+	return `^${escapeRegexp(repo)}$`;
+};

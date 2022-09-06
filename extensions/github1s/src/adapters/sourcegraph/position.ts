@@ -4,7 +4,7 @@
  */
 
 import { gql } from '@apollo/client/core';
-import { escapeRegexp, sourcegraphClient } from './common';
+import { buildRepoPattern, escapeRegexp, sourcegraphClient } from './common';
 import { CodeLocation } from '../types';
 
 const searchPositionsQuery = gql`
@@ -48,7 +48,8 @@ const searchPositionsQuery = gql`
 // get symbol position information base on search,
 // used by definition, reference and hover
 export const getSymbolPositions = async (repository: string, ref: string, symbol: string): Promise<CodeLocation[]> => {
-	const repoRefString = ref.toUpperCase() === 'HEAD' ? `repo:${repository}` : `repo:${repository}@${ref}`;
+	const repoPattern = buildRepoPattern(repository);
+	const repoRefString = ref.toUpperCase() === 'HEAD' ? `repo:${repoPattern}` : `repo:${repoPattern}@${ref}`;
 	const optionsString = ['context:global', 'type:symbol', 'patternType:regexp', 'case:yes'].join(' ');
 	const patternString = `^${escapeRegexp(symbol)}$`;
 	const query = [repoRefString, optionsString, patternString].join(' ');
