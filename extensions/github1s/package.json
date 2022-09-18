@@ -15,7 +15,8 @@
     "onFileSystem:github1s",
     "onFileSystem:gitlab1s",
     "onFileSystem:bitbucket1s",
-    "onFileSystem:npmjs1s"
+    "onFileSystem:npmjs1s",
+    "onFileSystem:ossinsight"
   ],
   "browser": "./dist/extension",
   "engines": {

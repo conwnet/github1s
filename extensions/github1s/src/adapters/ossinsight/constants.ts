@@ -51,14 +51,3 @@ export const RankingLanguages = [
 	'Perl',
 	'Fortran',
 ];
-
-export type RepoItem = {
-	collection_names?: string;
-	contributor_logins?: string;
-	description?: string;
-	forks?: number;
-	language?: string;
-	repo_name: string;
-	stars?: number;
-	total_score?: number;
-};

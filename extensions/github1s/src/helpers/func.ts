@@ -60,3 +60,22 @@ export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(fu
 		}) as ReturnType<T>;
 	};
 };
+
+// memorize function result, beware of memory leaks!
+export const memorize = <T extends (...args: any[]) => any>(
+	func: T,
+	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey
+) => {
+	const cache = new Map<string, ReturnType<T>>();
+
+	return function (...args: Parameters<T>): ReturnType<T> {
+		const key = computeCacheKey(...args);
+		if (cache.has(key)) {
+			return cache.get(key)!;
+		}
+
+		const result = func.call(this, ...args);
+		cache.set(key, result);
+		return result;
+	};
+};

@@ -23,11 +23,11 @@ export const trimEnd = (str: string, chars: string = ' '): string => {
 };
 
 export const joinPath = (...segments: string[]): string => {
-	if (!segments.length) {
+	const validSegments = segments.filter(Boolean);
+	if (!validSegments.length) {
 		return '';
 	}
-
-	return segments.reduce((prev, segment) => {
+	return validSegments.reduce((prev, segment) => {
 		return trimEnd(prev, '/') + '/' + trimStart(segment, '/');
 	});
 };
@@ -42,10 +42,7 @@ export const basename = (path: string): string => {
 	return trimmedPath.substr(trimmedPath.lastIndexOf('/') + 1) || '';
 };
 
-export const uniqueId = (
-	(id) => () =>
-		id++
-)(1);
+export const uniqueId = ((id) => () => id++)(1);
 
 export const prop = (obj: object, path: (string | number)[] = []): any => {
 	let cur = obj;

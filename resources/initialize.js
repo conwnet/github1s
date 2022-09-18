@@ -23,6 +23,7 @@
 	let logoIcon = staticAssetsPrefix + '/config/github.svg';
 	const pathParts = window.location.pathname.split('/').filter(Boolean);
 	let repository = pathParts.slice(0, 2).join('/') || 'conwnet/github1s';
+	let workspaceLabel = '';
 
 	if (hostname.match(/\.?gitlab1s\.com$/i)) {
 		scheme = 'gitlab1s';
@@ -45,6 +46,9 @@
 		const trimedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
 		const packageParts = trimedParts.slice(0, trimedParts[0] && trimedParts[0][0] === '@' ? 2 : 1);
 		repository = pathParts.length ? packageParts.join('/') || 'package' : 'lodash';
+	} else if (!pathParts[0] || pathParts[0] === 'trending') {
+		scheme = 'ossinsight';
+		workspaceLabel = 'GitHub Trending';
 	}
 
 	// set product.json
@@ -74,6 +78,7 @@
 			'*.vercel.com',
 			'*.sourcegraph.com',
 			'*.gitpod.io',
+			'*.ossinsight.io',
 		],
 		extensionEnabledApiProposals: { 'ms-vscode.anycode': ['extensionsAny'] },
 	};
@@ -231,7 +236,7 @@
 		builtinExtensions: window.github1sExtensions || [],
 		folderUri: { scheme: scheme, authority: '', path: '/' },
 		workspaceId: scheme + ':' + repository,
-		workspaceLabel: repository,
+		workspaceLabel: workspaceLabel || repository,
 		hideTextFileLabelDecorations: true,
 		logo: {
 			icon: logoIcon,
