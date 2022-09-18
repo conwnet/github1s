@@ -58,12 +58,10 @@ export type CollectionItem = {
 	public: number;
 };
 
-export const getCollections = memorize(
-	(): Promise<CollectionItem[]> => {
-		const requestUrl = `${OSSInsightEndpoint}/collections`;
-		return fetch(requestUrl).then(resolveDataFromResponse);
-	}
-);
+export const getCollections = memorize((): Promise<CollectionItem[]> => {
+	const requestUrl = `${OSSInsightEndpoint}/collections`;
+	return fetch(requestUrl).then(resolveDataFromResponse);
+});
 
 export const getCollectionIdByName = async (collectionName: string): Promise<number | null> => {
 	const collections = await getCollections();
