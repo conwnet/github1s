@@ -217,7 +217,7 @@ export const createCollectionPageMarkdown = async (collectionName: string) => {
 
 Last 28 days ranking of repos in this collection by stars, pull requests, issues. Historical Ranking by Popularity.${dataSourceMarkdown}
 
-Other Rankings: &nbsp; ${createRankingsLinksMarkdown('Collections')}
+Other Rankings: &nbsp; ${createRankingsLinksMarkdown('')}
 
 ***
 
