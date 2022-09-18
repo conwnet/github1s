@@ -127,9 +127,7 @@ yarn build
 
 - If something is not working, [create an issue](https://github.com/conwnet/github1s/issues/new)
 
-- If you have a question, [discuss on gitter](https://gitter.im/conwnet/github1s)
-
-## Project Sponsors
+## Sponsors
 
 The continued development and maintenance of GitHub1s is made possible by these generous sponsors:
 
@@ -142,7 +140,33 @@ The continued development and maintenance of GitHub1s is made possible by these 
 </a></td>
 </tr></tbody></table>
 
-## Third-party Related Projects
+## Partners
+
+We are Partnered with [OSSInsight](https://ossinsight.io/) to get the Trending Repositories & some more Interesting Analytics
+
+<table><tbody><tr>
+<td><a href="https://ossinsight.io/">
+<img height="40px" src="./resources/images/ossinsight.png">
+</a></td>
+</tr></tbody></table>
+
+## Maintainers! :blush:
+
+<table>
+  <tbody><tr>
+    <td align="center"><a href="https://github.com/conwnet"><img alt="" src="https://avatars.githubusercontent.com/conwnet" width="100px;"><br><sub><b>netcon</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=conwnet" title="Code">💻 🖋</a></td> </a></td>
+    <td align="center"><a href="https://github.com/xcv58"><img alt="" src="https://avatars.githubusercontent.com/xcv58" width="100px;"><br><sub><b>xcv58</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=xcv58" title="Code">💻 🖋</a></td></a></td>
+    <td align="center"><a href="https://github.com/Siddhant-K-code"><img alt="" src="https://avatars.githubusercontent.com/Siddhant-K-code" width="100px;"><br><sub><b>Siddhant Khare</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=Siddhant-K-code" title="Code">💻 🖋</a></td> </a></td>
+  </tr>
+</tbody></table>
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)
+
+<details>
+<summary>Third-party Related Projects</summary>
+<br>
 
 ### Chrome Extensions
 
@@ -173,17 +197,4 @@ The continued development and maintenance of GitHub1s is made possible by these 
 ### Tampermonkey scripts
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
-
-## Maintainers! :blush:
-
-<table>
-  <tbody><tr>
-    <td align="center"><a href="https://github.com/conwnet"><img alt="" src="https://avatars.githubusercontent.com/conwnet" width="100px;"><br><sub><b>netcon</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=conwnet" title="Code">💻 🖋</a></td> </a></td>
-    <td align="center"><a href="https://github.com/xcv58"><img alt="" src="https://avatars.githubusercontent.com/xcv58" width="100px;"><br><sub><b>xcv58</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=xcv58" title="Code">💻 🖋</a></td></a></td>
-    <td align="center"><a href="https://github.com/Siddhant-K-code"><img alt="" src="https://avatars.githubusercontent.com/Siddhant-K-code" width="100px;"><br><sub><b>Siddhant Khare</b></sub></a><br><a href="https://github.com/conwnet/github1s/commits?author=Siddhant-K-code" title="Code">💻 🖋</a></td> </a></td>
-  </tr>
-</tbody></table>
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/conwnet/github1s.svg)](https://starchart.cc/conwnet/github1s)
+</details>
