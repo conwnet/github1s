@@ -25,7 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	page = await browser.newPage();
-	await page.goto(BASE_URL);
+	await page.goto(`${BASE_URL}/conwnet/github1s`);
 	await page.waitForTimeout(3000);
 });
 
@@ -34,7 +34,7 @@ afterEach(async () => {
 });
 
 it('should load successfully', async () => {
-	await page.goto(BASE_URL);
+	await page.goto(`${BASE_URL}/conwnet/github1s`);
 	expect(await page.title()).toMatch(/.*GitHub1s/);
 
 	// Make sure the VS Code loads
@@ -63,7 +63,7 @@ it('should load successfully', async () => {
 });
 
 it('should open file correctly', async () => {
-	await page.goto(BASE_URL);
+	await page.goto(`${BASE_URL}/conwnet/github1s`);
 	await page.click('[title="~/tsconfig.json"]');
 	await page.click('[data-resource-name="tsconfig.json"]');
 	await page.waitForTimeout(3000);

@@ -7,7 +7,7 @@ import * as adapterTypes from '../types';
 import { parseGitHubPath } from './parse-path';
 
 export class GitHub1sRouterParser extends adapterTypes.RouterParser {
-	private static instance: GitHub1sRouterParser | null = null;
+	protected static instance: GitHub1sRouterParser | null = null;
 
 	public static getInstance(): GitHub1sRouterParser {
 		if (GitHub1sRouterParser.instance) {
