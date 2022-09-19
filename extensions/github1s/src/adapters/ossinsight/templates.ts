@@ -18,7 +18,7 @@ import {
 
 const buildRepoLink = (repo: string) => `https://github1s.com/${repo}`;
 
-const dataSourceMarkdown = ` (Data source: [OSS Insight](https://ossinsight.io/))`;
+const dataSourceMarkdown = ` (Data source: [👁️ OSS Insight](https://ossinsight.io/?utm_source=github1s&utm_medium=github&utm_campaign=ghtrending))`;
 
 const createRepoItemMarkdown = (repo: RepoItem, period: RankingPeriod) => {
 	const contributorAvatars = (repo.contributor_logins?.split(',') || []).map((username) => {
@@ -102,7 +102,7 @@ export const createLanguageListPageMarkdown = () => {
 	return `
 # Trending Repos by Languages
 
-See what the GitHub community is most excited by languages.${dataSourceMarkdown}
+See what the GitHub community is most excited by languages.${dataSourceMarkdown}  
 
 Other Rankings: &nbsp; ${createRankingsLinksMarkdown('Languages')}
 
