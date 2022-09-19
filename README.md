@@ -142,11 +142,11 @@ The continued development and maintenance of GitHub1s is made possible by these 
 
 ## Partners
 
-We are Partnered with [OSSInsight](https://ossinsight.io/) to get the Trending Repositories & some more Interesting Analytics
+We are partnered with [OSS Insight](https://ossinsight.io/?utm_source=github1s&utm_medium=github&utm_campaign=ghtrending) to get the Trending Repositories & some more Interesting Analytics. [OSS Insight](https://ossinsight.io/?utm_source=github1s&utm_medium=github&utm_campaign=ghtrending) provides deep insights into GitHub repos, developers, and curated repo lists from billions of GitHub events. It’s built with [TiDB Cloud](https://www.pingcap.com/tidb-cloud/?utm_source=github1s&utm_medium=github&utm_campaign=ghtrending).
 
 <table><tbody><tr>
-<td><a href="https://ossinsight.io/">
-<img height="40px" src="./resources/images/ossinsight.png">
+<td><a href="https://ossinsight.io/?utm_source=github1s&utm_medium=github&utm_campaign=ghtrending">
+<img height="40px" src="./resources/images/ossinsight-brand-dark.png">
 </a></td>
 </tr></tbody></table>
 
