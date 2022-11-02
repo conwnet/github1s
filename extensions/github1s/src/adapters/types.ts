@@ -381,7 +381,7 @@ export class RouterParser {
 
 	// convert giving path to the external link (using for jumping back to origin platform)
 	buildExternalLink(path: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return 'https://github.com/conwnet/github1s';
 	}
 }
 

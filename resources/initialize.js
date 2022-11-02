@@ -111,7 +111,7 @@
 
 		platformName = 'GitHub';
 		platformConfig = {
-			hideTextFileLabelDecorations: !!repository,
+			hideTextFileLabelDecorations: !isOnlineEditor,
 			windowIndicator: createWindowIndicator(repository),
 			configurationDefaults: createConfigurationDefaults(!!repository),
 			workspace: !isOnlineEditor ? createFolderWorkspace(repository ? 'github1s' : 'ossinsight') : undefined,
