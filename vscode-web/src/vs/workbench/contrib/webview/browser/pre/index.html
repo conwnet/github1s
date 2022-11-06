@@ -100,7 +100,7 @@
 		padding: 0 20px;
 	}
 
-	img {
+	img, video {
 		max-width: 100%;
 		max-height: 100%;
 	}
@@ -402,7 +402,10 @@
 			activeTheme: undefined,
 
 			/** @type {string | undefined} */
-			themeName: undefined,
+			themeId: undefined,
+
+			/** @type {string | undefined} */
+			themeLabel: undefined,
 
 			/** @type {boolean} */
 			screenReader: false,
@@ -460,7 +463,9 @@
 				}
 
 				body.dataset.vscodeThemeKind = initData.activeTheme;
-				body.dataset.vscodeThemeName = initData.themeName || '';
+				/** @deprecated data-vscode-theme-name will be removed, use data-vscode-theme-id instead */
+				body.dataset.vscodeThemeName = initData.themeLabel || '';
+				body.dataset.vscodeThemeId = initData.themeId || '';
 			}
 
 			if (initData.styles) {
@@ -541,7 +546,7 @@
 			// make sure we block the browser from dispatching it. Instead VS Code
 			// handles these events and will dispatch a copy/paste back to the webview
 			// if needed
-			if (isUndoRedo(e) || isPrint(e) || isFindEvent(e)) {
+			if (isUndoRedo(e) || isPrint(e) || isFindEvent(e) || isSaveEvent(e)) {
 				e.preventDefault();
 			} else if (isCopyPasteOrCut(e)) {
 				if (onElectron) {
@@ -613,6 +618,15 @@
 		function isFindEvent(e) {
 			const hasMeta = e.ctrlKey || e.metaKey;
 			return hasMeta && e.key.toLowerCase() === 'f';
+		}
+
+		/**
+		 * @param {KeyboardEvent} e
+		 * @return {boolean}
+		 */
+		function isSaveEvent(e) {
+			const hasMeta = e.ctrlKey || e.metaKey;
+			return hasMeta && e.key.toLowerCase() === 's';
 		}
 
 		let isHandlingScroll = false;
@@ -790,7 +804,8 @@
 
 				initData.styles = data.styles;
 				initData.activeTheme = data.activeTheme;
-				initData.themeName = data.themeName;
+				initData.themeLabel = data.themeLabel;
+				initData.themeId = data.themeId;
 				initData.reduceMotion = data.reduceMotion;
 				initData.screenReader = data.screenReader;
 

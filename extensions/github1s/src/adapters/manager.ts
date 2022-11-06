@@ -48,10 +48,7 @@ export class AdapterManager {
 	}
 
 	public getCurrentScheme(): string {
-		if (!vscode.workspace.workspaceFolders?.length) {
-			throw new Error(`Can not found active workspace`);
-		}
-		return vscode.workspace.workspaceFolders[0].uri.scheme;
+		return vscode.workspace.workspaceFolders?.[0]?.uri?.scheme || 'empty';
 	}
 
 	public getCurrentAdapter(): Adapter {

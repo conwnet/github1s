@@ -345,43 +345,43 @@ export type RouterState = { repo: string; ref: string } & (
 export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,
 	parsePath(path: string): Promisable<RouterState> {
-		return { repo: 'conwnet/github1s', ref: 'HEAD', pageType: PageType.Tree, filePath: '' };
+		return { repo: '', ref: 'HEAD', pageType: PageType.Tree, filePath: '' };
 	}
 
 	// build the tree page path
 	buildTreePath(repo: string, ref?: string, filePath?: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 
 	// build the blob page path
 	// startLine/endLine begins from 1
 	// eslint-disable-next-line max-len
 	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 	// build the commit list page path
 	buildCommitListPath(repo: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 
 	// build the commit page path
 	buildCommitPath(repo: string, commitSha: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 
 	// build the code review list page path
 	buildCodeReviewListPath(repo: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 
 	// build the code review page path
 	buildCodeReviewPath(repo: string, codeReviewId: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return '/' + repo;
 	}
 
 	// convert giving path to the external link (using for jumping back to origin platform)
 	buildExternalLink(path: string): Promisable<string> {
-		return '/conwnet/github1s';
+		return 'https://github.com' + path;
 	}
 }
 

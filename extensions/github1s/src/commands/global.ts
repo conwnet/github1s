@@ -69,12 +69,19 @@ export const commandOpenRepository = async () => {
 	quickPick.onDidAccept(async () => {
 		const choice = quickPick.activeItems[0];
 		const repository = choice === manualInputItem ? quickPick.value : choice.label;
-		const tagetLink = vscode.Uri.parse((await router.href()) || '').with({
+		const targetLink = vscode.Uri.parse((await router.href()) || '').with({
 			path: await (await router.resolveParser()).buildTreePath(repository),
 		});
-		vscode.commands.executeCommand('vscode.open', tagetLink);
+		vscode.commands.executeCommand('vscode.open', targetLink);
 		quickPick.hide();
 	});
+};
+
+const commandOpenOnlineEditor = async () => {
+	const currentScheme = adapterManager.getCurrentScheme();
+	const onlineEditorPath = ['github1s', 'ossinsight'].includes(currentScheme) ? '/editor' : '/';
+	const targetLink = vscode.Uri.parse((await router.href()) || '').with({ path: onlineEditorPath });
+	return vscode.commands.executeCommand('vscode.open', targetLink);
 };
 
 export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
@@ -85,6 +92,8 @@ export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openOnNpm', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnOfficialPage', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnGitPod', commandOpenGitpod),
-		vscode.commands.registerCommand('github1s.commands.openRepository', commandOpenRepository)
+		vscode.commands.registerCommand('github1s.commands.openRepository', commandOpenRepository),
+		vscode.commands.registerCommand('github1s.commands.openOnlineEditor', commandOpenOnlineEditor),
+		vscode.commands.registerCommand('remoteHub.openRepository', commandOpenRepository)
 	);
 };

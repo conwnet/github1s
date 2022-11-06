@@ -3,16 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { create, IWorkbenchConstructionOptions, IWorkspaceProvider, UriComponents } from 'vs/workbench/workbench.web.main';
+import { create } from 'vs/workbench/workbench.web.main';
 import { IExtensionManifest } from 'vs/platform/extensions/common/extensions';
+import { IWorkbenchConstructionOptions } from 'vs/workbench/browser/web.api';
+import { IWorkspaceProvider } from 'vs/workbench/services/host/browser/browserHostService';
+import { URI, UriComponents } from 'vs/base/common/uri';
 import { env } from 'vs/workbench/browser/web.factory';
-import { URI } from 'vs/base/common/uri';
 
 // same as vscode-web/src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts
 interface IBundledExtension {
 	extensionPath: string;
 	packageJSON: IExtensionManifest;
 	packageNLS?: any;
+	browserNlsMetadataPath?: string;
 	readmePath?: string;
 	changelogPath?: string;
 }
@@ -20,7 +23,7 @@ interface IBundledExtension {
 declare global {
 	interface Window {
 		vscodeWeb?: Partial<IWorkbenchConstructionOptions> & {
-			folderUri?: UriComponents; // easy way to build single folder workspace
+			workspace?: { folderUri?: UriComponents; workspaceUri?: UriComponents; };
 			workspaceId?: string; // the identifier to distinguish workspace
 			workspaceLabel?: string; // the label shown on explorer
 			hideTextFileReadonlyIcon?: boolean; // if hide the readonly icon for readonly files
@@ -40,11 +43,21 @@ declare global {
 }
 
 (function () {
-	const workspaceProvider: IWorkspaceProvider | undefined = window?.vscodeWeb?.folderUri ? {
+	const resolveWorkspace = (workspace?: { folderUri?: UriComponents; workspaceUri?: UriComponents; }) => {
+		if (workspace?.folderUri) {
+			return { folderUri: URI.from(workspace.folderUri) };
+		}
+		if (workspace?.workspaceUri) {
+			return { workspaceUri: URI.from(workspace.workspaceUri) };
+		}
+		return { workspaceUri: URI.from({ scheme: 'tmp', path: '/default.code-workspace' }) };
+	};
+
+	const workspaceProvider: IWorkspaceProvider | undefined = {
 		trusted: true,
-		workspace: { folderUri: URI.from(window.vscodeWeb.folderUri) },
+		workspace: resolveWorkspace(window.vscodeWeb?.workspace),
 		open: window.vscodeWeb?.openWorkspace || (() => Promise.resolve(false)),
-	} : undefined;
+	};
 
 	// Create workbench
 	create(document.body, { workspaceProvider, ...window.vscodeWeb });
