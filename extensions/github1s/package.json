@@ -6,7 +6,8 @@
   "private": true,
   "enabledApiProposals": [
     "fileSearchProvider",
-    "textSearchProvider"
+    "textSearchProvider",
+    "resolvers"
   ],
   "directories": {
     "lib": "lib"
@@ -16,7 +17,10 @@
     "onFileSystem:gitlab1s",
     "onFileSystem:bitbucket1s",
     "onFileSystem:npmjs1s",
-    "onFileSystem:ossinsight"
+    "onFileSystem:ossinsight",
+    "onCommand:remoteHub.openRepository",
+    "onCommand:github1s.commands.openRepository",
+    "onStartupFinished"
   ],
   "browser": "./dist/extension",
   "engines": {
@@ -63,6 +67,11 @@
       {
         "command": "github1s.commands.openRepository",
         "title": "Open Repository...",
+        "category": "GitHub1s"
+      },
+      {
+        "command": "github1s.commands.openOnlineEditor",
+        "title": "Open Online Editor...",
         "category": "GitHub1s"
       },
       {

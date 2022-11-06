@@ -15,40 +15,114 @@
 		});
 	}
 
-	// set workbench config
-	const hostname = window.location.hostname;
-	let scheme = 'github1s';
-	let platformName = 'GitHub';
-	let platformOrigin = 'https://github.com';
-	let logoIcon = staticAssetsPrefix + '/config/github.svg';
-	const pathParts = window.location.pathname.split('/').filter(Boolean);
-	let repository = pathParts.slice(0, 2).join('/') || 'conwnet/github1s';
-	let workspaceLabel = '';
+	// build workbench config
+	const createFolderWorkspace = (scheme) => ({ folderUri: { scheme, authority: '', path: '/' } });
+	const openGitHub1sPage = () => window.open('https://github.com/conwnet/github1s', '_blank');
+	const openOfficialPage = (origin) => {
+		const targetPath = window.location.pathname + window.location.search + window.location.hash;
+		return window.open(origin + targetPath, '_blank');
+	};
+	const createWindowIndicator = (label) => ({
+		label: label || '$(remote)',
+		command: 'github1s.commands.openRepository',
+	});
+	const createConfigurationDefaults = (disableSomeAnyCodeFeatures) => {
+		const configurationDefaults = {
+			'workbench.colorTheme': 'Default Dark+',
+			'telemetry.telemetryLevel': 'off',
+			'workbench.startupEditor': 'readme',
+		};
+		// disable some anycode features when we can use sourcegraph instead
+		if (disableSomeAnyCodeFeatures) {
+			configurationDefaults['anycode.language.features'] = {
+				completions: false,
+				definitions: false,
+				references: false,
+				highlights: true,
+				outline: true,
+				workspaceSymbols: true,
+				folding: false,
+				diagnostics: false,
+			};
+		}
+		return configurationDefaults;
+	};
 
-	if (hostname.match(/\.?gitlab1s\.com$/i)) {
-		scheme = 'gitlab1s';
-		platformName = 'GitLab';
-		platformOrigin = 'https://gitlab.com';
-		logoIcon = staticAssetsPrefix + '/config/gitlab.svg';
+	let platformName = 'GitHub';
+	let platformConfig = {};
+	const pathParts = window.location.pathname.split('/').filter(Boolean);
+	if (window.location.hostname.match(/\.?gitlab1s\.com$/i)) {
 		const dashIndex = pathParts.indexOf('-');
-		repository = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/') || 'gitlab-org/gitlab-docs';
-	} else if (hostname.match(/\.?bitbucket1s\.org$/i)) {
-		scheme = 'bitbucket1s';
+		const repository = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
+
+		platformName = 'GitLab';
+		platformConfig = {
+			hideTextFileLabelDecorations: !!repository,
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+			workspace: repository ? createFolderWorkspace('gitlab1s') : undefined,
+			workspaceId: repository ? 'gitlab1s:' + repository : '',
+			workspaceLabel: repository,
+			logo: {
+				title: 'Open on GitLab',
+				icon: staticAssetsPrefix + '/config/gitlab.svg',
+				onClick: () => (repository ? openOfficialPage('https://gitlab.com') : openGitHub1sPage()),
+			},
+		};
+	} else if (window.location.hostname.match(/\.?bitbucket1s\.org$/i)) {
+		const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';
+
 		platformName = 'Bitbucket';
-		platformOrigin = 'https://bitbucket.org';
-		logoIcon = staticAssetsPrefix + '/config/bitbucket.svg';
-		repository = pathParts >= 2 ? pathParts.slice(0, 2).join('/') : 'atlassian/clover';
-	} else if (hostname.match(/\.?npmjs1s\.com$/i)) {
-		scheme = 'npmjs1s';
+		platformConfig = {
+			hideTextFileLabelDecorations: !!repository,
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+			workspace: repository ? createFolderWorkspace('bitbucket1s') : undefined,
+			workspaceId: repository ? 'bitbucket1s:' + repository : '',
+			workspaceLabel: repository,
+			logo: {
+				title: 'Open on Bitbucket',
+				icon: staticAssetsPrefix + '/config/bitbucket.svg',
+				onClick: () => (repository ? openOfficialPage('https://bitbucket.org') : openGitHub1sPage()),
+			},
+		};
+	} else if (window.location.hostname.match(/\.?npmjs1s\.com$/i)) {
+		const trimmedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
+		const packageParts = trimmedParts.slice(0, trimmedParts[0] && trimmedParts[0][0] === '@' ? 2 : 1);
+		const repository = pathParts.length ? packageParts.join('/') || 'package' : '';
+
 		platformName = 'npm';
-		platformOrigin = 'https://npmjs.com';
-		logoIcon = staticAssetsPrefix + '/config/npm.svg';
-		const trimedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
-		const packageParts = trimedParts.slice(0, trimedParts[0] && trimedParts[0][0] === '@' ? 2 : 1);
-		repository = pathParts.length ? packageParts.join('/') || 'package' : 'lodash';
-	} else if (!pathParts[0] || pathParts[0] === 'trending') {
-		scheme = 'ossinsight';
-		workspaceLabel = 'GitHub Trending';
+		platformConfig = {
+			hideTextFileLabelDecorations: !!repository,
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(false),
+			workspace: repository ? createFolderWorkspace('npmjs1s') : undefined,
+			workspaceId: repository ? 'npmjs1s:' + repository : '',
+			workspaceLabel: repository,
+			logo: {
+				title: 'Open on npm',
+				icon: staticAssetsPrefix + '/config/npm.svg',
+				onClick: () => (repository ? openOfficialPage('https://npmjs.com') : openGitHub1sPage()),
+			},
+		};
+	} else {
+		const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';
+		const isOnlineEditor = pathParts[0] === 'editor';
+
+		platformName = 'GitHub';
+		platformConfig = {
+			hideTextFileLabelDecorations: !isOnlineEditor,
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+			workspace: !isOnlineEditor ? createFolderWorkspace(repository ? 'github1s' : 'ossinsight') : undefined,
+			workspaceId: !isOnlineEditor ? 'github1s:' + (repository || 'trending') : '',
+			workspaceLabel: repository || (isOnlineEditor ? '' : 'GitHub Trending'),
+			logo: {
+				title: 'Open on GitHub',
+				icon: staticAssetsPrefix + '/config/github.svg',
+				onClick: () => (repository ? openOfficialPage('https://github1s.com') : openGitHub1sPage()),
+			},
+		};
 	}
 
 	// set product.json
@@ -186,71 +260,27 @@
 	};
 	/*** end notificaton block ***/
 
+	const vscodeCommands = [
+		{ id: 'github1s.commands.vscode.getBrowserUrl', handler: () => window.location.href },
+		{ id: 'github1s.commands.vscode.replaceBrowserUrl', handler: (url) => window.history.replaceState(null, '', url) },
+		{ id: 'github1s.commands.vscode.pushBrowserUrl', handler: (url) => window.history.pushState(null, '', url) },
+		{ id: 'github1s.commands.vscode.connectToGitHub', handler: ConnectToGitHub },
+	];
+
 	window.vscodeWeb = {
-		windowIndicator: { label: repository, command: 'github1s.commands.openRepository' },
 		additionalBuiltinExtensions: ['ms-vscode.anycode'],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		webWorkerExtensionHostIframeSrc:
 			staticAssetsPrefix + '/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
-		commands: [
-			{
-				id: 'github1s.commands.vscode.getBrowserUrl',
-				handler() {
-					return window.location.href;
-				},
-			},
-			{
-				id: 'github1s.commands.vscode.replaceBrowserUrl',
-				handler(url) {
-					window.history.replaceState(null, '', url);
-				},
-			},
-			{
-				id: 'github1s.commands.vscode.pushBrowserUrl',
-				handler(url) {
-					window.history.pushState(null, '', url);
-				},
-			},
-			{
-				id: 'github1s.commands.vscode.connectToGitHub',
-				handler: ConnectToGitHub,
-			},
-		],
+		commands: vscodeCommands,
 		productConfiguration: productConfiguration,
 		initialColorTheme: { themeType: 'dark' },
-		configurationDefaults: {
-			'workbench.colorTheme': 'Default Dark+',
-			'telemetry.telemetryLevel': 'off',
-			'workbench.startupEditor': 'readme',
-			'anycode.language.features': {
-				completions: false,
-				definitions: false,
-				references: false,
-				highlights: true,
-				outline: true,
-				workspaceSymbols: true,
-				folding: false,
-				diagnostics: false,
-			},
-		},
 		builtinExtensions: window.github1sExtensions || [],
-		folderUri: { scheme: scheme, authority: '', path: '/' },
-		workspaceId: scheme + ':' + repository,
-		workspaceLabel: workspaceLabel || repository,
-		hideTextFileLabelDecorations: true,
-		logo: {
-			icon: logoIcon,
-			title: 'Open on ' + platformName,
-			onClick() {
-				const pathname = window.location.pathname.length > 1 ? window.location.pathname : '/' + repository;
-				const targetPath = pathname + window.location.search + window.location.hash;
-				window.open(platformOrigin + targetPath, '_blank');
-			},
-		},
 		onWorkbenchReady() {
 			const loadSpinner = document.querySelector('#load-spinner');
 			loadSpinner && loadSpinner.remove();
 			renderNotification();
 		},
+		...platformConfig,
 	};
 })();
