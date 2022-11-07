@@ -120,7 +120,7 @@
 			logo: {
 				title: 'Open on GitHub',
 				icon: staticAssetsPrefix + '/config/github.svg',
-				onClick: () => (repository ? openOfficialPage('https://github1s.com') : openGitHub1sPage()),
+				onClick: () => (repository ? openOfficialPage('https://github.com') : openGitHub1sPage()),
 			},
 		};
 	}
