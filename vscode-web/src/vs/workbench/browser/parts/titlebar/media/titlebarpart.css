@@ -307,10 +307,6 @@
 	height: 48px;
 }
 
-.monaco-workbench .activitybar > .content > .home-bar.home-bar-clickable:hover {
-	opacity: 0.7;
-}
-
 .monaco-workbench .activitybar > .content > .home-bar.home-bar-clickable:active {
 	opacity: 0.4;
 }
