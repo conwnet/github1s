@@ -76,23 +76,6 @@ const scanGitHub1sExtensions = () => {
 	return extensions.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item))).filter(Boolean);
 };
 
-const getInitialize = () => {
-	try {
-		const svgs = ['github', 'gitlab', 'bitbucket', 'npm'];
-		const initializePath = path.join(APP_ROOT, `resources/initialize.js`);
-		let content = fs.readFileSync(initializePath).toString('utf8');
-		svgs.forEach((svg) => {
-			const svgPath = path.join(APP_ROOT, `resources/${svg}.svg`);
-			const svgContent = fs.readFileSync(svgPath).toString('utf8');
-			content = content.replace(`__${svg}__`, svgContent);
-		});
-		return content;
-	} catch {
-		console.error('Failed to generate initialize.js file.');
-		process.exit(1);
-	}
-};
-
 const VSCODE_NODE_MODULES = [
 	'@vscode/iconv-lite-umd',
 	'@vscode/vscode-languagedetection',
@@ -156,6 +139,10 @@ module.exports = {
 						ignore: ['**/node_modules/**'],
 					},
 				},
+				{
+					from: 'resources/{initialize.js,github.svg,gitlab.svg,bitbucket.svg,npm.svg}',
+					to: 'static/config/[name][ext]',
+				},
 				...VSCODE_NODE_MODULES,
 			].filter(Boolean),
 		}),
@@ -177,10 +164,6 @@ module.exports = {
 				const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
 				return `window.github1sExtensions = ${JSON.stringify(extensions)};`;
 			},
-		}),
-		generate({
-			file: 'static/config/initialize.js',
-			content: () => getInitialize(),
 		}),
 	],
 	devServer: {

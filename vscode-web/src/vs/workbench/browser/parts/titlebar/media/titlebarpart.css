@@ -307,15 +307,23 @@
 	height: 48px;
 }
 
+.monaco-workbench .activitybar > .content > .home-bar.home-bar-clickable:hover {
+	opacity: 0.7;
+}
+
 .monaco-workbench .activitybar > .content > .home-bar.home-bar-clickable:active {
 	opacity: 0.4;
 }
 
 .monaco-workbench .activitybar > .content > .home-bar .home-bar-custom-icon {
 	opacity: 1 !important;
-	background-size: 50% 50%;
-	background-position: 50% 50%;
-	background-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-repeat: no-repeat;
+	mask-size: 50% 50%;
+	-webkit-mask-size: 50% 50%;
+	mask-position: 50% 50%;
+	-webkit-mask-position: 50% 50%;
+	background-color: var(--vscode-activityBar-foreground);
 }
 
 /* above codes are changed by github1s */
