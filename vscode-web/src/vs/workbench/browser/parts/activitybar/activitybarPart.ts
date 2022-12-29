@@ -574,7 +574,9 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 		if (logo?.icon) {
 			const iconElement = this.homeBarContainer.querySelector('.home-bar-custom-icon') as HTMLElement;
 			if (iconElement?.style) {
-				iconElement.innerHTML = logo.icon;
+				const logoImage = `url(${window.encodeURI(logo?.icon)})`
+				iconElement.style.maskImage = logoImage;
+				iconElement.style.webkitMaskImage = logoImage;
 			}
 		}
 	}

@@ -65,7 +65,7 @@
 			workspaceLabel: repository,
 			logo: {
 				title: 'Open on GitLab',
-				icon: `__gitlab__`,
+				icon: staticAssetsPrefix + '/config/gitlab.svg',
 				onClick: () => (repository ? openOfficialPage('https://gitlab.com') : openGitHub1sPage()),
 			},
 		};
@@ -82,7 +82,7 @@
 			workspaceLabel: repository,
 			logo: {
 				title: 'Open on Bitbucket',
-				icon: `__bitbucket__`,
+				icon: staticAssetsPrefix + '/config/bitbucket.svg',
 				onClick: () => (repository ? openOfficialPage('https://bitbucket.org') : openGitHub1sPage()),
 			},
 		};
@@ -101,7 +101,7 @@
 			workspaceLabel: repository,
 			logo: {
 				title: 'Open on npm',
-				icon: `__npm__`,
+				icon: staticAssetsPrefix + '/config/npm.svg',
 				onClick: () => (repository ? openOfficialPage('https://npmjs.com') : openGitHub1sPage()),
 			},
 		};
@@ -119,7 +119,7 @@
 			workspaceLabel: repository || (isOnlineEditor ? '' : 'GitHub Trending'),
 			logo: {
 				title: 'Open on GitHub',
-				icon: `__github__`,
+				icon: staticAssetsPrefix + '/config/github.svg',
 				onClick: () => (repository ? openOfficialPage('https://github.com') : openGitHub1sPage()),
 			},
 		};
