@@ -7,7 +7,7 @@ import got from 'got';
 import * as url from 'url';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
+export default async (req: VercelRequest, res: VercelResponse) => {
 	const pathname = url.parse(req.url || '').pathname || '';
 	const matches = pathname.match(/^\/api\/vscode-unpkg\/([^/]+)\/(.*)/);
 
