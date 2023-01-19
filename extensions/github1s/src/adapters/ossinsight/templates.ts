@@ -27,16 +27,16 @@ const createRepoItemMarkdown = (repo: RepoItem, period: RankingPeriod) => {
 		return `[${username}](https://github.com/${username})`;
 	});
 	const repoBadges = [
-		`![Language](https://img.shields.io/github/languages/top/${repo.repo_name})`,
-		`![Watch](https://img.shields.io/github/watchers/${repo.repo_name}?label=Watch)`,
-		`![Fork](https://img.shields.io/github/forks/${repo.repo_name}?label=Fork)`,
-		`![Star](https://img.shields.io/github/stars/${repo.repo_name}?label=Star)`,
-		`![LastCommit](https://img.shields.io/github/last-commit/${repo.repo_name})`,
+		`[![Language](https://img.shields.io/github/languages/top/${repo.repo_name})](https://github.com/${repo.repo_name})`,
+		`[![Watch](https://img.shields.io/github/watchers/${repo.repo_name}?label=Watch)](https://github.com/${repo.repo_name}/watchers)`,
+		`[![Fork](https://img.shields.io/github/forks/${repo.repo_name}?label=Fork)](https://github.com/${repo.repo_name}/forks)`,
+		`[![Star](https://img.shields.io/github/stars/${repo.repo_name}?label=Star)](https://github.com/${repo.repo_name}/stargazers)`,
+		`[![LastCommit](https://img.shields.io/github/last-commit/${repo.repo_name})](https://github.com/${repo.repo_name}/commits)`,
 	];
 
 	const increaseStarsText = (repo.stars || 0) >= 0 ? `+${repo.stars || 0}` : `-${repo.stars}`;
 	const increaseForksText = (repo.forks || 0) >= 0 ? `+${repo.forks || 0}` : `-${repo.forks}`;
-	const contributorsMardown = contributorAvatars.length
+	const contributorsMarkdown = contributorAvatars.length
 		? ' &nbsp;&nbsp; Built by &nbsp;' + contributorAvatars.join('&nbsp;&nbsp;')
 		: '';
 	const collectionMarkdown = repo.collection_names ? ` &nbsp;&nbsp; <i>${repo.collection_names}</i>` : '';
@@ -47,7 +47,7 @@ const createRepoItemMarkdown = (repo: RepoItem, period: RankingPeriod) => {
 
 ${repo.description || ''}
 
-⭐️ ${increaseStarsText} &nbsp;&nbsp; 🔗 ${increaseForksText} ${contributorsMardown}${collectionMarkdown}
+⭐️ ${increaseStarsText} &nbsp;&nbsp; 🔗 ${increaseForksText} ${contributorsMarkdown}${collectionMarkdown}
 
 ${repoBadges.join('&nbsp;')}
 `;
