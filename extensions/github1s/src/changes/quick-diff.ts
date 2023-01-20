@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { Repository } from '@/repository';
 import { emptyFileUri } from '@/providers';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
@@ -12,17 +13,22 @@ import * as adapterTypes from '@/adapters/types';
 // get the original source uri when the `routerState.pageType` is `PageType.PULL`
 const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string): Promise<vscode.Uri | null> => {
 	const routeState = await router.getState();
-	const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
-	const codeReview = await dataSource.provideCodeReview(routeState.repo, codeReviewId);
-	const changedFile = codeReview?.files?.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const currentScheme = adapterManager.getCurrentScheme();
+	const repository = Repository.getInstance(currentScheme, routeState.repo);
+	const codeReviewFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
+	const changedFile = codeReviewFiles?.find((changedFile) => changedFile.path === uri.path.slice(1));
 
-	// TODO: why removed
-	if (!changedFile || changedFile.status === adapterTypes.FileChangeStatus.Removed) {
+	if (
+		!changedFile ||
+		changedFile.status === adapterTypes.FileChangeStatus.Added ||
+		changedFile.status === adapterTypes.FileChangeStatus.Removed
+	) {
 		return null;
 	}
 
-	if (changedFile.status === adapterTypes.FileChangeStatus.Added) {
-		return emptyFileUri;
+	const codeReview = await repository.getCodeReviewItem(codeReviewId);
+	if (!codeReview?.base?.commitSha) {
+		return null;
 	}
 
 	const originalAuthority = `${routeState.repo}+${codeReview!.base.commitSha}`;
@@ -34,20 +40,21 @@ const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string)
 // get the original source uri when the `routerState.pageType` is `PageType.COMMIT`
 const getOriginalResourceForCommit = async (uri: vscode.Uri, commitSha: string) => {
 	const routeState = await router.getState();
-	const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
-	const commit = await dataSource.provideCommit(routeState.repo, commitSha);
-	const changedFile = commit?.files?.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const currentScheme = adapterManager.getCurrentScheme();
+	const repository = Repository.getInstance(currentScheme, routeState.repo);
+	const commitFiles = await repository.getCommitChangedFiles(commitSha);
+	const changedFile = commitFiles?.find((changedFile) => changedFile.path === uri.path.slice(1));
 
-	if (!changedFile || changedFile.status === adapterTypes.FileChangeStatus.Removed) {
+	if (
+		!changedFile ||
+		changedFile.status === adapterTypes.FileChangeStatus.Added ||
+		changedFile.status === adapterTypes.FileChangeStatus.Removed
+	) {
 		return null;
 	}
 
-	if (changedFile.status === adapterTypes.FileChangeStatus.Added) {
-		return emptyFileUri;
-	}
-
-	const parentCommitSha = commit!.parents?.[0] || 'HEAD';
-
+	const commit = await repository.getCommitItem(commitSha);
+	const parentCommitSha = commit?.parents?.[0];
 	if (!parentCommitSha) {
 		return emptyFileUri;
 	}

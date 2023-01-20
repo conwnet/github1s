@@ -77,7 +77,7 @@ const parsePullUrl = async (path: string): Promise<RouterState> => {
 	return {
 		repo: `${owner}/${repo}`,
 		pageType: PageType.CodeReview,
-		ref: codeReview.base.commitSha,
+		ref: codeReview.head.commitSha,
 		codeReviewId,
 	};
 };

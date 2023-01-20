@@ -18,7 +18,7 @@ import { ILabelService, ResourceLabelFormatter, ResourceLabelFormatting, IFormat
 import { ExtensionsRegistry } from 'vs/workbench/services/extensions/common/extensionsRegistry';
 import { match } from 'vs/base/common/glob';
 import { ILifecycleService, LifecyclePhase } from 'vs/workbench/services/lifecycle/common/lifecycle';
-import { registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
 import { IPathService } from 'vs/workbench/services/path/common/pathService';
 import { isProposedApiEnabled } from 'vs/workbench/services/extensions/common/extensions';
 import { OperatingSystem, OS } from 'vs/base/common/platform';
@@ -293,6 +293,7 @@ export class LabelService extends Disposable implements ILabelService {
 			return (window as any)?.vscodeWeb?.workspaceLabel as string;
 		}
 		/* above codes are changed by github1s */
+
 		if (isWorkspace(workspace)) {
 			const identifier = toWorkspaceIdentifier(workspace);
 			if (identifier) {
@@ -460,4 +461,4 @@ export class LabelService extends Disposable implements ILabelService {
 	}
 }
 
-registerSingleton(ILabelService, LabelService, true);
+registerSingleton(ILabelService, LabelService, InstantiationType.Delayed);
