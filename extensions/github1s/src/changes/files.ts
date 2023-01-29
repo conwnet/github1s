@@ -22,16 +22,18 @@ interface VSCodeChangedFile {
 export const getCodeReviewChangedFiles = async (codeReview: adapterTypes.CodeReview) => {
 	const scheme = adapterManager.getCurrentScheme();
 	const { repo } = await router.getState();
+	const repository = Repository.getInstance(scheme, repo);
+	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
+	// cann't get base sha from mergeList
+	const [{ base: baseSha = '' } = {}] = changedFiles;
 	const baseRootUri = vscode.Uri.parse('').with({
 		scheme: scheme,
-		authority: `${repo}+${codeReview.base.commitSha}`,
+		authority: `${repo}+${codeReview.base.commitSha || baseSha}`,
 		path: '/',
 	});
 	const headRootUri = baseRootUri.with({
 		authority: `${repo}+${codeReview.head.commitSha}`,
 	});
-	const repository = Repository.getInstance(scheme, repo);
-	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
 		// the `previous_filename` field only exists in `RENAMED` file,
@@ -140,7 +142,6 @@ export const getChangedFileDiffCommand = (changedFile: VSCodeChangedFile): vscod
 		base: baseFileUri.with({ query: '' }).toString(),
 		head: headFileUri.with({ query: '' }).toString(),
 	});
-
 	return {
 		title: 'Diff',
 		command: 'vscode.diff',

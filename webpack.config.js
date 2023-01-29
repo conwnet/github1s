@@ -76,6 +76,18 @@ const scanGitHub1sExtensions = () => {
 	return extensions.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item))).filter(Boolean);
 };
 
+const getInitialize = () => {
+	try {
+		const initializePath = path.join(APP_ROOT, `resources/initialize.js`);
+		let content = fs.readFileSync(initializePath).toString('utf8');
+		content = content.replace(/GITLAB_DOMAIN/g, process.env.GITLAB_DOMAIN || 'https://gitlab.com');
+		return content;
+	} catch {
+		console.error('Failed to generate initialize.js file.');
+		process.exit(1);
+	}
+};
+
 const VSCODE_NODE_MODULES = [
 	'@vscode/iconv-lite-umd',
 	'@vscode/vscode-languagedetection',
@@ -140,7 +152,7 @@ module.exports = {
 					},
 				},
 				{
-					from: 'resources/{initialize.js,github.svg,gitlab.svg,bitbucket.svg,npm.svg}',
+					from: 'resources/{github.svg,gitlab.svg,bitbucket.svg,npm.svg}',
 					to: 'static/config/[name][ext]',
 				},
 				...VSCODE_NODE_MODULES,
@@ -164,6 +176,10 @@ module.exports = {
 				const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
 				return `window.github1sExtensions = ${JSON.stringify(extensions)};`;
 			},
+		}),
+		generate({
+			file: 'static/config/initialize.js',
+			content: () => getInitialize(),
 		}),
 	],
 	devServer: {

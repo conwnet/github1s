@@ -44,6 +44,7 @@ export interface Branch {
 	name: string;
 	commitSha?: string;
 	description?: string;
+	isDefault?: boolean;
 }
 
 export interface Tag {
@@ -150,6 +151,8 @@ export interface ChangedFile {
 	path: string;
 	// only exists for renamed file
 	previousPath?: string;
+	head?: string;
+	base?: string;
 }
 
 export interface BlameRange {
