@@ -66,7 +66,7 @@
 			logo: {
 				title: 'Open on GitLab',
 				icon: staticAssetsPrefix + '/config/gitlab.svg',
-				onClick: () => (repository ? openOfficialPage(GITLAB_DOMAIN) : openGitHub1sPage()),
+				onClick: () => (repository ? openOfficialPage(`GITLAB_DOMAIN`) : openGitHub1sPage()),
 			},
 		};
 	} else if (window.location.hostname.match(/\.?bitbucket1s\.org$/i)) {
