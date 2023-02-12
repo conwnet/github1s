@@ -78,7 +78,7 @@ cd github1s
 yarn build:vscode
 ```
 
-After the inital successful build, you could use the watch mode:
+After the initial successful build, you could use the watch mode:
 
 ```bash
 cd github1s
