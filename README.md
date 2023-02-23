@@ -177,6 +177,7 @@ We are partnered with [OSS Insight](https://ossinsight.io/?utm_source=github1s&u
 - [shortcut to github1s](https://chrome.google.com/webstore/detail/shortcut-to-github1s/gfcdbodapcbfckbfpmgeldfkkgjknceo) ([katsuhisa91/github1s-shortcut](https://github.com/katsuhisa91/github1s-shortcut))
 - [Github1s Shortut - Open source](https://github.com/Fauzdar1/Github1s)
 - [⚡️ 1s to GitHub1s!](https://github.com/holazz/webext-github1s)
+- [github1s Google Chrome Extensions](https://github.com/Lonely-Mr-zhang/github_1s_vscode)
 
 ### Firefox Extensions
 
