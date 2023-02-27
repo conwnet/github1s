@@ -26,7 +26,8 @@ declare global {
 			workspace?: { folderUri?: UriComponents; workspaceUri?: UriComponents; };
 			workspaceId?: string; // the identifier to distinguish workspace
 			workspaceLabel?: string; // the label shown on explorer
-			hideTextFileReadonlyIcon?: boolean; // if hide the readonly icon for readonly files
+			hideTextFileLabelDecorations?: boolean; // whether hide the readonly icon for readonly files
+			allowEditorLabelOverride?: boolean; // whether allow override editor label
 			// custom builtin extensions
 			builtinExtensions?: IBundledExtension[] | ((builtinExtensions: IBundledExtension[]) => IBundledExtension[]);
 			logo?: { // custom editor logo, hide logo if this is undefined
@@ -55,11 +56,11 @@ declare global {
 
 	const workspaceProvider: IWorkspaceProvider | undefined = {
 		trusted: true,
-		workspace: resolveWorkspace(window.vscodeWeb?.workspace),
-		open: window.vscodeWeb?.openWorkspace || (() => Promise.resolve(false)),
+		workspace: resolveWorkspace(window?.vscodeWeb?.workspace),
+		open: window?.vscodeWeb?.openWorkspace || (() => Promise.resolve(false)),
 	};
 
 	// Create workbench
-	create(document.body, { workspaceProvider, ...window.vscodeWeb });
-	env.getUriScheme().then(scheme => window.vscodeWeb?.onWorkbenchReady?.(scheme));
+	create(document.body, { workspaceProvider, ...window?.vscodeWeb });
+	env.getUriScheme().then(scheme => window?.vscodeWeb?.onWorkbenchReady?.(scheme));
 })();

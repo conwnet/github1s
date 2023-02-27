@@ -273,6 +273,7 @@
 		webWorkerExtensionHostIframeSrc:
 			staticAssetsPrefix + '/vscode/vs/workbench/services/extensions/worker/httpWebWorkerExtensionHostIframe.html',
 		commands: vscodeCommands,
+		allowEditorLabelOverride: true,
 		productConfiguration: productConfiguration,
 		initialColorTheme: { themeType: 'dark' },
 		builtinExtensions: window.github1sExtensions || [],
