@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<!-- Disable pinch zooming -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+		<!-- Workbench Icon/Manifest/CSS -->
+		<link rel="icon" media="(prefers-color-scheme:light)" href="/favicon-light.svg" type="image/svg+xml" />
+		<link rel="icon" media="(prefers-color-scheme:dark)" href="/favicon-dark.svg" type="image/svg+xml" />
+		<% if (!devVscode) { %>
+		<link rel="preload" href="/static-<%= staticHash %>/vscode/vs/workbench/workbench.web.main.css" as="style">
+		<% } %>
+		<link rel="manifest" href="/manifest.json" />
+		<title>GitHub1s</title>
+		<script><%= pageTitleScript %></script>
+		<script><%= analyticsScript %></script>
+		<style><%= spinnerStyle %></style>
+	</head>
+
+	<body aria-label="">
+		<noscript title="No JavaScript Support">
+			<h1>You need to enable JavaScript to run this app.</h1>
+		</noscript>
+		<div id="load-spinner" aria-label="loading">
+			<div class="lds-grid">
+				<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+			</div>
+		</div>
+	</body>
+
+	<script src="/static-<%= staticHash %>/vscode/vs/loader.js"></script>
+	<script src="/static-<%= staticHash %>/vscode/vs/webPackagePaths.js"></script>
+	<script src="/static-<%= staticHash %>/config/extensions.js"></script>
+	<script src="/static-<%= staticHash %>/config/bootstrap.js"></script>
+	<% if (devVscode) { %>
+		<script>require(['vs/code/browser/workbench/workbench'], function () {});</script>
+	<% } else { %>
+		<script src="/static-<%= staticHash %>/vscode/vs/workbench/workbench.web.main.nls.js"></script>
+		<script src="/static-<%= staticHash %>/vscode/vs/workbench/workbench.web.main.js"></script>
+		<script src="/static-<%= staticHash %>/vscode/vs/code/browser/workbench/workbench.js"></script>
+	<% } %>
+	<script src="https://unpkg.com/favicon-switcher@1.2.2/dist/index.js" crossorigin="anonymous" async="async"></script>
+</html>
