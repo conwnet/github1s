@@ -13,7 +13,7 @@
     "copy:vscode": "./scripts/copy-vscode.sh",
     "copy:extensions": "./scripts/copy-extensions.sh",
     "watch": "run-s clone sync && run-p watch:*",
-    "watch:vscode": "cd lib/vscode && yarn watch",
+    "watch:vscode": "cd lib/vscode && run-p watch watch-web",
     "watch:src": "cd scripts/watch && node watch-src.js",
     "watch:dist": "cd scripts/watch && node watch-dist.js"
   },
