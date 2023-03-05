@@ -7,6 +7,8 @@ const cp = require('child_process');
 const util = require('util');
 
 const APP_ROOT = path.join(__dirname, '../../..');
+const GIT_COMMIT_ID = cp.execSync('git rev-parse HEAD').toString().trim();
+const STATIC_HASH = GIT_COMMIT_ID.padStart(7, '0').slice(0, 7);
 
 const debounce = (func, delay) => {
 	let timer = null;
@@ -24,8 +26,27 @@ const debounce = (func, delay) => {
 
 const autoSyncVscodeOut = async () => {
 	const SOURCE = path.join(APP_ROOT, 'vscode-web/lib/vscode/out');
-	const TARGET = path.join(APP_ROOT, 'dist/static/vscode');
+	const TARGET = path.join(APP_ROOT, `dist/static-${STATIC_HASH}/vscode`);
 
+	fs.ensureDirSync(TARGET);
+	await util
+		.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`)
+		.catch(() => {});
+
+	chokidar.watch(SOURCE).on(
+		'all',
+		debounce((_, path) => {
+			cp.exec(`rsync -a ${SOURCE}/ ${TARGET}`);
+			console.log(`sync ${path}`);
+		}, 300)
+	);
+};
+
+const autoSyncExtensionsOut = async () => {
+	const SOURCE = path.join(APP_ROOT, 'vscode-web/lib/vscode/extensions');
+	const TARGET = path.join(APP_ROOT, `dist/static-${STATIC_HASH}/extensions`);
+
+	fs.ensureDirSync(TARGET);
 	await util
 		.promisify(cp.exec)(`rsync -a ${SOURCE}/ ${TARGET}`)
 		.catch(() => {});
@@ -40,9 +61,8 @@ const autoSyncVscodeOut = async () => {
 };
 
 const main = () => {
-	fs.ensureDirSync(path.join(APP_ROOT, 'dist/static'));
-
 	autoSyncVscodeOut();
+	autoSyncExtensionsOut();
 };
 
 main();
