@@ -4,6 +4,7 @@
  */
 
 import { ConnectToGitHub } from './github-auth';
+import { ConnectToGitLab } from './gitlab-auth';
 import { renderNotification } from './notification';
 import { createProductConfiguration } from './product';
 import { createVSCodeWebConfig, Platform } from './config';
@@ -63,6 +64,7 @@ const resolvePlatformState = (): [Platform, string] => {
 		{ id: 'github1s.commands.vscode.replaceBrowserUrl', handler: (url: string) => history.replaceState(null, '', url) },
 		{ id: 'github1s.commands.vscode.pushBrowserUrl', handler: (url: string) => history.pushState(null, '', url) },
 		{ id: 'github1s.commands.vscode.connectToGitHub', handler: ConnectToGitHub },
+		{ id: 'github1s.commands.vscode.connectToGitLab', handler: ConnectToGitLab },
 	];
 
 	(window as any).vscodeWeb = {
