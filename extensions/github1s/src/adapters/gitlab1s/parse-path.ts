@@ -5,13 +5,15 @@
 
 import { parsePath } from 'history';
 import { PageType, RouterState } from '../types';
+import { GitLab1sDataSource } from './data-source';
 import { SourcegraphDataSource } from '@/adapters/sourcegraph/data-source';
 
 const resolveBranchName = async (repo: string, ref = '') => {
 	if (ref && ref.toUpperCase() !== 'HEAD') {
 		return ref;
 	}
-	const dataSource = SourcegraphDataSource.getInstance('gitlab');
+	const dataSource = GitLab1sDataSource.getInstance();
+	// const dataSource = SourcegraphDataSource.getInstance('gitlab');
 	return (await dataSource.provideRepository(repo))?.defaultBranch || 'HEAD';
 };
 
@@ -20,7 +22,7 @@ const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const dashIndex = pathParts.indexOf('-');
 	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
 	const restParts = dashIndex < 0 ? [] : pathParts.slice(dashIndex + 2);
-	const dataSource = SourcegraphDataSource.getInstance('gitlab');
+	const dataSource = GitLab1sDataSource.getInstance();
 	const { ref, path: filePath } = await dataSource.extractRefPath(repo, restParts.join('/'));
 
 	return { pageType: PageType.Tree, repo, ref: await resolveBranchName(repo, ref), filePath };
@@ -65,9 +67,59 @@ const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	return { repo, pageType: PageType.Commit, ref: commitSha, commitSha };
 };
 
+const parsePullsUrl = async (path: string): Promise<RouterState> => {
+	const [owner, repo] = parsePath(path).pathname!.split('/').filter(Boolean);
+
+	return {
+		repo: `${owner}/${repo}`,
+		ref: 'HEAD',
+		pageType: PageType.CodeReviewList,
+	};
+};
+
+const parsePullUrl = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
+	const [owner, repo, , _pageType, codeReviewId] = pathParts;
+	const repoFullName = `${owner}/${repo}`;
+	const codeReview = await GitLab1sDataSource.getInstance().provideCodeReview(repoFullName, codeReviewId);
+
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.CodeReview,
+		ref: codeReview.base.commitSha,
+		codeReviewId,
+	};
+};
+
+// const parseSearchUrl = async (path: string): Promise<RouterState> => {
+// 	const { pathname, search } = parsePath(path);
+// 	const pathParts = pathname!.split('/').filter(Boolean);
+// 	const [owner, repo, _pageType] = pathParts;
+// 	const queryOptions = queryString.parse(search || '');
+// 	const query = typeof queryOptions.q === 'string' ? queryOptions.q : '';
+// 	const isRegex = queryOptions.regex === 'yes';
+// 	const isCaseSensitive = queryOptions.case === 'yes';
+// 	const matchWholeWord = queryOptions.whole === 'yes';
+// 	const filesToInclude = typeof queryOptions['files-to-include'] === 'string' ? queryOptions['files-to-include'] : '';
+// 	const filesToExclude = typeof queryOptions['files-to-exclude'] === 'string' ? queryOptions['files-to-exclude'] : '';
+
+// 	return {
+// 		repo: `${owner}/${repo}`,
+// 		pageType: PageType.Search,
+// 		ref: 'HEAD',
+// 		query,
+// 		isRegex,
+// 		isCaseSensitive,
+// 		matchWholeWord,
+// 		filesToInclude,
+// 		filesToExclude,
+// 	};
+// };
+
 const PAGE_TYPE_MAP = {
 	tree: PageType.Tree,
 	blob: PageType.Blob,
+	merge_requests: PageType.CodeReview,
 	commit: PageType.Commit,
 	commits: PageType.CommitList,
 };
@@ -85,6 +137,8 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 				return parseTreeUrl(path);
 			case PageType.Blob:
 				return parseBlobUrl(path);
+			case PageType.CodeReview:
+				return parsePullUrl(path);
 			case PageType.Commit:
 				return parseCommitUrl(path);
 			case PageType.CommitList:
