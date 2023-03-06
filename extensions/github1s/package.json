@@ -13,14 +13,13 @@
     "lib": "lib"
   },
   "activationEvents": [
+    "onStartupFinished",
     "onFileSystem:github1s",
     "onFileSystem:gitlab1s",
     "onFileSystem:bitbucket1s",
     "onFileSystem:npmjs1s",
     "onFileSystem:ossinsight",
-    "onCommand:remoteHub.openRepository",
-    "onCommand:github1s.commands.openRepository",
-    "onStartupFinished"
+    "onCommand:remoteHub.openRepository"
   ],
   "browser": "./dist/extension",
   "engines": {
@@ -598,9 +597,9 @@
   },
   "scripts": {
     "clean": "rm -rf dist out",
-    "build": "webpack --config extension.webpack.config.js --mode production",
-    "compile": "webpack --config extension.webpack.config.js --mode production",
-    "dev": "webpack --config extension.webpack.config.js --watch"
+    "build": "webpack --config webpack.config.js --mode production",
+    "compile": "webpack --config webpack.config.js --mode production",
+    "dev": "webpack --config webpack.config.js --watch"
   },
   "keywords": [],
   "author": "",

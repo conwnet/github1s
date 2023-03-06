@@ -67,10 +67,10 @@ export class BuiltinExtensionsScannerService implements IBuiltinExtensionsScanne
 				}
 
 				// below codes are changed by github1s
-				if (Array.isArray((window as any)?.vscodeWeb?.builtinExtensions)) {
-					bundledExtensions.push(...(window as any)?.vscodeWeb?.builtinExtensions);
-				} else if (typeof (window as any)?.vscodeWeb?.builtinExtensions === 'function') {
-					bundledExtensions = (window as any)?.vscodeWeb?.builtinExtensions(bundledExtensions);
+				if (Array.isArray(window?.vscodeWeb?.builtinExtensions)) {
+					bundledExtensions.push(...(window?.vscodeWeb?.builtinExtensions || []));
+				} else if (typeof window?.vscodeWeb?.builtinExtensions === 'function') {
+					bundledExtensions = window?.vscodeWeb?.builtinExtensions(bundledExtensions);
 				}
 				// above codes are changed by github1s
 
