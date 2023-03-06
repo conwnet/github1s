@@ -46,6 +46,6 @@ export class GitLab1sRouterParser extends adapterTypes.RouterParser {
 	}
 
 	buildExternalLink(path: string): string {
-		return 'https://gitlab.com' + (path.startsWith('/') ? path : `/${path}`);
+		return GITLAB_DOMAIN + (path.startsWith('/') ? path : `/${path}`);
 	}
 }
