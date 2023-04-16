@@ -58,7 +58,6 @@ interface IPlaceholderViewContainer {
 interface IPinnedViewContainer {
 	readonly id: string;
 	readonly pinned: boolean;
-	readonly badgeEnabled: boolean;
 	readonly order?: number;
 	readonly visible: boolean;
 }
@@ -68,7 +67,6 @@ interface ICachedViewContainer {
 	name?: string;
 	icon?: URI | ThemeIcon;
 	readonly pinned: boolean;
-	readonly badgeEnabled: boolean;
 	readonly order?: number;
 	visible: boolean;
 	isBuiltin?: boolean;
@@ -159,7 +157,6 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 				name: container.name,
 				visible: container.visible,
 				order: container.order,
-				badgeEnabled: container.badgeEnabled,
 				pinned: container.pinned,
 			}));
 
@@ -761,7 +758,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 			cachedViewContainer = cachedViewContainer || this.cachedViewContainers.find(({ id }) => id === viewContainerId);
 
 			// Show builtin ViewContainer if not registered yet
-			if (!viewContainer && cachedViewContainer?.isBuiltin) {
+			if (!viewContainer && cachedViewContainer?.isBuiltin && cachedViewContainer?.visible) {
 				return false;
 			}
 
@@ -884,7 +881,6 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 					id: cachedViewContainer.id,
 					name: cachedViewContainer.name,
 					order: cachedViewContainer.order,
-					badgeEnabled: cachedViewContainer.badgeEnabled,
 					pinned: cachedViewContainer.pinned,
 					visible: !!compositeItems.find(({ id }) => id === cachedViewContainer.id)
 				});
@@ -929,13 +925,12 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 					icon: URI.isUri(viewContainerModel.icon) && this.environmentService.remoteAuthority ? undefined : viewContainerModel.icon, /* Donot cache uri icons with remote connection */
 					views,
 					pinned: compositeItem.pinned,
-					badgeEnabled: compositeItem.badgeEnabled,
 					order: compositeItem.order,
 					visible: compositeItem.visible,
 					isBuiltin: !viewContainer.extensionId
 				});
 			} else {
-				state.push({ id: compositeItem.id, pinned: compositeItem.pinned, badgeEnabled: compositeItem.badgeEnabled, order: compositeItem.order, visible: false, isBuiltin: false });
+				state.push({ id: compositeItem.id, pinned: compositeItem.pinned, order: compositeItem.order, visible: false, isBuiltin: false });
 			}
 		}
 
