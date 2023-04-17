@@ -1,0 +1,37 @@
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+from google.cloud import bigquery
+import json
+import pandas as pd
+
+
+class data_df(beam.DoFn):
+    def process(self,elements):
+        df = pd.read_csv(f'gs://allcsviles/{elements}.csv')
+        yield (df,elements)
+
+
+               
+def to_bq(data):
+    df , element = data
+    client = bigquery.Client()
+    table_id = f'mystical-magnet-375412.samplestudy.{element}'
+    
+    job_config = bigquery.LoadJobConfig(
+        autodetect=True,
+        write_disposition='WRITE_TRUNCATE'
+    )
+    
+    job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
+    job.result()  
+
+options = PipelineOptions()
+p = beam.Pipeline(options=options)
+file_name = ['CUSTOMERS']
+(p
+| 'make' >>  beam.Create(file_name)
+| 'get_from_bucket' >> beam.ParDo(data_df())
+| 'df_to_bq' >> beam.ParDo(to_bq)
+)
+
+p.run()
