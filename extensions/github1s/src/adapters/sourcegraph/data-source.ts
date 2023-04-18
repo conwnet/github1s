@@ -34,8 +34,9 @@ import { getAllRefs } from './ref';
 import { getSymbolReferences } from './reference';
 import { getRepository } from './repository';
 import { getTextSearchResults } from './search';
+import { ConfigsForEnterprise } from '../../../../../platform_config';
 
-type SupportedPlatfrom = 'github' | 'gitlab' | 'bitbucket';
+type SupportedPlatfrom = 'github' | 'gitlab' | 'bitbucket' | 'github-enterprise';
 
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
@@ -57,6 +58,7 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	buildRepository(repo: string) {
+		console.log(`platform: ${this.platform}`);
 		if (this.platform === 'github') {
 			return `github.com/${repo}`;
 		}
@@ -65,6 +67,9 @@ export class SourcegraphDataSource extends DataSource {
 		}
 		if (this.platform === 'bitbucket') {
 			return `bitbucket.org/${repo}`;
+		}
+		if (this.platform === 'github-enterprise') {
+			return `${ConfigsForEnterprise.github_enterprise_baseUrl.replace(/^https?:\/\//g, '')}/${repo}`;
 		}
 		return repo;
 	}
@@ -237,6 +242,9 @@ export class SourcegraphDataSource extends DataSource {
 	provideUserAvatarLink(user: string): string {
 		if (this.platform === 'github') {
 			return `https://github.com/${user}.png`;
+		}
+		if (this.platform === 'github-enterprise') {
+			return `${ConfigsForEnterprise.github_enterprise_baseUrl}/${user}.png`;
 		}
 		return `https://www.gravatar.com/avatar/${user}?d=identicon`;
 	}

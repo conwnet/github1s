@@ -45,7 +45,7 @@ module.exports = (env, argv) => {
 		mode: env.mode || 'production',
 		entry: path.resolve(__dirname, 'src/index.ts'),
 		output: { filename: `static-${STATIC_HASH}/config/bootstrap.js` },
-		resolve: { extensions: ['.js', '.ts'] },
+		resolve: { extensions: ['.js', '.ts', '.json'] },
 		module: {
 			rules: [
 				{ test: /\.tsx?$/, use: 'ts-loader' },
@@ -64,6 +64,10 @@ module.exports = (env, argv) => {
 						to: `static-${STATIC_HASH}/extensions`,
 						globOptions: { dot: true, ignore: ['**/node_modules/**'] },
 						...skipMinified,
+					},
+					{
+						from: 'platform_config.js',
+						to: `static-${STATIC_HASH}/platform_config.js`,
 					},
 					!devVscode && {
 						from: 'node_modules/@github1s/vscode-web/dist/vscode',

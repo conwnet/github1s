@@ -397,6 +397,7 @@ export enum PlatformName {
 	GitLab = 'GitLab',
 	Bitbucket = 'Bitbucket',
 	npm = 'npm',
+	GitHubEnterprise = 'GitHub Enterprise',
 	OfficialPage = 'OfficialPage', // as fallback
 }
 

@@ -10,6 +10,7 @@ import { BitbucketAdapter } from './bitbucket1s';
 import { Npmjs1sAdapter } from './npmjs1s';
 import { OSSInsightAdapter } from './ossinsight';
 import { DataSource, PlatformName, RouterParser } from './types';
+import { GitHubEnterprise1sAdapter } from './githubenterprise1s';
 
 const emptyAdapter = {
 	scheme: 'empty',
@@ -21,6 +22,7 @@ const emptyAdapter = {
 export const registerAdapters = async (): Promise<void> => {
 	await Promise.all([
 		adapterManager.registerAdapter(emptyAdapter),
+		adapterManager.registerAdapter(new GitHubEnterprise1sAdapter()),
 		adapterManager.registerAdapter(new GitHub1sAdapter()),
 		adapterManager.registerAdapter(new GitLab1sAdapter()),
 		adapterManager.registerAdapter(new BitbucketAdapter()),
