@@ -40,7 +40,7 @@ export const VscodeLink = ({ to, external, ...props }) => {
 };
 
 export const postMessage = (() => {
-	export const vscode = window.acquireVsCodeApi();
+	const vscode = window.acquireVsCodeApi();
 	const uniqueId = (
 		(id) => () =>
 			id++
