@@ -2,6 +2,7 @@ import { h } from './preact.module.js';
 import htm from './htm.module.js';
 
 export const html = htm.bind(h);
+export const vscode = window.acquireVsCodeApi();
 
 export const VscodeButton = ({ size, loading, ...props }) => {
 	const sizeClass = `size-${size || 'small'}`;
@@ -40,7 +41,6 @@ export const VscodeLink = ({ to, external, ...props }) => {
 };
 
 export const postMessage = (() => {
-	const vscode = window.acquireVsCodeApi();
 	const uniqueId = (
 		(id) => () =>
 			id++

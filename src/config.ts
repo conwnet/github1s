@@ -7,6 +7,10 @@ import githubLogoUrl from './assets/github.svg';
 import gitlabLogoUrl from './assets/gitlab.svg';
 import bitbucketLogoUrl from './assets/bitbucket.svg';
 import npmLogoUrl from './assets/npm.svg';
+// @ts-ignore
+import { ConfigsForEnterprise } from '../platform_config';
+// @ts-ignore
+import { Platform } from '../platform_config';
 
 const createFolderWorkspace = (scheme: string) => ({
 	folderUri: { scheme, authority: '', path: '/', query: '', fragment: '' },
@@ -50,14 +54,24 @@ const createConfigurationDefaults = (disableSomeAnyCodeFeatures: boolean) => {
 	return configurationDefaults;
 };
 
-export enum Platform {
-	GitHub = 'GitHub',
-	GitLab = 'GitLab',
-	Bitbucket = 'Bitbucket',
-	npm = 'npm',
-}
-
 export const createVSCodeWebConfig = (platform: Platform, repository: string): any => {
+	if (platform === Platform.GitHubEnterprise) {
+		return {
+			hideTextFileLabelDecorations: !!repository,
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+			workspace: repository ? createFolderWorkspace('githubenterprise1s') : undefined,
+			workspaceId: repository ? 'githubenterprise1s:' + repository : '',
+			workspaceLabel: repository,
+			logo: {
+				title: 'Open on GitHub Enterprise',
+				icon: githubLogoUrl,
+				onClick: () =>
+					repository ? openOfficialPage(ConfigsForEnterprise.github_enterprise_baseUrl) : openGitHub1sPage(),
+			},
+		};
+	}
+
 	if (platform === Platform.GitLab) {
 		return {
 			hideTextFileLabelDecorations: !!repository,

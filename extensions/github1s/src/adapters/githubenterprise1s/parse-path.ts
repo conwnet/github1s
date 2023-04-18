@@ -1,0 +1,153 @@
+/**
+ * @file parse github path
+ * @author netcon
+ * @updated by kcoms555 for Enterprise
+ */
+
+import { parsePath } from 'history';
+import { PageType, RouterState } from '@/adapters/types';
+import { GitHubEnterprise1sDataSource } from './data-source';
+import * as queryString from 'query-string';
+
+const parseTreeUrl = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType, ...restParts] = pathParts;
+	const repoFullName = `${owner}/${repo}`;
+	const dataSource = GitHubEnterprise1sDataSource.getInstance();
+	const { ref, path: filePath } = await dataSource.extractRefPath(repoFullName, restParts.join('/'));
+
+	return { pageType: PageType.Tree, repo: repoFullName, ref, filePath };
+};
+
+const parseBlobUrl = async (path: string): Promise<RouterState> => {
+	const routerState = (await parseTreeUrl(path)) as any;
+	const { hash: routerHash } = parsePath(path);
+
+	if (!routerHash) {
+		return { ...routerState, pageType: PageType.Blob };
+	}
+
+	// get selected line number range from path which looks like:
+	// `/conwnet/github1s/blob/HEAD/package.json#L10-L20`
+	const matches = routerHash.match(/^#L(\d+)(?:-L(\d+))?/);
+	const [_, startLineNumber = '0', endLineNumber] = matches ? matches : [];
+
+	return {
+		...routerState,
+		pageType: PageType.Blob,
+		startLine: parseInt(startLineNumber, 10),
+		endLine: parseInt(endLineNumber || startLineNumber, 10),
+	};
+};
+
+const parseCommitsUrl = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType, ...refParts] = pathParts;
+
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.CommitList,
+		ref: refParts.length ? refParts.join('/') : 'HEAD',
+	};
+};
+
+const parseCommitUrl = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType, ...refParts] = pathParts;
+	const commitSha = refParts.join('/');
+
+	return { repo: `${owner}/${repo}`, pageType: PageType.Commit, ref: commitSha, commitSha };
+};
+
+const parsePullsUrl = async (path: string): Promise<RouterState> => {
+	const [owner, repo] = parsePath(path).pathname!.split('/').filter(Boolean);
+
+	return {
+		repo: `${owner}/${repo}`,
+		ref: 'HEAD',
+		pageType: PageType.CodeReviewList,
+	};
+};
+
+const parsePullUrl = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType, codeReviewId] = pathParts;
+	const repoFullName = `${owner}/${repo}`;
+	const codeReview = await GitHubEnterprise1sDataSource.getInstance().provideCodeReview(repoFullName, codeReviewId);
+
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.CodeReview,
+		ref: codeReview.head.commitSha,
+		codeReviewId,
+	};
+};
+
+const parseSearchUrl = async (path: string): Promise<RouterState> => {
+	const { pathname, search } = parsePath(path);
+	const pathParts = pathname!.split('/').filter(Boolean);
+	const [owner, repo, _pageType] = pathParts;
+	const queryOptions = queryString.parse(search || '');
+	const query = typeof queryOptions.q === 'string' ? queryOptions.q : '';
+	const isRegex = queryOptions.regex === 'yes';
+	const isCaseSensitive = queryOptions.case === 'yes';
+	const matchWholeWord = queryOptions.whole === 'yes';
+	const filesToInclude = typeof queryOptions['files-to-include'] === 'string' ? queryOptions['files-to-include'] : '';
+	const filesToExclude = typeof queryOptions['files-to-exclude'] === 'string' ? queryOptions['files-to-exclude'] : '';
+
+	return {
+		repo: `${owner}/${repo}`,
+		pageType: PageType.Search,
+		ref: 'HEAD',
+		query,
+		isRegex,
+		isCaseSensitive,
+		matchWholeWord,
+		filesToInclude,
+		filesToExclude,
+	};
+};
+
+const PAGE_TYPE_MAP = {
+	tree: PageType.Tree,
+	blob: PageType.Blob,
+	pulls: PageType.CodeReviewList,
+	pull: PageType.CodeReview,
+	commit: PageType.Commit,
+	commits: PageType.CommitList,
+	search: PageType.Search,
+};
+
+export const parseGitHubEnterprisePath = async (path: string): Promise<RouterState> => {
+	const pathParts = parsePath(path).pathname?.split('/').filter(Boolean) || [];
+	// detect concrete PageType the *third part* in url.path
+	const pageType = pathParts[2] ? PAGE_TYPE_MAP[pathParts[2]] || PageType.Unknown : PageType.Tree;
+
+	if (pathParts.length >= 2) {
+		switch (pageType) {
+			case PageType.Tree:
+			case PageType.Unknown:
+				return parseTreeUrl(path);
+			case PageType.Blob:
+				return parseBlobUrl(path);
+			case PageType.CodeReview:
+				return parsePullUrl(path);
+			case PageType.CodeReviewList:
+				return parsePullsUrl(path);
+			case PageType.Commit:
+				return parseCommitUrl(path);
+			case PageType.CommitList:
+				return parseCommitsUrl(path);
+			case PageType.Search:
+				return parseSearchUrl(path);
+		}
+	}
+
+	// fallback to default
+	return {
+		repo: 'kcoms555/github1s',
+		ref: 'HEAD',
+		pageType: PageType.Tree,
+		filePath: '',
+	};
+};

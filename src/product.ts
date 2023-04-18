@@ -1,4 +1,5 @@
-import { Platform } from './config';
+// @ts-ignore
+import { Platform } from '../platform_config';
 
 export const createProductConfiguration = (platform: Platform) => ({
 	nameShort: platform + '1s',

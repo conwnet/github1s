@@ -60,6 +60,8 @@ You can start an online development environment with [Gitpod](https://www.gitpod
 ```bash
 git clone git@github.com:conwnet/github1s.git
 cd github1s
+
+# If you are planning to use Github Enterprise, then modify /platform_config.js
 yarn
 yarn watch
 # The cli will automatically open http://localhost:5000 once the build is completed.
@@ -122,6 +124,11 @@ It uses `prettier` to format all possible codes.
 yarn
 yarn build
 ```
+
+## Abount Github Enterprise
+
+Currently, Github Enterprise is on the development.
+It is difficult to guarantee performance and safety, but we plan to improve it gradually.
 
 ## Feedback
 

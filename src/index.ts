@@ -4,9 +4,12 @@
  */
 
 import { ConnectToGitHub } from './github-auth';
+import { ConnectToGitHubEnterprise } from './githubenterprise-auth';
 import { renderNotification } from './notification';
 import { createProductConfiguration } from './product';
-import { createVSCodeWebConfig, Platform } from './config';
+import { createVSCodeWebConfig } from './config';
+// @ts-ignore
+import { DefaultPlatform, Platform } from '../platform_config.js';
 
 declare global {
 	interface Window {
@@ -38,7 +41,7 @@ const resolvePlatformState = (): [Platform, string] => {
 	}
 
 	const repository = pathParts.slice(0, 2).join('/');
-	return [Platform.GitHub, repository];
+	return [DefaultPlatform, repository];
 };
 
 (function () {
@@ -63,6 +66,7 @@ const resolvePlatformState = (): [Platform, string] => {
 		{ id: 'github1s.commands.vscode.replaceBrowserUrl', handler: (url: string) => history.replaceState(null, '', url) },
 		{ id: 'github1s.commands.vscode.pushBrowserUrl', handler: (url: string) => history.pushState(null, '', url) },
 		{ id: 'github1s.commands.vscode.connectToGitHub', handler: ConnectToGitHub },
+		{ id: 'github1s.commands.vscode.connectToGitHubEnterprise', handler: ConnectToGitHubEnterprise },
 	];
 
 	(window as any).vscodeWeb = {

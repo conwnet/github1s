@@ -31,6 +31,7 @@ But this does not mean the token is absolutely safe, **don't forget to clean it 
 As you see, running GitHub1s locally is not difficult. After cloning the repository, just run these commands:
 
 ```shell
+$ # if you are planning to use Github Enterprise, modify /platform_config.js
 $ yarn
 $ yarn watch # or yarn build, it may take minutes, wait please
 ```

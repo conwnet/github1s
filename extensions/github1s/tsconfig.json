@@ -14,6 +14,7 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "../../dist/static-f00d3a7/extensions/typescript-language-features/dist/browser/typescript/lib.dom.d.ts"
   ]
 }

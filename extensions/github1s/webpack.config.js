@@ -21,7 +21,7 @@ module.exports = /** @type WebpackConfig */ {
 	},
 	resolve: {
 		mainFields: ['module', 'main'],
-		extensions: ['.ts', '.js'], // support ts-files and js-files
+		extensions: ['.ts', '.js', '.json'], // support ts-files and js-files
 		alias: {
 			'@': path.resolve(__dirname, 'src'),
 		},
@@ -45,6 +45,12 @@ module.exports = /** @type WebpackConfig */ {
 						},
 					},
 				],
+			},
+			{
+				test: /\.json$/,
+				exclude: /node_modules/,
+				type: 'json',
+				loader: 'json-loader',
 			},
 		],
 	},
