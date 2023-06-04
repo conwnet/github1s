@@ -27,7 +27,7 @@ yarn build # Build the GitHub1s & other extensions
 yarn serve
 ```
 
-And visit the http://localhost:5000 to verify the change. Please revert any changes related to `yalc` before commit, i.e. the `package.json`, the `.yalc/` and `yalc.lock` files.
+And visit the http://localhost:8080 to verify the change. Please revert any changes related to `yalc` before commit, i.e. the `package.json`, the `.yalc/` and `yalc.lock` files.
 
 ## Publish
 
