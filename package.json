@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
-    "@github1s/vscode-web": "0.9.0",
+    "@github1s/vscode-web": "0.10.0",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "chokidar": "^3.5.3",
@@ -54,7 +54,7 @@
     "webpack": "webpack --config webpack.config.js",
     "format": "prettier --write .",
     "eslint": "eslint --ext .ts --ext .js .",
-    "test:ci": "start-test watch:dev-server 5000 test",
+    "test:ci": "start-test watch:dev-server 8080 test",
     "test": "cd tests && yarn && yarn jest"
   },
   "lint-staged": {

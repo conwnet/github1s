@@ -35,7 +35,7 @@ $ yarn
 $ yarn watch # or yarn build, it may take minutes, wait please
 ```
 
-Then, there will be a new directory named `dist` generated in the project root. The `yarn watch:dev-server` (part of `yarn watch` command) will automatically open http://localhost:5000 in the browser.
+Then, there will be a new directory named `dist` generated in the project root. The `yarn watch:dev-server` (part of `yarn watch` command) will automatically open http://localhost:8080 in the browser.
 
 If you get a 404 error for some static files, please wait a minute for the building to complete.
 

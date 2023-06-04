@@ -62,8 +62,8 @@ git clone git@github.com:conwnet/github1s.git
 cd github1s
 yarn
 yarn watch
-# The cli will automatically open http://localhost:5000 once the build is completed.
-# You can visit http://localhost:5000/conwnet/github1s if it doesn't.
+# The cli will automatically open http://localhost:8080 once the build is completed.
+# You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
 
 #### Local development with full VS Code build
@@ -84,8 +84,8 @@ After the initial successful build, you could use the watch mode:
 cd github1s
 yarn
 yarn watch-with-vscode
-# The cli will automatically open http://localhost:5000 once the build is completed.
-# You can visit http://localhost:5000/conwnet/github1s if it doesn't.
+# The cli will automatically open http://localhost:8080 once the build is completed.
+# You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
 
 ### ... or ... VS Code + Docker Development
@@ -104,8 +104,8 @@ You can use the VS Code plugin [Remote-Containers](https://marketplace.visualstu
 ```bash
 yarn
 yarn watch
-# The cli will automatically open http://localhost:5000 once the build is completed.
-# You can visit http://localhost:5000/conwnet/github1s if it doesn't.
+# The cli will automatically open http://localhost:8080 once the build is completed.
+# You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
 
 ### Format all codes
