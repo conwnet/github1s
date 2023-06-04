@@ -29,7 +29,7 @@ const resolvePlatformState = (): [Platform, string] => {
 		const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';
 		return [Platform.Bitbucket, repository];
 	}
-	if (hostname.match(/^(.*\.)?bitbucket1s\.org$/i)) {
+	if (hostname.match(/^(.*\.)?npmjs1s\.com$/i)) {
 		const trimmedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
 		const packageParts = trimmedParts.slice(0, trimmedParts[0] && trimmedParts[0][0] === '@' ? 2 : 1);
 		const repository = pathParts.length ? packageParts.join('/') || 'package' : '';

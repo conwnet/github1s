@@ -13,7 +13,7 @@ const matchImageSnapshotOptions: MatchImageSnapshotOptions = {
 let browser: Browser;
 let page: Page;
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://localhost:8080';
 
 beforeAll(async () => {
 	browser = await chromium.launch();

@@ -54,7 +54,7 @@
     "webpack": "webpack --config webpack.config.js",
     "format": "prettier --write .",
     "eslint": "eslint --ext .ts --ext .js .",
-    "test:ci": "start-test watch:dev-server 5000 test",
+    "test:ci": "start-test watch:dev-server 8080 test",
     "test": "cd tests && yarn && yarn jest"
   },
   "lint-staged": {
