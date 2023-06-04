@@ -31,10 +31,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@github1s/vscode-web@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.9.0.tgz#4531745452dbd10be0fda8470818c5bf17fddc87"
-  integrity sha512-M/t0PExhgq09wgIYLnvcAlTdRJaR9m+gKP/sp7dmdkjTV9YQElfSCGMzEFfKN8fW3FASGunbZ2Hq79bpr0TCcA==
+"@github1s/vscode-web@0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.10.0.tgz#ea0616b3f14f5321a73faf8796c857cd2d6b5d33"
+  integrity sha512-BaD1LvnphjZ4ZI5BupoDH5FDwBeccXke/tIsfX1DIOphz2YplrAkGETbA2+pFFx2/Y5lkmUvyt5Y+XgxHbhYQA==
   dependencies:
     "@vscode/iconv-lite-umd" "0.7.0"
     "@vscode/vscode-languagedetection" "1.0.21"
@@ -4331,9 +4331,9 @@ yallist@^4.0.0:
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
 yaml@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.1.1.tgz#1e06fb4ca46e60d9da07e4f786ea370ed3c3cfec"
-  integrity sha512-o96x3OPo8GjWeSLF+wOAbrPfhFOGY0W00GNaxCDv+9hkcDJEnev1yh8S7pgHF0ik6zc8sQLuL8hjHjJULZp8bw==
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.2.2.tgz#ec551ef37326e6d42872dad1970300f8eb83a073"
+  integrity sha512-CBKFWExMn46Foo4cldiChEzn7S7SRV+wqiluAb6xmueD/fGyRHIhX8m14vVGgeFWjN540nKCNVj6P21eQjgTuA==
 
 yargs-parser@^20.2.2:
   version "20.2.9"

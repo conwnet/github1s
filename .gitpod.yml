@@ -13,7 +13,7 @@ tasks:
       echo "Please wait for 'yarn watch' to complete compilation, then run 'yarn serve'"
       echo "==========================================================================="
 ports:
-  - port: 5000
+  - port: 8080
     onOpen: open-browser
 github:
   prebuilds:
