@@ -142,7 +142,7 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 						color: listErrorForeground,
 						letter: Codicon.lockSmall,
 						strikethrough: true,
-						tooltip: localize('readonlyAndDeleted', "Deleted, Read Only"),
+						tooltip: localize('readonlyAndDeleted', "Deleted, Read-only"),
 					};
 				}
 
@@ -150,7 +150,7 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 				else if (isReadonly) {
 					return {
 						letter: Codicon.lockSmall,
-						tooltip: localize('readonly', "Read Only"),
+						tooltip: localize('readonly', "Read-only"),
 					};
 				}
 
@@ -511,7 +511,7 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 		let sourceTextModel: ITextModel | undefined = undefined;
 		if (sourceModel instanceof BaseTextEditorModel) {
 			if (sourceModel.isResolved()) {
-				sourceTextModel = sourceModel.textEditorModel;
+				sourceTextModel = withNullAsUndefined(sourceModel.textEditorModel);
 			}
 		} else {
 			sourceTextModel = sourceModel as ITextModel;
