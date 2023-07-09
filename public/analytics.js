@@ -1,5 +1,5 @@
 (function () {
-	const mid = 'G-D3LJNF4DN0';
+	let mid = 'G-D3LJNF4DN0';
 	if (window.location.hostname.match(/\.?gitlab1s\.com$/i)) {
 		mid = 'G-1F70ST6944';
 	} else if (window.location.hostname.match(/\.?bitbucket1s\.org$/i)) {

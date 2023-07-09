@@ -31,10 +31,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@github1s/vscode-web@0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.10.0.tgz#ea0616b3f14f5321a73faf8796c857cd2d6b5d33"
-  integrity sha512-BaD1LvnphjZ4ZI5BupoDH5FDwBeccXke/tIsfX1DIOphz2YplrAkGETbA2+pFFx2/Y5lkmUvyt5Y+XgxHbhYQA==
+"@github1s/vscode-web@0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@github1s/vscode-web/-/vscode-web-0.11.0.tgz#aa8ff5389c7f615ceecc5a851035e3c8ca677282"
+  integrity sha512-8n5BaCrF+C6sykfswGobZkYcYw2Qw7znX5a9rgxh9NcRbYxAV9AY+jlxpDjnr21e7qUWWdTn0RTWsxF7x91LqA==
   dependencies:
     "@vscode/iconv-lite-umd" "0.7.0"
     "@vscode/vscode-languagedetection" "1.0.21"
