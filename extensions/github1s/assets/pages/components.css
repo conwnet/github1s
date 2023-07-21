@@ -55,7 +55,7 @@
   outline: 1px solid transparent;
   font-family: var(--vscode-font-family);
   color: var(--vscode-input-foreground);
-  border: 1px solid var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, var(--vscode-widget-border));
   background-color: var(--vscode-input-background);
 }
 
