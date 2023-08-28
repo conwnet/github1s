@@ -35,6 +35,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ matrix.node-version }}
 
+      - run: sudo apt -y install libkrb5-dev
       - run: yarn --frozen-lockfile
       - run: yarn build:vscode
       - run: yarn yalc && yarn build
