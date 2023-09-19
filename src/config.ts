@@ -32,6 +32,8 @@ const createConfigurationDefaults = (disableSomeAnyCodeFeatures: boolean) => {
 		'workbench.colorTheme': 'Default Dark+',
 		'telemetry.telemetryLevel': 'off',
 		'workbench.startupEditor': 'readme',
+		'workbench.editorAssociations': { '*.md': 'vscode.markdown.preview.editor' },
+		'markdown.preview.doubleClickToSwitchToEditor': false,
 	} as Record<string, any>;
 
 	// disable some anycode features when we can use sourcegraph instead
