@@ -34,8 +34,8 @@ const createRepoItemMarkdown = (repo: RepoItem, period: RankingPeriod) => {
 		`[![LastCommit](https://img.shields.io/github/last-commit/${repo.repo_name})](https://github.com/${repo.repo_name}/commits)`,
 	];
 
-	const increaseStarsText = (repo.stars || 0) >= 0 ? `+${repo.stars || 0}` : `-${repo.stars}`;
-	const increaseForksText = (repo.forks || 0) >= 0 ? `+${repo.forks || 0}` : `-${repo.forks}`;
+	const increaseStarsText = (+repo.stars || 0) >= 0 ? `+${repo.stars || 0}` : `-${repo.stars}`;
+	const increaseForksText = (+repo.forks || 0) >= 0 ? `+${repo.forks || 0}` : `-${repo.forks}`;
 	const contributorsMarkdown = contributorAvatars.length
 		? ' &nbsp;&nbsp; Built by &nbsp;' + contributorAvatars.join('&nbsp;&nbsp;')
 		: '';
@@ -43,7 +43,7 @@ const createRepoItemMarkdown = (repo: RepoItem, period: RankingPeriod) => {
 	const fireThreshold = period === RankingPeriod.ThisWeek ? 5000 : period === RankingPeriod.ThisMonth ? 12000 : 1000;
 
 	return `
-## ${(repo.total_score || 0) >= fireThreshold ? '🔥' : '🚀'} [${repo.repo_name}](${buildRepoLink(repo.repo_name)})
+## ${(+repo.total_score || 0) >= fireThreshold ? '🔥' : '🚀'} [${repo.repo_name}](${buildRepoLink(repo.repo_name)})
 
 ${repo.description || ''}
 
@@ -126,12 +126,23 @@ const getPopCountText = (pop_count: number, percentage = false) => {
 		: '';
 };
 
+const getRankChangeText = (rank_change: number) => {
+	const absValue = Math.abs(rank_change);
+	return rank_change > 0
+		? ` <span style="color: #ff453a">(↓${absValue})</span>`
+		: rank_change < 0
+		? ` <span style="color: #30d158">(↑${absValue})</span>`
+		: '';
+};
+
 export const createCollectionsListPageMarkdown = async () => {
 	const collectionReposMap = new Map<string, [string, string][]>();
 	const [hotCollections, allCollections] = await Promise.all([getRecentHotCollections(), getCollections()]);
-	const sortedCollections = hotCollections.sort((itemA, itemB) => itemA.rank - itemB.rank);
+	const sortedCollections = hotCollections.sort(
+		(itemA, itemB) => +itemA.repo_current_period_rank - +itemB.repo_current_period_rank
+	);
 	const uniqueCollections = sortedCollections.filter((collection) => {
-		const relativeRankText = getPopCountText(collection.last_2nd_month_rank - collection.last_month_rank);
+		const relativeRankText = getRankChangeText(+collection.repo_rank_changes);
 		if (!collectionReposMap.has(collection.name)) {
 			collectionReposMap.set(collection.name, [[collection.repo_name, relativeRankText]]);
 			return true;
@@ -192,24 +203,24 @@ export const createCollectionPageMarkdown = async (collectionName: string) => {
 	]);
 
 	const starRankListMarkdown = starsData.map((item) => {
-		const rankMarkdown = ` ${item.last_period_rank}${getPopCountText(item.rank_pop)}`;
+		const rankMarkdown = ` ${item.current_period_rank}${getRankChangeText(+item.rank_pop)}`;
 		const repoMarkdown = ` [${item.repo_name}](${buildRepoLink(item.repo_name)})`;
-		const starsMarkdown = ` ${item.last_period_total}${getPopCountText(item.total_pop, true)}`;
-		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.last_2nd_period_total} | ${item.total} |`;
+		const starsMarkdown = ` ${item.current_period_growth}${getPopCountText(+item.growth_pop, true)}`;
+		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.past_period_growth} | ${item.total} |`;
 	});
 
 	const pullRankListMarkdown = pullsData.map((item) => {
-		const rankMarkdown = ` ${item.last_period_rank}${getPopCountText(item.rank_pop)}`;
+		const rankMarkdown = ` ${item.current_period_rank}${getRankChangeText(+item.rank_pop)}`;
 		const repoMarkdown = ` [${item.repo_name}](${buildRepoLink(item.repo_name)})`;
-		const starsMarkdown = ` ${item.last_period_total}${getPopCountText(item.total_pop, true)}`;
-		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.last_2nd_period_total} | ${item.total} |`;
+		const starsMarkdown = ` ${item.current_period_growth}${getPopCountText(+item.growth_pop, true)}`;
+		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.past_period_growth} | ${item.total} |`;
 	});
 
 	const issuesRankListMarkdown = issuesData.map((item) => {
-		const rankMarkdown = ` ${item.last_period_rank}${getPopCountText(item.rank_pop)}`;
+		const rankMarkdown = ` ${item.current_period_rank}${getRankChangeText(+item.rank_pop)}`;
 		const repoMarkdown = ` [${item.repo_name}](${buildRepoLink(item.repo_name)})`;
-		const starsMarkdown = ` ${item.last_period_total}${getPopCountText(item.total_pop, true)}`;
-		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.last_2nd_period_total} | ${item.total} |`;
+		const starsMarkdown = ` ${item.current_period_growth}${getPopCountText(+item.growth_pop, true)}`;
+		return `|${rankMarkdown} |${repoMarkdown} |${starsMarkdown} | ${item.past_period_growth} | ${item.total} |`;
 	});
 
 	return `
