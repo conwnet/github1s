@@ -595,7 +595,7 @@
     "@apollo/client": "^3.5.10",
     "@octokit/core": "^3.6.0",
     "dayjs": "^1.11.1",
-    "graphql": "^16.3.0",
+    "graphql": "^16.8.1",
     "history": "^5.3.0",
     "js-base64": "^3.7.2",
     "json-stable-stringify": "^1.0.1",
