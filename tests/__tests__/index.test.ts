@@ -64,6 +64,7 @@ it('should load successfully', async () => {
 
 it('should open file correctly', async () => {
 	await page.goto(`${BASE_URL}/conwnet/github1s`);
+	await page.waitForTimeout(3000);
 	await page.click('[title="~/tsconfig.json"]');
 	await page.click('[data-resource-name="tsconfig.json"]');
 	await page.waitForTimeout(3000);
@@ -76,7 +77,7 @@ it('should show Commit files', async () => {
 	await page.goto(`${BASE_URL}/conwnet/github1s/commit/ecd252fa54de41b1cb622ff5a1f8a1b715d3b621`);
 	await page.waitForSelector('.monaco-action-bar.vertical ul.actions-container[aria-label="Active View Switcher"]');
 	await page.press('body', 'Control+Shift+G');
-	await page.waitForTimeout(3000);
+	await page.waitForTimeout(6000);
 
 	const container = await page.$('[id="workbench.parts.sidebar"]');
 	let image = await container?.screenshot();
