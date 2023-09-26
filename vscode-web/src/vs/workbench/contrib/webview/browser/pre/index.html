@@ -4,8 +4,10 @@
 <head>
 	<meta charset="UTF-8">
 
+	<!-- below codes are changed by github1s -->
 	<meta http-equiv="Content-Security-Policy"
 		content="default-src 'none'; script-src 'unsafe-inline' 'self'; frame-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' https: data:; media-src 'self' https: data:; font-src 'self' https: data:;">
+	<!-- above codes are changed by github1s -->
 
 	<!-- Disable pinch zooming -->
 	<meta name="viewport"
@@ -86,11 +88,11 @@
 		defaultStyles.id = '_defaultStyles';
 		defaultStyles.textContent = `
 			html {
-				overscroll-behavior-x: none;
 				scrollbar-color: var(--vscode-scrollbarSlider-background) var(--vscode-editor-background);
 			}
 
 			body {
+				overscroll-behavior-x: none;
 				background-color: transparent;
 				color: var(--vscode-editor-foreground);
 				font-family: var(--vscode-font-family);

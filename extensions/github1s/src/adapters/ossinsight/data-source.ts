@@ -35,24 +35,6 @@ export class OSSInsightDataSource extends DataSource {
 		children: [
 			{
 				type: FileType.Directory,
-				name: '.vscode',
-				children: [
-					{
-						type: FileType.File,
-						name: 'settings.json',
-						content: () =>
-							JSON.stringify({
-								'files.exclude': { '.vscode': true },
-								'markdown.preview.doubleClickToSwitchToEditor': false,
-								'workbench.editorAssociations': {
-									'*.md': 'vscode.markdown.preview.editor',
-								},
-							}),
-					},
-				],
-			},
-			{
-				type: FileType.Directory,
 				name: 'collections',
 				children: () =>
 					getCollections().then((collections) => {
