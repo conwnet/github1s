@@ -6,7 +6,7 @@
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick a Node version: 10, 12, 14
 		"args": { 
-			"VARIANT": "12"
+			"VARIANT": "20-bullseye"
 		}
 	},
 

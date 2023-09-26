@@ -22,7 +22,9 @@ const VSCODE_NODE_MODULES = [
 	'vscode-oniguruma',
 	'vscode-textmate',
 	'xterm',
+	'xterm-addon-image',
 	'xterm-addon-search',
+	'xterm-addon-serialize',
 	'xterm-addon-unicode11',
 	'xterm-addon-webgl',
 ].map((pkg) => ({

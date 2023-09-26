@@ -1,13 +1,14 @@
 {
-  "vs/code/browser/workbench/workbench.ts": "be140606a59a329584a67af7a8ec3d624ab71028ed3717a3d41bf368412beb4a",
-  "vs/editor/common/config/editorOptions.ts": "648903f0306c733cb2df5c0b7c241a8b1423a46ea7f2b746ef879cd43992117a",
-  "vs/workbench/browser/parts/activitybar/activitybarActions.ts": "a4813477aac947fc94d84f563143ef67370a9cf9c34a054741e051ec88f2eca2",
-  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "0a9ff35eaa2bf4ffaa22ecf362b070cf47d8a63fc9e7055a280b456150677a06",
-  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "715607e6f7330e1137a4ddf7892c4846b40fe0d6c04a164d2b684eefa608846f",
-  "vs/workbench/browser/web.main.ts": "707d64b8fc7436e704fb1e6e06cddc6b48224c75c2617cc2175d7763906f1895",
+  "vs/code/browser/workbench/workbench.ts": "a954327b52b6ed462b3b7fbd2301c6ba11bf135ca7ba70c5f552214309492946",
+  "vs/editor/common/config/editorOptions.ts": "5dee522e65874effeb1d1a0a3637d8dedcfceb929892cf0c51c9cf29162f44da",
+  "vs/workbench/browser/parts/activitybar/activitybarActions.ts": "51c169706a121b1008f9173812cbc77d864255e24bfe78dfac53fec5dd6263da",
+  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "e202c8406f9c4c8dc998ecd8763a2753191d2a325d6fe28d6ab951966dc84d0e",
+  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "e9a29c2d1a9ed11262667ce3433e03ca98e87e4a1d9cb591383333eb4988e50b",
+  "vs/workbench/browser/web.main.ts": "6faa17247fc0370a4262ebd38d92922eb199c75aa1c92bbd72bbdcfc3e93dac8",
   "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "d52aa1f962f1a0bdfc6d186762f6fa51c9aa35bb98667aead8d8e9ad75e45215",
-  "vs/workbench/contrib/webview/browser/pre/index.html": "110da74034afd7843b0939ed0e2aa8a8ce8f4288d0382f9b651913659d3eceaf",
+  "vs/workbench/contrib/webview/browser/pre/index.html": "6dc11aefde8587732dba85116dac2718cef9287075c8d3a306663a7741e6910f",
   "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "b2c52e36c3d4122aa21b8f9a14fc9b14d45550f5a2251617e6d0e60685dde83c",
   "vs/workbench/services/label/common/labelService.ts": "73237cce0f9496151ea8ae5079676bbdfa15ce49de9b05621d39fcd04e9c1f0d",
-  "vs/workbench/services/textfile/browser/textFileService.ts": "c9e7439cf0356c327c791e1c3ea911cf13399212e84d27f49e6c2bc8a983b861"
+  "vs/workbench/services/textfile/browser/textFileService.ts": "514ae0a7922c9e0e63c1b50ef08936d0b900e4970c19ba219b73759d62bac1a4",
+  "vs/workbench/services/editor/browser/editorResolverService.ts": "43cd774a4715e98afaf85b3d44f0381d0b83dc1b9cd75fc090553f84fa0f7e80"
 }
