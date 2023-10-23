@@ -16,7 +16,7 @@ export const RankingLanguages = [
 	'PHP',
 	'C++',
 	'C#',
-	'Typescript',
+	'TypeScript',
 	'Shell',
 	'C',
 	'Ruby',

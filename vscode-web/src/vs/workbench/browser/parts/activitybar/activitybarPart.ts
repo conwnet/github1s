@@ -45,6 +45,8 @@ import { StringSHA1 } from 'vs/base/common/hash';
 import { HoverPosition } from 'vs/base/browser/ui/hover/hoverWidget';
 import { GestureEvent } from 'vs/base/browser/touch';
 import { IPaneCompositePart, IPaneCompositeSelectorPart } from 'vs/workbench/browser/parts/paneCompositePart';
+import { IUserDataProfileService } from 'vs/workbench/services/userDataProfile/common/userDataProfile';
+import { DEFAULT_ICON } from 'vs/workbench/services/userDataProfile/common/userDataProfileIcons';
 
 interface IPlaceholderViewContainer {
 	readonly id: string;
@@ -82,7 +84,6 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 	private static readonly ACTION_HEIGHT = 48;
 	private static readonly ACCOUNTS_ACTION_INDEX = 0;
 
-	private static readonly GEAR_ICON = registerIcon('settings-view-bar-icon', Codicon.settingsGear, localize('settingsViewBarIcon', "Settings icon in the view bar."));
 	private static readonly ACCOUNTS_ICON = registerIcon('accounts-view-bar-icon', Codicon.account, localize('accountsViewBarIcon', "Accounts icon in the view bar."));
 
 	//#region IView
@@ -136,6 +137,7 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 		@IContextKeyService private readonly contextKeyService: IContextKeyService,
 		@IConfigurationService private readonly configurationService: IConfigurationService,
 		@IWorkbenchEnvironmentService private readonly environmentService: IWorkbenchEnvironmentService,
+		@IUserDataProfileService private readonly userDataProfileService: IUserDataProfileService,
 	) {
 		super(Parts.ACTIVITYBAR_PART, { hasTitle: false }, themeService, storageService, layoutService);
 
@@ -582,10 +584,11 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 			preventLoopNavigation: true
 		}));
 
-		this.globalActivityAction = this._register(new ActivityAction({
-			id: 'workbench.actions.manage',
-			name: localize('manage', "Manage"),
-			classNames: ThemeIcon.asClassNameArray(ActivitybarPart.GEAR_ICON),
+		this.globalActivityAction = this._register(new ActivityAction(this.createGlobalActivity()));
+		this._register(this.userDataProfileService.onDidChangeCurrentProfile(e => {
+			if (this.globalActivityAction) {
+				this.globalActivityAction.activity = this.createGlobalActivity();
+			}
 		}));
 
 		if (this.accountsVisibilityPreference) {
@@ -599,6 +602,14 @@ export class ActivitybarPart extends Part implements IPaneCompositeSelectorPart 
 		}
 
 		this.globalActivityActionBar.push(this.globalActivityAction);
+	}
+
+	private createGlobalActivity(): IActivity {
+		return {
+			id: 'workbench.actions.manage',
+			name: localize('manage', "Manage"),
+			classNames: ThemeIcon.asClassNameArray(this.userDataProfileService.currentProfile.icon ? ThemeIcon.fromId(this.userDataProfileService.currentProfile.icon) : DEFAULT_ICON),
+		};
 	}
 
 	private toggleAccountsActivity() {
