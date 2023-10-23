@@ -2,21 +2,22 @@
 
 # github1s
 
-One second to read GitHub code with VS Code.
+Created to read GitHub repository code with VS Code for the Web in just one second.
 
 ## Usage
 
-Just add `1s` after `github` and press `Enter` in the browser address bar for any repository you want to read.
+`https://github1s.com/OWNER/REPO`
 
-For example, try it on the VS Code repo:
+For example, the VS Code repo would be: [https://github1s.com/microsoft/vscode](https://github1s.com/microsoft/vscode)
 
-[https://github1s.com/microsoft/vscode](https://github1s.com/microsoft/vscode)
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
 
-You can also use [https://gitlab1s.com](https://gitlab1s.com) or [https://npmjs1s.com](https://npmjs1s.com) in the same way.
+This project also supports:
+- GitLab - `https://gitlab1s.com/OWNER/REPO`
+- NPM - `https://npmjs1s.com/OWNER/REPO`
 
-For browser extensions, see [Third-party Related Projects](https://github.com/conwnet/github1s#third-party-related-projects).
+For a list of browser extensions, see [Third-party related Projects](#third-party-related-projects)
 
 Or save the following code snippet as a bookmarklet, you can use it to quickly switch between github.com and github1s.com (GitHub markdown doesn't allow js links, so just copy it into a bookmark).
 
@@ -164,8 +165,9 @@ We are partnered with [OSS Insight](https://ossinsight.io/?utm_source=github1s&u
 
 [![Stargazers over time](https://api.star-history.com/svg?repos=conwnet/github1s&type=Date)](https://star-history.com/#conwnet/github1s&Date)
 
+## Third-party related Projects
 <details>
-<summary>Third-party Related Projects</summary>
+<summary>Full List</summary>
 <br>
 
 ### Chrome Extensions
@@ -198,4 +200,4 @@ We are partnered with [OSS Insight](https://ossinsight.io/?utm_source=github1s&u
 ### Tampermonkey scripts
 
 - [Mr-B0b/TamperMonkeyScripts/vscode.js](https://github.com/Mr-B0b/TamperMonkeyScripts/blob/main/vscode.js)
-</details>
+</>
