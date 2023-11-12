@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "extensions/*"
+  ],
   "directories": {
     "lib": "lib"
   },
@@ -29,8 +33,12 @@
     "prettier": "^2.7.1",
     "serve-handler": "^6.1.3",
     "start-server-and-test": "^1.14.0",
+<<<<<<< HEAD
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
+=======
+    "turbo": "^1.2.14",
+>>>>>>> origin/yarn-workspace
     "typescript": "^4.7.3",
     "uglify-js": "^3.17.4",
     "webpack": "^5.75.0",
@@ -41,9 +49,15 @@
   "scripts": {
     "preinstall": "./scripts/preinstall.sh",
     "postinstall": "husky install && ./scripts/postinstall.sh",
+<<<<<<< HEAD
     "dev": "yarn watch",
     "build": "./scripts/build.sh",
     "clean": "./scripts/clean.sh",
+=======
+    "clean-build": "./scripts/clean-build.sh",
+    "clean": "./scripts/clean.sh",
+    "build": "turbo run compile && yarn webpack",
+>>>>>>> origin/yarn-workspace
     "yalc": "yalc publish vscode-web && yalc add -D @github1s/vscode-web",
     "build:vscode": "cd vscode-web && yarn build",
     "watch": "rm -rf dist && run-p watch:*",
