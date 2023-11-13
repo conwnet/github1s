@@ -61,6 +61,12 @@ module.exports = /** @type WebpackConfig */ {
 	},
 	devtool: 'source-map',
 	plugins: [
+		new webpack.DefinePlugin({
+			GITLAB_DOMAIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
+			GITLAB_CREATE_TOKEN_URL: JSON.stringify(
+				process.env.GITLAB_CREATE_TOKEN_URL || '/-/profile/personal_access_tokens'
+			),
+		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser.js',
 		}),

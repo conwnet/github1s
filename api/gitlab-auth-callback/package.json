@@ -1,6 +1,6 @@
 {
-  "name": "github-auth-callback",
-  "version": "0.0.0",
+  "name": "vscode-unpkg",
+  "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -8,6 +8,6 @@
     "got": "^11.8.5"
   },
   "devDependencies": {
-    "@vercel/node": "^2.9.10"
+    "@vercel/node": "^2.5.7"
   }
 }
