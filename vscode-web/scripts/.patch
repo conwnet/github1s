@@ -1,14 +1,14 @@
 {
   "vs/code/browser/workbench/workbench.ts": "a954327b52b6ed462b3b7fbd2301c6ba11bf135ca7ba70c5f552214309492946",
-  "vs/editor/common/config/editorOptions.ts": "611f03be53deb2d1326e31b618da729a5c2660d647149e1452792dcfc63c1b64",
-  "vs/workbench/browser/parts/activitybar/activitybarActions.ts": "6f7e46ab77834e26c0cd6ef4bd31e0fb54d605b677d8e1746522e22ceebae1e5",
-  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "101b6d4d65a1efb478caf77159684f691f3075ec52c5cd35cef1fee521d4edac",
-  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "26bf68e6e1b3acfcac13405eba2d2b54ce4771ede2e75e5788beb9e5fe5da569",
-  "vs/workbench/browser/web.main.ts": "3f41a99e744b80d161af5f9830b3394e4953d91ed38d282179e0f4bcc385c205",
+  "vs/editor/common/config/editorOptions.ts": "043c420c18f97c42b9fa45a0f12b10ab81f464a3d3293d177dfbf4d63e4693be",
+  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "7396307c8bcf88eb7b306fbe5c3648a4eeb7fe817de4f508ed6ce256d3aab9ea",
+  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "12ee25ef0c98f63a6f3dbc3d78c648408db81c165aa547d8c7dcfe89c5d25e8c",
+  "vs/workbench/browser/web.main.ts": "6fe9eeb0cdebd7e95fcb7da48524aded5b544b41a31752486e8351cd505ab9f5",
   "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "27714e54f72edb805459d991c607d2867bd791e46d4c58eb4ab1a418f767e817",
   "vs/workbench/contrib/webview/browser/pre/index.html": "6dc11aefde8587732dba85116dac2718cef9287075c8d3a306663a7741e6910f",
   "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "3cc4c831bcffc9b2837890d64c651ba5508af9e9693d6d2cf425305ff27cba9f",
   "vs/workbench/services/label/common/labelService.ts": "73237cce0f9496151ea8ae5079676bbdfa15ce49de9b05621d39fcd04e9c1f0d",
-  "vs/workbench/services/textfile/browser/textFileService.ts": "514ae0a7922c9e0e63c1b50ef08936d0b900e4970c19ba219b73759d62bac1a4",
-  "vs/workbench/services/editor/browser/editorResolverService.ts": "43cd774a4715e98afaf85b3d44f0381d0b83dc1b9cd75fc090553f84fa0f7e80"
+  "vs/workbench/services/textfile/browser/textFileService.ts": "193176bfccbbeae7fdf7b546992647554503dc4df8579db7094a4eee3cf50451",
+  "vs/workbench/services/editor/browser/editorResolverService.ts": "43cd774a4715e98afaf85b3d44f0381d0b83dc1b9cd75fc090553f84fa0f7e80",
+  "vs/workbench/browser/parts/globalCompositeBar.ts": "d3ae76e7831976c34be6b9bf07eb87b05eb46d45eb7ebff039169a8f5372ff87"
 }

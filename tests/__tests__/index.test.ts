@@ -43,7 +43,7 @@ it('should load successfully', async () => {
 	// Make sure the repo loads
 	await page.click('div[role="tab"]');
 	// GitHub repo Link available
-	await page.$eval('div.home-bar[role="toolbar"]', (el) => el.innerHTML);
+	await page.$eval('div.home-bar', (el) => el.innerHTML);
 	// File explorer available
 	await page.$eval('div[role="tree"][aria-label="Files Explorer"]', (el) => el.innerHTML);
 	const tab = await page.$eval('div[role="tab"] .label-name', (el: HTMLElement) => el.innerText);
