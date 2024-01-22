@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
-    "@github1s/vscode-web": "0.15.0",
+    "@github1s/vscode-web": "0.16.0",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "chokidar": "^3.5.3",

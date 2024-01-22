@@ -5,8 +5,7 @@
 
 import { create } from 'vs/workbench/workbench.web.main';
 import { IExtensionManifest } from 'vs/platform/extensions/common/extensions';
-import { IWorkbenchConstructionOptions } from 'vs/workbench/browser/web.api';
-import { IWorkspaceProvider } from 'vs/workbench/services/host/browser/browserHostService';
+import { IWorkspaceProvider, IWorkbenchConstructionOptions } from 'vs/workbench/browser/web.api';
 import { URI, UriComponents } from 'vs/base/common/uri';
 import { env } from 'vs/workbench/browser/web.factory';
 
