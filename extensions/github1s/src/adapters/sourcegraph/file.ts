@@ -14,7 +14,7 @@ const DirectoryQuery = gql`
 		repository(name: $repository) {
 			commit(rev: $ref) {
 				tree(path: $path) {
-					entries(first: ${FILE_COUNT_LIMIT}, recursive: $recursive, recursiveSingleChild: false) {
+					entries(first: ${FILE_COUNT_LIMIT}, recursive: $recursive) {
 						path
 						isDirectory
 						# TODO submodule don't work now
