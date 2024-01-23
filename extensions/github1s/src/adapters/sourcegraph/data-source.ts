@@ -35,24 +35,24 @@ import { getSymbolReferences } from './reference';
 import { getRepository } from './repository';
 import { getTextSearchResults } from './search';
 
-type SupportedPlatfrom = 'github' | 'gitlab' | 'bitbucket';
+type SupportedPlatform = 'github' | 'gitlab' | 'bitbucket';
 
 export class SourcegraphDataSource extends DataSource {
-	private static instanceMap: Map<SupportedPlatfrom, SourcegraphDataSource> = new Map();
+	private static instanceMap: Map<SupportedPlatform, SourcegraphDataSource> = new Map();
 	private refsPromiseMap: Map<string, Promise<{ branches: Branch[]; tags: Tag[] }>> = new Map();
 	private repositoryPromiseMap: Map<string, Promise<{ name: string; defaultBranch: string } | null>> = new Map();
 	private fileTypeMap: Map<string, FileType> = new Map(); // cache if path is a directory
 	private matchedRefsMap: Map<string, string[]> = new Map();
-	private textEncodder = new TextEncoder();
+	private textEncoder = new TextEncoder();
 
-	public static getInstance(platfrom: SupportedPlatfrom): SourcegraphDataSource {
-		if (!SourcegraphDataSource.instanceMap.has(platfrom)) {
-			SourcegraphDataSource.instanceMap.set(platfrom, new SourcegraphDataSource(platfrom));
+	public static getInstance(platform: SupportedPlatform): SourcegraphDataSource {
+		if (!SourcegraphDataSource.instanceMap.has(platform)) {
+			SourcegraphDataSource.instanceMap.set(platform, new SourcegraphDataSource(platform));
 		}
-		return SourcegraphDataSource.instanceMap.get(platfrom)!;
+		return SourcegraphDataSource.instanceMap.get(platform)!;
 	}
 
-	private constructor(private platform: SupportedPlatfrom) {
+	private constructor(private platform: SupportedPlatform) {
 		super();
 	}
 
@@ -110,7 +110,7 @@ export class SourcegraphDataSource extends DataSource {
 		}
 		// TODO: support binary files for other platforms
 		const { content } = await readFile(this.buildRepository(repo), ref, path);
-		return { content: this.textEncodder.encode(content) };
+		return { content: this.textEncoder.encode(content) };
 	}
 
 	async prepareAllRefs(repo: string) {
