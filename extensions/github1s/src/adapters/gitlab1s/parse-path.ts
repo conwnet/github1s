@@ -6,7 +6,6 @@
 import { parsePath } from 'history';
 import { PageType, RouterState } from '../types';
 import { GitLab1sDataSource } from './data-source';
-import { SourcegraphDataSource } from '@/adapters/sourcegraph/data-source';
 
 const resolveBranchName = async (repo: string, ref = '') => {
 	if (ref && ref.toUpperCase() !== 'HEAD') {

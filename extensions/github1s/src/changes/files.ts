@@ -142,6 +142,7 @@ export const getChangedFileDiffCommand = (changedFile: VSCodeChangedFile): vscod
 		base: baseFileUri.with({ query: '' }).toString(),
 		head: headFileUri.with({ query: '' }).toString(),
 	});
+
 	return {
 		title: 'Diff',
 		command: 'vscode.diff',

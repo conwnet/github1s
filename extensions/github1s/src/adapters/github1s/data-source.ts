@@ -118,6 +118,7 @@ export class GitHub1sDataSource extends DataSource {
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const requestParams = { owner, repo, ref, path };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/contents/{path}', requestParams);
+		// fetcher.request('GET /user')
 		return { content: toUint8Array((data as any).content) };
 	}
 

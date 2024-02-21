@@ -28,7 +28,7 @@ export class GitLab1sAdapter implements Adapter {
 
 	activateAsDefault() {
 		// register settings view and show it in activity bar
-		setVSCodeContext('gitlab1s:views:settings:visible', true);
+		setVSCodeContext('github1s:views:settings:visible', true);
 		setVSCodeContext('github1s:views:codeReviewList:visible', true);
 		setVSCodeContext('github1s:views:commitList:visible', true);
 		setVSCodeContext('github1s:views:fileHistory:visible', true);
@@ -38,13 +38,13 @@ export class GitLab1sAdapter implements Adapter {
 			GitLab1sSettingsViewProvider.viewType,
 			new GitLab1sSettingsViewProvider()
 		);
-		vscode.commands.registerCommand('github1s.commands.openGitHub1sAuthPage', () => {
+		vscode.commands.registerCommand('github1s.commands.openGitLab1sAuthPage', () => {
 			return GitLab1sAuthenticationView.getInstance().open();
 		});
 	}
 
 	deactivateAsDefault() {
-		setVSCodeContext('gitlab1s:views:settings:visible', false);
+		setVSCodeContext('github1s:views:settings:visible', false);
 		setVSCodeContext('github1s:views:codeReviewList:visible', false);
 		setVSCodeContext('github1s:views:commitList:visible', false);
 		setVSCodeContext('github1s:views:fileHistory:visible', false);

@@ -29,19 +29,8 @@ import {
 } from '../types';
 import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
-// import { FILE_BLAME_QUERY } from './graphql';
 import { GitLabFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
-
-const parseRepoFullName = (repoFullName: string) => {
-	const [owner, repo] = repoFullName.split('/');
-	return { owner, repo };
-};
-
-const encodeFilePath = (filePath: string): string => {
-	const pathParts = filePath.split('/').filter(Boolean);
-	return pathParts.map((segment) => encodeURIComponent(segment)).join('/');
-};
 
 const FileTypeMap = {
 	blob: FileType.File,
@@ -68,8 +57,8 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 
 	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
 		// return originalMethod.apply(this, args);
-		const githubFetcher = GitLabFetcher.getInstance();
-		if (await githubFetcher.useSourcegraphApiFirst(args[0])) {
+		const gitlabFetcher = GitLabFetcher.getInstance();
+		if (await gitlabFetcher.useSourcegraphApiFirst(args[0])) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
 			} catch (e) {}
@@ -82,7 +71,6 @@ export class GitLab1sDataSource extends DataSource {
 	private static instance: GitLab1sDataSource | null = null;
 	private branchesPromiseMap: Map<string, Promise<Branch[]>> = new Map();
 	private tagsPromiseMap: Map<string, Promise<Tag[]>> = new Map();
-	private refPathPromiseMap: Map<string, Promise<{ ref: string; path: string }>> = new Map();
 	private matchedRefsMap = new Map<string, string[]>();
 	private avatarPromiseMap = new Map<string, Promise<string>>();
 
@@ -106,9 +94,8 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideDirectory(repoFullName: string, ref: string, path: string, recursive = false): Promise<Directory> {
+	async provideDirectory(repo: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const fetcher = GitLabFetcher.getInstance();
-		const encodedPath = encodeFilePath(path);
 		let page = 1;
 		let files = [];
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
@@ -118,18 +105,14 @@ export class GitLab1sDataSource extends DataSource {
 			size: treeItem.size,
 		});
 		while (page > 0) {
-			const requestParams = {
-				ref,
-				page,
-				path: encodedPath,
-				...parseRepoFullName(repoFullName),
-			};
+			const requestParams = { ref, page, path, repo, recursive };
 			const { data, headers } = await fetcher.request(
-				'GET /projects/{owner}%2F{repo}/repository/tree?recursive=true&per_page=100&page={page}&ref={ref}',
+				'GET /projects/{repo}/repository/tree?recursive={recursive}&per_page=100&page={page}&ref={ref}&path={path}',
 				requestParams
 			);
 			files = files.concat(data);
-			page = Number(headers!.get('x-next-page'));
+			const nextPage = Number(headers!.get('x-next-page'));
+			page = nextPage > page ? nextPage : 0;
 		}
 
 		return {
@@ -139,23 +122,18 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideFile(repoFullName: string, ref: string, path: string): Promise<File> {
+	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref, path: encodeURIComponent(path) };
-		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/repository/files/{path}?ref={ref}',
-			requestParams
-		);
+		const requestParams = { ref, path, repo };
+		const { data } = await fetcher.request('GET /projects/{repo}/repository/files/{path}?ref={ref}', requestParams);
 		return { content: toUint8Array((data as any).content) };
 	}
 
 	@trySourcegraphApiFirst
-	async getBranches(repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
+	async getBranches(repo: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref };
-		const { data } = await fetcher.request('GET /projects/{owner}%2F{repo}/repository/branches', requestParams);
+		const requestParams = { repo, ref };
+		const { data } = await fetcher.request('GET /projects/{repo}/repository/branches', requestParams);
 		return data.map((item) => ({
 			name: item.name,
 			commitSha: item.commit.id,
@@ -165,11 +143,10 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async getTags(repoFullName: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
+	async getTags(repo: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref };
-		const { data } = await fetcher.request('GET /projects/{owner}%2F{repo}/repository/tags', requestParams);
+		const requestParams = { repo, ref };
+		const { data } = await fetcher.request('GET /projects/{repo}/repository/tags', requestParams);
 		return data.map((item) => ({
 			name: item.name,
 			commitSha: item.commit.id,
@@ -208,35 +185,35 @@ export class GitLab1sDataSource extends DataSource {
 	// }
 
 	@trySourcegraphApiFirst
-	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
+	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
 			return { ref: 'HEAD', path: refAndPath.slice(5) };
 		}
-		if (!this.matchedRefsMap.has(repoFullName)) {
-			this.matchedRefsMap.set(repoFullName, []);
+		if (!this.matchedRefsMap.has(repo)) {
+			this.matchedRefsMap.set(repo, []);
 		}
 		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
-		const pathRef = this.matchedRefsMap.get(repoFullName)?.find(matchPathRef);
+		const pathRef = this.matchedRefsMap.get(repo)?.find(matchPathRef);
 		if (pathRef) {
 			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
 		}
-		const [branches, tags] = await this.prepareAllRefs(repoFullName);
+		const [branches, tags] = await this.prepareAllRefs(repo);
 		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
 		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
-		exactRef && this.matchedRefsMap.get(repoFullName)?.push(ref);
+		exactRef && this.matchedRefsMap.get(repo)?.push(ref);
 		return { ref, path: refAndPath.slice(ref.length + 1) };
 	}
 
-	async prepareAllRefs(repoFullName: string) {
-		return Promise.all([this.provideBranches(repoFullName), this.provideTags(repoFullName)]);
+	async prepareAllRefs(repo: string) {
+		return Promise.all([this.provideBranches(repo), this.provideTags(repo)]);
 	}
 
 	@trySourcegraphApiFirst
-	async provideBranches(repoFullName: string, options?: CommonQueryOptions): Promise<Branch[]> {
-		if (!this.branchesPromiseMap.has(repoFullName)) {
-			this.branchesPromiseMap.set(repoFullName, this.getBranches(repoFullName, 'heads'));
+	async provideBranches(repo: string, options?: CommonQueryOptions): Promise<Branch[]> {
+		if (!this.branchesPromiseMap.has(repo)) {
+			this.branchesPromiseMap.set(repo, this.getBranches(repo, 'heads'));
 		}
-		return this.branchesPromiseMap.get(repoFullName)!.then((branches) => {
+		return this.branchesPromiseMap.get(repo)!.then((branches) => {
 			const matchOptions = { keys: ['name'] };
 			const matchedBranches = options?.query ? matchSorter(branches, options.query, matchOptions) : branches;
 			if (options?.pageSize) {
@@ -249,8 +226,8 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideBranch(repoFullName: string, branchName: string): Promise<Branch | null> {
-		const branches = await this.provideBranches(repoFullName);
+	async provideBranch(repo: string, branchName: string): Promise<Branch | null> {
+		const branches = await this.provideBranches(repo);
 		return branches.find((item) => item.name === branchName) || null;
 	}
 
@@ -287,12 +264,8 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideCommits(
-		repoFullName: string,
-		options?: CommitsQueryOptions
-	): Promise<(Commit & { files?: ChangedFile[] })[]> {
+	async provideCommits(repo: string, options?: CommitsQueryOptions): Promise<(Commit & { files?: ChangedFile[] })[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
 		const queryParams = {
 			page: options?.page,
 			per_page: options?.pageSize,
@@ -300,9 +273,9 @@ export class GitLab1sDataSource extends DataSource {
 			path: options?.path,
 			author: options?.author,
 		};
-		const requestParams = { owner, repo, ...queryParams };
+		const requestParams = { repo, ...queryParams };
 		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/repository/commits?per_page={per_page}&page={page}&path={path}&ref_name={sha}',
+			'GET /projects/{repo}/repository/commits?per_page={per_page}&page={page}&path={path}&ref_name={sha}',
 			requestParams
 		);
 		return Promise.all(
@@ -320,11 +293,10 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideCommit(repoFullName: string, ref: string): Promise<Commit & { files?: ChangedFile[] }> {
+	async provideCommit(repo: string, ref: string): Promise<Commit & { files?: ChangedFile[] }> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref };
-		const { data } = await fetcher.request('GET /projects/{owner}%2F{repo}/repository/commits/{ref}', requestParams);
+		const requestParams = { repo, ref };
+		const { data } = await fetcher.request('GET /projects/{repo}/repository/commits/{ref}', requestParams);
 		return {
 			sha: data.id,
 			author: data.author_name,
@@ -343,18 +315,10 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideCommitChangedFiles(
-		repoFullName: string,
-		ref: string,
-		_options?: CommonQueryOptions
-	): Promise<ChangedFile[]> {
+	async provideCommitChangedFiles(repo: string, ref: string, _options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref };
-		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/repository/commits/{ref}/diff',
-			requestParams
-		);
+		const requestParams = { repo, ref };
+		const { data } = await fetcher.request('GET /projects/{repo}/repository/commits/{ref}/diff', requestParams);
 		return (
 			data?.map((item) => ({
 				path: item.new_path || item.old_path!,
@@ -371,17 +335,16 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	async provideCodeReviews(
-		repoFullName: string,
+		repo: string,
 		options?: CodeReviewsQueryOptions
 	): Promise<(CodeReview & { files?: ChangedFile[] })[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
 		const state = options?.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
 		// per_page=100&page={page}
 		const queryParams = { state, page: options?.page, per_page: options?.pageSize, creator: options?.creator };
-		const requestParams = { owner, repo, ...queryParams };
+		const requestParams = { repo, ...queryParams };
 		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/merge_requests?per_page={per_page}&page={page}',
+			'GET /projects/{repo}/merge_requests?per_page={per_page}&page={page}',
 			requestParams as any
 		);
 
@@ -400,14 +363,10 @@ export class GitLab1sDataSource extends DataSource {
 		}));
 	}
 
-	async provideCodeReview(repoFullName: string, id: string): Promise<CodeReview & { files?: ChangedFile[] }> {
+	async provideCodeReview(repo: string, id: string): Promise<CodeReview & { files?: ChangedFile[] }> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const pullRequestParams = { owner, repo, pull_number: Number(id) };
-		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/merge_requests/{pull_number}',
-			pullRequestParams
-		);
+		const pullRequestParams = { repo, pull_number: Number(id) };
+		const { data } = await fetcher.request('GET /projects/{repo}/merge_requests/{pull_number}', pullRequestParams);
 
 		return {
 			id: `${data.iid}`,
@@ -423,17 +382,13 @@ export class GitLab1sDataSource extends DataSource {
 		};
 	}
 
-	async provideCodeReviewChangedFiles(
-		repoFullName: string,
-		id: string,
-		options?: CommonQueryOptions
-	): Promise<ChangedFile[]> {
+	// eslint-disable-next-line
+	async provideCodeReviewChangedFiles(repo: string, id: string, options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
 		const pageParams = { per_page: options?.pageSize, page: options?.page };
-		const filesRequestParams = { owner, repo, pull_number: Number(id), ...pageParams };
+		const filesRequestParams = { repo, pull_number: Number(id), ...pageParams };
 		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/merge_requests/{pull_number}/changes?per_page={per_page}&page={page}',
+			'GET /projects/{repo}/merge_requests/{pull_number}/changes?per_page={per_page}&page={page}',
 			filesRequestParams
 		);
 
@@ -452,36 +407,12 @@ export class GitLab1sDataSource extends DataSource {
 		}));
 	}
 
-	// @trySourcegraphApiFirst
-	// async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
-	// 	const fetcher = GitHubFetcher.getInstance();
-	// 	const { owner, repo } = parseRepoFullName(repoFullName);
-	// 	const requestParams = { owner, repo, ref, path };
-	// 	const { data } = await fetcher.graphql(FILE_BLAME_QUERY, requestParams);
-	// 	const blameRanges = (data as any)?.repository?.object?.blame?.ranges;
-
-	// 	return (blameRanges || []).map((item) => ({
-	// 		age: item.age as number,
-	// 		startingLine: item.startingLine as number,
-	// 		endingLine: item.endingLine as number,
-	// 		commit: {
-	// 			sha: item.commit?.sha as string,
-	// 			author: item.commit?.author?.name as string,
-	// 			email: item.commit?.author?.email as string,
-	// 			message: item.commit?.message as string,
-	// 			createTime: new Date(item.commit?.authoredDate),
-	// 			avatarUrl: item.commit?.author?.avatarUrl as string,
-	// 		},
-	// 	}));
-	// }
-
 	@trySourcegraphApiFirst
-	async provideFileBlameRanges(repoFullName: string, ref: string, path: string): Promise<BlameRange[]> {
+	async provideFileBlameRanges(repo: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref, path: encodeURIComponent(path) };
+		const requestParams = { repo, ref, path: encodeURIComponent(path) };
 		const { data } = await fetcher.request(
-			'GET /projects/{owner}%2F{repo}/repository/files/{path}/blame?ref={ref}',
+			'GET /projects/{repo}/repository/files/{path}/blame?ref={ref}',
 			requestParams
 		);
 		let startLine = 1;

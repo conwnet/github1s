@@ -96,15 +96,6 @@
   transform: scale(0.98);
 }
 
-.authentication-button .github-logo {
-  height: 24px;
-  margin-right: 8px;
-}
-
-.authentication-button[disabled] .github-logo {
-  opacity: .5;
-}
-
 .authentication-token .token-input-line {
   display: flex;
   margin-bottom: 6px;
@@ -154,74 +145,108 @@
   align-items: center;
 }
 
+#app {
+  margin-top: 60px;
+}
+
+.authentication-button[disabled] .auth-button-logo {
+  opacity: .5;
+}
+
+.auth-button-logo {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-size: 100% 100%;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+
+.github-logo {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="32" width="32"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>');
+}
+
+.gitlab-logo {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 24" height="24" width="25"><path fill="%23E24329" d="m24.507 9.5-.034-.09L21.082.562a.896.896 0 0 0-1.694.091l-2.29 7.01H7.825L5.535.653a.898.898 0 0 0-1.694-.09L.451 9.411.416 9.5a6.297 6.297 0 0 0 2.09 7.278l.012.01.03.022 5.16 3.867 2.56 1.935 1.554 1.176a1.051 1.051 0 0 0 1.268 0l1.555-1.176 2.56-1.935 5.197-3.89.014-.01A6.297 6.297 0 0 0 24.507 9.5Z"></path><path fill="%23FC6D26" d="m24.507 9.5-.034-.09a11.44 11.44 0 0 0-4.56 2.051l-7.447 5.632 4.742 3.584 5.197-3.89.014-.01A6.297 6.297 0 0 0 24.507 9.5Z"></path><path fill="%23FCA326" d="m7.707 20.677 2.56 1.935 1.555 1.176a1.051 1.051 0 0 0 1.268 0l1.555-1.176 2.56-1.935-4.743-3.584-4.755 3.584Z"></path><path fill="%23FC6D26" d="M5.01 11.461a11.43 11.43 0 0 0-4.56-2.05L.416 9.5a6.297 6.297 0 0 0 2.09 7.278l.012.01.03.022 5.16 3.867 4.745-3.584-7.444-5.632Z"></path></svg>');
+}
+
 .authentication-detail {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.authentication-detail .detail-title {
+.detail-title {
   width: 320px;
   font-size: 24px;
   margin-bottom: 32px;
   color: var(--vscode-button-foreground);
 }
 
-.authentication-detail .token-status {
+.token-status {
+  display: flex;
+  align-items: center;
   width: 320px;
+  margin-bottom: 8px;
 }
 
-.authentication-detail .token-status ul {
+.token-status .refresh-button {
+	cursor: pointer;
+  margin-left: 6px;
+}
+
+.token-status .refresh-button:hover {
+  color: #3794ff;
+}
+
+.token-status .refresh-button:active {
+  color: #094771;
+}
+
+.login-text > span:first-child {
+  margin-right: 4px;
+}
+
+.user-avatar {
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+  margin-right: 4px;
+  vertical-align: bottom;
+  border-radius: 50%;
+  background-color: #ccc;
+}
+
+.rate-limit-info {
+  width: 320px;
   list-style: none;
   padding-left: 0;
 }
 
-.authentication-detail .token-status ul li {
+.rate-limit-info li {
   margin-bottom: 8px;
 }
 
-.authentication-detail .status-title {
-  font-weight: 200;
-  margin-top: 0;
-  margin-bottom: 5px;
-  font-size: 18px;
-  line-height: normal;
+.token-text {
+  width: 320px;
+  margin-bottom: 8px;
 }
 
-.authentication-detail .refresh-button {
-	cursor: pointer;
-  margin-left: 4px;
+.token-text.token-valid {
+  color: #73c991;
 }
 
-.authentication-detail .refresh-button:hover {
-  color: #3794ff;
+.token-text.token-invalid {
+  color: #f88070;
 }
 
-.authentication-detail .refresh-button:active {
-  color: #094771;
-}
-
-.authentication-detail .token-operations {
+.token-operations {
   width: 320px;
   margin-top: 12px;
 }
 
-.authentication-detail .token-operations > * {
+.token-operations > * {
   width: 240px;
 }
 
-.success-text {
-  color: #89d185;
-}
-
-.warning-text {
-  color: #cca700;
-}
-
-.error-text {
-  color: #f48771;
-}
-
-#app {
-  margin-top: 60px;
-}

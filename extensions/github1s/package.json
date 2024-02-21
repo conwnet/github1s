@@ -49,14 +49,6 @@
           "when": "github1s:views:settings:visible == true"
         }
       ],
-      "gitlab1s": [
-        {
-          "id": "gitlab1s.views.settings",
-          "name": "Settings",
-          "type": "webview",
-          "when": "gitlab1s:views:settings:visible == true"
-        }
-      ],
       "scm": [
         {
           "id": "github1s.views.fileHistory",

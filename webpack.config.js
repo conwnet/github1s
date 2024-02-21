@@ -14,18 +14,6 @@ const STATIC_HASH = GIT_COMMIT_ID.padStart(7, '0').slice(0, 7);
 const devVscode = !!process.env.DEV_VSCODE;
 const skipMinified = { info: { minimized: true } };
 
-const getInitialize = () => {
-	try {
-		const initializePath = path.join(APP_ROOT, `resources/initialize.js`);
-		let content = fs.readFileSync(initializePath).toString('utf8');
-		content = content.replace(/GITLAB_DOMAIN/g, process.env.GITLAB_DOMAIN || 'https://gitlab.com');
-		return content;
-	} catch {
-		console.error('Failed to generate initialize.js file.');
-		process.exit(1);
-	}
-};
-
 const VSCODE_NODE_MODULES = [
 	'@vscode/iconv-lite-umd',
 	'@vscode/vscode-languagedetection',
