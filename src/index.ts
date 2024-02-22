@@ -21,25 +21,25 @@ const resolvePlatformState = (): [Platform, string] => {
 	const hostname = window.location.hostname;
 	const pathParts = window.location.pathname.split('/').filter(Boolean);
 
-	if (hostname.match(/^(.*\.)?gitlab1s\.com$/i) || true) {
+	if (hostname.match(/^(.*\.)?gitlab1s\.com$/i)) {
 		const dashIndex = pathParts.indexOf('-');
 		const repository = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
 		return [Platform.GitLab, repository];
 	}
-	// if (hostname.match(/^(.*\.)?bitbucket1s\.org$/i)) {
-	// 	const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';
-	// 	return [Platform.Bitbucket, repository];
-	// }
-	// if (hostname.match(/^(.*\.)?npmjs1s\.com$/i)) {
-	// 	const trimmedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
-	// 	const packageParts = trimmedParts.slice(0, trimmedParts[0] && trimmedParts[0][0] === '@' ? 2 : 1);
-	// 	const repository = pathParts.length ? packageParts.join('/') || 'package' : '';
+	if (hostname.match(/^(.*\.)?bitbucket1s\.org$/i)) {
+		const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';
+		return [Platform.Bitbucket, repository];
+	}
+	if (hostname.match(/^(.*\.)?npmjs1s\.com$/i)) {
+		const trimmedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
+		const packageParts = trimmedParts.slice(0, trimmedParts[0] && trimmedParts[0][0] === '@' ? 2 : 1);
+		const repository = pathParts.length ? packageParts.join('/') || 'package' : '';
 
-	// 	return [Platform.npm, repository];
-	// }
+		return [Platform.npm, repository];
+	}
 
-	// const repository = pathParts.slice(0, 2).join('/');
-	// return [Platform.GitHub, repository];
+	const repository = pathParts.slice(0, 2).join('/');
+	return [Platform.GitHub, repository];
 };
 
 (function () {

@@ -79,3 +79,10 @@ export const memorize = <T extends (...args: any[]) => any>(
 		return result;
 	};
 };
+
+export const decorate = <F extends (...args: unknown[]) => unknown>(transformer: (func: F) => F) => {
+	return <T>(_target: T, _propertyKey: string, descriptor: PropertyDescriptor) => {
+		const originalMethod = descriptor.value;
+		descriptor.value = transformer(originalMethod as F);
+	};
+};

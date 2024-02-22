@@ -9,7 +9,7 @@ import { GitHub1sSettingsViewProvider } from '../github1s/settings';
 
 export class GitLab1sSettingsViewProvider extends GitHub1sSettingsViewProvider {
 	protected tokenManager = GitLabTokenManager.getInstance();
-	protected githubFetcher = GitLabFetcher.getInstance();
+	protected apiFetcher = GitLabFetcher.getInstance();
 
 	protected OAuthCommand = 'github1s.commands.vscode.connectToGitLab';
 	protected detailPageCommand = 'github1s.commands.openGitLab1sAuthPage';

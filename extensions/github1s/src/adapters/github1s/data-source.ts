@@ -32,6 +32,7 @@ import { matchSorter } from 'match-sorter';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
+import { decorate, memorize } from '@/helpers/func';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -92,6 +93,15 @@ export class GitHub1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
+	async provideRepository(repoFullName: string): Promise<{ private: boolean; defaultBranch: string } | null> {
+		const fetcher = GitHubFetcher.getInstance();
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo };
+		const response = await fetcher.request('GET /repos/{owner}/{repo}', requestParams).catch(() => null);
+		return response?.data ? { private: response.data.private, defaultBranch: response.data.default_branch } : null;
+	}
+
+	@trySourcegraphApiFirst
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const fetcher = GitHubFetcher.getInstance();
 		const encodedPath = encodeFilePath(path);
@@ -134,6 +144,11 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
+	@decorate(memorize)
+	async getDefaultBranch(repoFullName: string) {
+		return (await this.provideRepository(repoFullName))?.defaultBranch || 'HEAD';
+	}
+
 	@trySourcegraphApiFirst
 	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!this.matchedRefsMap.has(repoFullName)) {
@@ -147,7 +162,10 @@ export class GitHub1sDataSource extends DataSource {
 		const mapKey = `${repoFullName} ${refAndPath}`;
 		if (!this.refPathPromiseMap.has(mapKey)) {
 			const refPathPromise = new Promise<{ ref: string; path: string }>(async (resolve, reject) => {
-				if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+				if (!refAndPath) {
+					return resolve({ ref: await this.getDefaultBranch(repoFullName), path: '' });
+				}
+				if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
 					return resolve({ ref: 'HEAD', path: refAndPath.slice(5) });
 				}
 

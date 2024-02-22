@@ -31,6 +31,7 @@ import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { GitLabFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
+import { decorate, memorize } from '@/helpers/func';
 
 const FileTypeMap = {
 	blob: FileType.File,
@@ -99,7 +100,7 @@ export class GitLab1sDataSource extends DataSource {
 		let page = 1;
 		let files = [];
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
-			path: treeItem.path,
+			path: treeItem.path.slice(path.length),
 			type: FileTypeMap[treeItem.type] || FileType.File,
 			commitSha: FileTypeMap[treeItem.id] === FileType.Submodule ? treeItem.sha || 'HEAD' : undefined,
 			size: treeItem.size,
@@ -129,7 +130,7 @@ export class GitLab1sDataSource extends DataSource {
 		return { content: toUint8Array((data as any).content) };
 	}
 
-	@trySourcegraphApiFirst
+	@decorate(memorize)
 	async getBranches(repo: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
 		const fetcher = GitLabFetcher.getInstance();
 		const requestParams = { repo, ref };
@@ -142,7 +143,7 @@ export class GitLab1sDataSource extends DataSource {
 		}));
 	}
 
-	@trySourcegraphApiFirst
+	@decorate(memorize)
 	async getTags(repo: string, ref: 'heads' | 'tags'): Promise<Branch[] | Tag[]> {
 		const fetcher = GitLabFetcher.getInstance();
 		const requestParams = { repo, ref };
@@ -154,39 +155,17 @@ export class GitLab1sDataSource extends DataSource {
 		}));
 	}
 
-	// @trySourcegraphApiFirst
-	// async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
-	// 	if (!this.matchedRefsMap.has(repoFullName)) {
-	// 		this.matchedRefsMap.set(repoFullName, []);
-	// 	}
-	// 	const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
-	// 	const matchedRef = this.matchedRefsMap.get(repoFullName)?.find(matchPathRef);
-	// 	if (matchedRef) {
-	// 		return { ref: matchedRef, path: refAndPath.slice(matchedRef.length + 1) };
-	// 	}
-	// 	const mapKey = `${repoFullName} ${refAndPath}`;
-	// 	if (!this.refPathPromiseMap.has(mapKey)) {
-	// 		const refPathPromise = new Promise<{ ref: string; path: string }>(async (resolve, reject) => {
-	// 			if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
-	// 				return resolve({ ref: 'HEAD', path: refAndPath.slice(5) });
-	// 			}
-
-	// 			const fetcher = GitHubFetcher.getInstance();
-	// 			const { owner, repo } = parseRepoFullName(repoFullName);
-	// 			const requestParams = { owner, repo, refAndPath };
-	// 			const requestUrl = `GET /projects/{owner}%2F{repo}/git/extract-ref/{refAndPath}`;
-	// 			const response = await fetcher.request(requestUrl, requestParams).catch(reject);
-	// 			response?.data?.ref && this.matchedRefsMap.get(repoFullName)?.push(response.data.ref);
-	// 			return resolve(response?.data || { ref: 'HEAD', path: '' });
-	// 		});
-	// 		this.refPathPromiseMap.set(mapKey, refPathPromise);
-	// 	}
-	// 	return this.refPathPromiseMap.get(mapKey)!;
-	// }
+	@decorate(memorize)
+	async getDefaultBranch(repo: string) {
+		return (await this.provideRepository(repo))?.defaultBranch || 'HEAD';
+	}
 
 	@trySourcegraphApiFirst
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
-		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+		if (!refAndPath) {
+			return { ref: await this.getDefaultBranch(repo), path: '' };
+		}
+		if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
 			return { ref: 'HEAD', path: refAndPath.slice(5) };
 		}
 		if (!this.matchedRefsMap.has(repo)) {
@@ -287,7 +266,7 @@ export class GitLab1sDataSource extends DataSource {
 				committer: item.committer_name,
 				createTime: item.created_at ? new Date(item.created_at) : undefined,
 				parents: item.parent_ids.map((parent) => parent) || [],
-				avatarUrl: item.author?.avatar_url || (await this.getAvatars(item.author_email)),
+				avatarUrl: item.author?.avatar_url || (await this.provideUserAvatarLink(item.author_name)),
 			}))
 		);
 	}
@@ -354,11 +333,11 @@ export class GitLab1sDataSource extends DataSource {
 			state: getPullState(item),
 			creator: item.author?.name || item.author?.username,
 			createTime: new Date(item.created_at),
-			// 有些版本没有merged_at字段
+			// Some versions do not have a merged_at field
 			mergeTime: item.merged_at ? new Date(item.merged_at) : item.updated_at ? new Date(item.updated_at) : null,
 			closeTime: item.closed_at ? new Date(item.closed_at) : null,
 			head: { label: item.labels[0], commitSha: item.sha },
-			base: { label: item.labels[1], commitSha: '' }, // 获取changes时填充
+			base: { label: item.labels[1], commitSha: '' }, // Populated when getting changes
 			avatarUrl: item.author?.avatar_url,
 		}));
 	}
@@ -410,41 +389,32 @@ export class GitLab1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideFileBlameRanges(repo: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const requestParams = { repo, ref, path: encodeURIComponent(path) };
+		const requestParams = { repo, ref, path };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/repository/files/{path}/blame?ref={ref}',
 			requestParams
 		);
 		let startLine = 1;
 		return Promise.all(
-			(data || []).map(async (item) => {
+			(data || []).map(async ({ commit, lines }) => {
 				let startingLine = startLine;
-				let endingLine = startingLine + item.lines.length;
+				let endingLine = startingLine + lines.length;
 				startLine = endingLine + 1;
 				return {
-					// age: item.age as number,
+					age: (+new Date(commit?.authored_date) % 10) as number,
 					startingLine,
 					endingLine,
 					commit: {
-						sha: item.commit?.id as string,
-						author: item.commit?.author_name as string,
-						email: item.commit?.author_email as string,
-						message: item.commit?.message as string,
-						createTime: new Date(item.commit?.authored_date),
-						avatarUrl: item.commit?.avatar_url || (await this.getAvatars(item.commit?.author_email)),
+						sha: commit?.id as string,
+						author: commit?.author_name as string,
+						email: commit?.author_email as string,
+						message: commit?.message as string,
+						createTime: new Date(commit?.authored_date),
+						avatarUrl: commit?.avatar_url || (await this.provideUserAvatarLink(commit?.author_name)),
 					},
 				};
 			})
 		);
-	}
-
-	async getAvatars(email: string) {
-		if (this.avatarPromiseMap.has(email)) {
-			return this.avatarPromiseMap.get(email);
-		}
-
-		this.avatarPromiseMap.set(email, this.getAvatar(email));
-		return this.avatarPromiseMap.get(email);
 	}
 
 	async getAvatar(email): Promise<string> {
@@ -487,6 +457,6 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	provideUserAvatarLink(user: string): string {
-		return ``;
+		return `https://www.gravatar.com/avatar/${user}?d=identicon`;
 	}
 }

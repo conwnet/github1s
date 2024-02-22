@@ -19,7 +19,10 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 	public static readonly viewType = 'github1s.views.settings';
 
 	protected tokenManager = GitHubTokenManager.getInstance();
-	protected apiFetcher = GitHubFetcher.getInstance();
+	protected apiFetcher: Pick<
+		GitHubFetcher,
+		'useSourcegraphApiFirst' | 'setUseSourcegraphApiFirst' | 'onDidChangeUseSourcegraphApiFirst'
+	> = GitHubFetcher.getInstance();
 
 	protected pageTitle = 'GitHub1s Settings';
 	protected OAuthCommand = 'github1s.commands.vscode.connectToGitHub';

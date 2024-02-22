@@ -7,13 +7,11 @@ import { parsePath } from 'history';
 import { PageType, RouterState } from '../types';
 import { GitLab1sDataSource } from './data-source';
 
-const resolveBranchName = async (repo: string, ref = '') => {
-	if (ref && ref.toUpperCase() !== 'HEAD') {
-		return ref;
-	}
+export const DEFAULT_REPO = 'gitlab-org/gitlab-docs';
+
+const getDefaultBranch = async (repo: string): Promise<string> => {
 	const dataSource = GitLab1sDataSource.getInstance();
-	// const dataSource = SourcegraphDataSource.getInstance('gitlab');
-	return (await dataSource.provideRepository(repo))?.defaultBranch || 'HEAD';
+	return dataSource.getDefaultBranch(repo);
 };
 
 const parseTreeUrl = async (path: string): Promise<RouterState> => {
@@ -24,7 +22,7 @@ const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const dataSource = GitLab1sDataSource.getInstance();
 	const { ref, path: filePath } = await dataSource.extractRefPath(repo, restParts.join('/'));
 
-	return { pageType: PageType.Tree, repo, ref: await resolveBranchName(repo, ref), filePath };
+	return { pageType: PageType.Tree, repo, ref, filePath };
 };
 
 const parseBlobUrl = async (path: string): Promise<RouterState> => {
@@ -36,7 +34,7 @@ const parseBlobUrl = async (path: string): Promise<RouterState> => {
 	}
 
 	// get selected line number range from path which looks like:
-	// `/gitlab-org/gitlab/-/blob/HEAD/package.json#L10-L20`
+	// `/gitlab-org/gitlab/-/blob/main/package.json#L10-L20`
 	const matches = routerHash.match(/^#L(\d+)(?:-L(\d+))?/);
 	const [_, startLineNumber = '0', endLineNumber] = matches ? matches : [];
 
@@ -52,7 +50,7 @@ const parseCommitsUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const dashIndex = pathParts.indexOf('-');
 	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
-	const ref = await resolveBranchName(repo, (dashIndex < 0 ? [] : pathParts.slice(dashIndex + 2)).join('/'));
+	const ref = dashIndex < 0 ? await getDefaultBranch(repo) : pathParts.slice(dashIndex + 2).join('/');
 
 	return { repo, pageType: PageType.CommitList, ref };
 };
@@ -61,22 +59,22 @@ const parseCommitUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const dashIndex = pathParts.indexOf('-');
 	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
-	const commitSha = await resolveBranchName(repo, (dashIndex < 0 ? [] : pathParts.slice(dashIndex + 2)).join('/'));
+	const commitSha = dashIndex < 0 ? await getDefaultBranch(repo) : pathParts.slice(dashIndex + 2).join('/');
 
 	return { repo, pageType: PageType.Commit, ref: commitSha, commitSha };
 };
 
-const parsePullsUrl = async (path: string): Promise<RouterState> => {
+const parseMergeRequestsUrl = async (path: string): Promise<RouterState> => {
 	const [owner, repo] = parsePath(path).pathname!.split('/').filter(Boolean);
 
 	return {
 		repo: `${owner}/${repo}`,
-		ref: 'HEAD',
+		ref: await getDefaultBranch(`${owner}/${repo}`),
 		pageType: PageType.CodeReviewList,
 	};
 };
 
-const parsePullUrl = async (path: string): Promise<RouterState> => {
+const parseMergeRequestUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
 	const [owner, repo, , _pageType, codeReviewId] = pathParts;
 	const repoFullName = `${owner}/${repo}`;
@@ -137,7 +135,9 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 			case PageType.Blob:
 				return parseBlobUrl(path);
 			case PageType.CodeReview:
-				return parsePullUrl(path);
+				return parseMergeRequestUrl(path);
+			case PageType.CodeReviewList:
+				return parseMergeRequestsUrl(path);
 			case PageType.Commit:
 				return parseCommitUrl(path);
 			case PageType.CommitList:
@@ -146,10 +146,9 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 	}
 
 	// fallback to default
-	const fallbackRepository = 'gitlab-org/gitlab-docs';
 	return {
-		repo: fallbackRepository,
-		ref: await resolveBranchName(fallbackRepository),
+		repo: DEFAULT_REPO,
+		ref: await getDefaultBranch(DEFAULT_REPO),
 		pageType: PageType.Tree,
 		filePath: '',
 	};
