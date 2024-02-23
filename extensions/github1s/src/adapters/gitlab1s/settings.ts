@@ -19,6 +19,6 @@ export class GitLab1sSettingsViewProvider extends GitHub1sSettingsViewProvider {
 			"Your token will only be stored locally in your browser. Don't forget to clean it while you are using a public device.",
 		],
 		OAuthButtonText: 'Connect to GitLab',
-		createTokenLink: 'https://gitlab.com/-/profile/personal_access_tokens?scopes=api&name=GitLab1s',
+		createTokenLink: 'https://gitlab.com/-/profile/personal_access_tokens?scopes=read_api&name=GitLab1s',
 	};
 }

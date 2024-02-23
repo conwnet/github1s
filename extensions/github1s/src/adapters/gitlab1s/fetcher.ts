@@ -26,17 +26,17 @@ export const errorMessages = {
 	},
 };
 
-const detectErrorMessage = (response: any, authenticated: boolean) => {
-	if (response?.status === 401 && +response?.data?.message?.includes?.('Unauthorized')) {
+const detectErrorMessage = (error: { status: number; data: any }, authenticated: boolean) => {
+	if (error?.status === 401 && +error?.data?.message?.includes?.('Unauthorized')) {
 		return errorMessages.badCredentials[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	if (response?.status === 404) {
+	if (error?.status === 404) {
 		return errorMessages.repoNotFound[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	if (response?.status === 403) {
+	if (error?.status === 403) {
 		return errorMessages.noPermission[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	return response?.data?.message || response?.data?.error || '';
+	return error?.data?.message || error?.data?.error || '';
 };
 
 const USE_SOURCEGRAPH_API_FIRST = 'USE_SOURCEGRAPH_API_FIRST';
@@ -54,7 +54,10 @@ export class GitLabFetcher {
 	}
 
 	private _originalRequest = reuseable(
-		(command: string, params: Record<string, string | number | boolean | undefined>) => {
+		(
+			command: string,
+			params: Record<string, string | number | boolean | undefined>
+		): Promise<{ status: number; data: any; headers: Headers }> => {
 			let [method, url] = command.split(' ');
 			Object.keys(params).forEach((el) => {
 				url = url.replace(`{${el}}`, `${encodeURIComponent(params[el] || '')}`);
@@ -75,16 +78,16 @@ export class GitLabFetcher {
 	);
 
 	public request = (command: string, params: Record<string, string | number | boolean | undefined>) => {
-		return this._originalRequest(command, params).catch(async (error) => {
-			const errorStatus = (error as any)?.response?.status;
-			const repoNotFound = errorStatus === 404 && !(await this.checkCurrentRepo());
-			if ([401, 403].includes(errorStatus) || repoNotFound) {
+		return this._originalRequest(command, params).catch(async (error?: { status: number; data: any }) => {
+			const repoNotFound = error && error.status === 404 && !(await this.checkCurrentRepo());
+			if ((error && [401, 403].includes(error.status)) || repoNotFound) {
 				// maybe we have to acquire github access token to continue
 				const accessToken = GitLabTokenManager.getInstance().getToken();
-				const message = detectErrorMessage(error?.response, !!accessToken);
+				const message = detectErrorMessage(error, !!accessToken);
 				await GitLab1sAuthenticationView.getInstance().open(message, true);
 				return this._originalRequest(command, params);
 			}
+			throw error;
 		});
 	};
 

@@ -29,19 +29,14 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "github1s",
-          "title": "GitHub1s",
-          "icon": "assets/github1s.svg"
-        },
-        {
-          "id": "gitlab1s",
-          "title": "GitLab1s",
-          "icon": "assets/github1s.svg"
+          "id": "settings",
+          "title": "Settings",
+          "icon": "assets/settings.svg"
         }
       ]
     },
     "views": {
-      "github1s": [
+      "settings": [
         {
           "id": "github1s.views.settings",
           "name": "Settings",

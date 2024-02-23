@@ -14,7 +14,7 @@ export class GitLab1sAuthenticationView extends GitHub1sAuthenticationView {
 		authenticationFormTitle: 'Authenticating to GitLab',
 		OAuthButtonLogoClass: 'gitlab-logo',
 		OAuthButtonText: 'Connect to GitLab',
-		createTokenLink: 'https://gitlab.com/-/profile/personal_access_tokens?scopes=api&name=GitLab1s',
+		createTokenLink: 'https://gitlab.com/-/profile/personal_access_tokens?scopes=read_api&name=GitLab1s',
 		authenticationFeatures: [
 			{
 				text: 'Access GitLab personal repository',
