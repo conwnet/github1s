@@ -19,7 +19,6 @@ export class GitLab1sAdapter implements Adapter {
 
 	resolveDataSource() {
 		return Promise.resolve(GitLab1sDataSource.getInstance());
-		// return Promise.resolve(SourcegraphDataSource.getInstance('gitlab'));
 	}
 
 	resolveRouterParser() {

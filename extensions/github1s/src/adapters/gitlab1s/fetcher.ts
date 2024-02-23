@@ -26,17 +26,17 @@ export const errorMessages = {
 	},
 };
 
-const detectErrorMessage = (error: { status: number; data: any }, authenticated: boolean) => {
-	if (error?.status === 401 && +error?.data?.message?.includes?.('Unauthorized')) {
+const detectErrorMessage = (response: any, authenticated: boolean) => {
+	if (response?.status === 401 && response?.data?.message?.includes?.('Unauthorized')) {
 		return errorMessages.badCredentials[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	if (error?.status === 404) {
+	if (response?.status === 404) {
 		return errorMessages.repoNotFound[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	if (error?.status === 403) {
+	if (response?.status === 403) {
 		return errorMessages.noPermission[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	return error?.data?.message || error?.data?.error || '';
+	return response?.data?.message || response?.data?.error || '';
 };
 
 const USE_SOURCEGRAPH_API_FIRST = 'USE_SOURCEGRAPH_API_FIRST';
@@ -45,6 +45,7 @@ export class GitLabFetcher {
 	private static instance: GitLabFetcher | null = null;
 	private _emitter = new vscode.EventEmitter<boolean | null | undefined>();
 	public onDidChangeUseSourcegraphApiFirst = this._emitter.event;
+	private _currentRepoPromise: Promise<any> | null = null;
 
 	public static getInstance(): GitLabFetcher {
 		if (GitLabFetcher.instance) {
@@ -53,37 +54,42 @@ export class GitLabFetcher {
 		return (GitLabFetcher.instance = new GitLabFetcher());
 	}
 
+	private constructor() {
+		GitLabTokenManager.getInstance().onDidChangeToken(() => this.checkCurrentRepo(true));
+	}
+
 	private _originalRequest = reuseable(
 		(
 			command: string,
 			params: Record<string, string | number | boolean | undefined>
 		): Promise<{ status: number; data: any; headers: Headers }> => {
-			let [method, url] = command.split(' ');
+			let [method, path] = command.split(/\s+/).filter(Boolean);
 			Object.keys(params).forEach((el) => {
-				url = url.replace(`{${el}}`, `${encodeURIComponent(params[el] || '')}`);
+				path = path.replace(`{${el}}`, `${encodeURIComponent(params[el] || '')}`);
 			});
 			const accessToken = GitLabTokenManager.getInstance().getToken();
 			const fetchOptions: { headers: Record<string, string> } =
 				accessToken?.length < 60
 					? { headers: { 'PRIVATE-TOKEN': `${accessToken}` } }
 					: { headers: { Authorization: `Bearer ${accessToken}` } };
-			return fetch(`${GITLAB_DOMAIN}/api/v4` + url, {
+			return fetch(`${GITLAB_DOMAIN}/api/v4` + path, {
 				...fetchOptions,
 				method,
-			}).then(async (response) => {
-				const data = { status: response.status, data: await response.json(), headers: response.headers };
-				return response.ok ? data : Promise.reject(data);
+			}).then(async (response: Response & { data: any }) => {
+				response.data = await response.json();
+				return response.ok ? response : Promise.reject({ response });
 			});
 		}
 	);
 
 	public request = (command: string, params: Record<string, string | number | boolean | undefined>) => {
-		return this._originalRequest(command, params).catch(async (error?: { status: number; data: any }) => {
-			const repoNotFound = error && error.status === 404 && !(await this.checkCurrentRepo());
-			if ((error && [401, 403].includes(error.status)) || repoNotFound) {
+		return this._originalRequest(command, params).catch(async (error: { response: any }) => {
+			const errorStatus = error?.response?.status as number | undefined;
+			const repoNotFound = errorStatus === 404 && !(await this.checkCurrentRepo());
+			if ((errorStatus && [401, 403].includes(errorStatus)) || repoNotFound) {
 				// maybe we have to acquire github access token to continue
 				const accessToken = GitLabTokenManager.getInstance().getToken();
-				const message = detectErrorMessage(error, !!accessToken);
+				const message = detectErrorMessage(error?.response, !!accessToken);
 				await GitLab1sAuthenticationView.getInstance().open(message, true);
 				return this._originalRequest(command, params);
 			}
@@ -99,32 +105,29 @@ export class GitLabFetcher {
 		});
 	}
 
-	@decorate(memorize)
-	private async checkCurrentRepo() {
-		const [owner, repo] = (await this.getCurrentRepo()).split('/');
-		return this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo }).then(
-			(response) => {
-				// turn off `useSourcegraphApiFirst` if current repository is private
-				response?.data?.private && this.setUseSourcegraphApiFirst(false);
-				return response?.data || null;
-			},
-			() => null
-		);
+	private checkCurrentRepo(forceUpdate: boolean = false) {
+		if (this._currentRepoPromise && !forceUpdate) {
+			return this._currentRepoPromise;
+		}
+		return (this._currentRepoPromise = Promise.resolve(this.getCurrentRepo()).then(async (repo) => {
+			const response = await this._originalRequest('GET /projects/{repo}', { repo });
+			response?.data?.visibility === 'private' && this.setUseSourcegraphApiFirst(false);
+			return response?.data || null;
+		})).catch(() => null);
 	}
 
-	public async useSourcegraphApiFirst(repoFullName?: string): Promise<boolean> {
-		const targetRepo = repoFullName || (await this.getCurrentRepo());
+	public async useSourcegraphApiFirst(repo?: string): Promise<boolean> {
+		const targetRepo = repo || (await this.getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
 		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
 	}
 
-	public async setUseSourcegraphApiFirst(repoOrValue: string | boolean, value?: boolean) {
-		const targetRepo = !isNil(value) ? (repoOrValue as string) : await this.getCurrentRepo();
-		const targetValue = !isNil(value) ? value : !!repoOrValue;
+	public async setUseSourcegraphApiFirst(value: boolean, repo?: string) {
+		const targetRepo = repo || (await this.getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
-		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: targetValue });
+		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: value });
 		this._emitter.fire(value);
 	}
 }

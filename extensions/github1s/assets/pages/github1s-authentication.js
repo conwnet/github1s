@@ -24,9 +24,10 @@ const AuthenticationButton = (props) => {
 		bridgeCommands.OAuthAuthenticate().then(() => setAuthenticating(false));
 	}, []);
 
+	const buttonLogoUrl = encodeURI(`${pageConfig.extensionUri}/${pageConfig.OAuthButtonLogo}`);
 	return html`
 		<button class="authentication-button" disabled="${authenticating}" onClick=${handleButtonClick} ...${props}>
-			<span class=${'auth-button-logo ' + pageConfig.OAuthButtonLogoClass}></span>
+			<span class=${'auth-button-logo'} style=${`background-image: url("${buttonLogoUrl}")`}></span>
 			<span>${pageConfig.OAuthButtonText}</span>
 		</button>
 	`;

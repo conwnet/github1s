@@ -24,8 +24,8 @@ export class GitHub1sAuthenticationView {
 	protected OAuthCommand = 'github1s.commands.vscode.connectToGitHub';
 	protected pageConfig: Record<string, unknown> = {
 		authenticationFormTitle: 'Authenticating to GitHub',
-		OAuthButtonLogoClass: 'github-logo',
 		OAuthButtonText: 'Connect to GitHub',
+		OAuthButtonLogo: 'assets/pages/assets/github.svg',
 		createTokenLink: 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s',
 		rateLimitDocLink: 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
 		rateLimitDocLinkText: 'GitHub Rate limiting Documentation',
@@ -122,9 +122,10 @@ export class GitHub1sAuthenticationView {
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/components.css').toString(),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-authentication.css').toString(),
 		];
+		const globalPageConfig = { ...this.pageConfig, extensionUri: extensionContext.extensionUri.toString() };
 		const scripts = [
 			'data:text/javascript;base64,' +
-				Buffer.from(`window.pageConfig=${JSON.stringify(this.pageConfig)};`).toString('base64'),
+				Buffer.from(`window.pageConfig=${JSON.stringify(globalPageConfig)};`).toString('base64'),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-authentication.js').toString(),
 		];
 

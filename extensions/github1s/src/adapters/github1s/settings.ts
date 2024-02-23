@@ -82,7 +82,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 			webviewView.webview.postMessage({ type: 'token-changed', token });
 		});
 		this.apiFetcher.onDidChangeUseSourcegraphApiFirst((value) => {
-			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-changed', value });
+			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-first-changed', value });
 		});
 	}
 
@@ -96,9 +96,10 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/components.css').toString(),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-settings.css').toString(),
 		];
+		const globalPageConfig = { ...this.pageConfig, extensionUri: extensionContext.extensionUri.toString() };
 		const scripts = [
 			'data:text/javascript;base64,' +
-				Buffer.from(`window.pageConfig=${JSON.stringify(this.pageConfig)};`).toString('base64'),
+				Buffer.from(`window.pageConfig=${JSON.stringify(globalPageConfig)};`).toString('base64'),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-settings.js').toString(),
 		];
 		webviewView.webview.html = createPageHtml(this.pageTitle, styles, scripts);

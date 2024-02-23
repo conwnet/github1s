@@ -122,6 +122,16 @@ const PageFooter = () => {
 	);
 
 	useEffect(() => {
+		const handler = ({ data }) => {
+			if (data.type === 'use-sourcegraph-api-first-changed') {
+				setSgApiFirst(data.value);
+			}
+		};
+		window.addEventListener('message', handler);
+		return () => window.removeEventListener('message', handler);
+	}, []);
+
+	useEffect(() => {
 		updateSgApiFirst();
 	}, [updateSgApiFirst]);
 

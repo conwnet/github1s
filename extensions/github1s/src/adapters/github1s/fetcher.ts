@@ -36,7 +36,7 @@ const detectErrorMessage = (response: any, authenticated: boolean) => {
 	if (response?.status === 403 && +response?.headers?.['x-ratelimit-remaining'] === 0) {
 		return errorMessages.rateLimited[authenticated ? 'authenticated' : 'anonymous'];
 	}
-	if (response?.status === 401 && +response?.data?.message?.includes?.('Bad credentials')) {
+	if (response?.status === 401 && response?.data?.message?.includes?.('Bad credentials')) {
 		return errorMessages.badCredentials[authenticated ? 'authenticated' : 'anonymous'];
 	}
 	if (response?.status === 404) {
@@ -55,6 +55,7 @@ export class GitHubFetcher {
 	private _emitter = new vscode.EventEmitter<boolean | null | undefined>();
 	private _originalRequest: Octokit['request'] | null = null;
 	public onDidChangeUseSourcegraphApiFirst = this._emitter.event;
+	private _currentRepoPromise: Promise<any> | null = null;
 
 	public request: Octokit['request'];
 	public graphql: Octokit['graphql'];
@@ -69,6 +70,7 @@ export class GitHubFetcher {
 	private constructor() {
 		this.initFetcherMethods();
 		GitHubTokenManager.getInstance().onDidChangeToken(() => this.initFetcherMethods());
+		GitHubTokenManager.getInstance().onDidChangeToken(() => this.checkCurrentRepo(true));
 	}
 
 	// initial fetcher methods in this way for correct `request/graphql` type inference
@@ -79,9 +81,9 @@ export class GitHubFetcher {
 		this._originalRequest = octokit.request;
 		this.request = Object.assign((...args: Parameters<Octokit['request']>) => {
 			return octokit.request(...args).catch(async (error) => {
-				const errorStatus = (error as any)?.response?.status;
+				const errorStatus = error?.response?.status as number | undefined;
 				const repoNotFound = errorStatus === 404 && !(await this.checkCurrentRepo());
-				if ([401, 403].includes(errorStatus) || repoNotFound) {
+				if ((errorStatus && [401, 403].includes(errorStatus)) || repoNotFound) {
 					// maybe we have to acquire github access token to continue
 					const message = detectErrorMessage(error?.response, !!accessToken);
 					await GitHub1sAuthenticationView.getInstance().open(message, true);
@@ -108,32 +110,30 @@ export class GitHubFetcher {
 		});
 	}
 
-	@decorate(memorize)
-	private async checkCurrentRepo() {
-		const [owner, repo] = (await this.getCurrentRepo()).split('/');
-		return this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo }).then(
-			(response) => {
-				// turn off `useSourcegraphApiFirst` if current repository is private
-				response?.data?.private && this.setUseSourcegraphApiFirst(false);
-				return response?.data || null;
-			},
-			() => null
-		);
+	private checkCurrentRepo(forceUpdate: boolean = false) {
+		if (this._currentRepoPromise && !forceUpdate) {
+			return this._currentRepoPromise;
+		}
+		return (this._currentRepoPromise = Promise.resolve(this.getCurrentRepo()).then(async (repoFullName) => {
+			const [owner, repo] = repoFullName.split('/');
+			const response = await this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo });
+			response?.data?.private && (await this.setUseSourcegraphApiFirst(false));
+			return response?.data || null;
+		})).then(() => null);
 	}
 
-	public async useSourcegraphApiFirst(repoFullName?: string): Promise<boolean> {
-		const targetRepo = repoFullName || (await this.getCurrentRepo());
+	public async useSourcegraphApiFirst(repo?: string): Promise<boolean> {
+		const targetRepo = repo || (await this.getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
 		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
 	}
 
-	public async setUseSourcegraphApiFirst(repoOrValue: string | boolean, value?: boolean) {
-		const targetRepo = !isNil(value) ? (repoOrValue as string) : await this.getCurrentRepo();
-		const targetValue = !isNil(value) ? value : !!repoOrValue;
+	public async setUseSourcegraphApiFirst(value: boolean, repo?: string) {
+		const targetRepo = repo || (await this.getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
-		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: targetValue });
+		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: value });
 		this._emitter.fire(value);
 	}
 }

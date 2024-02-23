@@ -12,8 +12,8 @@ export class GitLab1sAuthenticationView extends GitHub1sAuthenticationView {
 	protected OAuthCommand = 'github1s.commands.vscode.connectToGitLab';
 	protected pageConfig = {
 		authenticationFormTitle: 'Authenticating to GitLab',
-		OAuthButtonLogoClass: 'gitlab-logo',
 		OAuthButtonText: 'Connect to GitLab',
+		OAuthButtonLogo: 'assets/pages/assets/gitlab.svg',
 		createTokenLink: 'https://gitlab.com/-/profile/personal_access_tokens?scopes=read_api&name=GitLab1s',
 		authenticationFeatures: [
 			{

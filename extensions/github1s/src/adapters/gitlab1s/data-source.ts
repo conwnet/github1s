@@ -52,12 +52,21 @@ const getPullState = (pull: { state: string; merged_at: string | null }): CodeRe
 	return CodeReviewState.Merged;
 };
 
+const resolveComputeAge = (timestamps: number[], ageLimit = 10) => {
+	const maxTimestamp = Math.max(...timestamps);
+	const minTimestamp = Math.min(...timestamps);
+	const step = (maxTimestamp - minTimestamp) / ageLimit;
+	return (timestamp: number) => {
+		const age = Math.floor((timestamp - minTimestamp) / (step || 1));
+		return (((Math.max(age, ageLimit - 1) % ageLimit) + ageLimit) % ageLimit) + 1;
+	};
+};
+
 const sourcegraphDataSource = SourcegraphDataSource.getInstance('gitlab');
 const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 	const originalMethod = descriptor.value;
 
 	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
-		// return originalMethod.apply(this, args);
 		const gitlabFetcher = GitLabFetcher.getInstance();
 		if (await gitlabFetcher.useSourcegraphApiFirst(args[0])) {
 			try {
@@ -73,7 +82,6 @@ export class GitLab1sDataSource extends DataSource {
 	private branchesPromiseMap: Map<string, Promise<Branch[]>> = new Map();
 	private tagsPromiseMap: Map<string, Promise<Tag[]>> = new Map();
 	private matchedRefsMap = new Map<string, string[]>();
-	private avatarPromiseMap = new Map<string, Promise<string>>();
 
 	public static getInstance(): GitLab1sDataSource {
 		if (GitLab1sDataSource.instance) {
@@ -82,16 +90,10 @@ export class GitLab1sDataSource extends DataSource {
 		return (GitLab1sDataSource.instance = new GitLab1sDataSource());
 	}
 
-	async provideRepository(repoFullName: string) {
-		if (!this.branchesPromiseMap.has(repoFullName)) {
-			await this.provideBranches(repoFullName);
-		}
-		return this.branchesPromiseMap.get(repoFullName)?.then((branches) => {
-			const defaultBranch = branches.find((br) => br.isDefault);
-			if (defaultBranch) {
-				return { name: defaultBranch.name, defaultBranch: defaultBranch?.name };
-			}
-		});
+	async provideRepository(repo: string) {
+		const fetcher = GitLabFetcher.getInstance();
+		const { data } = await fetcher.request('GET /projects/{repo}', { repo });
+		return { private: data.visibility === 'private', defaultBranch: data.default_branch };
 	}
 
 	@trySourcegraphApiFirst
@@ -395,26 +397,26 @@ export class GitLab1sDataSource extends DataSource {
 			requestParams
 		);
 		let startLine = 1;
-		return Promise.all(
-			(data || []).map(async ({ commit, lines }) => {
-				let startingLine = startLine;
-				let endingLine = startingLine + lines.length;
-				startLine = endingLine + 1;
-				return {
-					age: (+new Date(commit?.authored_date) % 10) as number,
-					startingLine,
-					endingLine,
-					commit: {
-						sha: commit?.id as string,
-						author: commit?.author_name as string,
-						email: commit?.author_email as string,
-						message: commit?.message as string,
-						createTime: new Date(commit?.authored_date),
-						avatarUrl: commit?.avatar_url || (await this.provideUserAvatarLink(commit?.author_name)),
-					},
-				};
-			})
-		);
+		const timestamps = data.map(({ commit }) => +new Date(commit.authored_date) || 0);
+		const computeAge = resolveComputeAge(timestamps);
+		return (data || []).map(({ commit, lines }) => {
+			let startingLine = startLine;
+			let endingLine = startingLine + lines.length;
+			startLine = endingLine + 1;
+			return {
+				age: computeAge(+new Date(commit?.authored_date) || 0),
+				startingLine,
+				endingLine,
+				commit: {
+					sha: commit?.id as string,
+					author: commit?.author_name as string,
+					email: commit?.author_email as string,
+					message: commit?.message as string,
+					createTime: new Date(commit?.authored_date),
+					avatarUrl: this.provideUserAvatarLink(encodeURIComponent(commit?.author?.name)),
+				},
+			};
+		});
 	}
 
 	async getAvatar(email): Promise<string> {
