@@ -18,16 +18,6 @@ export const commandOpenOnOfficialPage = async () => {
 	return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(externalLink));
 };
 
-export const commandOpenGitpod = () => {
-	return router.getAuthority().then((currentAuthority) => {
-		const [currentRepo] = currentAuthority.split('+');
-		vscode.commands.executeCommand(
-			'vscode.open',
-			vscode.Uri.parse(`https://gitpod.io/#https://github.com/${currentRepo}`)
-		);
-	});
-};
-
 const repoPickItemButtons = [{ iconPath: new vscode.ThemeIcon('close') }];
 
 const getRecentRepoPickItems = () =>
@@ -91,7 +81,6 @@ export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openOnBitbucket', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnNpm', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openOnOfficialPage', commandOpenOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.openOnGitPod', commandOpenGitpod),
 		vscode.commands.registerCommand('github1s.commands.openRepository', commandOpenRepository),
 		vscode.commands.registerCommand('github1s.commands.openOnlineEditor', commandOpenOnlineEditor),
 		vscode.commands.registerCommand('remoteHub.openRepository', commandOpenRepository)

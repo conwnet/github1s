@@ -325,13 +325,15 @@ export class GitHub1sDataSource extends DataSource {
 			createTime: new Date(item.created_at),
 			mergeTime: item.merged_at ? new Date(item.merged_at) : null,
 			closeTime: item.closed_at ? new Date(item.closed_at) : null,
-			head: { label: item.head.label, commitSha: item.head.sha },
-			base: { label: item.base.label, commitSha: item.base.sha },
+			source: item.head.label,
+			target: item.base.label,
+			sourceSha: item.head.sha,
+			targetSha: item.base.sha,
 			avatarUrl: item.user?.avatar_url,
 		}));
 	}
 
-	async provideCodeReview(repoFullName: string, id: string): Promise<CodeReview & { files?: ChangedFile[] }> {
+	async provideCodeReview(repoFullName: string, id: string) {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const pullRequestParams = { owner, repo, pull_number: Number(id) };
@@ -345,8 +347,10 @@ export class GitHub1sDataSource extends DataSource {
 			createTime: new Date(data.created_at),
 			mergeTime: data.merged_at ? new Date(data.merged_at) : null,
 			closeTime: data.closed_at ? new Date(data.closed_at) : null,
-			head: { label: data.head.label, commitSha: data.head.sha },
-			base: { label: data.base.label, commitSha: data.base.sha },
+			source: data.head.label,
+			target: data.base.label,
+			sourceSha: data.head.sha,
+			targetSha: data.base.sha,
 			avatarUrl: data.user?.avatar_url,
 		};
 	}
@@ -426,6 +430,6 @@ export class GitHub1sDataSource extends DataSource {
 	}
 
 	provideUserAvatarLink(user: string): string {
-		return `https://github.com/${user}.png`;
+		return `${GITHUB_ORIGIN}/${user}.png`;
 	}
 }

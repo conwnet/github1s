@@ -24,7 +24,7 @@ export class GitLabTokenManager extends GitHubTokenManager {
 			accessToken?.length < 60
 				? { headers: { 'PRIVATE-TOKEN': `${accessToken}` } }
 				: { headers: { Authorization: `Bearer ${accessToken}` } };
-		return fetch(`${GITLAB_DOMAIN}/api/v4/user`, fetchOptions)
+		return fetch(`${GITLAB_API_PREFIX}/user`, fetchOptions)
 			.then((response) => {
 				if (response.status === 401) {
 					return null;

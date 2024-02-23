@@ -49,7 +49,7 @@ export class GitHubTokenManager {
 			return Promise.resolve(null);
 		}
 		const fetchOptions = accessToken ? { headers: { Authorization: `token ${accessToken}` } } : {};
-		return fetch('https://api.github.com/user', fetchOptions)
+		return fetch(`${GITHUB_API_PREFIX}/user`, fetchOptions)
 			.then((response) => {
 				if (response.status === 401) {
 					return null;

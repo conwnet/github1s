@@ -8,7 +8,7 @@ import * as queryString from 'query-string';
 import router from '@/router';
 import { Barrier } from '@/helpers/async';
 import { Repository } from '@/repository';
-import { relativeTimeTo } from '@/helpers/date';
+import { relativeTimeTo, toISOString } from '@/helpers/date';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/changes/files';
@@ -61,6 +61,15 @@ export const getCodeReviewTreeItemDescription = (codeReview: adapterTypes.CodeRe
 
 	// current codeReview is closed
 	return `by ${codeReview.creator} was closed ${relativeTimeTo(codeReview.closeTime!)}`;
+};
+
+export const getCodeReviewTreeItemTooltip = (codeReview: adapterTypes.CodeReview): string => {
+	const titleText = `#${codeReview.id} ${codeReview.title.split(/[\r\n]/)[0]}`;
+	const ISOTimeStr = codeReview.createTime ? toISOString(codeReview.createTime) : null;
+	const directionText = `${codeReview.target} ← ${codeReview.source}`;
+	const infoText = [codeReview.state, directionText].filter(Boolean).join(', ');
+	const detailText = [codeReview.creator, ISOTimeStr].filter(Boolean).join(', ');
+	return `${titleText}\n(${infoText})\n(${detailText})`;
 };
 
 export interface CodeReviewTreeItem extends vscode.TreeItem {
@@ -132,7 +141,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
 			const label = getCodeReviewTreeItemLabel(codeReview);
 			const description = getCodeReviewTreeItemDescription(codeReview);
-			const tooltip = `${label} (${description})`;
+			const tooltip = getCodeReviewTreeItemTooltip(codeReview);
 			const iconPath = vscode.Uri.parse(codeReview?.avatarUrl || '');
 			const contextValue = 'github1s:viewItems:codeReviewListItem';
 
@@ -157,7 +166,11 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 
 	async getCodeReviewFileItems(codeReview: adapterTypes.CodeReview): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
-		const changedFiles = await getCodeReviewChangedFiles(codeReview);
+		const scheme = adapterManager.getCurrentScheme();
+		const { repo } = await router.getState();
+		const repository = Repository.getInstance(scheme, repo);
+		const _codeReview = await repository.getCodeReviewItem(codeReview.id);
+		const changedFiles = _codeReview ? await getCodeReviewChangedFiles(_codeReview) : [];
 		const changedFileItems = changedFiles.map((changedFile) => {
 			const filePath = changedFile.headFileUri.path;
 			const id = `${codeReview.id} ${filePath}`;
@@ -173,9 +186,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				collapsibleState: vscode.TreeItemCollapsibleState.None,
 			};
 		});
-		const scheme = adapterManager.getCurrentScheme();
-		const { repo } = await router.getState();
-		const repository = Repository.getInstance(scheme, repo);
+
 		const hasMore = await repository.hasMoreCodeReviewChangedFiles(codeReview.id);
 		const loadMoreChangedFilesItem = createLoadMoreChangedFilesItem(codeReview.id);
 		return hasMore ? [...changedFileItems, loadMoreChangedFilesItem] : changedFileItems;

@@ -33,7 +33,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 			'For API requests using Authentication, you can make up to 5,000 requests per hour.',
 		],
 		OAuthButtonText: 'Connect to GitHub',
-		createTokenLink: 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s',
+		createTokenLink: `${GITHUB_ORIGIN}/settings/tokens/new?scopes=repo&description=GitHub1s`,
 	};
 
 	public registerListeners(webviewView: vscode.WebviewView) {

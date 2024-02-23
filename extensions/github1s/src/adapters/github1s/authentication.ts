@@ -26,7 +26,7 @@ export class GitHub1sAuthenticationView {
 		authenticationFormTitle: 'Authenticating to GitHub',
 		OAuthButtonText: 'Connect to GitHub',
 		OAuthButtonLogo: 'assets/pages/assets/github.svg',
-		createTokenLink: 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s',
+		createTokenLink: `${GITHUB_ORIGIN}/settings/tokens/new?scopes=repo&description=GitHub1s`,
 		rateLimitDocLink: 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
 		rateLimitDocLinkText: 'GitHub Rate limiting Documentation',
 		authenticationFeatures: [

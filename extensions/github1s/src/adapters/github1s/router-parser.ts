@@ -3,6 +3,7 @@
  * @author netcon
  */
 
+import { joinPath } from '@/helpers/util';
 import * as adapterTypes from '../types';
 import { parseGitHubPath } from './parse-path';
 
@@ -46,6 +47,6 @@ export class GitHub1sRouterParser extends adapterTypes.RouterParser {
 	}
 
 	buildExternalLink(path: string): string {
-		return 'https://github.com' + (path.startsWith('/') ? path : `/${path}`);
+		return joinPath(GITHUB_ORIGIN, path);
 	}
 }

@@ -72,7 +72,7 @@ export class GitLabFetcher {
 				accessToken?.length < 60
 					? { headers: { 'PRIVATE-TOKEN': `${accessToken}` } }
 					: { headers: { Authorization: `Bearer ${accessToken}` } };
-			return fetch(`${GITLAB_DOMAIN}/api/v4` + path, {
+			return fetch(GITLAB_API_PREFIX + path, {
 				...fetchOptions,
 				method,
 			}).then(async (response: Response & { data: any }) => {

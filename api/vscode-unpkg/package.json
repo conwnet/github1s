@@ -8,6 +8,6 @@
     "got": "^11.8.5"
   },
   "devDependencies": {
-    "@vercel/node": "^2.5.7"
+    "@vercel/node": "^3.0.20"
   }
 }

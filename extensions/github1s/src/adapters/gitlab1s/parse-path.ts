@@ -83,7 +83,7 @@ const parseMergeRequestUrl = async (path: string): Promise<RouterState> => {
 	return {
 		repo: `${owner}/${repo}`,
 		pageType: PageType.CodeReview,
-		ref: codeReview.base.commitSha,
+		ref: codeReview.targetSha,
 		codeReviewId,
 	};
 };

@@ -44,7 +44,6 @@ export interface Branch {
 	name: string;
 	commitSha?: string;
 	description?: string;
-	isDefault?: boolean;
 }
 
 export interface Tag {
@@ -127,14 +126,10 @@ export interface CodeReview {
 	createTime: Date;
 	mergeTime: Date | null;
 	closeTime: Date | null;
-	head: {
-		label: string;
-		commitSha: string;
-	};
-	base: {
-		label: string;
-		commitSha: string;
-	};
+	source: string;
+	target: string;
+	sourceSha?: string;
+	targetSha?: string;
 	avatarUrl?: string;
 }
 
@@ -151,8 +146,6 @@ export interface ChangedFile {
 	path: string;
 	// only exists for renamed file
 	previousPath?: string;
-	head?: string;
-	base?: string;
 }
 
 export interface BlameRange {
@@ -241,7 +234,10 @@ export class DataSource {
 	}
 
 	// optionally return changed files (if `files` exists can reduce api calls)
-	provideCodeReview(repo: string, id: string): Promisable<(CodeReview & { files?: ChangedFile[] }) | null> {
+	provideCodeReview(
+		repo: string,
+		id: string
+	): Promisable<(CodeReview & { sourceSha: string; targetSha: string; files?: ChangedFile[] }) | null> {
 		return null;
 	}
 
@@ -384,7 +380,7 @@ export class RouterParser {
 
 	// convert giving path to the external link (using for jumping back to origin platform)
 	buildExternalLink(path: string): Promisable<string> {
-		return 'https://github.com' + path;
+		return path;
 	}
 }
 

@@ -562,22 +562,22 @@
         {
           "command": "github1s.commands.openFilePreviousRevision",
           "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/",
-          "group": "navigation@98"
+          "group": "navigation@4"
         },
         {
           "command": "github1s.commands.openFileNextRevision",
           "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/",
-          "group": "navigation@99"
+          "group": "navigation@5"
         },
         {
           "command": "github1s.commands.openEditorGutterBlame",
           "when": "!isInDiffEditor && github1s:features:gutterBlame:enabled && !github1s:features:gutterBlame:open",
-          "group": "navigation@4"
+          "group": "navigation@6"
         },
         {
           "command": "github1s.commands.closeEditorGutterBlame",
           "when": "!isInDiffEditor && github1s:features:gutterBlame:enabled && github1s:features:gutterBlame:open",
-          "group": "navigation@4"
+          "group": "navigation@6"
         }
       ]
     }

@@ -27,11 +27,11 @@ const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string)
 	}
 
 	const codeReview = await repository.getCodeReviewItem(codeReviewId);
-	if (!codeReview?.base?.commitSha) {
+	if (!codeReview?.targetSha) {
 		return null;
 	}
 
-	const originalAuthority = `${routeState.repo}+${codeReview!.base.commitSha}`;
+	const originalAuthority = `${routeState.repo}+${codeReview!.targetSha}`;
 	const originalPath = changedFile.previousPath ? `/${changedFile.previousPath}` : uri.path;
 
 	return uri.with({ authority: originalAuthority, path: originalPath });

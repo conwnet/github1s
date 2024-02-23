@@ -39,16 +39,16 @@ const FileTypeMap = {
 	commit: FileType.Submodule,
 };
 
-const getPullState = (pull: { state: string; merged_at: string | null }): CodeReviewState => {
-	// current pull request is open
-	if (pull.state === 'opened') {
+const getMergeRequestState = (mergeRequest: { state: string; merged_at: string | null }): CodeReviewState => {
+	// current merge request is open
+	if (mergeRequest.state === 'opened') {
 		return CodeReviewState.Open;
 	}
-	// current pull request is merged
-	if (pull.state === 'closed' && pull.merged_at) {
+	// current merge request is merged
+	if (mergeRequest.state === 'closed' && mergeRequest.merged_at) {
 		return CodeReviewState.Merged;
 	}
-	// current pull is closed
+	// current merge is closed
 	return CodeReviewState.Merged;
 };
 
@@ -141,7 +141,6 @@ export class GitLab1sDataSource extends DataSource {
 			name: item.name,
 			commitSha: item.commit.id,
 			description: `${ref === 'heads' ? 'Branch' : 'Tag'} at ${item.commit.short_id}`,
-			isDefault: item.default,
 		}));
 	}
 
@@ -332,33 +331,34 @@ export class GitLab1sDataSource extends DataSource {
 		return data.map((item) => ({
 			id: `${item.iid}`,
 			title: item.title,
-			state: getPullState(item),
+			state: getMergeRequestState(item),
 			creator: item.author?.name || item.author?.username,
 			createTime: new Date(item.created_at),
-			// Some versions do not have a merged_at field
-			mergeTime: item.merged_at ? new Date(item.merged_at) : item.updated_at ? new Date(item.updated_at) : null,
+			mergeTime: item.merged_at ? new Date(item.merged_at) : null,
 			closeTime: item.closed_at ? new Date(item.closed_at) : null,
-			head: { label: item.labels[0], commitSha: item.sha },
-			base: { label: item.labels[1], commitSha: '' }, // Populated when getting changes
+			source: item.source_branch,
+			target: item.target_branch,
 			avatarUrl: item.author?.avatar_url,
 		}));
 	}
 
-	async provideCodeReview(repo: string, id: string): Promise<CodeReview & { files?: ChangedFile[] }> {
+	async provideCodeReview(repo: string, id: string) {
 		const fetcher = GitLabFetcher.getInstance();
-		const pullRequestParams = { repo, pull_number: Number(id) };
-		const { data } = await fetcher.request('GET /projects/{repo}/merge_requests/{pull_number}', pullRequestParams);
+		const requestParams = { repo, id };
+		const { data } = await fetcher.request('GET /projects/{repo}/merge_requests/{id}', requestParams);
 
 		return {
 			id: `${data.iid}`,
 			title: data.title,
-			state: getPullState(data),
+			state: getMergeRequestState(data),
 			creator: data.author?.name || data.author?.username,
 			createTime: new Date(data.created_at),
 			mergeTime: data.merged_at ? new Date(data.merged_at) : null,
 			closeTime: data.closed_at ? new Date(data.closed_at) : null,
-			head: { label: data.labels[0], commitSha: data.diff_refs.head_sha },
-			base: { label: data.labels[1], commitSha: data.diff_refs.base_sha },
+			source: data.source_branch,
+			target: data.target_branch,
+			sourceSha: data.diff_refs.head_sha,
+			targetSha: data.diff_refs.base_sha,
 			avatarUrl: data.author?.avatar_url,
 		};
 	}
@@ -367,9 +367,9 @@ export class GitLab1sDataSource extends DataSource {
 	async provideCodeReviewChangedFiles(repo: string, id: string, options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		const fetcher = GitLabFetcher.getInstance();
 		const pageParams = { per_page: options?.pageSize, page: options?.page };
-		const filesRequestParams = { repo, pull_number: Number(id), ...pageParams };
+		const filesRequestParams = { repo, id, ...pageParams };
 		const { data } = await fetcher.request(
-			'GET /projects/{repo}/merge_requests/{pull_number}/changes?per_page={per_page}&page={page}',
+			'GET /projects/{repo}/merge_requests/{id}/changes?per_page={per_page}&page={page}',
 			filesRequestParams
 		);
 
@@ -383,8 +383,6 @@ export class GitLab1sDataSource extends DataSource {
 				: item.renamed_file
 				? FileChangeStatus.Renamed
 				: FileChangeStatus.Modified,
-			head: data.diff_refs.head_sha,
-			base: data.diff_refs.base_sha,
 		}));
 	}
 

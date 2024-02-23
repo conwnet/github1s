@@ -76,7 +76,7 @@ export class GitHubFetcher {
 	// initial fetcher methods in this way for correct `request/graphql` type inference
 	initFetcherMethods() {
 		const accessToken = GitHubTokenManager.getInstance().getToken();
-		const octokit = new Octokit({ auth: accessToken, request: { fetch } });
+		const octokit = new Octokit({ auth: accessToken, request: { fetch }, baseUrl: GITHUB_API_PREFIX });
 
 		this._originalRequest = octokit.request;
 		this.request = Object.assign((...args: Parameters<Octokit['request']>) => {
@@ -93,9 +93,8 @@ export class GitHubFetcher {
 		}, this._originalRequest);
 
 		this.graphql = Object.assign(async (...args: Parameters<Octokit['graphql']>) => {
-			// graphql API only worked for authenticated users
 			if (!GitHubTokenManager.getInstance().getToken()) {
-				const message = 'GraphQL API only worked for authenticated users';
+				const message = 'GraphQL API only works for authenticated users';
 				await GitHub1sAuthenticationView.getInstance().open(message, true);
 			}
 			return octokit.graphql(...args);
@@ -119,7 +118,7 @@ export class GitHubFetcher {
 			const response = await this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo });
 			response?.data?.private && (await this.setUseSourcegraphApiFirst(false));
 			return response?.data || null;
-		})).then(() => null);
+		})).catch(() => null);
 	}
 
 	public async useSourcegraphApiFirst(repo?: string): Promise<boolean> {
