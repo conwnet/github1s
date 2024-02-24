@@ -4,12 +4,13 @@
  */
 
 import * as vscode from 'vscode';
-import { getBrowserUrl, getExtensionContext } from '@/helpers/context';
+import { getExtensionContext } from '@/helpers/context';
 import { GitLab1sAuthenticationView } from './authentication';
 import { GitLabTokenManager } from './token';
 import { isNil } from '@/helpers/util';
-import { decorate, memorize, reuseable } from '@/helpers/func';
-import { DEFAULT_REPO } from './parse-path';
+import { reuseable } from '@/helpers/func';
+import { getCurrentRepo } from './parse-path';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 export const errorMessages = {
 	badCredentials: {
@@ -39,12 +40,12 @@ const detectErrorMessage = (response: any, authenticated: boolean) => {
 	return response?.data?.message || response?.data?.error || '';
 };
 
-const USE_SOURCEGRAPH_API_FIRST = 'USE_SOURCEGRAPH_API_FIRST';
+const PREFER_SOURCEGRAPH_API = 'PREFER_SOURCEGRAPH_API';
 
 export class GitLabFetcher {
 	private static instance: GitLabFetcher | null = null;
 	private _emitter = new vscode.EventEmitter<boolean | null | undefined>();
-	public onDidChangeUseSourcegraphApiFirst = this._emitter.event;
+	public onDidChangePreferSourcegraphApi = this._emitter.event;
 	private _currentRepoPromise: Promise<any> | null = null;
 
 	public static getInstance(): GitLabFetcher {
@@ -55,10 +56,11 @@ export class GitLabFetcher {
 	}
 
 	private constructor() {
-		GitLabTokenManager.getInstance().onDidChangeToken(() => this.checkCurrentRepo(true));
+		this.initPreferSourcegraphApi();
+		GitLabTokenManager.getInstance().onDidChangeToken(() => this.initPreferSourcegraphApi());
 	}
 
-	private _originalRequest = reuseable(
+	private _request = reuseable(
 		(
 			command: string,
 			params: Record<string, string | number | boolean | undefined>
@@ -83,51 +85,52 @@ export class GitLabFetcher {
 	);
 
 	public request = (command: string, params: Record<string, string | number | boolean | undefined>) => {
-		return this._originalRequest(command, params).catch(async (error: { response: any }) => {
+		return this._request(command, params).catch(async (error: { response: any }) => {
 			const errorStatus = error?.response?.status as number | undefined;
-			const repoNotFound = errorStatus === 404 && !(await this.checkCurrentRepo());
+			const repoNotFound = errorStatus === 404 && !(await this.resolveCurrentRepo());
 			if ((errorStatus && [401, 403].includes(errorStatus)) || repoNotFound) {
 				// maybe we have to acquire github access token to continue
 				const accessToken = GitLabTokenManager.getInstance().getToken();
 				const message = detectErrorMessage(error?.response, !!accessToken);
 				await GitLab1sAuthenticationView.getInstance().open(message, true);
-				return this._originalRequest(command, params);
+				return this._request(command, params);
 			}
 			throw error;
 		});
 	};
 
-	@decorate(memorize)
-	private getCurrentRepo() {
-		return getBrowserUrl().then((browserUrl: string) => {
-			const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
-			return pathParts.length >= 2 ? (pathParts.slice(0, 2) as [string, string]).join('/') : DEFAULT_REPO;
-		});
-	}
-
-	private checkCurrentRepo(forceUpdate: boolean = false) {
+	private resolveCurrentRepo(forceUpdate: boolean = false) {
 		if (this._currentRepoPromise && !forceUpdate) {
 			return this._currentRepoPromise;
 		}
-		return (this._currentRepoPromise = Promise.resolve(this.getCurrentRepo()).then(async (repo) => {
-			const response = await this._originalRequest('GET /projects/{repo}', { repo });
-			response?.data?.visibility === 'private' && this.setUseSourcegraphApiFirst(false);
-			return response?.data || null;
-		})).catch(() => null);
+		return (this._currentRepoPromise = Promise.resolve(getCurrentRepo())
+			.then(async (repo) => this._request('GET /projects/{repo}', { repo }).then((res) => res.data))
+			.catch(() => null));
 	}
 
-	public async useSourcegraphApiFirst(repo?: string): Promise<boolean> {
-		const targetRepo = repo || (await this.getCurrentRepo());
+	private async initPreferSourcegraphApi() {
+		if (await this.getPreferSourcegraphApi()) {
+			const sgDataSource = SourcegraphDataSource.getInstance('github');
+			if (!(await sgDataSource.provideRepository(await getCurrentRepo()))) {
+				this.resolveCurrentRepo(true).then((repo) => {
+					repo?.visibility === 'private' && this.setPreferSourcegraphApi(false);
+				});
+			}
+		}
+	}
+
+	public async getPreferSourcegraphApi(repo?: string): Promise<boolean> {
+		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
-		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
+		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);
 		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
 	}
 
-	public async setUseSourcegraphApiFirst(value: boolean, repo?: string) {
-		const targetRepo = repo || (await this.getCurrentRepo());
+	public async setPreferSourcegraphApi(value: boolean, repo?: string) {
+		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
-		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
-		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: value });
+		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);
+		await globalState.update(PREFER_SOURCEGRAPH_API, { ...cachedData, [targetRepo]: value });
 		this._emitter.fire(value);
 	}
 }

@@ -5,13 +5,13 @@
 
 (self as any).global = self;
 import * as vscode from 'vscode';
-import { getBrowserUrl, getExtensionContext } from '@/helpers/context';
+import { getExtensionContext } from '@/helpers/context';
 import { Octokit } from '@octokit/core';
 import { GitHub1sAuthenticationView } from './authentication';
 import { GitHubTokenManager } from './token';
 import { isNil } from '@/helpers/util';
-import { decorate, memorize } from '@/helpers/func';
-import { DEFAULT_REPO } from './parse-path';
+import { getCurrentRepo } from './parse-path';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 export const errorMessages = {
 	rateLimited: {
@@ -48,13 +48,13 @@ const detectErrorMessage = (response: any, authenticated: boolean) => {
 	return response?.data?.message || '';
 };
 
-const USE_SOURCEGRAPH_API_FIRST = 'USE_SOURCEGRAPH_API_FIRST';
+const PREFER_SOURCEGRAPH_API = 'PREFER_SOURCEGRAPH_API';
 
 export class GitHubFetcher {
 	private static instance: GitHubFetcher | null = null;
 	private _emitter = new vscode.EventEmitter<boolean | null | undefined>();
-	private _originalRequest: Octokit['request'] | null = null;
-	public onDidChangeUseSourcegraphApiFirst = this._emitter.event;
+	private _request: Octokit['request'] | null = null;
+	public onDidChangePreferSourcegraphApi = this._emitter.event;
 	private _currentRepoPromise: Promise<any> | null = null;
 
 	public request: Octokit['request'];
@@ -69,8 +69,9 @@ export class GitHubFetcher {
 
 	private constructor() {
 		this.initFetcherMethods();
+		this.initPreferSourcegraphApi();
 		GitHubTokenManager.getInstance().onDidChangeToken(() => this.initFetcherMethods());
-		GitHubTokenManager.getInstance().onDidChangeToken(() => this.checkCurrentRepo(true));
+		GitHubTokenManager.getInstance().onDidChangeToken(() => this.initPreferSourcegraphApi());
 	}
 
 	// initial fetcher methods in this way for correct `request/graphql` type inference
@@ -78,19 +79,19 @@ export class GitHubFetcher {
 		const accessToken = GitHubTokenManager.getInstance().getToken();
 		const octokit = new Octokit({ auth: accessToken, request: { fetch }, baseUrl: GITHUB_API_PREFIX });
 
-		this._originalRequest = octokit.request;
+		this._request = octokit.request;
 		this.request = Object.assign((...args: Parameters<Octokit['request']>) => {
 			return octokit.request(...args).catch(async (error) => {
 				const errorStatus = error?.response?.status as number | undefined;
-				const repoNotFound = errorStatus === 404 && !(await this.checkCurrentRepo());
+				const repoNotFound = errorStatus === 404 && !(await this.resolveCurrentRepo());
 				if ((errorStatus && [401, 403].includes(errorStatus)) || repoNotFound) {
 					// maybe we have to acquire github access token to continue
 					const message = detectErrorMessage(error?.response, !!accessToken);
 					await GitHub1sAuthenticationView.getInstance().open(message, true);
-					return this._originalRequest!(...args);
+					return this._request!(...args);
 				}
 			});
-		}, this._originalRequest);
+		}, this._request);
 
 		this.graphql = Object.assign(async (...args: Parameters<Octokit['graphql']>) => {
 			if (!GitHubTokenManager.getInstance().getToken()) {
@@ -101,38 +102,40 @@ export class GitHubFetcher {
 		}, octokit.graphql);
 	}
 
-	@decorate(memorize)
-	private getCurrentRepo() {
-		return getBrowserUrl().then((browserUrl: string) => {
-			const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
-			return pathParts.length >= 2 ? (pathParts.slice(0, 2) as [string, string]).join('/') : DEFAULT_REPO;
-		});
-	}
-
-	private checkCurrentRepo(forceUpdate: boolean = false) {
+	private resolveCurrentRepo(forceUpdate: boolean = false) {
 		if (this._currentRepoPromise && !forceUpdate) {
 			return this._currentRepoPromise;
 		}
-		return (this._currentRepoPromise = Promise.resolve(this.getCurrentRepo()).then(async (repoFullName) => {
-			const [owner, repo] = repoFullName.split('/');
-			const response = await this._originalRequest?.('GET /repos/{owner}/{repo}', { owner, repo });
-			response?.data?.private && (await this.setUseSourcegraphApiFirst(false));
-			return response?.data || null;
-		})).catch(() => null);
+		const requestPattern = '/repos/{owner}/{repo}' as const;
+		const getOwnerRepo = () => getCurrentRepo().then((repo) => repo.split('/'));
+		return (this._currentRepoPromise = Promise.resolve(getOwnerRepo())
+			.then(([owner, repo]) => this._request?.(requestPattern, { owner, repo }).then((res) => res.data))
+			.catch(() => null));
 	}
 
-	public async useSourcegraphApiFirst(repo?: string): Promise<boolean> {
-		const targetRepo = repo || (await this.getCurrentRepo());
+	private async initPreferSourcegraphApi() {
+		if (await this.getPreferSourcegraphApi()) {
+			const sgDataSource = SourcegraphDataSource.getInstance('github');
+			if (!(await sgDataSource.provideRepository(await getCurrentRepo()))) {
+				this.resolveCurrentRepo(true).then((repo) => {
+					repo?.private && this.setPreferSourcegraphApi(false);
+				});
+			}
+		}
+	}
+
+	public async getPreferSourcegraphApi(repo?: string): Promise<boolean> {
+		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
-		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
+		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);
 		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
 	}
 
-	public async setUseSourcegraphApiFirst(value: boolean, repo?: string) {
-		const targetRepo = repo || (await this.getCurrentRepo());
+	public async setPreferSourcegraphApi(value: boolean, repo?: string) {
+		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
-		const cachedData: Record<string, boolean> | undefined = globalState.get(USE_SOURCEGRAPH_API_FIRST);
-		await globalState.update(USE_SOURCEGRAPH_API_FIRST, { ...cachedData, [targetRepo]: value });
+		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);
+		await globalState.update(PREFER_SOURCEGRAPH_API, { ...cachedData, [targetRepo]: value });
 		this._emitter.fire(value);
 	}
 }

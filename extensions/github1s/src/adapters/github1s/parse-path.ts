@@ -3,14 +3,24 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { parsePath } from 'history';
 import { PageType, RouterState } from '@/adapters/types';
 import { GitHub1sDataSource } from './data-source';
 import * as queryString from 'query-string';
+import { memorize } from '@/helpers/func';
+import { getBrowserUrl } from '@/helpers/context';
 
 export const DEFAULT_REPO = 'conwnet/github1s';
 
-const getDefaultBranch = async (repo: string): Promise<string> => {
+export const getCurrentRepo = memorize(() => {
+	return getBrowserUrl().then((browserUrl: string) => {
+		const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
+		return pathParts.length >= 2 ? (pathParts.slice(0, 2) as [string, string]).join('/') : DEFAULT_REPO;
+	});
+});
+
+export const getDefaultBranch = async (repo: string): Promise<string> => {
 	const dataSource = GitHub1sDataSource.getInstance();
 	return dataSource.getDefaultBranch(repo);
 };

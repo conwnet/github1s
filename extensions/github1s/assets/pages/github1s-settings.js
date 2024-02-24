@@ -104,27 +104,27 @@ export const TokenDetailBlock = ({ token, validating, onEditClick, validateToken
 };
 
 const PageFooter = () => {
-	const [sgApiFirst, setSgApiFirst] = useState(false);
+	const [preferSgApi, setPreferSgApi] = useState(false);
 
-	const updateSgApiFirst = useCallback(() => {
-		bridgeCommands.getUseSgApiFirst().then((value) => {
-			setSgApiFirst(value);
+	const updatePreferSgApi = useCallback(() => {
+		bridgeCommands.getPreferSgApi().then((value) => {
+			setPreferSgApi(value);
 		});
 	}, []);
 
 	const handleCheckboxChange = useCallback(
 		(event) => {
-			bridgeCommands.setUseSgApiFirst(event.target.checked).then(() => {
-				updateSgApiFirst();
+			bridgeCommands.setPreferSgApi(event.target.checked).then(() => {
+				updatePreferSgApi();
 			});
 		},
-		[updateSgApiFirst]
+		[updatePreferSgApi]
 	);
 
 	useEffect(() => {
 		const handler = ({ data }) => {
-			if (data.type === 'use-sourcegraph-api-first-changed') {
-				setSgApiFirst(data.value);
+			if (data.type === 'prefer-sourcegraph-api-changed') {
+				updatePreferSgApi();
 			}
 		};
 		window.addEventListener('message', handler);
@@ -132,13 +132,13 @@ const PageFooter = () => {
 	}, []);
 
 	useEffect(() => {
-		updateSgApiFirst();
-	}, [updateSgApiFirst]);
+		updatePreferSgApi();
+	}, [updatePreferSgApi]);
 
 	return html`
 		<div class="page-footer">
-			<input type="checkbox" checked=${sgApiFirst} onChange=${handleCheckboxChange} />
-			<span>Use Sourcegraph API first in this repository</span>
+			<input type="checkbox" checked=${preferSgApi} onChange=${handleCheckboxChange} />
+			<span>Prefer to use Sourcegraph API</span>
 		</div>
 	`;
 };
@@ -184,7 +184,7 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 	return html`
 		<div class="token-detail-page" ...${props}>
 			<${PageHeader} title="You have authenticated">
-				${validating ? html`<${VscodeLoading} dots=${8} align="left" style="height: 12px" />` : validateResult}
+				${validating ? html`<${VscodeLoading} dots=${8} align="left" style="height: 14px" />` : validateResult}
 			<//>
 			<${TokenDetailBlock}
 				token=${token}

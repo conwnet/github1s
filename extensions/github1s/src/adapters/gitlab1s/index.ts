@@ -6,11 +6,12 @@
 import * as vscode from 'vscode';
 import { GitLab1sRouterParser } from './router-parser';
 import { GitLab1sDataSource } from './data-source';
-// import { SourcegraphDataSource } from '../sourcegraph/data-source';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
 import { Adapter, CodeReviewType, PlatformName } from '../types';
 import { GitLab1sSettingsViewProvider } from './settings';
 import { GitLab1sAuthenticationView } from './authentication';
 import { setVSCodeContext } from '@/helpers/vscode';
+import { getCurrentRepo } from './parse-path';
 
 export class GitLab1sAdapter implements Adapter {
 	public scheme: string = 'gitlab1s';
@@ -39,6 +40,11 @@ export class GitLab1sAdapter implements Adapter {
 		);
 		vscode.commands.registerCommand('github1s.commands.openGitLab1sAuthPage', () => {
 			return GitLab1sAuthenticationView.getInstance().open();
+		});
+		vscode.commands.registerCommand('github1s.commands.syncSourcegraphRepository', async () => {
+			const dataSource = SourcegraphDataSource.getInstance('gitlab');
+			const randomRef = (Math.random() + 1).toString(36).slice(2);
+			return dataSource.provideCommit(await getCurrentRepo(), randomRef);
 		});
 	}
 

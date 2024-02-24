@@ -103,11 +103,9 @@ export class SourcegraphDataSource extends DataSource {
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
-			try {
-				return await fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
-					.then((response) => response.arrayBuffer())
-					.then((buffer) => ({ content: new Uint8Array(buffer) }));
-			} catch (e) {}
+			return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
+				.then((response) => (response.ok ? response.arrayBuffer() : Promise.reject({ response })))
+				.then((buffer) => ({ content: new Uint8Array(buffer) }));
 		}
 		// TODO: support binary files for other platforms
 		const { content } = await readFile(this.buildRepository(repo), ref, path);

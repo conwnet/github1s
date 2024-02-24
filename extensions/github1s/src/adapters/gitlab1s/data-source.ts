@@ -68,7 +68,7 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 
 	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
 		const gitlabFetcher = GitLabFetcher.getInstance();
-		if (await gitlabFetcher.useSourcegraphApiFirst(args[0])) {
+		if (await gitlabFetcher.getPreferSourcegraphApi(args[0])) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
 			} catch (e) {}

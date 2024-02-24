@@ -21,7 +21,7 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 	protected tokenManager = GitHubTokenManager.getInstance();
 	protected apiFetcher: Pick<
 		GitHubFetcher,
-		'useSourcegraphApiFirst' | 'setUseSourcegraphApiFirst' | 'onDidChangeUseSourcegraphApiFirst'
+		'getPreferSourcegraphApi' | 'setPreferSourcegraphApi' | 'onDidChangePreferSourcegraphApi'
 	> = GitHubFetcher.getInstance();
 
 	protected pageTitle = 'GitHub1s Settings';
@@ -68,11 +68,11 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 					const messageApi = messageApiMap[message.data?.level];
 					messageApi && messageApi(...message.data?.args).then((response) => postMessage(response));
 					break;
-				case 'get-use-sourcegraph-api':
-					this.apiFetcher.useSourcegraphApiFirst().then((value) => postMessage(value));
+				case 'get-prefer-sourcegraph-api':
+					this.apiFetcher.getPreferSourcegraphApi().then((value) => postMessage(value));
 					break;
-				case 'set-use-sourcegraph-api':
-					this.apiFetcher.setUseSourcegraphApiFirst(message.data);
+				case 'set-prefer-sourcegraph-api':
+					this.apiFetcher.setPreferSourcegraphApi(message.data);
 					postMessage(message.data);
 					break;
 			}
@@ -81,8 +81,8 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 		this.tokenManager.onDidChangeToken((token) => {
 			webviewView.webview.postMessage({ type: 'token-changed', token });
 		});
-		this.apiFetcher.onDidChangeUseSourcegraphApiFirst((value) => {
-			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-first-changed', value });
+		this.apiFetcher.onDidChangePreferSourcegraphApi((value) => {
+			webviewView.webview.postMessage({ type: 'prefer-sourcegraph-api-changed', value });
 		});
 	}
 
