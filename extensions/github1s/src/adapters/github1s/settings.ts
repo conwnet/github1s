@@ -18,33 +18,48 @@ export const messageApiMap = {
 export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = 'github1s.views.settings';
 
-	public registerListeners(webviewView: vscode.WebviewView) {
-		const tokenManager = GitHubTokenManager.getInstance();
-		const githubFetcher = GitHubFetcher.getInstance();
+	protected tokenManager = GitHubTokenManager.getInstance();
+	protected apiFetcher: Pick<
+		GitHubFetcher,
+		'useSourcegraphApiFirst' | 'setUseSourcegraphApiFirst' | 'onDidChangeUseSourcegraphApiFirst'
+	> = GitHubFetcher.getInstance();
 
+	protected pageTitle = 'GitHub1s Settings';
+	protected OAuthCommand = 'github1s.commands.vscode.connectToGitHub';
+	protected detailPageCommand = 'github1s.commands.openGitHub1sAuthPage';
+	protected pageConfig = {
+		pageDescriptionLines: [
+			'For unauthenticated requests, the rate limit of GitHub allows for up to 60 requests per hour.',
+			'For API requests using Authentication, you can make up to 5,000 requests per hour.',
+		],
+		OAuthButtonText: 'Connect to GitHub',
+		createTokenLink: `${GITHUB_ORIGIN}/settings/tokens/new?scopes=repo&description=GitHub1s`,
+	};
+
+	public registerListeners(webviewView: vscode.WebviewView) {
 		webviewView.webview.onDidReceiveMessage((message) => {
 			const commonResponse = { id: message.id, type: message.type };
 			const postMessage = (data?: unknown) => webviewView.webview.postMessage({ ...commonResponse, data });
 
 			switch (message.type) {
 				case 'get-token':
-					postMessage(tokenManager.getToken());
+					postMessage(this.tokenManager.getToken());
 					break;
 				case 'set-token':
-					tokenManager.setToken(message.data || '').then(() => postMessage());
+					this.tokenManager.setToken(message.data || '').then(() => postMessage());
 					break;
 				case 'validate-token':
-					tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
+					this.tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
 					break;
 				case 'open-detail-page':
-					vscode.commands.executeCommand('github1s.commands.openGitHub1sAuthPage').then(() => postMessage());
+					vscode.commands.executeCommand(this.detailPageCommand).then(() => postMessage());
 					break;
-				case 'connect-to-github':
-					vscode.commands.executeCommand('github1s.commands.vscode.connectToGitHub').then((data: any) => {
+				case 'oauth-authorizing':
+					vscode.commands.executeCommand(this.OAuthCommand).then((data: any) => {
 						if (data && data.error_description) {
 							vscode.window.showErrorMessage(data.error_description);
 						} else if (data && data.access_token) {
-							GitHubTokenManager.getInstance().setToken(data.access_token || '');
+							this.tokenManager.setToken(data.access_token || '');
 						}
 						postMessage();
 					});
@@ -54,20 +69,20 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 					messageApi && messageApi(...message.data?.args).then((response) => postMessage(response));
 					break;
 				case 'get-use-sourcegraph-api':
-					githubFetcher.useSourcegraphApiFirst().then((value) => postMessage(value));
+					this.apiFetcher.useSourcegraphApiFirst().then((value) => postMessage(value));
 					break;
 				case 'set-use-sourcegraph-api':
-					githubFetcher.setUseSourcegraphApiFirst(message.data);
+					this.apiFetcher.setUseSourcegraphApiFirst(message.data);
 					postMessage(message.data);
 					break;
 			}
 		});
 
-		tokenManager.onDidChangeToken((token) => {
+		this.tokenManager.onDidChangeToken((token) => {
 			webviewView.webview.postMessage({ type: 'token-changed', token });
 		});
-		githubFetcher.onDidChangeUseSourcegraphApiFirst((value) => {
-			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-changed', value });
+		this.apiFetcher.onDidChangeUseSourcegraphApiFirst((value) => {
+			webviewView.webview.postMessage({ type: 'use-sourcegraph-api-first-changed', value });
 		});
 	}
 
@@ -81,9 +96,12 @@ export class GitHub1sSettingsViewProvider implements vscode.WebviewViewProvider 
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/components.css').toString(),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-settings.css').toString(),
 		];
+		const globalPageConfig = { ...this.pageConfig, extensionUri: extensionContext.extensionUri.toString() };
 		const scripts = [
+			'data:text/javascript;base64,' +
+				Buffer.from(`window.pageConfig=${JSON.stringify(globalPageConfig)};`).toString('base64'),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-settings.js').toString(),
 		];
-		webviewView.webview.html = createPageHtml('GitHub1s Settings', styles, scripts);
+		webviewView.webview.html = createPageHtml(this.pageTitle, styles, scripts);
 	}
 }

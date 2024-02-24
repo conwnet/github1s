@@ -71,7 +71,7 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 			logo: {
 				title: 'Open on GitLab',
 				icon: gitlabLogoUrl,
-				onClick: () => (repository ? openOfficialPage('https://gitlab.com') : openGitHub1sPage()),
+				onClick: () => (repository ? openOfficialPage(GITLAB_ORIGIN) : openGitHub1sPage()),
 			},
 		};
 	}
@@ -120,7 +120,7 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 		logo: {
 			title: 'Open on GitHub',
 			icon: githubLogoUrl,
-			onClick: () => (repository ? openOfficialPage('https://github.com') : openGitHub1sPage()),
+			onClick: () => (repository ? openOfficialPage(GITHUB_ORIGIN) : openGitHub1sPage()),
 		},
 	};
 };

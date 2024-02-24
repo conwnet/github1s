@@ -1,7 +1,7 @@
 {
-  "name": "vscode-unpkg",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "gitlab-auth-callback",
+  "version": "0.0.0",
+  "main": "index.ts",
   "license": "MIT",
   "private": true,
   "dependencies": {

@@ -31,7 +31,7 @@ export const createPageHtml = (title: string, styles: string[] = [], scripts: st
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
+			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-${nonce}'; script-src 'nonce-${nonce}'; img-src *;">
 			<title>${title}</title>
 			${styles.map((style) => `<link rel="stylesheet" nonce="${nonce}" href="${style}" />`).join('')}
 			<style nonce="${nonce}">
@@ -47,7 +47,7 @@ export const createPageHtml = (title: string, styles: string[] = [], scripts: st
 				<span></span><span></span><span></span><span></span><span></span>
 			</div>
 		  <div id="app"></div>
-		  ${scripts.map((script) => `<script type="module" nonce="${nonce}" src="${script}"></script>`)}
+		  ${scripts.map((script) => `<script type="module" nonce="${nonce}" src="${script}"></script>`).join('')}
 		</body>
 		</html>
 	 `;
