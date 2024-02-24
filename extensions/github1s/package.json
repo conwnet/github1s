@@ -298,6 +298,12 @@
         "category": "GitHub1s",
         "icon": "$(globe)",
         "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'"
+      },
+      {
+        "command": "github1s.commands.syncSourcegraphRepository",
+        "title": "Sync Sourcegraph Repository",
+        "category": "GitHub1s",
+        "enablement": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/"
       }
     ],
     "colors": [

@@ -68,7 +68,7 @@ export const bridgeCommands = {
 	openDetailPage: () => postMessage('open-detail-page'),
 	OAuthAuthenticate: () => postMessage('oauth-authorizing'),
 	alertMessage: (messageArgs) => postMessage('call-vscode-message-api', messageArgs),
-	getUseSgApiFirst: () => postMessage('get-use-sourcegraph-api'),
-	setUseSgApiFirst: (value) => postMessage('set-use-sourcegraph-api', value),
+	getPreferSgApi: () => postMessage('get-prefer-sourcegraph-api'),
+	setPreferSgApi: (value) => postMessage('set-prefer-sourcegraph-api', value),
 	getNotice: () => postMessage('get-notice'),
 };

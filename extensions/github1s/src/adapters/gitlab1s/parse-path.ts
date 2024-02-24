@@ -3,11 +3,22 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { parsePath } from 'history';
 import { PageType, RouterState } from '../types';
 import { GitLab1sDataSource } from './data-source';
+import { memorize } from '@/helpers/func';
+import { getBrowserUrl } from '@/helpers/context';
 
 export const DEFAULT_REPO = 'gitlab-org/gitlab-docs';
+
+export const getCurrentRepo = memorize(() => {
+	return getBrowserUrl().then((browserUrl: string) => {
+		const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
+		const dashIndex = pathParts.indexOf('-');
+		return (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/') || DEFAULT_REPO;
+	});
+});
 
 const getDefaultBranch = async (repo: string): Promise<string> => {
 	const dataSource = GitLab1sDataSource.getInstance();
@@ -135,7 +146,10 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 			case PageType.Blob:
 				return parseBlobUrl(path);
 			case PageType.CodeReview:
-				return parseMergeRequestUrl(path);
+				if (pathParts.length > dashIndex + 2) {
+					return parseMergeRequestUrl(path);
+				}
+				return parseMergeRequestsUrl(path);
 			case PageType.CodeReviewList:
 				return parseMergeRequestsUrl(path);
 			case PageType.Commit:

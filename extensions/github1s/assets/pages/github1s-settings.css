@@ -26,11 +26,7 @@
 
 .page-description {
   font-size: 12px;
-	margin-bottom: 10px;
-}
-
-.page-description div {
-	margin-bottom: 5px;
+	margin-bottom: 12px;
 }
 
 .description div:last-child {
