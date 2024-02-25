@@ -1,35 +1,34 @@
-import { render } from './preact.module.js';
-import { useState, useCallback, useEffect } from './preact-hooks.module.js';
-import { html, VscodeButton, VscodeInput, VscodeLink, VscodeLoading, postMessage } from './components.js';
+import { render } from './libraries/preact.module.js';
+import { useState, useCallback, useEffect } from './libraries/preact-hooks.module.js';
+import { html, VscodeButton, VscodeInput, VscodeLink, VscodeLoading, bridgeCommands } from './components.js';
 
-const EditTokenDescription = () => {
-	return html`
-		<div class="description">
-			<div>For unauthenticated requests, the rate limit of GitHub allows for up to 60 requests per hour.</div>
-			<div>For API requests using Authentication, you can make up to 5,000 requests per hour.</div>
-		</div>
-	`;
+const pageConfig = window.pageConfig || {};
+
+export const PageHeader = ({ title, children, ...props }) => {
+	return html`<div ...${props}>
+		<div class="page-title">${title}</div>
+		<div class="page-description">${children}</div>
+	</div>`;
 };
 
-const ConnectToGitHubBlock = (props) => {
+export const OAuthBlock = ({ buttonText, command, ...props }) => {
 	const [loading, setLoading] = useState(false);
 	const handleButtonClick = useCallback(() => {
 		setLoading(true);
-		postMessage('connect-to-github').then(() => setLoading(false));
+		bridgeCommands.OAuthAuthenticate().then(() => setLoading(false));
 	}, []);
 
 	return html`
-		<div class="authentication-method-block" ...${props}>
-			<h3 class="authentication-method-title">Authenticating OAuth App</h3>
+		<div class="content-block" ...${props}>
+			<h3 class="content-block-title">Authenticating OAuth App</h3>
 			<div class="flex-line">
-				<${VscodeButton} loading=${loading} onClick=${handleButtonClick}>Connect to GitHub<//>
+				<${VscodeButton} loading=${loading} onClick=${handleButtonClick}>${buttonText}<//>
 			</div>
 		</div>
 	`;
 };
 
-const ManualInputTokenBlock = ({ onTokenChange, ...props }) => {
-	const createTokenLink = 'https://github.com/settings/tokens/new?scopes=repo&description=GitHub1s';
+export const InputTokenBlock = ({ createLink, isEditing, onCancel, ...props }) => {
 	const [inputToken, setInputToken] = useState('');
 	const [loading, setLoading] = useState(false);
 	const handleInputTokenChange = useCallback((event) => {
@@ -39,23 +38,23 @@ const ManualInputTokenBlock = ({ onTokenChange, ...props }) => {
 	const handleSubmit = useCallback(() => {
 		if (inputToken) {
 			setLoading(true);
-			postMessage('validate-token', inputToken).then((tokenStatus) => {
+			bridgeCommands.validateToken(inputToken).then((tokenStatus) => {
 				if (!tokenStatus) {
 					const messageArgs = { level: 'info', args: ['This AccessToken is invalid'] };
-					postMessage('call-vscode-message-api', messageArgs);
+					bridgeCommands.alertMessage(messageArgs);
 					setLoading(false);
 					return;
 				}
-				postMessage('set-token', inputToken).then(() => setLoading(false));
+				bridgeCommands.setToken(inputToken).then(() => setLoading(false));
 			});
 		}
 	}, [inputToken]);
 
 	return html`
-		<div class="authentication-method-block" ...${props}>
-			<h3 class="authentication-method-title">Manual Input AccessToken</h3>
+		<div class="input-token-block" ...${props}>
+			<h3 class="input-token-block-title">Manual Input AccessToken</h3>
 			<div class="create-token-link">
-				<${VscodeLink} to=${createTokenLink} external> Generate New AccessToken <//>
+				<${VscodeLink} to=${createLink} external>Create New AccessToken <//>
 			</div>
 			<div class="flex-line">
 				<${VscodeInput}
@@ -68,72 +67,35 @@ const ManualInputTokenBlock = ({ onTokenChange, ...props }) => {
 			<div class="flex-line">
 				<${VscodeButton} loading=${loading} onClick=${handleSubmit}>Submit<//>
 			</div>
+			${isEditing
+				? html`<div class="flex-line">
+						<${VscodeButton} onClick=${onCancel}>Cancel<//>
+				  </div>`
+				: null}
 		</div>
 	`;
 };
 
-const TokenEditPage = ({ token, onCancel, ...props }) => {
-	const cancelButton = token ? html`<${VscodeButton} onClick=${onCancel}>Cancel<//>` : '';
-
-	return html`
-		<div class="token-edit-page" ...${props}>
-			<div class="page-title">Set AccessToken</div>
-			<${EditTokenDescription} />
-			<${ConnectToGitHubBlock} />
-			<${ManualInputTokenBlock} />
-			<div class="flex-line">${cancelButton}</div>
-		</div>
-	`;
-};
-
-const TokenDetailPage = ({ token, onEditClick, ...props }) => {
-	const displayToken = token.slice(0, 7) + '*********************************';
-	const [tokenStatus, setTokenStatus] = useState(null);
-	const [validating, setValidating] = useState(true);
-
-	const tokenStatusText = validating ? '...' : tokenStatus ? 'VALID' : 'INVALID';
-	const tokenClasses = `token-text ${validating ? '' : tokenStatus ? 'token-valid' : 'token-invalid'}`;
-
-	const handleDetailClick = useCallback(() => postMessage('open-detail-page'), []);
-
-	const validateToken = useCallback((token) => {
-		setValidating(true);
-		return postMessage('validate-token', token).then((tokenStatus) => {
-			setValidating(false);
-			setTokenStatus(tokenStatus);
-			return tokenStatus;
-		});
-	}, []);
-
+export const TokenDetailBlock = ({ token, validating, onEditClick, validateToken, ...props }) => {
 	const handleValidateClick = useCallback(() => {
 		validateToken(token).then((tokenStatus) => {
 			const statusMessage = `Current AccessToken is ${tokenStatus ? 'VALID' : 'INVALID'}`;
 			const messageArgs = { level: 'info', args: [statusMessage] };
-			postMessage('call-vscode-message-api', messageArgs);
+			bridgeCommands.alertMessage(messageArgs);
 		});
 	}, [validateToken, token]);
 
 	const handleClearClick = useCallback(() => {
-		postMessage('call-vscode-message-api', {
+		const messageArgs = {
 			level: 'warning',
-			args: ['Would you want to clear the saved GitHub AccessToken?', { modal: true }, 'Confirm'],
-		}).then((choose) => choose === 'Confirm' && postMessage('set-token', ''));
+			args: ['Would you want to clear the saved this AccessToken?', { modal: true }, 'Confirm'],
+		};
+		bridgeCommands.alertMessage(messageArgs).then((choose) => choose === 'Confirm' && bridgeCommands.setToken(''));
 	}, []);
 
-	useEffect(() => {
-		token && validateToken(token);
-	}, [token, validateToken]);
-
 	return html`
-		<div class="token-detail-page" ${props}>
-			<div class="page-title">You have authenticated</div>
-			<div class="description">
-				<div class="token-status">
-					Current AccessToken is <span class="token-status-text">${tokenStatusText}</span>.
-				</div>
-				<div class=${tokenClasses}>${displayToken}</div>
-			</div>
-			<div class="flex-line"><${VscodeButton} onClick=${handleDetailClick}>Detail<//></div>
+		<div class="token-detail-block" ${props}>
+			<div class="flex-line"><${VscodeButton} onClick=${bridgeCommands.openDetailPage}>Detail<//></div>
 			<div class="flex-line"><${VscodeButton} loading=${validating} onClick=${handleValidateClick}>Validate<//></div>
 			<div class="flex-line"><${VscodeButton} onClick=${onEditClick}>Edit<//></div>
 			<div class="flex-line"><${VscodeButton} onClick=${handleClearClick}>Clear<//></div>
@@ -142,31 +104,94 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 };
 
 const PageFooter = () => {
-	const [sgApiFirst, setSgApiFirst] = useState(false);
+	const [preferSgApi, setPreferSgApi] = useState(false);
 
-	const updateSgApiFirst = useCallback(() => {
-		postMessage('get-use-sourcegraph-api').then((value) => {
-			setSgApiFirst(value);
+	const updatePreferSgApi = useCallback(() => {
+		bridgeCommands.getPreferSgApi().then((value) => {
+			setPreferSgApi(value);
 		});
 	}, []);
 
 	const handleCheckboxChange = useCallback(
 		(event) => {
-			postMessage('set-use-sourcegraph-api', event.target.checked).then(() => {
-				updateSgApiFirst();
+			bridgeCommands.setPreferSgApi(event.target.checked).then(() => {
+				updatePreferSgApi();
 			});
 		},
-		[updateSgApiFirst]
+		[updatePreferSgApi]
 	);
 
 	useEffect(() => {
-		updateSgApiFirst();
-	}, [updateSgApiFirst]);
+		const handler = ({ data }) => {
+			if (data.type === 'prefer-sourcegraph-api-changed') {
+				updatePreferSgApi();
+			}
+		};
+		window.addEventListener('message', handler);
+		return () => window.removeEventListener('message', handler);
+	}, []);
+
+	useEffect(() => {
+		updatePreferSgApi();
+	}, [updatePreferSgApi]);
 
 	return html`
 		<div class="page-footer">
-			<input type="checkbox" checked=${sgApiFirst} onChange=${handleCheckboxChange} />
-			<span>Use Sourcegraph API first in this repository</span>
+			<input type="checkbox" checked=${preferSgApi} onChange=${handleCheckboxChange} />
+			<span>Prefer to use Sourcegraph API</span>
+		</div>
+	`;
+};
+
+const TokenEditPage = ({ token, onCancel, ...props }) => {
+	const pageDescription = (pageConfig.pageDescriptionLines || []).map((line) => html`<div>${line}</div>`);
+
+	return html`
+		<div class="token-edit-page" ...${props}>
+			<${PageHeader} title="Set AccessToken">${pageDescription}<//>
+			<${OAuthBlock} buttonText=${pageConfig.OAuthButtonText} command=${pageConfig.OAuthCommand} />
+			<${InputTokenBlock} createLink=${pageConfig.createTokenLink} isEditing=${!!token} onCancel=${onCancel} />
+		</div>
+	`;
+};
+
+const TokenDetailPage = ({ token, onEditClick, ...props }) => {
+	const [tokenStatus, setTokenStatus] = useState(null);
+	const [validating, setValidating] = useState(true);
+
+	const validateToken = useCallback((token) => {
+		setValidating(true);
+		return bridgeCommands.validateToken(token).then((tokenStatus) => {
+			setValidating(false);
+			setTokenStatus(tokenStatus);
+			return tokenStatus;
+		});
+	}, []);
+
+	const validateResult = tokenStatus
+		? html`<div class="login-text">
+				<span>Logged in as</span>
+				<a href=${tokenStatus.profile_url} target="_blank" rel="noopener noreferrer">
+					<img class="user-avatar" src=${tokenStatus.avatar_url} />${tokenStatus.username}
+				</a>
+		  </div>`
+		: html`<div>Current AccessToken is <span class="error-text">INVALID</span>.</div>`;
+
+	useEffect(() => {
+		token && validateToken(token);
+	}, [token, validateToken]);
+
+	return html`
+		<div class="token-detail-page" ...${props}>
+			<${PageHeader} title="You have authenticated">
+				${validating ? html`<${VscodeLoading} dots=${8} align="left" style="height: 14px" />` : validateResult}
+			<//>
+			<${TokenDetailBlock}
+				token=${token}
+				validating=${validating}
+				onEditClick=${onEditClick}
+				validateToken=${validateToken}
+			/>
 		</div>
 	`;
 };
@@ -180,7 +205,7 @@ const App = () => {
 	const switchToDetail = useCallback(() => setPageType('DETAIL'), []);
 
 	useEffect(() => {
-		postMessage('get-token').then((token) => {
+		bridgeCommands.getToken().then((token) => {
 			setToken(token);
 			setLoading(false);
 			setPageType(token ? 'DETAIL' : 'EDIT');
@@ -202,14 +227,11 @@ const App = () => {
 		return html`<${VscodeLoading} />`;
 	}
 
-	const tokenPage =
-		pageType === 'DETAIL'
-			? html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} />`
-			: html`<${TokenEditPage} token=${token} onCancel=${switchToDetail} />`;
-
 	return html`
 		<div>
-			${tokenPage}
+			${pageType === 'DETAIL'
+				? html`<${TokenDetailPage} token=${token} onEditClick=${switchToEdit} />`
+				: html`<${TokenEditPage} token=${token} onCancel=${switchToDetail} />`}
 			<${PageFooter} />
 		</div>
 	`;

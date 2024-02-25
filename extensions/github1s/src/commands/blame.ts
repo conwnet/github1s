@@ -134,7 +134,7 @@ const createFirstLineDecorationType = (blameRange: BlameRange) => {
 			contentText: blameRange.commit.message,
 			color: new vscode.ThemeColor('foreground'),
 			textDecoration: firstLineBeforeTextDecorationCss,
-			borderColor: ageColors[blameRange.age || 10],
+			borderColor: ageColors[blameRange.age % 11 || 10],
 		},
 		after: {
 			...commonLineDecorationTypeOptions.after,
@@ -151,7 +151,7 @@ const createRestLinesDecorationType = (blameRange: BlameRange) => {
 		...commonLineDecorationTypeOptions,
 		before: {
 			...commonLineDecorationTypeOptions.before,
-			borderColor: ageColors[blameRange.age || 10],
+			borderColor: ageColors[blameRange.age % 11 || 10],
 		},
 	});
 };

@@ -5,7 +5,7 @@
 
 import 'vs/css!./media/activitybarpart';
 import 'vs/css!./media/activityaction';
-import { localize } from 'vs/nls';
+import { localize, localize2 } from 'vs/nls';
 import { ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
 import { Part } from 'vs/workbench/browser/part';
 import { ActivityBarPosition, IWorkbenchLayoutService, LayoutSettings, Parts, Position } from 'vs/workbench/services/layout/browser/layoutService';
@@ -35,7 +35,6 @@ import { Categories } from 'vs/platform/action/common/actionCommonCategories';
 import { createAndFillInContextMenuActions } from 'vs/platform/actions/browser/menuEntryActionViewItem';
 import { IViewDescriptorService, ViewContainerLocation, ViewContainerLocationToString } from 'vs/workbench/common/views';
 import { IPaneCompositePartService } from 'vs/workbench/services/panecomposite/browser/panecomposite';
-import { TitleBarStyleContext } from 'vs/workbench/common/contextkeys';
 import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
 import { IWorkbenchEnvironmentService } from 'vs/workbench/services/environment/common/environmentService';
 
@@ -338,12 +337,12 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
 		const homeBarContainer = document.createElement('div');
 		homeBarContainer.className = 'home-bar';
 		if (logo?.icon) {
-			const logoImage = `url(${window.encodeURI(logo?.icon)})`
+			const logoImage = `url(${window.encodeURI(logo?.icon)})`;
 			homeBarContainer.style.maskImage = logoImage;
 			homeBarContainer.style.webkitMaskImage = logoImage;
 		}
 		if (logo?.title) {
-			homeBarContainer.title = logo?.title
+			homeBarContainer.title = logo?.title;
 		}
 		if (logo?.onClick) {
 			homeBarContainer.onclick = logo.onClick;
@@ -413,7 +412,7 @@ registerAction2(class extends Action2 {
 			},
 			shortTitle: localize('side', "Side"),
 			category: Categories.View,
-			toggled: ContextKeyExpr.or(ContextKeyExpr.equals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.SIDE), ContextKeyExpr.and(ContextKeyExpr.equals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.TOP), TitleBarStyleContext.isEqualTo('native'))),
+			toggled: ContextKeyExpr.equals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.SIDE),
 			menu: [{
 				id: MenuId.ActivityBarPositionMenu,
 				order: 1
@@ -443,11 +442,10 @@ registerAction2(class extends Action2 {
 			toggled: ContextKeyExpr.equals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.TOP),
 			menu: [{
 				id: MenuId.ActivityBarPositionMenu,
-				when: TitleBarStyleContext.notEqualsTo('native'),
 				order: 2
 			}, {
 				id: MenuId.CommandPalette,
-				when: ContextKeyExpr.and(ContextKeyExpr.notEquals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.TOP), TitleBarStyleContext.notEqualsTo('native')),
+				when: ContextKeyExpr.notEquals(`config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`, ActivityBarPosition.TOP),
 			}]
 		});
 	}
@@ -542,7 +540,7 @@ registerAction2(
 		constructor() {
 			super({
 				id: 'workbench.action.previousSideBarView',
-				title: { value: localize('previousSideBarView', "Previous Primary Side Bar View"), original: 'Previous Primary Side Bar View' },
+				title: localize2('previousSideBarView', 'Previous Primary Side Bar View'),
 				category: Categories.View,
 				f1: true
 			}, -1);
@@ -555,7 +553,7 @@ registerAction2(
 		constructor() {
 			super({
 				id: 'workbench.action.nextSideBarView',
-				title: { value: localize('nextSideBarView', "Next Primary Side Bar View"), original: 'Next Primary Side Bar View' },
+				title: localize2('nextSideBarView', 'Next Primary Side Bar View'),
 				category: Categories.View,
 				f1: true
 			}, 1);
@@ -568,7 +566,7 @@ registerAction2(
 		constructor() {
 			super({
 				id: 'workbench.action.focusActivityBar',
-				title: { value: localize('focusActivityBar', "Focus Activity Bar"), original: 'Focus Activity Bar' },
+				title: localize2('focusActivityBar', 'Focus Activity Bar'),
 				category: Categories.View,
 				f1: true
 			});

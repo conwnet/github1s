@@ -8,7 +8,7 @@ import router from '@/router';
 import { Barrier } from '@/helpers/async';
 import { Repository } from '@/repository';
 import * as queryString from 'query-string';
-import { relativeTimeTo } from '@/helpers/date';
+import { relativeTimeTo, toISOString } from '@/helpers/date';
 import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
@@ -18,6 +18,13 @@ export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): strin
 	const shortCommitSha = commit.sha.slice(0, 7);
 	const relativeTimeStr = commit.createTime ? relativeTimeTo(commit.createTime) : null;
 	return [shortCommitSha, commit.author, relativeTimeStr].filter(Boolean).join(', ');
+};
+
+export const getCommitTreeItemTooltip = (commit: adapterTypes.Commit): string => {
+	const shortCommitSha = commit.sha.slice(0, 7);
+	const ISOTimeStr = commit.createTime ? toISOString(commit.createTime) : null;
+	const detailText = [shortCommitSha, commit.author, ISOTimeStr].filter(Boolean).join(', ');
+	return `${commit.message}\n(${detailText})`;
 };
 
 export interface CommitTreeItem extends vscode.TreeItem {
@@ -95,7 +102,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = commit.message.split(/[\r\n]/)[0];
 			const description = getCommitTreeItemDescription(commit);
-			const tooltip = `${commit.message}\n(${description})`;
+			const tooltip = getCommitTreeItemTooltip(commit);
 			const iconPath = vscode.Uri.parse(commit.avatarUrl || '');
 			const contextValue = 'github1s:viewItems:commitListItem';
 

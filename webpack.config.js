@@ -17,16 +17,17 @@ const skipMinified = { info: { minimized: true } };
 const VSCODE_NODE_MODULES = [
 	'@vscode/iconv-lite-umd',
 	'@vscode/vscode-languagedetection',
+	'@xterm/addon-canvas',
+	'@xterm/addon-image',
+	'@xterm/addon-search',
+	'@xterm/addon-serialize',
+	'@xterm/addon-unicode11',
+	'@xterm/addon-webgl',
+	'@xterm/xterm',
 	'jschardet',
 	'tas-client-umd',
 	'vscode-oniguruma',
 	'vscode-textmate',
-	'xterm',
-	'xterm-addon-image',
-	'xterm-addon-search',
-	'xterm-addon-serialize',
-	'xterm-addon-unicode11',
-	'xterm-addon-webgl',
 ].map((pkg) => ({
 	from: `vscode-web/node_modules/${pkg}/**`,
 	globOptions: { dot: true },
@@ -93,6 +94,8 @@ module.exports = (env, argv) => {
 			}),
 			new webpack.DefinePlugin({
 				STATIC_HASH: JSON.stringify(STATIC_HASH),
+				GITHUB_ORIGIN: JSON.stringify(process.env.GITHUB_DOMAIN || 'https://github.com'),
+				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
 			}),
 			generate({
 				file: `static-${STATIC_HASH}/config/extensions.js`,

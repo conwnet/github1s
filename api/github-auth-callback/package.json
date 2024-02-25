@@ -1,10 +1,13 @@
 {
   "name": "github-auth-callback",
   "version": "0.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "license": "MIT",
   "private": true,
   "dependencies": {
     "got": "^11.8.5"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.0.20"
   }
 }

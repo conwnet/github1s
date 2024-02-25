@@ -3,10 +3,27 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { parsePath } from 'history';
 import { PageType, RouterState } from '@/adapters/types';
 import { GitHub1sDataSource } from './data-source';
 import * as queryString from 'query-string';
+import { memorize } from '@/helpers/func';
+import { getBrowserUrl } from '@/helpers/context';
+
+export const DEFAULT_REPO = 'conwnet/github1s';
+
+export const getCurrentRepo = memorize(() => {
+	return getBrowserUrl().then((browserUrl: string) => {
+		const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
+		return pathParts.length >= 2 ? (pathParts.slice(0, 2) as [string, string]).join('/') : DEFAULT_REPO;
+	});
+});
+
+export const getDefaultBranch = async (repo: string): Promise<string> => {
+	const dataSource = GitHub1sDataSource.getInstance();
+	return dataSource.getDefaultBranch(repo);
+};
 
 const parseTreeUrl = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname!.split('/').filter(Boolean);
@@ -27,7 +44,7 @@ const parseBlobUrl = async (path: string): Promise<RouterState> => {
 	}
 
 	// get selected line number range from path which looks like:
-	// `/conwnet/github1s/blob/HEAD/package.json#L10-L20`
+	// `/conwnet/github1s/blob/master/package.json#L10-L20`
 	const matches = routerHash.match(/^#L(\d+)(?:-L(\d+))?/);
 	const [_, startLineNumber = '0', endLineNumber] = matches ? matches : [];
 
@@ -46,7 +63,7 @@ const parseCommitsUrl = async (path: string): Promise<RouterState> => {
 	return {
 		repo: `${owner}/${repo}`,
 		pageType: PageType.CommitList,
-		ref: refParts.length ? refParts.join('/') : 'HEAD',
+		ref: refParts.length ? refParts.join('/') : await getDefaultBranch(`${owner}/${repo}`),
 	};
 };
 
@@ -63,7 +80,7 @@ const parsePullsUrl = async (path: string): Promise<RouterState> => {
 
 	return {
 		repo: `${owner}/${repo}`,
-		ref: 'HEAD',
+		ref: await getDefaultBranch(`${owner}/${repo}`),
 		pageType: PageType.CodeReviewList,
 	};
 };
@@ -77,7 +94,7 @@ const parsePullUrl = async (path: string): Promise<RouterState> => {
 	return {
 		repo: `${owner}/${repo}`,
 		pageType: PageType.CodeReview,
-		ref: codeReview.head.commitSha,
+		ref: codeReview.targetSha,
 		codeReviewId,
 	};
 };
@@ -97,7 +114,7 @@ const parseSearchUrl = async (path: string): Promise<RouterState> => {
 	return {
 		repo: `${owner}/${repo}`,
 		pageType: PageType.Search,
-		ref: 'HEAD',
+		ref: await getDefaultBranch(`${owner}/${repo}`),
 		query,
 		isRegex,
 		isCaseSensitive,
@@ -144,8 +161,8 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 
 	// fallback to default
 	return {
-		repo: 'conwnet/github1s',
-		ref: 'HEAD',
+		repo: DEFAULT_REPO,
+		ref: await getDefaultBranch(DEFAULT_REPO),
 		pageType: PageType.Tree,
 		filePath: '',
 	};

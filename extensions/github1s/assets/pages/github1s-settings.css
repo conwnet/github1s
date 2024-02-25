@@ -24,6 +24,37 @@
 	margin-bottom: 10px;
 }
 
+.page-description {
+  font-size: 12px;
+	margin-bottom: 12px;
+}
+
+.description div:last-child {
+	margin-bottom: 0;
+}
+
+.content-block {
+  margin-bottom: 8px;
+}
+
+.content-block-title {
+  font-weight: normal;
+	margin-bottom: 8px;
+}
+
+.input-token-block {
+	margin-bottom: 8px;
+}
+
+.input-token-block-title {
+  font-weight: normal;
+	margin-bottom: 8px;
+}
+
+.create-token-link {
+	margin-bottom: 10px;
+}
+
 .page-footer {
   display: flex;
   align-items: center;
@@ -35,41 +66,17 @@
  margin-left: 0;
 }
 
-
-.description {
-  font-size: 12px;
-	margin-bottom: 10px;
+.login-text > span:first-child {
+  margin-right: 4px;
 }
 
-.description div {
-	margin-bottom: 5px;
+.user-avatar {
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+  margin-right: 4px;
+  vertical-align: bottom;
+  border-radius: 50%;
+  background-color: #ccc;
 }
 
-.description div:last-child {
-	margin-bottom: 0;
-}
-
-.authentication-method-block {
-	margin-bottom: 8px;
-}
-
-.authentication-method-title {
-  font-weight: normal;
-	margin-bottom: 8px;
-}
-
-.create-token-link {
-	margin-bottom: 10px;
-}
-
-.token-text {
-  margin-bottom: 8px;
-}
-
-.token-text.token-valid {
-  color: #73c991;
-}
-
-.token-text.token-invalid {
-  color: #f88070;
-}

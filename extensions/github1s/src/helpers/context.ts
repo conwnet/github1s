@@ -35,3 +35,7 @@ export const removeRecentRepository = (name: string) => {
 	const newRecords = getRecentRepositories().filter((record) => record.name !== name);
 	return getExtensionContext().globalState.update(RECENT_REPOSITORIES, newRecords);
 };
+
+export const getBrowserUrl = () => {
+	return vscode.commands.executeCommand('github1s.commands.vscode.getBrowserUrl');
+};

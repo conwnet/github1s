@@ -34,13 +34,14 @@ import { getAllRefs } from './ref';
 import { getSymbolReferences } from './reference';
 import { getRepository } from './repository';
 import { getTextSearchResults } from './search';
+import { decorate, memorize } from '@/helpers/func';
 
 type SupportedPlatform = 'github' | 'gitlab' | 'bitbucket';
 
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatform, SourcegraphDataSource> = new Map();
 	private refsPromiseMap: Map<string, Promise<{ branches: Branch[]; tags: Tag[] }>> = new Map();
-	private repositoryPromiseMap: Map<string, Promise<{ name: string; defaultBranch: string } | null>> = new Map();
+	private repositoryPromiseMap: Map<string, Promise<{ private: boolean; defaultBranch: string } | null>> = new Map();
 	private fileTypeMap: Map<string, FileType> = new Map(); // cache if path is a directory
 	private matchedRefsMap: Map<string, string[]> = new Map();
 	private textEncoder = new TextEncoder();
@@ -102,11 +103,9 @@ export class SourcegraphDataSource extends DataSource {
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
-			try {
-				return await fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
-					.then((response) => response.arrayBuffer())
-					.then((buffer) => ({ content: new Uint8Array(buffer) }));
-			} catch (e) {}
+			return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
+				.then((response) => (response.ok ? response.arrayBuffer() : Promise.reject({ response })))
+				.then((buffer) => ({ content: new Uint8Array(buffer) }));
 		}
 		// TODO: support binary files for other platforms
 		const { content } = await readFile(this.buildRepository(repo), ref, path);
@@ -120,8 +119,16 @@ export class SourcegraphDataSource extends DataSource {
 		return this.refsPromiseMap.get(repo)!;
 	}
 
+	@decorate(memorize)
+	private async getDefaultBranch(repo: string) {
+		return (await this.provideRepository(repo))?.defaultBranch || 'HEAD';
+	}
+
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
-		if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+		if (!refAndPath) {
+			return { ref: await this.getDefaultBranch(repo), path: '' };
+		}
+		if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
 			return { ref: 'HEAD', path: refAndPath.slice(5) };
 		}
 		if (!this.matchedRefsMap.has(repo)) {

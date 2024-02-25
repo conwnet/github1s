@@ -88,18 +88,30 @@ export class CodeReviewManager {
 		return this._codeReviewList;
 	});
 
-	getItem = reuseable(async (codeReviewId: string, forceUpdate = false): Promise<CodeReview | null> => {
-		if (forceUpdate || !this._codeReviewMap.has(codeReviewId)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
-			const codeReview = await dataSource.provideCodeReview(this._repo, codeReviewId);
-			codeReview && this._codeReviewMap.set(codeReviewId, codeReview);
-			if (codeReview?.files) {
-				const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
-				manager.setChangedFiles(codeReview.files);
+	getItem = reuseable(
+		async (
+			codeReviewId: string,
+			forceUpdate = false
+		): Promise<(CodeReview & { sourceSha: string; targetSha: string }) | null> => {
+			const isShaExists = (codeReview: CodeReview) => codeReview.sourceSha && codeReview.targetSha;
+			if (
+				forceUpdate ||
+				!this._codeReviewMap.has(codeReviewId) ||
+				!isShaExists(this._codeReviewMap.get(codeReviewId)!)
+			) {
+				const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+				const codeReview = await dataSource.provideCodeReview(this._repo, codeReviewId);
+				codeReview && this._codeReviewMap.set(codeReviewId, codeReview);
+				if (codeReview?.files) {
+					const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
+					manager.setChangedFiles(codeReview.files);
+				}
 			}
+			return (this._codeReviewMap.get(codeReviewId) || null) as
+				| (CodeReview & { sourceSha: string; targetSha: string })
+				| null;
 		}
-		return this._codeReviewMap.get(codeReviewId) || null;
-	});
+	);
 
 	loadMore = reuseable(async (): Promise<CodeReview[]> => {
 		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();

@@ -32,6 +32,7 @@ import { matchSorter } from 'match-sorter';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
+import { decorate, memorize } from '@/helpers/func';
 
 const parseRepoFullName = (repoFullName: string) => {
 	const [owner, repo] = repoFullName.split('/');
@@ -68,7 +69,7 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 
 	descriptor.value = async function <T extends (...args) => Promise<any>>(...args: Parameters<T>) {
 		const githubFetcher = GitHubFetcher.getInstance();
-		if (await githubFetcher.useSourcegraphApiFirst(args[0])) {
+		if (await githubFetcher.getPreferSourcegraphApi(args[0])) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
 			} catch (e) {}
@@ -89,6 +90,15 @@ export class GitHub1sDataSource extends DataSource {
 			return GitHub1sDataSource.instance;
 		}
 		return (GitHub1sDataSource.instance = new GitHub1sDataSource());
+	}
+
+	@trySourcegraphApiFirst
+	async provideRepository(repoFullName: string): Promise<{ private: boolean; defaultBranch: string } | null> {
+		const fetcher = GitHubFetcher.getInstance();
+		const { owner, repo } = parseRepoFullName(repoFullName);
+		const requestParams = { owner, repo };
+		const response = await fetcher.request('GET /repos/{owner}/{repo}', requestParams).catch(() => null);
+		return response?.data ? { private: response.data.private, defaultBranch: response.data.default_branch } : null;
 	}
 
 	@trySourcegraphApiFirst
@@ -133,6 +143,11 @@ export class GitHub1sDataSource extends DataSource {
 		}));
 	}
 
+	@decorate(memorize)
+	async getDefaultBranch(repoFullName: string) {
+		return (await this.provideRepository(repoFullName))?.defaultBranch || 'HEAD';
+	}
+
 	@trySourcegraphApiFirst
 	async extractRefPath(repoFullName: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!this.matchedRefsMap.has(repoFullName)) {
@@ -146,7 +161,10 @@ export class GitHub1sDataSource extends DataSource {
 		const mapKey = `${repoFullName} ${refAndPath}`;
 		if (!this.refPathPromiseMap.has(mapKey)) {
 			const refPathPromise = new Promise<{ ref: string; path: string }>(async (resolve, reject) => {
-				if (!refAndPath || refAndPath.match(/^HEAD(\/.*)?$/i)) {
+				if (!refAndPath) {
+					return resolve({ ref: await this.getDefaultBranch(repoFullName), path: '' });
+				}
+				if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
 					return resolve({ ref: 'HEAD', path: refAndPath.slice(5) });
 				}
 
@@ -307,13 +325,15 @@ export class GitHub1sDataSource extends DataSource {
 			createTime: new Date(item.created_at),
 			mergeTime: item.merged_at ? new Date(item.merged_at) : null,
 			closeTime: item.closed_at ? new Date(item.closed_at) : null,
-			head: { label: item.head.label, commitSha: item.head.sha },
-			base: { label: item.base.label, commitSha: item.base.sha },
+			source: item.head.label,
+			target: item.base.label,
+			sourceSha: item.head.sha,
+			targetSha: item.base.sha,
 			avatarUrl: item.user?.avatar_url,
 		}));
 	}
 
-	async provideCodeReview(repoFullName: string, id: string): Promise<CodeReview & { files?: ChangedFile[] }> {
+	async provideCodeReview(repoFullName: string, id: string) {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
 		const pullRequestParams = { owner, repo, pull_number: Number(id) };
@@ -327,8 +347,10 @@ export class GitHub1sDataSource extends DataSource {
 			createTime: new Date(data.created_at),
 			mergeTime: data.merged_at ? new Date(data.merged_at) : null,
 			closeTime: data.closed_at ? new Date(data.closed_at) : null,
-			head: { label: data.head.label, commitSha: data.head.sha },
-			base: { label: data.base.label, commitSha: data.base.sha },
+			source: data.head.label,
+			target: data.base.label,
+			sourceSha: data.head.sha,
+			targetSha: data.base.sha,
 			avatarUrl: data.user?.avatar_url,
 		};
 	}
@@ -408,6 +430,6 @@ export class GitHub1sDataSource extends DataSource {
 	}
 
 	provideUserAvatarLink(user: string): string {
-		return `https://github.com/${user}.png`;
+		return `${GITHUB_ORIGIN}/${user}.png`;
 	}
 }

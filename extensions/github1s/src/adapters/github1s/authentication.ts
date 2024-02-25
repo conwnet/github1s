@@ -3,36 +3,61 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { Barrier } from '@/helpers/async';
 import { getExtensionContext } from '@/helpers/context';
-import * as vscode from 'vscode';
-import { GitHubTokenManager } from './token';
 import { createPageHtml, getWebviewOptions } from '@/helpers/page';
+import { GitHubTokenManager } from './token';
 import { messageApiMap } from './settings';
 
 export class GitHub1sAuthenticationView {
-	private static instance: GitHub1sAuthenticationView | null = null;
+	protected static instance: GitHub1sAuthenticationView | null = null;
 	public static viewType = 'github1s.views.github1s-authentication';
+	protected tokenManager = GitHubTokenManager.getInstance();
 	private webviewPanel: vscode.WebviewPanel | null = null;
 	// using for waiting token
 	private tokenBarrier: Barrier | null = null;
 	// using for displaying open page reason
 	private notice: string = '';
 
-	private constructor() {}
+	protected pageTitle = 'Authenticating to GitHub';
+	protected OAuthCommand = 'github1s.commands.vscode.connectToGitHub';
+	protected pageConfig: Record<string, unknown> = {
+		authenticationFormTitle: 'Authenticating to GitHub',
+		OAuthButtonText: 'Connect to GitHub',
+		OAuthButtonLogo: 'assets/pages/assets/github.svg',
+		createTokenLink: `${GITHUB_ORIGIN}/settings/tokens/new?scopes=repo&description=GitHub1s`,
+		rateLimitDocLink: 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
+		rateLimitDocLinkText: 'GitHub Rate limiting Documentation',
+		authenticationFeatures: [
+			{
+				text: 'Access GitHub personal repository',
+				link: 'https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories',
+			},
+			{
+				text: 'Higher rate limit for GitHub official API',
+				link: 'https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting',
+			},
+			{
+				text: 'Support for GitHub GraphQL API',
+				link: 'https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql',
+			},
+		],
+	};
+
+	protected constructor() {}
 
 	public static getInstance(): GitHub1sAuthenticationView {
 		if (GitHub1sAuthenticationView.instance) {
 			return GitHub1sAuthenticationView.instance;
 		}
-		return (GitHub1sAuthenticationView.instance = new GitHub1sAuthenticationView());
+		return (GitHub1sAuthenticationView.instance = new this());
 	}
 
 	private registerListeners() {
 		if (!this.webviewPanel) {
-			throw new Error('webview is not inited yet');
+			throw new Error('webview is not init yet');
 		}
-		const tokenManager = GitHubTokenManager.getInstance();
 
 		this.webviewPanel.webview.onDidReceiveMessage((message) => {
 			const commonResponse = { id: message.id, type: message.type };
@@ -43,21 +68,21 @@ export class GitHub1sAuthenticationView {
 					postMessage(this.notice);
 					break;
 				case 'get-token':
-					postMessage(tokenManager.getToken());
+					postMessage(this.tokenManager.getToken());
 					break;
 				case 'set-token':
 					message.data && (this.notice = '');
-					tokenManager.setToken(message.data || '').then(() => postMessage());
+					this.tokenManager.setToken(message.data || '').then(() => postMessage());
 					break;
 				case 'validate-token':
-					tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
+					this.tokenManager.validateToken(message.data).then((tokenStatus) => postMessage(tokenStatus));
 					break;
-				case 'connect-to-github':
-					vscode.commands.executeCommand('github1s.commands.vscode.connectToGitHub').then((data: any) => {
+				case 'oauth-authorizing':
+					vscode.commands.executeCommand(this.OAuthCommand).then((data: any) => {
 						if (data && data.error_description) {
 							vscode.window.showErrorMessage(data.error_description);
 						} else if (data && data.access_token) {
-							tokenManager.setToken(data.access_token || '').then(() => postMessage());
+							this.tokenManager.setToken(data.access_token || '').then(() => postMessage());
 						}
 						postMessage();
 					});
@@ -69,23 +94,23 @@ export class GitHub1sAuthenticationView {
 			}
 		});
 
-		tokenManager.onDidChangeToken((token) => {
+		this.tokenManager.onDidChangeToken((token) => {
 			this.tokenBarrier && this.tokenBarrier.open();
 			this.tokenBarrier && (this.tokenBarrier = null);
 			this.webviewPanel?.webview.postMessage({ type: 'token-changed', token });
 		});
 	}
 
-	public open(notice: string = '', withBarriar = false) {
+	public open(notice: string = '', withBarrier = false) {
 		const extensionContext = getExtensionContext();
 
 		this.notice = notice;
-		withBarriar && !this.tokenBarrier && (this.tokenBarrier = new Barrier(600 * 1000));
+		withBarrier && !this.tokenBarrier && (this.tokenBarrier = new Barrier(600 * 1000));
 
 		if (!this.webviewPanel) {
 			this.webviewPanel = vscode.window.createWebviewPanel(
 				GitHub1sAuthenticationView.viewType,
-				'Authenticating to GitHub',
+				this.pageTitle,
 				vscode.ViewColumn.One,
 				getWebviewOptions(extensionContext.extensionUri)
 			);
@@ -97,12 +122,15 @@ export class GitHub1sAuthenticationView {
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/components.css').toString(),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-authentication.css').toString(),
 		];
+		const globalPageConfig = { ...this.pageConfig, extensionUri: extensionContext.extensionUri.toString() };
 		const scripts = [
+			'data:text/javascript;base64,' +
+				Buffer.from(`window.pageConfig=${JSON.stringify(globalPageConfig)};`).toString('base64'),
 			vscode.Uri.joinPath(extensionContext.extensionUri, 'assets/pages/github1s-authentication.js').toString(),
 		];
 
 		const webview = this.webviewPanel.webview;
-		webview.html = createPageHtml('Authenticating To GitHub', styles, scripts);
-		return withBarriar ? this.tokenBarrier!.wait() : Promise.resolve();
+		webview.html = createPageHtml(this.pageTitle, styles, scripts);
+		return withBarrier ? this.tokenBarrier!.wait() : Promise.resolve();
 	}
 }

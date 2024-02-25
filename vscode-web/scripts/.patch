@@ -1,13 +1,11 @@
 {
   "vs/code/browser/workbench/workbench.ts": "66d3d7f717a67bf5b4432e1968fa68c1af8fa5552df7e958afd07c64cde3e247",
-  "vs/editor/common/config/editorOptions.ts": "96ffe6e1c00b19b8866e4bb5505241681f8d9956558127bb7b0b369ca4d30d52",
-  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "d86dbe51c3371291a5d23a9d359f7d6e19568d6d46a859f908d25b4d5b9e5448",
-  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "cbbe54c7a07edb4abac784cc9a611a44866fa04a18b79f601e3588cbcf3bbbfe",
-  "vs/workbench/browser/web.main.ts": "3bb15c0567d512161cd0ed27e4e38169888e410467b56974ff1613baa349dbe9",
-  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "26148e61f419d2afa6b35f6ae551af9faafb133a01a7fcac6f859c8c44526216",
+  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "f2efeda40ac46abdef871145126e8099009c9b9ab25f0d17f5b03653fa09ecbf",
+  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "7884173bd194d76d1f0392b8fb5a92d7f946348555bb26a564f99dbfd7961dcf",
+  "vs/workbench/browser/web.main.ts": "ab8d3494022bec32bbdf5f85d083434be2a379018699222246c5aa1d87470f36",
+  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "cabf40a531266003fe9746756da07d74cd41be20afd505f94fd7937f7f49e6ec",
   "vs/workbench/contrib/webview/browser/pre/index.html": "256fae7173fdabfed8963f6d15852609b15630d6e68ddbc281def651a23c76bb",
   "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "a301513f75bdecf781c0e8703e0c2f22c164039972dcbc99b12524f2073ccc43",
   "vs/workbench/services/label/common/labelService.ts": "73237cce0f9496151ea8ae5079676bbdfa15ce49de9b05621d39fcd04e9c1f0d",
-  "vs/workbench/services/textfile/browser/textFileService.ts": "193176bfccbbeae7fdf7b546992647554503dc4df8579db7094a4eee3cf50451",
-  "vs/workbench/services/editor/browser/editorResolverService.ts": "79831ee3ed18eb8c25a41baf9bc4060f2330468d636c7c142fd238389ce97775"
+  "vs/workbench/services/textfile/browser/textFileService.ts": "193176bfccbbeae7fdf7b546992647554503dc4df8579db7094a4eee3cf50451"
 }

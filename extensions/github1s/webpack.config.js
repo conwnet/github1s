@@ -61,6 +61,12 @@ module.exports = /** @type WebpackConfig */ {
 	},
 	devtool: 'source-map',
 	plugins: [
+		new webpack.DefinePlugin({
+			GITHUB_ORIGIN: JSON.stringify(process.env.GITHUB_DOMAIN || 'https://github.com'),
+			GITHUB_API_PREFIX: JSON.stringify(process.env.GITHUB_API_PREFIX || 'https://api.github.com'),
+			GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
+			GITLAB_API_PREFIX: JSON.stringify(process.env.GITLAB_API_PREFIX || 'https://gitlab.com/api/v4'),
+		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser.js',
 		}),

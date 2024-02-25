@@ -3,6 +3,7 @@
  * @author netcon
  */
 
+import { joinPath } from '@/helpers/util';
 import * as adapterTypes from '../types';
 import { parseGitLabPath } from './parse-path';
 
@@ -46,6 +47,6 @@ export class GitLab1sRouterParser extends adapterTypes.RouterParser {
 	}
 
 	buildExternalLink(path: string): string {
-		return 'https://gitlab.com' + (path.startsWith('/') ? path : `/${path}`);
+		return joinPath(GITLAB_ORIGIN, path);
 	}
 }

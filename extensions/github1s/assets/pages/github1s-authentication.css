@@ -96,15 +96,6 @@
   transform: scale(0.98);
 }
 
-.authentication-button .github-logo {
-  height: 24px;
-  margin-right: 8px;
-}
-
-.authentication-button[disabled] .github-logo {
-  opacity: .5;
-}
-
 .authentication-token .token-input-line {
   display: flex;
   margin-bottom: 6px;
@@ -154,74 +145,100 @@
   align-items: center;
 }
 
+#app {
+  margin-top: 60px;
+}
+
+.authentication-button[disabled] .auth-button-logo {
+  opacity: .5;
+}
+
+.auth-button-logo {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-size: 100% 100%;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+
 .authentication-detail {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.authentication-detail .detail-title {
+.detail-title {
   width: 320px;
   font-size: 24px;
   margin-bottom: 32px;
   color: var(--vscode-button-foreground);
 }
 
-.authentication-detail .token-status {
+.token-status {
+  display: flex;
+  align-items: center;
   width: 320px;
+  margin-bottom: 8px;
 }
 
-.authentication-detail .token-status ul {
+.token-status .refresh-button {
+	cursor: pointer;
+  margin-left: 6px;
+}
+
+.token-status .refresh-button:hover {
+  color: #3794ff;
+}
+
+.token-status .refresh-button:active {
+  color: #094771;
+}
+
+.login-text > span:first-child {
+  margin-right: 4px;
+}
+
+.user-avatar {
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+  margin-right: 4px;
+  vertical-align: bottom;
+  border-radius: 50%;
+  background-color: #ccc;
+}
+
+.rate-limit-info {
+  width: 320px;
   list-style: none;
   padding-left: 0;
 }
 
-.authentication-detail .token-status ul li {
+.rate-limit-info li {
   margin-bottom: 8px;
 }
 
-.authentication-detail .status-title {
-  font-weight: 200;
-  margin-top: 0;
-  margin-bottom: 5px;
-  font-size: 18px;
-  line-height: normal;
+.token-text {
+  width: 320px;
+  margin-bottom: 8px;
 }
 
-.authentication-detail .refresh-button {
-	cursor: pointer;
-  margin-left: 4px;
+.token-text.token-valid {
+  color: #73c991;
 }
 
-.authentication-detail .refresh-button:hover {
-  color: #3794ff;
+.token-text.token-invalid {
+  color: #f88070;
 }
 
-.authentication-detail .refresh-button:active {
-  color: #094771;
-}
-
-.authentication-detail .token-operations {
+.token-operations {
   width: 320px;
   margin-top: 12px;
 }
 
-.authentication-detail .token-operations > * {
+.token-operations > * {
   width: 240px;
 }
 
-.success-text {
-  color: #89d185;
-}
-
-.warning-text {
-  color: #cca700;
-}
-
-.error-text {
-  color: #f48771;
-}
-
-#app {
-  margin-top: 60px;
-}

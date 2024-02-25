@@ -10,6 +10,7 @@ const RepositoryQuery = gql`
 	query ($repository: String!) {
 		repository(name: $repository) {
 			name
+			isPrivate
 			defaultBranch {
 				displayName
 			}
@@ -17,13 +18,15 @@ const RepositoryQuery = gql`
 	}
 `;
 
-export const getRepository = async (repository: string): Promise<{ name: string; defaultBranch: string } | null> => {
+export const getRepository = async (
+	repository: string
+): Promise<{ private: boolean; defaultBranch: string } | null> => {
 	const response = await sourcegraphClient.query({
 		query: RepositoryQuery,
 		variables: { repository },
 	});
 	const repositoryData = response.data?.repository;
 	return repositoryData
-		? { name: repositoryData.name, defaultBranch: repositoryData?.defaultBranch?.displayName }
+		? { private: repositoryData.isPrivate, defaultBranch: repositoryData.defaultBranch?.displayName }
 		: null;
 };

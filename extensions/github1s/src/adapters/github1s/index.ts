@@ -10,6 +10,8 @@ import { GitHub1sRouterParser } from './router-parser';
 import { GitHub1sSettingsViewProvider } from './settings';
 import { GitHub1sAuthenticationView } from './authentication';
 import { Adapter, CodeReviewType, PlatformName } from '../types';
+import { SourcegraphDataSource } from '../sourcegraph/data-source';
+import { getCurrentRepo } from './parse-path';
 
 export class GitHub1sAdapter implements Adapter {
 	public scheme: string = 'github1s';
@@ -38,6 +40,11 @@ export class GitHub1sAdapter implements Adapter {
 		);
 		vscode.commands.registerCommand('github1s.commands.openGitHub1sAuthPage', () => {
 			return GitHub1sAuthenticationView.getInstance().open();
+		});
+		vscode.commands.registerCommand('github1s.commands.syncSourcegraphRepository', async () => {
+			const dataSource = SourcegraphDataSource.getInstance('github');
+			const randomRef = (Math.random() + 1).toString(36).slice(2);
+			return dataSource.provideCommit(await getCurrentRepo(), randomRef);
 		});
 	}
 
