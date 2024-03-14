@@ -1,11 +1,11 @@
 {
-  "vs/code/browser/workbench/workbench.ts": "66d3d7f717a67bf5b4432e1968fa68c1af8fa5552df7e958afd07c64cde3e247",
-  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "f2efeda40ac46abdef871145126e8099009c9b9ab25f0d17f5b03653fa09ecbf",
-  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "7884173bd194d76d1f0392b8fb5a92d7f946348555bb26a564f99dbfd7961dcf",
-  "vs/workbench/browser/web.main.ts": "ab8d3494022bec32bbdf5f85d083434be2a379018699222246c5aa1d87470f36",
-  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "cabf40a531266003fe9746756da07d74cd41be20afd505f94fd7937f7f49e6ec",
-  "vs/workbench/contrib/webview/browser/pre/index.html": "256fae7173fdabfed8963f6d15852609b15630d6e68ddbc281def651a23c76bb",
-  "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "a301513f75bdecf781c0e8703e0c2f22c164039972dcbc99b12524f2073ccc43",
+  "vs/code/browser/workbench/workbench.ts": "4d5caa66a9d8d5c862c4ee6a928c4e1cb7cc93fc481dc9c471245229be7323e1",
+  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "3b2d7f2be631cb5b2a37bbd5eaceae87833273fd7c3babc41cab180d6330b657",
+  "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "253c6b6b1212d0ca80e1969959d3d09d0c1040f3bea3ad076f2708783bd14544",
+  "vs/workbench/browser/web.main.ts": "a1fb5bb77c9602358f4e25cf3413bf2f89cb31421de1fa64b797d815e30b3e9c",
+  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "b1c3f939b2f6182bd2bfb231a0fea0d19e7579fb6a37953ad5dada596337cbf2",
+  "vs/workbench/contrib/webview/browser/pre/index.html": "a1942558e310b15a1d2387f33cd00787d2e507332df16bbb258ad644e4c62dbb",
+  "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "8cbb23b36f1e35436c0cd53b10f6ba2d3a51c92cee297d1fd956b9dcd6e33b1a",
   "vs/workbench/services/label/common/labelService.ts": "73237cce0f9496151ea8ae5079676bbdfa15ce49de9b05621d39fcd04e9c1f0d",
-  "vs/workbench/services/textfile/browser/textFileService.ts": "193176bfccbbeae7fdf7b546992647554503dc4df8579db7094a4eee3cf50451"
+  "vs/workbench/services/textfile/browser/textFileService.ts": "9d0831d6f49ad0ac8482a941e1b3b36b58e7a9db2fedc6e66ba94499719617e9"
 }
