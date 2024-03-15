@@ -65,7 +65,7 @@ it('should load successfully', async () => {
 it('should open file correctly', async () => {
 	await page.goto(`${BASE_URL}/conwnet/github1s`);
 	await page.waitForTimeout(3000);
-	await page.click('[title="~/tsconfig.json"]');
+	await page.click('[aria-label="~/tsconfig.json"]');
 	await page.click('[data-resource-name="tsconfig.json"]');
 	await page.waitForTimeout(3000);
 
