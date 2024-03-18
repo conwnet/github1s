@@ -103,9 +103,15 @@ export class SourcegraphDataSource extends DataSource {
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
-			return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
-				.then((response) => (response.ok ? response.arrayBuffer() : Promise.reject({ response })))
-				.then((buffer) => ({ content: new Uint8Array(buffer) }));
+			// For GitHub repositories, request GitHub User Content API first (it seems no Rate Limit),
+			// because Sourcegraph API returns binary data such as pictures in error. If the GitHub User
+			// Content API goes wrong, then try Sourcegraph API. Use `try catch` because if fallback to
+			// GitHub REST API may trigger a pop-up window to request authentication for anonymous users.
+			try {
+				return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
+					.then((response) => (response.ok ? response.arrayBuffer() : Promise.reject({ response })))
+					.then((buffer) => ({ content: new Uint8Array(buffer) }));
+			} catch {}
 		}
 		// TODO: support binary files for other platforms
 		const { content } = await readFile(this.buildRepository(repo), ref, path);
