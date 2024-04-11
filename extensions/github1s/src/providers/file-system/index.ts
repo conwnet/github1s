@@ -237,7 +237,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
 			let { scheme, authority, path } = uri;
-			// if `authority` is same with currnet, try to find it with `this.lookupAsFile`,
+			// if `authority` is same with current, try to find it with `this.lookupAsFile`,
 			// we can't use `router.getAuthority()` directly because this file may be in submodule
 			if (authority === workspace.workspaceFolders?.[0].uri.authority) {
 				const file = (await this.lookupAsFile(uri, false))!;
