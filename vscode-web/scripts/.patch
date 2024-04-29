@@ -1,10 +1,10 @@
 {
   "vs/code/browser/workbench/workbench.ts": "4d5caa66a9d8d5c862c4ee6a928c4e1cb7cc93fc481dc9c471245229be7323e1",
-  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "3b2d7f2be631cb5b2a37bbd5eaceae87833273fd7c3babc41cab180d6330b657",
+  "vs/workbench/browser/parts/activitybar/activitybarPart.ts": "f1f646360d161b62ac857698cfe4f1e2f63107c86f8100f630c8d704f15049f5",
   "vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "253c6b6b1212d0ca80e1969959d3d09d0c1040f3bea3ad076f2708783bd14544",
-  "vs/workbench/browser/web.main.ts": "a1fb5bb77c9602358f4e25cf3413bf2f89cb31421de1fa64b797d815e30b3e9c",
-  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "b1c3f939b2f6182bd2bfb231a0fea0d19e7579fb6a37953ad5dada596337cbf2",
-  "vs/workbench/contrib/webview/browser/pre/index.html": "a1942558e310b15a1d2387f33cd00787d2e507332df16bbb258ad644e4c62dbb",
+  "vs/workbench/browser/web.main.ts": "40def654a6762f4d7393e65230d613379d70a4f21829b4882a911e8397fe1b58",
+  "vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "86663454cc80d8fb63900ffd88f826ad971071976e54c2b9dfbbcab17bd6dc49",
+  "vs/workbench/contrib/webview/browser/pre/index.html": "7bcd1298e5cc21a5526e89954c09c225a33a22713f840a7aa172305b517d11d7",
   "vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "8cbb23b36f1e35436c0cd53b10f6ba2d3a51c92cee297d1fd956b9dcd6e33b1a",
   "vs/workbench/services/label/common/labelService.ts": "73237cce0f9496151ea8ae5079676bbdfa15ce49de9b05621d39fcd04e9c1f0d",
   "vs/workbench/services/textfile/browser/textFileService.ts": "9d0831d6f49ad0ac8482a941e1b3b36b58e7a9db2fedc6e66ba94499719617e9"
