@@ -91,7 +91,7 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 
 	const repository = Repository.getInstance(fileUri.scheme, repo);
 	const leftCommit = await repository.getPreviousCommit(rightCommitSha, fileUri.path.slice(1));
-	// if we can't find previous commit, use the the `emptyFileUri` as the leftFileUri
+	// if we can't find previous commit, use the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? rightFileUri.with({ authority: `${repo}+${leftCommit.sha}` }) : emptyFileUri;
 
 	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;

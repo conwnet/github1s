@@ -49,7 +49,7 @@ const getMergeRequestState = (mergeRequest: { state: string; merged_at: string |
 		return CodeReviewState.Merged;
 	}
 	// current merge is closed
-	return CodeReviewState.Merged;
+	return CodeReviewState.Closed;
 };
 
 const resolveComputeAge = (timestamps: number[], ageLimit = 10) => {

@@ -25,8 +25,6 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	page = await browser.newPage();
-	await page.goto(`${BASE_URL}/conwnet/github1s`);
-	await page.waitForTimeout(3000);
 });
 
 afterEach(async () => {

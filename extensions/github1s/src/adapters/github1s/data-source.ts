@@ -60,7 +60,7 @@ const getPullState = (pull: { state: string; merged_at: string | null }): CodeRe
 		return CodeReviewState.Merged;
 	}
 	// current pull is closed
-	return CodeReviewState.Merged;
+	return CodeReviewState.Closed;
 };
 
 const sourcegraphDataSource = SourcegraphDataSource.getInstance('github');
