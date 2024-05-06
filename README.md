@@ -14,7 +14,7 @@ For example, try it on the VS Code repo:
 
 ![VS Code - GitHub1s](https://raw.githubusercontent.com/conwnet/github1s/master/resources/images/vs-code-github1s.png)
 
-You can also use [https://gitlab1s.com](https://gitlab1s.com) or [https://npmjs1s.com](https://npmjs1s.com) in the same way.
+You can also use [https://gitlab1s.com](https://gitlab1s.com), [https://sourceforge1s.com](https://sourceforge1s.com), or [https://npmjs1s.com](https://npmjs1s.com) in the same way.
 
 For browser extensions, see [Third-party Related Projects](https://github.com/conwnet/github1s#third-party-related-projects).
 

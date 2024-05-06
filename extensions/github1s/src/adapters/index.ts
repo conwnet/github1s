@@ -9,6 +9,7 @@ import { GitLab1sAdapter } from './gitlab1s';
 import { BitbucketAdapter } from './bitbucket1s';
 import { Npmjs1sAdapter } from './npmjs1s';
 import { OSSInsightAdapter } from './ossinsight';
+import { Sourceforge1sAdapter } from './sourceforge1s'; // Import the Sourceforge adapter
 import { DataSource, PlatformName, RouterParser } from './types';
 
 const emptyAdapter = {
@@ -26,6 +27,7 @@ export const registerAdapters = async (): Promise<void> => {
 		adapterManager.registerAdapter(new BitbucketAdapter()),
 		adapterManager.registerAdapter(new Npmjs1sAdapter()),
 		adapterManager.registerAdapter(new OSSInsightAdapter()),
+		adapterManager.registerAdapter(new Sourceforge1sAdapter()), // Register the Sourceforge adapter
 	]);
 };
 
