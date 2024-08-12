@@ -35,7 +35,7 @@
 	<% if (devVscode) { %>
 		<script>require(['vs/code/browser/workbench/workbench'], function () {});</script>
 	<% } else { %>
-		<script src="/static-<%= staticHash %>/vscode/vs/workbench/workbench.web.main.nls.js"></script>
+		<script src="/static-<%= staticHash %>/vscode/nls.messages.js"></script>
 		<script src="/static-<%= staticHash %>/vscode/vs/workbench/workbench.web.main.js"></script>
 		<script src="/static-<%= staticHash %>/vscode/vs/code/browser/workbench/workbench.js"></script>
 	<% } %>

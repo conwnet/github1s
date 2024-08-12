@@ -112,6 +112,10 @@
 				color: var(--vscode-textLink-foreground);
 			}
 
+			p > a {
+				text-decoration: var(--text-link-decoration);
+			}
+
 			a:hover {
 				color: var(--vscode-textLink-activeForeground);
 			}
@@ -945,7 +949,7 @@
 				const previousPendingFrame = getPendingFrame();
 				if (previousPendingFrame) {
 					previousPendingFrame.setAttribute('id', '');
-					document.body.removeChild(previousPendingFrame);
+					previousPendingFrame.remove();
 				}
 				if (!wasFirstLoad) {
 					pendingMessages = [];
@@ -1042,9 +1046,7 @@
 					if (newFrame && newFrame.contentDocument && newFrame.contentDocument === contentDocument) {
 						const wasFocused = document.hasFocus();
 						const oldActiveFrame = getActiveFrame();
-						if (oldActiveFrame) {
-							document.body.removeChild(oldActiveFrame);
-						}
+						oldActiveFrame?.remove();
 						// Styles may have changed since we created the element. Make sure we re-style
 						if (initialStyleVersion !== styleVersion) {
 							applyStyles(newFrame.contentDocument, newFrame.contentDocument.body);
