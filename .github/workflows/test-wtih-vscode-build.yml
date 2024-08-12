@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
-        node-version: [18.16.0]
+        node-version: [20.16.0]
 
     runs-on: ${{ matrix.os }}
 
@@ -35,7 +35,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ matrix.node-version }}
 
-      - run: sudo apt -y install libkrb5-dev
+      - run: sudo apt update && sudo apt install -y libkrb5-dev
       - run: yarn --frozen-lockfile
       - run: yarn build:vscode
       - run: yarn yalc && yarn build
