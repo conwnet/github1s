@@ -46,10 +46,10 @@ const resolvePlatformState = (): [Platform, string] => {
 	const [platform, repository] = resolvePlatformState();
 	const staticAssetsPath = '/static-' + STATIC_HASH;
 	const staticAssetsPrefix = window.location.origin + staticAssetsPath;
-	const nodeModulesPrefix = staticAssetsPrefix + '/node_modules';
+	const webPackagesPrefix = staticAssetsPrefix + '/web-packages';
 
 	Object.keys(window.webPackagePaths || {}).forEach((key) => {
-		self.webPackagePaths[key] = `${nodeModulesPrefix}/${key}/${self.webPackagePaths[key]}`;
+		self.webPackagePaths[key] = `${webPackagesPrefix}/${key}/${self.webPackagePaths[key]}`;
 	});
 	// config vscode loader
 	if (window.require && window.require.config) {

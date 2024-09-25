@@ -6,10 +6,10 @@ const path = require('path');
 const cp = require('child_process');
 const fsPromise = require('fs/promises');
 
-const APP_ROOT = path.join(__dirname, '..');
+const VSCODE_WEB_ROOT = path.join(__dirname, '..');
 
-const SRC_SOURCE = path.join(APP_ROOT, 'src');
-const SRC_TARGET = path.join(APP_ROOT, 'lib/vscode/src');
+const SRC_SOURCE = path.join(VSCODE_WEB_ROOT, 'src');
+const SRC_TARGET = path.join(VSCODE_WEB_ROOT, 'lib/vscode/src');
 
 let config = {};
 let needUpdate = false;
