@@ -107,21 +107,9 @@ module.exports = (env, argv) => {
 			port: 8080,
 			liveReload: false,
 			allowedHosts: 'all',
-			static: {
-				directory: path.join(__dirname, 'dist'),
-			},
-			client: {
-				progress: true,
-			},
-			historyApiFallback: {
-				rewrites: [{ from: /./, to: '/index.html' }],
-			},
-			devMiddleware: {
-				writeToDisk: true,
-			},
-			proxy: {
-				'/api/vscode-unpkg': packUtils.createVSCodeUnpkgProxy(),
-			},
+			historyApiFallback: true,
+			static: path.join(__dirname, 'dist'),
+			proxy: [packUtils.createVSCodeUnpkgProxy()],
 		},
 	};
 };
