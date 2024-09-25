@@ -14,31 +14,6 @@ const STATIC_HASH = GIT_COMMIT_ID.padStart(7, '0').slice(0, 7);
 const devVscode = !!process.env.DEV_VSCODE;
 const skipMinified = { info: { minimized: true } };
 
-const VSCODE_NODE_MODULES = [
-	'@vscode/iconv-lite-umd',
-	'@vscode/vscode-languagedetection',
-	'@xterm/addon-canvas',
-	'@xterm/addon-image',
-	'@xterm/addon-search',
-	'@xterm/addon-serialize',
-	'@xterm/addon-unicode11',
-	'@xterm/addon-webgl',
-	'@xterm/xterm',
-	'jschardet',
-	'tas-client-umd',
-	'vscode-oniguruma',
-	'vscode-textmate',
-].map((pkg) => ({
-	from: `vscode-web/node_modules/${pkg}/**`,
-	globOptions: { dot: true },
-	to({ context, absoluteFilename }) {
-		const relativePath = path.relative(context, absoluteFilename);
-		const relativeDir = path.dirname(relativePath.replace('vscode-web/node_modules/', ''));
-		return `static-${STATIC_HASH}/node_modules/${relativeDir}/[name][ext]`;
-	},
-	...skipMinified,
-}));
-
 module.exports = (env, argv) => {
 	const devMode = argv.mode === 'development';
 	const minifyCSS = (code) => (devMode ? code : new CleanCSS().minify(code).styles);
@@ -78,7 +53,11 @@ module.exports = (env, argv) => {
 						to: `static-${STATIC_HASH}/extensions`,
 						...skipMinified,
 					},
-					...VSCODE_NODE_MODULES,
+					!devVscode && {
+						from: 'node_modules/@github1s/vscode-web/dist/web-packages',
+						to: `static-${STATIC_HASH}/web-packages`,
+						...skipMinified,
+					},
 				].filter(Boolean),
 			}),
 			new HtmlWebpackPlugin({
@@ -107,21 +86,11 @@ module.exports = (env, argv) => {
 			port: 8080,
 			liveReload: false,
 			allowedHosts: 'all',
-			static: {
-				directory: path.join(__dirname, 'dist'),
-			},
-			client: {
-				progress: true,
-			},
-			historyApiFallback: {
-				rewrites: [{ from: /./, to: '/index.html' }],
-			},
-			devMiddleware: {
-				writeToDisk: true,
-			},
-			proxy: {
-				'/api/vscode-unpkg': packUtils.createVSCodeUnpkgProxy(),
-			},
+			client: { overlay: false },
+			static: path.join(__dirname, 'dist'),
+			devMiddleware: { writeToDisk: true },
+			proxy: [packUtils.createVSCodeUnpkgProxy()],
+			historyApiFallback: { disableDotRule: true },
 		},
 	};
 };
