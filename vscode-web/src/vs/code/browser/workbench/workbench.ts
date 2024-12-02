@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { create } from 'vs/workbench/workbench.web.main';
-import { IExtensionManifest } from 'vs/platform/extensions/common/extensions';
-import { IWorkspaceProvider, IWorkbenchConstructionOptions } from 'vs/workbench/browser/web.api';
-import { URI, UriComponents } from 'vs/base/common/uri';
-import { env } from 'vs/workbench/browser/web.factory';
+import { env } from '../../../workbench/browser/web.factory.js';
+import { IExtensionManifest } from '../../../platform/extensions/common/extensions.js';
+import { URI, UriComponents } from '../../../base/common/uri.js';
+import { IWorkbenchConstructionOptions, IWorkspaceProvider } from '../../../workbench/browser/web.api.js';
+import { create } from '../../../workbench/workbench.web.main.internal.js';
 
 // same as vscode-web/src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts
 interface IBundledExtension {

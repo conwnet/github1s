@@ -9,7 +9,7 @@ echo $VSCODE_WEB_ROOT
 function main() {
 	cd ${VSCODE_WEB_ROOT}/lib/vscode
 
-	yarn gulp vscode-web-min
+	npm run gulp vscode-web-min
 
 	echo "build vscode done!"
 }

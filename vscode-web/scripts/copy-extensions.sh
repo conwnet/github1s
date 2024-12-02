@@ -9,7 +9,7 @@ function ensureBuiltinExtensitions() {
 	if [ $EXTENSIONS_DIRTY != 0 ] || [ ! -e ".build/web/extensions" ]
 	then
 		echo "compile vscode builtin extensions..."
-		yarn gulp compile-web-extensions-build
+		npm run gulp compile-web-extensions-build
 	else
 		echo "vscode builtin extensions is up-to-date, skip compiling."
 	fi

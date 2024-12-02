@@ -16,7 +16,7 @@ function main() {
 	git clone --depth 1 -b `cat ${VSCODE_WEB_ROOT}/.VERSION` https://github.com/microsoft/vscode.git vscode
 	node ${VSCODE_WEB_ROOT}/scripts/patch.js
 	cd vscode
-	yarn --frozen-lockfile
+	npm i
 }
 
 main "$@"
