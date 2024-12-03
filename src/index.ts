@@ -70,7 +70,7 @@ const resolvePlatformState = (): [Platform, string] => {
 	(window as any).vscodeWeb = {
 		commands: vscodeCommands,
 		allowEditorLabelOverride: true,
-		additionalBuiltinExtensions: ['ms-vscode.anycode'],
+		additionalBuiltinExtensions: [],
 		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
 		productConfiguration: createProductConfiguration(platform),
 		initialColorTheme: { themeType: 'dark' as any },
