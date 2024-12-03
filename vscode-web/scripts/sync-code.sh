@@ -2,12 +2,12 @@
 set -euo pipefail
 
 cd "$(dirname "${0}")/.."
-APP_ROOT=$(pwd)
-echo $APP_ROOT
+VSCODE_WEB_ROOT=$(pwd)
+echo $VSCODE_WEB_ROOT
 
 # sync src/* to vscode
 function main() {
-	cd ${APP_ROOT}
+	cd ${VSCODE_WEB_ROOT}
 	rsync -a src/ lib/vscode/src
 	if [ -e extensions ]; then
 		rsync -a extensions/ lib/vscode/extensions

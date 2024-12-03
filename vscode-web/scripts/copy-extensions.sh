@@ -2,9 +2,9 @@
 set -euo pipefail
 
 cd "$(dirname "${0}")/.."
-APP_ROOT=$(pwd)
+VSCODE_WEB_ROOT=$(pwd)
 function ensureBuiltinExtensitions() {
-	cd "${APP_ROOT}/lib/vscode"
+	cd "${VSCODE_WEB_ROOT}/lib/vscode"
 	EXTENSIONS_DIRTY=0 && git diff --exit-code --name-only extensions || EXTENSIONS_DIRTY=$?
 	if [ $EXTENSIONS_DIRTY != 0 ] || [ ! -e ".build/web/extensions" ]
 	then
@@ -17,9 +17,9 @@ function ensureBuiltinExtensitions() {
 
 function main() {
 	ensureBuiltinExtensitions
-	cd ${APP_ROOT}
+	cd ${VSCODE_WEB_ROOT}
 	mkdir -p "dist/extensions"
-	cp -R ${APP_ROOT}/lib/vscode/.build/web/extensions/* ${APP_ROOT}/dist/extensions
+	cp -R ${VSCODE_WEB_ROOT}/lib/vscode/.build/web/extensions/* ${VSCODE_WEB_ROOT}/dist/extensions
 
 	echo "copy vscode builtin extensions done!"
 }

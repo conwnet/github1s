@@ -80,6 +80,7 @@ const createExtensionsContent = (devVscode) => {
 const createVSCodeUnpkgProxy = () => ({
 	changeOrigin: true,
 	target: 'vscode-unpkg.net',
+	context: '/api/vscode-unpkg/',
 	pathRewrite: (path) => path.replace(/^\/api\/vscode-unpkg\//, '/'),
 	router: (req) => {
 		const PATH_REGEXP = /^\/api\/vscode-unpkg\/([^/]+)\/(.*)/;
