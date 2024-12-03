@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@github1s/vscode-web": "0.22.0",
+    "@cloudflare/workers-types": "^4.20240722.0",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "clean-css": "^5.3.2",

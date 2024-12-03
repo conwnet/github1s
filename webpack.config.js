@@ -46,11 +46,13 @@ module.exports = (env, argv) => {
 					!devVscode && {
 						from: 'node_modules/@github1s/vscode-web/dist/vscode',
 						to: `static-${STATIC_HASH}/vscode`,
+						globOptions: { ignore: ['**/*.js.map'] },
 						...skipMinified,
 					},
 					!devVscode && {
 						from: 'node_modules/@github1s/vscode-web/dist/extensions',
 						to: `static-${STATIC_HASH}/extensions`,
+						globOptions: { ignore: ['**/*.js.map'] },
 						...skipMinified,
 					},
 					!devVscode && {
