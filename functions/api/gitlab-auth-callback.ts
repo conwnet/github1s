@@ -68,6 +68,7 @@ export const onRequest: PagesFunction<{
 				redirect_uri: AUTH_REDIRECT_URI,
 				grant_type: 'authorization_code',
 			}),
+			headers: { 'content-type': 'application/json' },
 		});
 		return response.json().then((result) => createResponse(response.status, result));
 	} catch (e) {
