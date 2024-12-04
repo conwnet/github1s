@@ -48,7 +48,7 @@ export const onRequest: PagesFunction<{
 
 	const createResponse = (status, data) => {
 		const body = createAuthorizeResultHtml(data, env.GITHUB1S_ALLOWED_ORIGINS);
-		return new Response(body, { status });
+		return new Response(body, { status, headers: { 'content-type': 'text/html' } });
 	};
 
 	if (!code) {
