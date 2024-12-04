@@ -60,7 +60,7 @@ export const onRequest: PagesFunction<{
 		const response = await fetch('https://github.com/login/oauth/access_token', {
 			method: 'POST',
 			body: JSON.stringify({ client_id: env.GITHUB_OAUTH_ID, client_secret: env.GITHUB_OAUTH_SECRET, code }),
-			headers: { 'content-type': 'application/json' },
+			headers: { accept: 'application/json', 'content-type': 'application/json' },
 		});
 		return response.json().then((result) => createResponse(response.status, result));
 	} catch (e) {
