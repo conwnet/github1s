@@ -21,7 +21,6 @@ export const createProductConfiguration = (platform: Platform) => ({
 		'*.npmjs.com',
 		'*.npmjs1s.com',
 		'*.microsoft.com',
-		'*.vercel.com',
 		'*.sourcegraph.com',
 		'*.ossinsight.io',
 		'*.open-vsx.org',

@@ -36,7 +36,6 @@
     "yalc": "^1.0.0-pre.53"
   },
   "scripts": {
-    "preinstall": "./scripts/preinstall.sh",
     "postinstall": "husky install && ./scripts/postinstall.sh",
     "dev": "yarn watch",
     "build": "./scripts/build.sh",
