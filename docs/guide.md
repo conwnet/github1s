@@ -12,7 +12,7 @@ _We may switch to the GitHub GraphQL API for more friendly user experience in th
 
 ~~GitHub1s is a purely static web app (because it really doesn't need a backend service, does it?). So we just deploy it on [GitHub Pages](https://pages.github.com/) now (the `gh-pages` branch of this repository), and it is free. The service of GitHub1s could be reliable (GitHub is very reliable) because nobody needs to pay the web hosting bills.~~
 
-We deploy GitHub1s on [Vercel](https://vercel.com/) now for minimize delays in loading and better developer experience. Thanks for the wonderful service provide by Vercel.
+We deploy GitHub1s on [Cloudflare Pages](https://cloudflare.com/) now for minimize delays in loading and better developer experience. Thanks for the wonderful service provide by Cloudflare.
 
 # Rate Limit
 

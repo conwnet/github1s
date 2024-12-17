@@ -6,8 +6,7 @@ export const createProductConfiguration = (platform: Platform) => ({
 	applicationName: platform + '1s',
 	reportIssueUrl: 'https://github.com/conwnet/github1s/issues/new',
 	extensionsGallery: {
-		resourceUrlTemplate:
-			'https://open-vsx.org/vscode/asset/{publisher}/{name}/{version}/Microsoft.VisualStudio.Code.WebResources/{path}',
+		resourceUrlTemplate: 'https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}',
 		serviceUrl: 'https://open-vsx.org/vscode/gallery',
 		itemUrl: 'https://open-vsx.org/vscode/item',
 	},
@@ -21,7 +20,6 @@ export const createProductConfiguration = (platform: Platform) => ({
 		'*.npmjs.com',
 		'*.npmjs1s.com',
 		'*.microsoft.com',
-		'*.vercel.com',
 		'*.sourcegraph.com',
 		'*.ossinsight.io',
 		'*.open-vsx.org',
