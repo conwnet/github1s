@@ -36,7 +36,7 @@ export class GitLab1sAdapter implements Adapter {
 
 		vscode.window.registerWebviewViewProvider(
 			GitLab1sSettingsViewProvider.viewType,
-			new GitLab1sSettingsViewProvider()
+			new GitLab1sSettingsViewProvider(),
 		);
 		vscode.commands.registerCommand('github1s.commands.openGitLab1sAuthPage', () => {
 			return GitLab1sAuthenticationView.getInstance().open();

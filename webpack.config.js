@@ -1,34 +1,63 @@
-const path = require('path');
-const fs = require('fs-extra');
-const cp = require('child_process');
-const webpack = require('webpack');
-const CleanCSS = require('clean-css');
-const UglifyJS = require('uglify-js');
-const CopyPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const generate = require('generate-file-webpack-plugin');
-const packUtils = require('./scripts/webpack.js');
+import path from 'path';
+import fs from 'fs-extra';
+import cp from 'child_process';
+import webpack from 'webpack';
+import CleanCSS from 'clean-css';
+import UglifyJS from 'uglify-js';
+import CopyPlugin from 'copy-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as packUtils from './scripts/webpack.js';
 
-const GIT_COMMIT_ID = cp.execSync('git rev-parse HEAD').toString().trim();
-const STATIC_HASH = GIT_COMMIT_ID.padStart(7, '0').slice(0, 7);
-const devVscode = !!process.env.DEV_VSCODE;
+const commitId = cp.execSync('git rev-parse HEAD').toString().trim();
+const staticDir = `static-${commitId.padStart(7, '0').slice(0, 7)}`;
+const vscodeWebPath = path.join(import.meta.dirname, 'node_modules/@github1s/vscode-web');
+
 const skipMinified = { info: { minimized: true } };
+const skipNodeModules = { globOptions: { dot: true, ignore: ['**/node_modules/**'] } };
+const fileLoaderOptions = { outputPath: staticDir, name: '[name].[ext]' };
 
-module.exports = (env, argv) => {
+const copyPluginPatterns = [
+	{ from: 'extensions', to: `${staticDir}/extensions`, ...skipNodeModules, ...skipMinified },
+	{ from: path.join(vscodeWebPath, 'vscode'), to: `${staticDir}/vscode`, ...skipMinified },
+	{ from: path.join(vscodeWebPath, 'extensions'), to: `${staticDir}/extensions`, ...skipMinified },
+	{ from: path.join(vscodeWebPath, 'dependencies'), to: `${staticDir}/dependencies`, ...skipMinified },
+];
+
+const devVscodeStatic = [
+	...fs.readdirSync(path.join(import.meta.dirname, 'extensions')).map((item) => ({
+		publicPath: `/${staticDir}/extensions/${item}`,
+		directory: path.join(import.meta.dirname, `extensions/${item}`),
+	})),
+	{
+		publicPath: `/${staticDir}/vscode/`,
+		directory: path.join(import.meta.dirname, 'vscode-web/lib/vscode/out'),
+	},
+	{
+		publicPath: `/${staticDir}/extensions/`,
+		directory: path.join(import.meta.dirname, 'vscode-web/lib/vscode/extensions'),
+	},
+	{
+		publicPath: `/${staticDir}/dependencies/`,
+		directory: path.join(import.meta.dirname, 'vscode-web/lib/vscode/node_modules'),
+	},
+];
+
+export default (env, argv) => {
 	const devMode = argv.mode === 'development';
+	const devVscode = !!process.env.DEV_VSCODE;
 	const minifyCSS = (code) => (devMode ? code : new CleanCSS().minify(code).styles);
 	const minifyJS = (code) => (devMode ? code : UglifyJS.minify(code).code);
 
 	return {
 		mode: env.mode || 'production',
-		entry: path.resolve(__dirname, 'src/index.ts'),
-		output: { filename: `static-${STATIC_HASH}/config/bootstrap.js` },
+		entry: path.resolve(import.meta.dirname, 'src/index.ts'),
+		output: { clean: true, publicPath: '/', filename: `${staticDir}/bootstrap.js` },
 		resolve: { extensions: ['.js', '.ts'] },
 		module: {
 			rules: [
 				{ test: /\.tsx?$/, use: 'ts-loader' },
 				{ test: /\.css?$/, use: ['style-loader', 'css-loader'] },
-				{ test: /\.svg$/, use: 'file-loader' },
+				{ test: /\.svg$/, use: [{ loader: 'file-loader', options: fileLoaderOptions }] },
 			],
 		},
 		plugins: [
@@ -37,50 +66,24 @@ module.exports = (env, argv) => {
 					{ from: 'public/favicon*', to: '[name][ext]' },
 					{ from: 'public/manifest.json', to: '[name][ext]' },
 					{ from: 'public/robots.txt', to: '[name][ext]' },
-					{
-						from: 'extensions',
-						to: `static-${STATIC_HASH}/extensions`,
-						globOptions: { dot: true, ignore: ['**/node_modules/**'] },
-						...skipMinified,
-					},
-					!devVscode && {
-						from: 'node_modules/@github1s/vscode-web/dist/vscode',
-						to: `static-${STATIC_HASH}/vscode`,
-						globOptions: { ignore: ['**/*.js.map'] },
-						...skipMinified,
-					},
-					!devVscode && {
-						from: 'node_modules/@github1s/vscode-web/dist/extensions',
-						to: `static-${STATIC_HASH}/extensions`,
-						globOptions: { ignore: ['**/*.js.map'] },
-						...skipMinified,
-					},
-					!devVscode && {
-						from: 'node_modules/@github1s/vscode-web/dist/web-packages',
-						to: `static-${STATIC_HASH}/web-packages`,
-						...skipMinified,
-					},
+					...(devVscode ? [] : copyPluginPatterns),
 				].filter(Boolean),
 			}),
 			new HtmlWebpackPlugin({
-				inject: false,
+				minify: !devMode,
+				scriptLoading: 'module',
 				template: 'public/index.html',
 				templateParameters: {
-					devVscode: devVscode,
-					staticHash: STATIC_HASH,
 					spinnerStyle: minifyCSS(fs.readFileSync('./public/spinner.css').toString()),
 					pageTitleScript: minifyJS(fs.readFileSync('./public/page-title.js').toString()),
-					analyticsScript: devMode ? '' : minifyJS(fs.readFileSync('./public/analytics.js').toString()),
+					globalScript: minifyJS(packUtils.createGlobalScript(staticDir, devVscode)),
 				},
 			}),
 			new webpack.DefinePlugin({
-				STATIC_HASH: JSON.stringify(STATIC_HASH),
+				DEV_VSCODE: JSON.stringify(devVscode),
 				GITHUB_ORIGIN: JSON.stringify(process.env.GITHUB_DOMAIN || 'https://github.com'),
 				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
-			}),
-			generate({
-				file: `static-${STATIC_HASH}/config/extensions.js`,
-				content: packUtils.createExtensionsContent(devVscode),
+				GITHUB1S_EXTENSIONS: JSON.stringify(packUtils.getBuiltinExtensions(devVscode)),
 			}),
 		],
 		performance: false,
@@ -89,9 +92,8 @@ module.exports = (env, argv) => {
 			liveReload: false,
 			allowedHosts: 'all',
 			client: { overlay: false },
-			static: path.join(__dirname, 'dist'),
 			devMiddleware: { writeToDisk: true },
-			proxy: [packUtils.createVSCodeUnpkgProxy()],
+			static: devVscode ? devVscodeStatic : [],
 			historyApiFallback: { disableDotRule: true },
 		},
 	};

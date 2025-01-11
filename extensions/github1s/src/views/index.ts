@@ -34,6 +34,6 @@ export const registerCustomViews = () => {
 	context.subscriptions.push(
 		// register commit view which is in source control panel
 		vscode.window.registerTreeDataProvider(FileHistoryTreeDataProvider.viewType, fileHistoryTreeDataProvider),
-		vscode.window.registerTreeDataProvider(CommitTreeDataProvider.viewType, commitTreeDataProvider)
+		vscode.window.registerTreeDataProvider(CommitTreeDataProvider.viewType, commitTreeDataProvider),
 	);
 };

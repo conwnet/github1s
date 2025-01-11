@@ -13,7 +13,7 @@ export interface Submodule {
 }
 
 // the code below is come from https://github.com/microsoft/vscode/blob/1.52.1/extensions/git/src/git.ts#L667
-export function parseGitmodules(raw: string): Submodule[] {
+export const parseGitmodules = (raw: string): Submodule[] => {
 	const regex = /\r?\n/g;
 	let position = 0;
 	let match: RegExpExecArray | null = null;
@@ -21,7 +21,7 @@ export function parseGitmodules(raw: string): Submodule[] {
 	const result: Submodule[] = [];
 	let submodule: Partial<Submodule> = {};
 
-	function parseLine(line: string): void {
+	const parseLine = (line: string): void => {
 		const sectionMatch = /^\s*\[submodule "([^"]+)"\]\s*$/.exec(line);
 
 		if (sectionMatch) {
@@ -57,7 +57,7 @@ export function parseGitmodules(raw: string): Submodule[] {
 				submodule.url = value;
 				break;
 		}
-	}
+	};
 
 	while ((match = regex.exec(raw))) {
 		parseLine(raw.substring(position, match.index));
@@ -71,7 +71,7 @@ export function parseGitmodules(raw: string): Submodule[] {
 	}
 
 	return result;
-}
+};
 
 export const parseSubmoduleUrl = (url: string) => {
 	try {

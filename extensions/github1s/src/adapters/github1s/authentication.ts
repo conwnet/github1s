@@ -112,7 +112,7 @@ export class GitHub1sAuthenticationView {
 				GitHub1sAuthenticationView.viewType,
 				this.pageTitle,
 				vscode.ViewColumn.One,
-				getWebviewOptions(extensionContext.extensionUri)
+				getWebviewOptions(extensionContext.extensionUri),
 			);
 			this.registerListeners();
 			this.webviewPanel.onDidDispose(() => (this.webviewPanel = null));

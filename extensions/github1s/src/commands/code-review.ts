@@ -70,7 +70,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 		quickPick.show();
 
 		const choice = (await new Promise<vscode.QuickPickItem | undefined>((resolve) =>
-			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
+			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0])),
 		)) as vscode.QuickPickItem & { codeReviewId?: string };
 		quickPick.hide();
 
@@ -136,12 +136,12 @@ export const registerCodeReviewCommands = (context: vscode.ExtensionContext) => 
 		vscode.commands.registerCommand('github1s.commands.openCodeReviewOnBitbucket', commandOpenCodeReviewOnOfficialPage),
 		vscode.commands.registerCommand(
 			'github1s.commands.openCodeReviewOnOfficialPage',
-			commandOpenCodeReviewOnOfficialPage
+			commandOpenCodeReviewOnOfficialPage,
 		),
 		vscode.commands.registerCommand('github1s.commands.load-more-code-reviews', commandLoadMoreCodeReviews),
 		vscode.commands.registerCommand(
 			'github1s.commands.load-more-code-review-changed-files',
-			commandLoadMoreCodeReviewChangedFiles
-		)
+			commandLoadMoreCodeReviewChangedFiles,
+		),
 	);
 };

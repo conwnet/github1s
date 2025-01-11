@@ -12,7 +12,7 @@ export const buildTextSearchQueryString = (
 	repository: string,
 	ref: string,
 	query: TextSearchQuery,
-	options: TextSearchOptions
+	options: TextSearchOptions,
 ): string => {
 	const repoPattern = buildRepoPattern(repository);
 	const countString = `count:${options.pageSize ? (options.page || 1) * options.pageSize : 100}`;
@@ -106,7 +106,7 @@ export const getTextSearchResults = (
 	repository: string,
 	ref: string,
 	query: TextSearchQuery,
-	options: TextSearchOptions
+	options: TextSearchOptions,
 ): Promise<TextSearchResults> => {
 	const offset = options.pageSize ? ((options.page || 1) - 1) * options.pageSize : 0;
 	const limit = options.pageSize ? options.pageSize : 100;

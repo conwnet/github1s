@@ -8,9 +8,10 @@ const AuthenticationFeatures = () => {
 	return html`
 		<ul class="authentication-features">
 			${(pageConfig.authenticationFeatures || []).map(
-				(feature) => html`<li class="feature-item">
-					<a class="link" href=${feature.link} target="_blank" rel="noopener noreferrer">${feature.text}</a>
-				</li>`
+				(feature) =>
+					html`<li class="feature-item">
+						<a class="link" href=${feature.link} target="_blank" rel="noopener noreferrer">${feature.text}</a>
+					</li>`,
 			)}
 		</ul>
 	`;

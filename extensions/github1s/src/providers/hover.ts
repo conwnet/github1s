@@ -8,14 +8,14 @@ import router from '@/router';
 import { getSourcegraphUrl } from '@/helpers/urls';
 import { adapterManager } from '@/adapters';
 
-const getSemanticMarkdownSuffix = (sourcegraphUrl: String) => `
+const getSemanticMarkdownSuffix = (sourcegraphUrl: string) => `
 
 ---
 
 [Semantic](https://docs.sourcegraph.com/code_intelligence/explanations/precise_code_intelligence) result provided by [Sourcegraph](${sourcegraphUrl})
 `;
 
-const getSearchBasedMarkdownSuffix = (sourcegraphUrl: String) => `
+const getSearchBasedMarkdownSuffix = (sourcegraphUrl: string) => `
 
 ---
 
@@ -42,7 +42,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 	async getSearchBasedHover(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		symbol: string
+		symbol: string,
 	): Promise<string | null> {
 		const { line, character } = position;
 		const authority = document.uri.authority || (await router.getAuthority());
@@ -67,12 +67,12 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 					scheme: target.scope?.scheme,
 					authority: `${target.scope?.repo}+${target.scope?.ref}`,
 					path: `/${target.path}`,
-			  });
+				});
 		// open corresponding file with target
 		const textDocument = await vscode.workspace.openTextDocument(targetFileUri);
 		// get the content in `[range.start.line - 2, range.end.line + 2]` lines
 		const startPosition = new vscode.Position(Math.max(0, target.range.start.line - 2), 0);
-		// eslint-disable-next-line max-len
+
 		const endPosition = textDocument.lineAt(Math.min(textDocument.lineCount - 1, target.range.end.line + 2)).range.end;
 		const codeText = textDocument.getText(new vscode.Range(startPosition, endPosition));
 
@@ -82,7 +82,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 	async provideHover(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		_token: vscode.CancellationToken
+		_token: vscode.CancellationToken,
 	): Promise<vscode.Hover | null> {
 		const symbolRange = document.getWordRangeAtPosition(position);
 		const symbol = symbolRange ? document.getText(symbolRange) : '';

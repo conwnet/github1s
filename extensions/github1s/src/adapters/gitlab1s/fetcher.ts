@@ -63,8 +63,9 @@ export class GitLabFetcher {
 	private _request = reuseable(
 		(
 			command: string,
-			params: Record<string, string | number | boolean | undefined>
+			params: Record<string, string | number | boolean | undefined>,
 		): Promise<{ status: number; data: any; headers: Headers }> => {
+			// eslint-disable-next-line prefer-const
 			let [method, path] = command.split(/\s+/).filter(Boolean);
 			Object.keys(params).forEach((el) => {
 				path = path.replace(`{${el}}`, `${encodeURIComponent(params[el] || '')}`);
@@ -81,7 +82,7 @@ export class GitLabFetcher {
 				response.data = await response.json();
 				return response.ok ? response : Promise.reject({ response });
 			});
-		}
+		},
 	);
 
 	public request = (command: string, params: Record<string, string | number | boolean | undefined>) => {

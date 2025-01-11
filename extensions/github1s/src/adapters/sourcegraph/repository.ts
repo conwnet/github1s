@@ -19,7 +19,7 @@ const RepositoryQuery = gql`
 `;
 
 export const getRepository = async (
-	repository: string
+	repository: string,
 ): Promise<{ private: boolean; defaultBranch: string } | null> => {
 	const response = await sourcegraphClient.query({
 		query: RepositoryQuery,

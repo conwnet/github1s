@@ -29,7 +29,7 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		_context: vscode.ReferenceContext,
-		_token: vscode.CancellationToken
+		_token: vscode.CancellationToken,
 	): Promise<vscode.Location[]> {
 		const symbolRange = document.getWordRangeAtPosition(position);
 		const symbol = symbolRange ? document.getText(symbolRange) : '';
@@ -61,13 +61,13 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 						scheme: scope!.scheme,
 						authority: `${scope!.repo}+${scope!.ref}`,
 						path: `/${path}`,
-				  });
+					});
 			const { start, end } = range;
 			return {
 				uri,
 				range: new vscode.Range(
 					new vscode.Position(start.line, start.character),
-					new vscode.Position(end.line, end.character)
+					new vscode.Position(end.line, end.character),
 				),
 			};
 		});

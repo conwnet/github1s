@@ -7,3 +7,4 @@ vscode-web/extensions
 htm.module.js
 preact.module.js
 preact-hooks.module.js
+index.html

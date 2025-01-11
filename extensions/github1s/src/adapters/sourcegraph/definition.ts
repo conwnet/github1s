@@ -51,7 +51,7 @@ const getLSIFDefinitions = async (
 	ref: string,
 	path: string,
 	line: number,
-	character: number
+	character: number,
 ): Promise<SymbolDefinitions> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFDefinitionsQuery,
@@ -70,7 +70,7 @@ export const getSymbolDefinitions = (
 	path: string,
 	line: number,
 	character: number,
-	symbol: string
+	symbol: string,
 ): Promise<SymbolDefinitions> => {
 	// if failed to find definitions from LSIF,
 	// fallback to search-based definitions, using

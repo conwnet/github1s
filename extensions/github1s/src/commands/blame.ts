@@ -50,7 +50,7 @@ const createCommitMessagePreviewMarkdown = (blameRange: BlameRange, platformName
 	const messageTextLines: string[] = [];
 
 	messageTextLines.push(
-		`![avatar](${commit.avatarUrl}|width=16px,height=16px) [${commit.author}](mailto:${commit.email}), ${relativeTimeTo(commit.createTime)} (*${commit.createTime}*)` // prettier-ignore
+		`![avatar](${commit.avatarUrl}|width=16px,height=16px) [${commit.author}](mailto:${commit.email}), ${relativeTimeTo(commit.createTime)} (*${commit.createTime}*)`, // prettier-ignore
 	);
 	messageTextLines.push(`Commit ID: ${commit.sha}`);
 
@@ -62,7 +62,7 @@ const createCommitMessagePreviewMarkdown = (blameRange: BlameRange, platformName
 	const switchToCommitCommandText = `command:github1s.commands.switchToCommit?${encodeURIComponent(JSON.stringify([commit.sha]))}`; // prettier-ignore
 	const openOnGitHubCommandText = `command:${commandConfig.command}?${encodeURIComponent(JSON.stringify([commit.sha]))}`; // prettier-ignore
 	messageTextLines.push(
-		`[$(log-in) Switch to Commit](${switchToCommitCommandText}) | [$(globe) ${commandConfig.title}](${openOnGitHubCommandText})`
+		`[$(log-in) Switch to Commit](${switchToCommitCommandText}) | [$(globe) ${commandConfig.title}](${openOnGitHubCommandText})`,
 	);
 
 	const markdownString = new vscode.MarkdownString(messageTextLines.join('\n\n'), true);
@@ -159,7 +159,7 @@ const createRestLinesDecorationType = (blameRange: BlameRange) => {
 // create decoration option for each line of a blame block
 const createLineDecorationOptions = (
 	blameRange: BlameRange,
-	hoverMessage?: vscode.MarkdownString | string
+	hoverMessage?: vscode.MarkdownString | string,
 ): vscode.DecorationOptions[] => {
 	const decorationOptions: vscode.DecorationOptions[] = [];
 	const { startingLine, endingLine } = blameRange;
@@ -231,7 +231,7 @@ class EditorGitBlame {
 
 		const blameRanges = await this.getBlameRanges();
 		const selectedCommitSha = blameRanges.find(
-			(blameRange) => blameRange.startingLine - 1 <= lineIndex && blameRange.endingLine - 1 >= lineIndex
+			(blameRange) => blameRange.startingLine - 1 <= lineIndex && blameRange.endingLine - 1 >= lineIndex,
 		)?.commit.sha;
 		const selectedBlameRanges = blameRanges.filter((blameRange) => blameRange.commit.sha === selectedCommitSha);
 		const decorationType = createSelectedLineDecorationType();
@@ -278,6 +278,6 @@ export const registerBlameCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.commands.toggleEditorGutterBlame', commandToggleEditorGutterBlame),
 		vscode.commands.registerCommand('github1s.commands.openEditorGutterBlame', commandOpenEditorGutterBlame),
-		vscode.commands.registerCommand('github1s.commands.closeEditorGutterBlame', commandCloseEditorGutterBlame)
+		vscode.commands.registerCommand('github1s.commands.closeEditorGutterBlame', commandCloseEditorGutterBlame),
 	);
 };

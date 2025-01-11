@@ -60,8 +60,8 @@ You can start an online development environment with [Gitpod](https://www.gitpod
 ```bash
 git clone git@github.com:conwnet/github1s.git
 cd github1s
-yarn
-yarn watch
+npm install
+npm run watch
 # The cli will automatically open http://localhost:8080 once the build is completed.
 # You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
@@ -75,15 +75,15 @@ To verify the build:
 
 ```bash
 cd github1s
-yarn build:vscode
+npm run build:vscode
 ```
 
 After the initial successful build, you could use the watch mode:
 
 ```bash
 cd github1s
-yarn
-yarn watch-with-vscode
+npm install
+npm run watch-with-vscode
 # The cli will automatically open http://localhost:8080 once the build is completed.
 # You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
@@ -99,11 +99,11 @@ You can use the VS Code plugin [Remote-Containers](https://marketplace.visualstu
 
    - Now VS Code will create the docker container and connect to the new container so you can use this as a fully setup environment!
 
-5. Open a new VS Code Terminal, then you can run the `yarn` commands listed above.
+5. Open a new VS Code Terminal, then you can run the `npm install` commands listed above.
 
 ```bash
-yarn
-yarn watch
+npm install
+npm run watch
 # The cli will automatically open http://localhost:8080 once the build is completed.
 # You can visit http://localhost:8080/conwnet/github1s if it doesn't.
 ```
@@ -111,7 +111,7 @@ yarn watch
 ### Format all codes
 
 ```bash
-yarn format
+npm run format
 ```
 
 It uses `prettier` to format all possible codes.
@@ -119,8 +119,8 @@ It uses `prettier` to format all possible codes.
 ## Build
 
 ```bash
-yarn
-yarn build
+npm install
+npm run build
 ```
 
 ## Feedback

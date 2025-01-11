@@ -23,6 +23,7 @@ const browserUrlManager = {
 		vscode.commands.executeCommand('github1s.commands.vscode.replaceBrowserUrl', url) as Promise<void>,
 };
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 export async function activate(context: vscode.ExtensionContext) {
 	// set the global context for convenient
 	setExtensionContext(context);
@@ -54,7 +55,7 @@ const initialVSCodeState = async () => {
 	if (routerState.pageType === PageType.Tree && routerState.filePath) {
 		vscode.commands.executeCommand(
 			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` })
+			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
 		);
 	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
 		const { startLine, endLine } = routerState;
@@ -66,7 +67,7 @@ const initialVSCodeState = async () => {
 		}
 		vscode.window.showTextDocument(
 			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
-			documentShowOptions
+			documentShowOptions,
 		);
 	} else if (routerState.pageType === PageType.CodeReviewList) {
 		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');

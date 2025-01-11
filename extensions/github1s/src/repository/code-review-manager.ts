@@ -25,7 +25,11 @@ class CodeReviewChangedFilesManager {
 		return CodeReviewChangedFilesManager.instancesMap.get(mapKey)!;
 	}
 
-	constructor(private _scheme: string, private _repo: string, private _codeReviewId: string) {}
+	constructor(
+		private _scheme: string,
+		private _repo: string,
+		private _codeReviewId: string,
+	) {}
 
 	getList = reuseable(async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
 		if (forceUpdate || !this._changedFilesList) {
@@ -77,7 +81,10 @@ export class CodeReviewManager {
 		return CodeReviewManager.instancesMap.get(mapKey)!;
 	}
 
-	private constructor(private _scheme: string, private _repo: string) {}
+	private constructor(
+		private _scheme: string,
+		private _repo: string,
+	) {}
 
 	getList = reuseable(async (forceUpdate: boolean = false): Promise<CodeReview[]> => {
 		if (forceUpdate || !this._codeReviewList) {
@@ -91,7 +98,7 @@ export class CodeReviewManager {
 	getItem = reuseable(
 		async (
 			codeReviewId: string,
-			forceUpdate = false
+			forceUpdate = false,
 		): Promise<(CodeReview & { sourceSha: string; targetSha: string }) | null> => {
 			const isShaExists = (codeReview: CodeReview) => codeReview.sourceSha && codeReview.targetSha;
 			if (
@@ -110,7 +117,7 @@ export class CodeReviewManager {
 			return (this._codeReviewMap.get(codeReviewId) || null) as
 				| (CodeReview & { sourceSha: string; targetSha: string })
 				| null;
-		}
+		},
 	);
 
 	loadMore = reuseable(async (): Promise<CodeReview[]> => {
@@ -141,7 +148,7 @@ export class CodeReviewManager {
 		async (codeReviewId: string, forceUpdate: boolean = false): Promise<ChangedFile[]> => {
 			const manager = CodeReviewChangedFilesManager.getInstance(this._scheme, this._repo, codeReviewId);
 			return manager.getList(forceUpdate);
-		}
+		},
 	);
 
 	public loadMoreChangedFiles = reuseable(async (codeReviewId: string) => {

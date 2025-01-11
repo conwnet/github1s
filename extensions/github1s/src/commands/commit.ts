@@ -56,7 +56,7 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 		quickPick.show();
 
 		const choice = (await new Promise<vscode.QuickPickItem | undefined>((resolve) =>
-			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]))
+			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0])),
 		)) as vscode.QuickPickItem & { commitSha?: string };
 		quickPick.hide();
 
@@ -136,11 +136,11 @@ export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.loadMoreFileHistoryCommits', commandLoadMoreFileHistoryCommits),
 		vscode.commands.registerCommand(
 			'github1s.commands.loadMoreFileHistoryCommitChangedFiles',
-			commandLoadMoreFileHistoryCommitChangedFiles
+			commandLoadMoreFileHistoryCommitChangedFiles,
 		),
 		vscode.commands.registerCommand(
 			'github1s.commands.refreshFileHistoryCommitList',
-			commandRefreshFileHistoryCommitList
-		)
+			commandRefreshFileHistoryCommitList,
+		),
 	);
 };

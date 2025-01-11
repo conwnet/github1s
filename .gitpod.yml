@@ -2,15 +2,15 @@ image:
   file: .gitpod.Dockerfile
 tasks:
   - init: |
-      yarn
-      yarn build
+      npm install
+      npm run build
     command: |
       echo "======================="
-      echo "Please run 'yarn watch'"
+      echo "Please run 'npm run watch'"
       echo "======================="
   - command: |
       echo "==========================================================================="
-      echo "Please wait for 'yarn watch' to complete compilation, then run 'yarn serve'"
+      echo "Please wait for 'npm run watch' to complete compilation"
       echo "==========================================================================="
 ports:
   - port: 8080

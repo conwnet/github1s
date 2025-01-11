@@ -7,12 +7,13 @@
 'use strict';
 
 //@ts-check
-/** @typedef {import('webpack').Configuration} WebpackConfig **/
+/** WebpackConfig */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const webpack = require('webpack');
 const path = require('path');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
-module.exports = /** @type WebpackConfig */ {
+module.exports = {
 	context: __dirname,
 	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 	target: 'webworker', // extensions run in a webworker context

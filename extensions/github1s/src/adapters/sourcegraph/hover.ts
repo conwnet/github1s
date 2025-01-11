@@ -32,7 +32,7 @@ const getLSIFHover = async (
 	ref: string,
 	path: string,
 	line: number,
-	character: number
+	character: number,
 ): Promise<SymbolHover | null> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFHoverQuery,
@@ -58,7 +58,7 @@ export const getSymbolHover = (
 	ref: string,
 	path: string,
 	line: number,
-	character: number
+	character: number,
 ): Promise<SymbolHover | null> => {
 	return getLSIFHover(repository, ref, path, line, character);
 };
