@@ -62,11 +62,14 @@ export class Npmjs1sDataSource extends DataSource {
 
 	async provideDirectory(packageName: string, version: string, path: string, recursive = false): Promise<Directory> {
 		const pathParts = path.split(/\/+/).filter(Boolean);
-		const parentFiles = pathParts.reduce((prevFiles, _, index) => {
-			const currentPath = `/${pathParts.slice(0, index + 1).join('/')}`;
-			const fileNode = prevFiles?.find((item) => item.path === currentPath);
-			return fileNode?.type === 'directory' ? fileNode.files : null;
-		}, await this.getPackageFiles(packageName, version));
+		const parentFiles = pathParts.reduce(
+			(prevFiles, _, index) => {
+				const currentPath = `/${pathParts.slice(0, index + 1).join('/')}`;
+				const fileNode = prevFiles?.find((item) => item.path === currentPath);
+				return fileNode?.type === 'directory' ? fileNode.files : null;
+			},
+			await this.getPackageFiles(packageName, version),
+		);
 		const entries = parentFiles ? retrieveFiles(parentFiles, pathParts.length, recursive) : [];
 		return { entries, truncated: false };
 	}

@@ -36,7 +36,7 @@ export class GitHub1sAdapter implements Adapter {
 
 		vscode.window.registerWebviewViewProvider(
 			GitHub1sSettingsViewProvider.viewType,
-			new GitHub1sSettingsViewProvider()
+			new GitHub1sSettingsViewProvider(),
 		);
 		vscode.commands.registerCommand('github1s.commands.openGitHub1sAuthPage', () => {
 			return GitHub1sAuthenticationView.getInstance().open();
@@ -44,7 +44,9 @@ export class GitHub1sAdapter implements Adapter {
 		vscode.commands.registerCommand('github1s.commands.syncSourcegraphRepository', async () => {
 			const dataSource = SourcegraphDataSource.getInstance('github');
 			const randomRef = (Math.random() + 1).toString(36).slice(2);
-			return dataSource.provideCommit(await getCurrentRepo(), randomRef);
+			return dataSource.provideCommit(await getCurrentRepo(), randomRef).then(() => {
+				return vscode.commands.executeCommand('workbench.action.reloadWindow');
+			});
 		});
 	}
 

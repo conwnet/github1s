@@ -122,8 +122,8 @@ const getPopCountText = (pop_count: number, percentage = false) => {
 	return pop_count > 0
 		? ` <span style="color: #30d158">(+${valueText})</span>`
 		: pop_count < 0
-		? ` <span style="color: #ff453a">(-${valueText})</span>`
-		: '';
+			? ` <span style="color: #ff453a">(-${valueText})</span>`
+			: '';
 };
 
 const getRankChangeText = (rank_change: number) => {
@@ -131,15 +131,15 @@ const getRankChangeText = (rank_change: number) => {
 	return rank_change > 0
 		? ` <span style="color: #ff453a">(↓${absValue})</span>`
 		: rank_change < 0
-		? ` <span style="color: #30d158">(↑${absValue})</span>`
-		: '';
+			? ` <span style="color: #30d158">(↑${absValue})</span>`
+			: '';
 };
 
 export const createCollectionsListPageMarkdown = async () => {
 	const collectionReposMap = new Map<string, [string, string][]>();
 	const [hotCollections, allCollections] = await Promise.all([getRecentHotCollections(), getCollections()]);
 	const sortedCollections = hotCollections.sort(
-		(itemA, itemB) => +itemA.repo_current_period_rank - +itemB.repo_current_period_rank
+		(itemA, itemB) => +itemA.repo_current_period_rank - +itemB.repo_current_period_rank,
 	);
 	const uniqueCollections = sortedCollections.filter((collection) => {
 		const relativeRankText = getRankChangeText(+collection.repo_rank_changes);

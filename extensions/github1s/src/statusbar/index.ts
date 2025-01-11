@@ -7,6 +7,6 @@ import { updateCheckoutTo } from './checkout';
 import { showSponsors } from './sponsors';
 
 export const decorateStatusBar = () => {
-	showSponsors();
 	updateCheckoutTo();
+	showSponsors();
 };

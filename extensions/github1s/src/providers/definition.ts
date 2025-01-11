@@ -28,7 +28,7 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 	async provideDefinition(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		_token: vscode.CancellationToken
+		_token: vscode.CancellationToken,
 	): Promise<vscode.Definition | vscode.LocationLink[]> {
 		const symbolRange = document.getWordRangeAtPosition(position);
 		const symbol = symbolRange ? document.getText(symbolRange) : '';
@@ -60,13 +60,13 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 						scheme: scope!.scheme,
 						authority: `${scope!.repo}+${scope!.ref}`,
 						path: `/${path}`,
-				  });
+					});
 			const { start, end } = range;
 			return {
 				uri,
 				range: new vscode.Range(
 					new vscode.Position(start.line, start.character),
-					new vscode.Position(end.line, end.character)
+					new vscode.Position(end.line, end.character),
 				),
 			};
 		});

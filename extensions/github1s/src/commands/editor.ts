@@ -85,7 +85,7 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 	const rightFileUri = await getConcreteFileUri(
 		// if the `queryBaseUriStr` is empty, which means this command is called from
 		// a normal file editor (not a diff editor), just use `fileUri` in this case
-		queryBaseUriStr ? vscode.Uri.parse(queryBaseUriStr as string) : fileUri
+		queryBaseUriStr ? vscode.Uri.parse(queryBaseUriStr as string) : fileUri,
 	);
 	const [repo, rightCommitSha] = rightFileUri.authority.split('+').filter(Boolean);
 
@@ -110,7 +110,7 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 		'vscode.diff',
 		leftFileUri.with({ query }),
 		rightFileUri.with({ query }),
-		getChangedFileDiffTitle(leftFileUri, rightFileUri, changedStatus)
+		getChangedFileDiffTitle(leftFileUri, rightFileUri, changedStatus),
 	);
 };
 
@@ -140,7 +140,7 @@ const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
 		'vscode.diff',
 		leftFileUri.with({ query }),
 		rightFileUri.with({ query }),
-		getChangedFileDiffTitle(leftFileUri, rightFileUri, FileChangeStatus.Modified)
+		getChangedFileDiffTitle(leftFileUri, rightFileUri, FileChangeStatus.Modified),
 	);
 };
 
@@ -150,6 +150,6 @@ export const registerEditorCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.diffViewOpenLeftFile', commandDiffViewOpenLeftFile),
 		vscode.commands.registerCommand('github1s.commands.diffViewOpenRightFile', commandDiffViewOpenRightFile),
 		vscode.commands.registerCommand('github1s.commands.openFilePreviousRevision', commandOpenFilePreviousRevision),
-		vscode.commands.registerCommand('github1s.commands.openFileNextRevision', commandOpenFileNextRevision)
+		vscode.commands.registerCommand('github1s.commands.openFileNextRevision', commandOpenFileNextRevision),
 	);
 };

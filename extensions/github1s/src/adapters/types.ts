@@ -203,7 +203,7 @@ export class DataSource {
 		repo: string,
 		ref: string,
 		query: TextSearchQuery,
-		options?: TextSearchOptions
+		options?: TextSearchOptions,
 	): Promisable<TextSearchResults> {
 		return { results: [], truncated: false };
 	}
@@ -228,7 +228,7 @@ export class DataSource {
 	// optionally return changed files (if `files` exists can reduce api calls)
 	provideCodeReviews(
 		repo: string,
-		options?: CodeReviewsQueryOptions
+		options?: CodeReviewsQueryOptions,
 	): Promisable<(CodeReview & { files?: ChangedFile[] })[]> {
 		return [];
 	}
@@ -236,7 +236,7 @@ export class DataSource {
 	// optionally return changed files (if `files` exists can reduce api calls)
 	provideCodeReview(
 		repo: string,
-		id: string
+		id: string,
 	): Promisable<(CodeReview & { sourceSha: string; targetSha: string; files?: ChangedFile[] }) | null> {
 		return null;
 	}
@@ -255,7 +255,7 @@ export class DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promisable<SymbolDefinitions> {
 		return [];
 	}
@@ -266,7 +266,7 @@ export class DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promisable<SymbolReferences> {
 		return [];
 	}
@@ -277,7 +277,7 @@ export class DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promisable<SymbolHover | null> {
 		return null;
 	}
@@ -354,7 +354,7 @@ export class RouterParser {
 
 	// build the blob page path
 	// startLine/endLine begins from 1
-	// eslint-disable-next-line max-len
+
 	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): Promisable<string> {
 		return '/' + repo;
 	}

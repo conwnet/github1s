@@ -182,7 +182,7 @@ export class SourcegraphDataSource extends DataSource {
 		repo: string,
 		ref: string,
 		query: TextSearchQuery,
-		options: TextSearchOptions
+		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
 		return getTextSearchResults(this.buildRepository(repo), ref, query, options);
 	}
@@ -192,7 +192,7 @@ export class SourcegraphDataSource extends DataSource {
 			this.buildRepository(repo),
 			options?.from || 'HEAD',
 			options?.path,
-			options?.pageSize ? options.pageSize * (options.page || 1) : undefined
+			options?.pageSize ? options.pageSize * (options.page || 1) : undefined,
 		);
 		if (options?.path && commits.length) {
 			// find the latested that related the `options.path` file
@@ -220,7 +220,7 @@ export class SourcegraphDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolDefinitions> {
 		return getSymbolDefinitions(this.buildRepository(repo), ref, path, line, character, symbol);
 	}
@@ -231,7 +231,7 @@ export class SourcegraphDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolReferences> {
 		return getSymbolReferences(this.buildRepository(repo), ref, path, line, character, symbol);
 	}
@@ -242,7 +242,7 @@ export class SourcegraphDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		_symbol: string
+		_symbol: string,
 	): Promise<SymbolHover | null> {
 		return getSymbolHover(this.buildRepository(repo), ref, path, line, character);
 	}

@@ -63,8 +63,6 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 	if (platform === Platform.GitLab) {
 		return {
 			hideTextFileLabelDecorations: !!repository,
-			windowIndicator: createWindowIndicator(repository),
-			configurationDefaults: createConfigurationDefaults(!!repository),
 			workspace: repository ? createFolderWorkspace('gitlab1s') : undefined,
 			workspaceId: repository ? 'gitlab1s:' + repository : '',
 			workspaceLabel: repository,
@@ -80,8 +78,6 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 	if (platform === Platform.Bitbucket) {
 		return {
 			hideTextFileLabelDecorations: !!repository,
-			windowIndicator: createWindowIndicator(repository),
-			configurationDefaults: createConfigurationDefaults(!!repository),
 			workspace: repository ? createFolderWorkspace('bitbucket1s') : undefined,
 			workspaceId: repository ? 'bitbucket1s:' + repository : '',
 			workspaceLabel: repository,
@@ -96,8 +92,6 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 	if (platform === Platform.npm) {
 		return {
 			hideTextFileLabelDecorations: !!repository,
-			windowIndicator: createWindowIndicator(repository),
-			configurationDefaults: createConfigurationDefaults(false),
 			workspace: repository ? createFolderWorkspace('npmjs1s') : undefined,
 			workspaceId: repository ? 'npmjs1s:' + repository : '',
 			workspaceLabel: repository,
@@ -112,8 +106,6 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 	const isOnlineEditor = repository === 'editor';
 	return {
 		hideTextFileLabelDecorations: !isOnlineEditor,
-		windowIndicator: createWindowIndicator(repository),
-		configurationDefaults: createConfigurationDefaults(!!repository),
 		workspace: !isOnlineEditor ? createFolderWorkspace(repository ? 'github1s' : 'ossinsight') : undefined,
 		workspaceId: !isOnlineEditor ? 'github1s:' + (repository || 'trending') : '',
 		workspaceLabel: repository || (isOnlineEditor ? '' : 'GitHub Trending'),
@@ -122,5 +114,34 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 			icon: githubLogoUrl,
 			onClick: () => (repository ? openOfficialPage(GITHUB_ORIGIN) : openGitHub1sPage()),
 		},
+	};
+};
+
+export const createWorkbenchOptions = (platform: Platform, repository: string): any => {
+	if (platform === Platform.GitLab) {
+		return {
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+		};
+	}
+
+	// bitbucket is not available now
+	if (platform === Platform.Bitbucket) {
+		return {
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(!!repository),
+		};
+	}
+
+	if (platform === Platform.npm) {
+		return {
+			windowIndicator: createWindowIndicator(repository),
+			configurationDefaults: createConfigurationDefaults(false),
+		};
+	}
+
+	return {
+		windowIndicator: createWindowIndicator(repository),
+		configurationDefaults: createConfigurationDefaults(!!repository),
 	};
 };

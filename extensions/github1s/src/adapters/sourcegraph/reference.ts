@@ -51,7 +51,7 @@ const getLSIFReferences = async (
 	ref: string,
 	path: string,
 	line: number,
-	character: number
+	character: number,
 ): Promise<SymbolReferences> => {
 	const response = await sourcegraphClient.query({
 		query: LSIFReferencesQuery,
@@ -70,7 +70,7 @@ export const getSymbolReferences = (
 	path: string,
 	line: number,
 	character: number,
-	symbol: string
+	symbol: string,
 ): Promise<SymbolReferences> => {
 	// if failed to find references from LSIF,
 	// fallback to search-based references, using

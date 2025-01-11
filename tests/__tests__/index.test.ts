@@ -53,7 +53,7 @@ it('should load successfully', async () => {
 	// README file will be rendered in an iframe
 	await page.$eval(
 		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
-		(el: HTMLElement) => el.innerHTML
+		(el: HTMLElement) => el.innerHTML,
 	);
 
 	const image = await page.screenshot();
@@ -78,6 +78,6 @@ it('should show Commit files', async () => {
 	await page.waitForTimeout(6000);
 
 	const container = await page.$('[id="workbench.parts.sidebar"]');
-	let image = await container?.screenshot();
+	const image = await container?.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);
 });

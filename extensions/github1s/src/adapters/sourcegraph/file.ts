@@ -32,7 +32,7 @@ export const readDirectory = async (
 	repository: string,
 	ref: string,
 	path: string,
-	recursive = false
+	recursive = false,
 ): Promise<Directory> => {
 	const repositoryData = await querySourcegraphRepository({
 		query: DirectoryQuery,
@@ -67,7 +67,7 @@ export const readFile = async (
 	repository: string,
 	ref: string,
 	path: string,
-	recursive = false
+	recursive = false,
 ): Promise<{ content: string; binary: boolean }> => {
 	const repositoryData = await querySourcegraphRepository({
 		query: FileQuery,

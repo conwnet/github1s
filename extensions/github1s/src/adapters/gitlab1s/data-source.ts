@@ -111,7 +111,7 @@ export class GitLab1sDataSource extends DataSource {
 			const requestParams = { ref, page, path, repo, recursive };
 			const { data, headers } = await fetcher.request(
 				'GET /projects/{repo}/repository/tree?recursive={recursive}&per_page=100&page={page}&ref={ref}&path={path}',
-				requestParams
+				requestParams,
 			);
 			files = files.concat(data);
 			const nextPage = Number(headers!.get('x-next-page'));
@@ -238,7 +238,7 @@ export class GitLab1sDataSource extends DataSource {
 		repoFullName: string,
 		ref: string,
 		query: TextSearchQuery,
-		options: TextSearchOptions
+		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
 		return sourcegraphDataSource.provideTextSearchResults(repoFullName, ref, query, options);
 	}
@@ -256,7 +256,7 @@ export class GitLab1sDataSource extends DataSource {
 		const requestParams = { repo, ...queryParams };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/repository/commits?per_page={per_page}&page={page}&path={path}&ref_name={sha}',
-			requestParams
+			requestParams,
 		);
 		return Promise.all(
 			data.map(async (item) => ({
@@ -268,7 +268,7 @@ export class GitLab1sDataSource extends DataSource {
 				createTime: item.created_at ? new Date(item.created_at) : undefined,
 				parents: item.parent_ids.map((parent) => parent) || [],
 				avatarUrl: item.author?.avatar_url || (await this.provideUserAvatarLink(item.author_name)),
-			}))
+			})),
 		);
 	}
 
@@ -306,17 +306,17 @@ export class GitLab1sDataSource extends DataSource {
 				status: item.new_file
 					? FileChangeStatus.Added
 					: item.deleted_file
-					? FileChangeStatus.Removed
-					: item.renamed_file
-					? FileChangeStatus.Renamed
-					: FileChangeStatus.Modified,
+						? FileChangeStatus.Removed
+						: item.renamed_file
+							? FileChangeStatus.Renamed
+							: FileChangeStatus.Modified,
 			})) || []
 		);
 	}
 
 	async provideCodeReviews(
 		repo: string,
-		options?: CodeReviewsQueryOptions
+		options?: CodeReviewsQueryOptions,
 	): Promise<(CodeReview & { files?: ChangedFile[] })[]> {
 		const fetcher = GitLabFetcher.getInstance();
 		const state = options?.state ? (options.state === CodeReviewState.Open ? 'open' : 'closed') : 'all';
@@ -325,7 +325,7 @@ export class GitLab1sDataSource extends DataSource {
 		const requestParams = { repo, ...queryParams };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/merge_requests?per_page={per_page}&page={page}',
-			requestParams as any
+			requestParams as any,
 		);
 
 		return data.map((item) => ({
@@ -363,14 +363,13 @@ export class GitLab1sDataSource extends DataSource {
 		};
 	}
 
-	// eslint-disable-next-line
 	async provideCodeReviewChangedFiles(repo: string, id: string, options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		const fetcher = GitLabFetcher.getInstance();
 		const pageParams = { per_page: options?.pageSize, page: options?.page };
 		const filesRequestParams = { repo, id, ...pageParams };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/merge_requests/{id}/changes?per_page={per_page}&page={page}',
-			filesRequestParams
+			filesRequestParams,
 		);
 
 		return data.changes.map((item) => ({
@@ -379,10 +378,10 @@ export class GitLab1sDataSource extends DataSource {
 			status: item.new_file
 				? FileChangeStatus.Added
 				: item.deleted_file
-				? FileChangeStatus.Removed
-				: item.renamed_file
-				? FileChangeStatus.Renamed
-				: FileChangeStatus.Modified,
+					? FileChangeStatus.Removed
+					: item.renamed_file
+						? FileChangeStatus.Renamed
+						: FileChangeStatus.Modified,
 		}));
 	}
 
@@ -392,14 +391,14 @@ export class GitLab1sDataSource extends DataSource {
 		const requestParams = { repo, ref, path };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/repository/files/{path}/blame?ref={ref}',
-			requestParams
+			requestParams,
 		);
 		let startLine = 1;
 		const timestamps = data.map(({ commit }) => +new Date(commit.authored_date) || 0);
 		const computeAge = resolveComputeAge(timestamps);
 		return (data || []).map(({ commit, lines }) => {
-			let startingLine = startLine;
-			let endingLine = startingLine + lines.length;
+			const startingLine = startLine;
+			const endingLine = startingLine + lines.length;
 			startLine = endingLine + 1;
 			return {
 				age: computeAge(+new Date(commit?.authored_date) || 0),
@@ -429,7 +428,7 @@ export class GitLab1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolDefinitions> {
 		return sourcegraphDataSource.provideSymbolDefinitions(repoFullName, ref, path, line, character, symbol);
 	}
@@ -440,7 +439,7 @@ export class GitLab1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolReferences> {
 		return sourcegraphDataSource.provideSymbolReferences(repoFullName, ref, path, line, character, symbol);
 	}
@@ -451,7 +450,7 @@ export class GitLab1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		_symbol: string
+		_symbol: string,
 	): Promise<SymbolHover | null> {
 		return sourcegraphDataSource.provideSymbolHover(repoFullName, ref, path, line, character, _symbol);
 	}

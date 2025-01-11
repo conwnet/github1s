@@ -64,7 +64,7 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 		ref,
 		activeFileUri.path.slice(1),
 		!editor.selection.isEmpty ? editor.selection.start.line + 1 : undefined,
-		editor.selection.end.line !== editor.selection.start.line ? editor.selection.end.line + 1 : undefined
+		editor.selection.end.line !== editor.selection.start.line ? editor.selection.end.line + 1 : undefined,
 	);
 
 	browserPath !== (await router.getPath()) && router.replace(browserPath);

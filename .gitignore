@@ -3,6 +3,3 @@ lib
 dist
 out
 node_modules
-.yalc
-yalc.lock
-yarn-error.log

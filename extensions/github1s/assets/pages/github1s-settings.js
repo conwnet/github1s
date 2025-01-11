@@ -70,7 +70,7 @@ export const InputTokenBlock = ({ createLink, isEditing, onCancel, ...props }) =
 			${isEditing
 				? html`<div class="flex-line">
 						<${VscodeButton} onClick=${onCancel}>Cancel<//>
-				  </div>`
+					</div>`
 				: null}
 		</div>
 	`;
@@ -118,7 +118,7 @@ const PageFooter = () => {
 				updatePreferSgApi();
 			});
 		},
-		[updatePreferSgApi]
+		[updatePreferSgApi],
 	);
 
 	useEffect(() => {
@@ -174,7 +174,7 @@ const TokenDetailPage = ({ token, onEditClick, ...props }) => {
 				<a href=${tokenStatus.profile_url} target="_blank" rel="noopener noreferrer">
 					<img class="user-avatar" src=${tokenStatus.avatar_url} />${tokenStatus.username}
 				</a>
-		  </div>`
+			</div>`
 		: html`<div>Current AccessToken is <span class="error-text">INVALID</span>.</div>`;
 
 	useEffect(() => {

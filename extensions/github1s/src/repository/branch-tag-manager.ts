@@ -30,7 +30,10 @@ export class BranchTagManager {
 		return BranchTagManager.instancesMap.get(mapKey)!;
 	}
 
-	private constructor(private _scheme: string, private _repo: string) {}
+	private constructor(
+		private _scheme: string,
+		private _repo: string,
+	) {}
 
 	getBranchList = reuseable(async (forceUpdate: boolean = false): Promise<Branch[]> => {
 		if (forceUpdate || !this._branchList) {

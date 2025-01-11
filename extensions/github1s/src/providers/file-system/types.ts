@@ -14,7 +14,11 @@ export class File implements FileStat {
 	sha: string;
 	content: Uint8Array;
 
-	constructor(public uri: Uri, name: string, options?: any) {
+	constructor(
+		public uri: Uri,
+		name: string,
+		options?: any,
+	) {
 		this.type = FileType.File;
 		this.ctime = Date.now();
 		this.mtime = Date.now();
@@ -34,7 +38,11 @@ export class Directory implements FileStat {
 	entries: Map<string, File | Directory> | null;
 	isSubmodule: boolean;
 
-	constructor(public uri: Uri, name: string, options?: any) {
+	constructor(
+		public uri: Uri,
+		name: string,
+		options?: any,
+	) {
 		this.type = FileType.Directory;
 		this.ctime = Date.now();
 		this.mtime = Date.now();
