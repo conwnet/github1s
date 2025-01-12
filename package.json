@@ -30,7 +30,7 @@
   "license": "ISC",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250109.0",
-    "@github1s/vscode-web": "^0.23.1",
+    "@github1s/vscode-web": "0.23.2",
     "chokidar": "^4.0.3",
     "clean-css": "^5.3.3",
     "copy-webpack-plugin": "^12.0.2",

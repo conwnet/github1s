@@ -58,13 +58,16 @@ globalThis._VSCODE_WEB = {
 
 if (!DEV_VSCODE) {
 	const linkElement = document.createElement('link');
-	linkElement.rel = 'stylesheet';
-	linkElement.href = resolveVscodeUrl('vs/workbench/workbench.web.main.css');
+	linkElement.setAttribute('rel', 'stylesheet');
+	linkElement.setAttribute('href', resolveVscodeUrl('vs/workbench/workbench.web.main.css'));
 	document.head.appendChild(linkElement);
 
+	const languageId = document.cookie.match(/(^| )vscode.nls.locale=([^;]+)/)?.[2] || '';
+	const nlsUrl = AVAILABLE_LANGUAGES.includes(languageId)
+		? resolveVscodeUrl(`../nls/${languageId}/nls.messages.js`)
+		: resolveVscodeUrl('nls.messages.js');
 	const scriptElement = document.createElement('script');
-	scriptElement.type = 'text/javascript';
-	scriptElement.src = resolveVscodeUrl('nls.messages.js');
+	scriptElement.setAttribute('src', nlsUrl);
 	document.body.appendChild(scriptElement);
 }
 

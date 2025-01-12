@@ -1,6 +1,6 @@
 {
   "name": "@github1s/vscode-web",
-  "version": "0.23.1",
+  "version": "0.23.2",
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
@@ -12,6 +12,7 @@
     "build": "run-s clone patch build:*",
     "build:vscode": "node scripts/build/vscode.js",
     "build:package": "node scripts/build/package.js",
+    "build:nls": "node scripts/build/nls.js",
     "watch": "run-s clone patch && run-p watch:*",
     "watch:source": "node scripts/watch/source.js",
     "watch:vscode": "node scripts/watch/vscode.js",
