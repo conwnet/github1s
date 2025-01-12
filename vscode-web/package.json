@@ -1,22 +1,22 @@
 {
   "name": "@github1s/vscode-web",
-  "version": "0.22.0",
+  "version": "0.23.2",
   "description": "VS Code web for GitHub1s",
   "author": "github1s",
   "license": "MIT",
-  "repository": "https://github.com/conwnet/github1s/issues/257",
+  "type": "module",
+  "repository": "https://github.com/conwnet/github1s",
   "scripts": {
-    "clone": "./scripts/clone-vscode.sh",
-    "sync": "./scripts/sync-code.sh",
-    "build": "run-s clone sync build:vscode copy:*",
-    "build:vscode": "./scripts/build-vscode.sh",
-    "copy:vscode": "./scripts/copy-vscode.sh",
-    "copy:extensions": "./scripts/copy-extensions.sh",
-    "copy:web-pkgs": "node ./scripts/copy-web-pkgs.js",
-    "watch": "run-s clone sync && run-p watch:*",
-    "watch:vscode": "cd lib/vscode && run-p watch watch-web",
-    "watch:src": "cd scripts/watch && node watch-src.js",
-    "watch:dist": "cd scripts/watch && node watch-dist.js"
+    "clone": "node scripts/clone.js",
+    "patch": "node scripts/patch.js",
+    "build": "run-s clone patch build:*",
+    "build:vscode": "node scripts/build/vscode.js",
+    "build:package": "node scripts/build/package.js",
+    "build:nls": "node scripts/build/nls.js",
+    "watch": "run-s clone patch && run-p watch:*",
+    "watch:source": "node scripts/watch/source.js",
+    "watch:vscode": "node scripts/watch/vscode.js",
+    "watch:extensions": "node scripts/watch/extensions.js"
   },
   "private": false,
   "files": [
@@ -29,7 +29,7 @@
     "github1s"
   ],
   "devDependencies": {
-    "chokidar": "^4.0.1",
+    "chokidar": "^4.0.3",
     "fs-extra": "^11.2.0",
     "npm-run-all": "^4.1.5"
   }

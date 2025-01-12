@@ -34,7 +34,7 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		query: vscode.TextSearchQuery,
 		options: vscode.TextSearchOptions,
 		progress: vscode.Progress<vscode.TextSearchResult>,
-		_token: vscode.CancellationToken
+		_token: vscode.CancellationToken,
 	) {
 		return router.getAuthority().then(async (authority) => {
 			const [repo, ref] = authority.split('+');

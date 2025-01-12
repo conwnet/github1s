@@ -56,6 +56,7 @@ export class GitHubFetcher {
 	private _request: Octokit['request'] | null = null;
 	public onDidChangePreferSourcegraphApi = this._emitter.event;
 	private _currentRepoPromise: Promise<any> | null = null;
+	private _sgApiTimeout: boolean = false;
 
 	public request: Octokit['request'];
 	public graphql: Octokit['graphql'];
@@ -116,10 +117,16 @@ export class GitHubFetcher {
 	private async initPreferSourcegraphApi() {
 		if (await this.getPreferSourcegraphApi()) {
 			const sgDataSource = SourcegraphDataSource.getInstance('github');
-			if (!(await sgDataSource.provideRepository(await getCurrentRepo()))) {
-				this.resolveCurrentRepo(true).then((repo) => {
-					repo?.private && this.setPreferSourcegraphApi(false);
-				});
+			try {
+				if (!(await sgDataSource.provideRepository(await getCurrentRepo()))) {
+					this.resolveCurrentRepo(true).then((repo) => {
+						repo?.private && this.setPreferSourcegraphApi(false);
+					});
+				}
+			} catch (e) {
+				if (e.message && e.message.includes('signal is aborted')) {
+					this._sgApiTimeout = true;
+				}
 			}
 		}
 	}
@@ -128,7 +135,7 @@ export class GitHubFetcher {
 		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);
-		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : true;
+		return !isNil(cachedData?.[targetRepo]) ? !!cachedData?.[targetRepo] : this._sgApiTimeout ? false : true;
 	}
 
 	public async setPreferSourcegraphApi(value: boolean, repo?: string) {

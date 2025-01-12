@@ -231,7 +231,7 @@ export class GitHub1sDataSource extends DataSource {
 		repoFullName: string,
 		ref: string,
 		query: TextSearchQuery,
-		options: TextSearchOptions
+		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
 		return sourcegraphDataSource.provideTextSearchResults(repoFullName, ref, query, options);
 	}
@@ -239,7 +239,7 @@ export class GitHub1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideCommits(
 		repoFullName: string,
-		options?: CommitsQueryOptions
+		options?: CommitsQueryOptions,
 	): Promise<(Commit & { files?: ChangedFile[] })[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -291,7 +291,7 @@ export class GitHub1sDataSource extends DataSource {
 	async provideCommitChangedFiles(
 		repoFullName: string,
 		ref: string,
-		_options?: CommonQueryOptions
+		_options?: CommonQueryOptions,
 	): Promise<ChangedFile[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -308,7 +308,7 @@ export class GitHub1sDataSource extends DataSource {
 
 	async provideCodeReviews(
 		repoFullName: string,
-		options?: CodeReviewsQueryOptions
+		options?: CodeReviewsQueryOptions,
 	): Promise<(CodeReview & { files?: ChangedFile[] })[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -358,7 +358,7 @@ export class GitHub1sDataSource extends DataSource {
 	async provideCodeReviewChangedFiles(
 		repoFullName: string,
 		id: string,
-		options?: CommonQueryOptions
+		options?: CommonQueryOptions,
 	): Promise<ChangedFile[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
@@ -402,7 +402,7 @@ export class GitHub1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolDefinitions> {
 		return sourcegraphDataSource.provideSymbolDefinitions(repoFullName, ref, path, line, character, symbol);
 	}
@@ -413,7 +413,7 @@ export class GitHub1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		symbol: string
+		symbol: string,
 	): Promise<SymbolReferences> {
 		return sourcegraphDataSource.provideSymbolReferences(repoFullName, ref, path, line, character, symbol);
 	}
@@ -424,7 +424,7 @@ export class GitHub1sDataSource extends DataSource {
 		path: string,
 		line: number,
 		character: number,
-		_symbol: string
+		_symbol: string,
 	): Promise<SymbolHover | null> {
 		return sourcegraphDataSource.provideSymbolHover(repoFullName, ref, path, line, character, _symbol);
 	}

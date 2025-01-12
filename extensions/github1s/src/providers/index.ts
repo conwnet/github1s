@@ -36,7 +36,7 @@ export const registerVSCodeProviders = () => {
 			vscode.workspace.registerTextSearchProvider(scheme, GitHub1sTextSearchProvider.getInstance()),
 			vscode.languages.registerDefinitionProvider({ scheme }, GitHub1sDefinitionProvider.getInstance()),
 			vscode.languages.registerReferenceProvider({ scheme }, GitHub1sReferenceProvider.getInstance()),
-			vscode.languages.registerHoverProvider({ scheme }, GitHub1sHoverProvider.getInstance())
+			vscode.languages.registerHoverProvider({ scheme }, GitHub1sHoverProvider.getInstance()),
 		);
 	});
 
@@ -47,6 +47,6 @@ export const registerVSCodeProviders = () => {
 		// provider a readonly empty file for diff
 		vscode.workspace.registerTextDocumentContentProvider(EMPTY_FILE_SCHEME, {
 			provideTextDocumentContent: () => '',
-		})
+		}),
 	);
 };

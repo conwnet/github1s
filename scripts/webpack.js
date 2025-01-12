@@ -1,8 +1,8 @@
-const Url = require('url');
-const path = require('path');
-const fs = require('fs-extra');
+import path from 'path';
+import fs from 'fs-extra';
+import { globSync } from 'glob';
 
-const APP_ROOT = path.join(__dirname, '..');
+const APP_ROOT = path.join(import.meta.dirname, '..');
 
 const isWebExtension = (manifest) => {
 	if (Boolean(manifest.browser)) {
@@ -60,9 +60,8 @@ const getExtensionData = (absolutePath) => {
 };
 
 const scanVSCodeExtensions = () => {
-	const extensionsPath = path.join(APP_ROOT, 'node_modules/@github1s/vscode-web/dist/extensions');
+	const extensionsPath = path.join(APP_ROOT, 'vscode-web/lib/vscode/extensions');
 	const extensionFolders = fs.existsSync(extensionsPath) ? fs.readdirSync(extensionsPath) : [];
-
 	return extensionFolders.map((item) => getExtensionData(path.join(extensionsPath, item))).filter(Boolean);
 };
 
@@ -71,25 +70,36 @@ const scanGitHub1sExtensions = () => {
 	return extensions.map((item) => getExtensionData(path.join(APP_ROOT, 'extensions', item))).filter(Boolean);
 };
 
-const createExtensionsContent = (devVscode) => {
-	const vscodeExtensions = devVscode ? scanVSCodeExtensions() : [];
-	const extensions = [...vscodeExtensions, ...scanGitHub1sExtensions()];
-	return `window.github1sExtensions = ${JSON.stringify(extensions)};`;
+export const getBuiltinExtensions = (devVscode) => {
+	return [...(devVscode ? scanVSCodeExtensions() : []), ...scanGitHub1sExtensions()];
 };
 
-const createVSCodeUnpkgProxy = () => ({
-	changeOrigin: true,
-	target: 'vscode-unpkg.net',
-	context: '/api/vscode-unpkg/',
-	pathRewrite: (path) => path.replace(/^\/api\/vscode-unpkg\//, '/'),
-	router: (req) => {
-		const PATH_REGEXP = /^\/api\/vscode-unpkg\/([^/]+)\/(.*)/;
-		const matches = Url.parse(req.url).pathname.match(PATH_REGEXP);
-		return `https://${matches?.[1]}.vscode-unpkg.net`.toLowerCase();
-	},
-});
+const createImportMapScript = () => {
+	const cssFiles = globSync('**/*.css', { cwd: path.join(APP_ROOT, 'vscode-web/lib/vscode/out') });
+	return `const styleElement = document.createElement('style');
+			styleElement.setAttribute('type', 'text/css');
+			styleElement.setAttribute('media', 'screen');
+			document.head.appendChild(styleElement);
 
-module.exports = {
-	createVSCodeUnpkgProxy,
-	createExtensionsContent,
+			globalThis._VSCODE_CSS_MODULES = ${JSON.stringify(cssFiles || [])};
+			globalThis._VSCODE_CSS_LOAD = (url) => styleElement.sheet.insertRule(\`@import url(\${url});\`);
+
+			const importMap = { imports: {} };
+			for (const cssModule of globalThis._VSCODE_CSS_MODULES) {
+				const cssUrl = new URL(cssModule, globalThis._VSCODE_FILE_ROOT).href;
+				const jsSrc = \`globalThis._VSCODE_CSS_LOAD('\${cssUrl}');\\n\`;
+				const blob = new Blob([jsSrc], { type: 'application/javascript' });
+				importMap.imports[cssUrl] = URL.createObjectURL(blob);
+			}
+			const importMapElement = document.createElement('script');
+			importMapElement.type = 'importmap';
+			importMapElement.setAttribute('nonce', '1nline-m4p');
+			importMapElement.textContent = JSON.stringify(importMap, undefined, 2);
+			document.head.appendChild(importMapElement);`;
+};
+
+export const createGlobalScript = (staticDir, devVscode) => {
+	return `globalThis.dynamicImport = (url) => import(url);
+			globalThis._VSCODE_FILE_ROOT = new URL('/${staticDir}/vscode/', window.location.origin).toString();
+			${devVscode ? createImportMapScript() : ''}`;
 };

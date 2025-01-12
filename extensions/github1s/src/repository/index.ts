@@ -24,7 +24,10 @@ export class Repository {
 		return Repository.instanceMap.get(mapKey)!;
 	}
 
-	private constructor(private _scheme: string, private _repo: string) {
+	private constructor(
+		private _scheme: string,
+		private _repo: string,
+	) {
 		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
 		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
 		this._blameRangesCache = new Map<string, BlameRange[]>();

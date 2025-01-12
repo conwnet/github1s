@@ -20,7 +20,7 @@ interface VSCodeChangedFile {
 
 // get the change files of a codeReview
 export const getCodeReviewChangedFiles = async (
-	codeReview: adapterTypes.CodeReview & { sourceSha: string; targetSha: string }
+	codeReview: adapterTypes.CodeReview & { sourceSha: string; targetSha: string },
 ) => {
 	const scheme = adapterManager.getCurrentScheme();
 	const { repo } = await router.getState();
@@ -104,7 +104,7 @@ export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 export const getChangedFileDiffTitle = (
 	baseFileUri: vscode.Uri,
 	headFileUri: vscode.Uri,
-	status: adapterTypes.FileChangeStatus
+	status: adapterTypes.FileChangeStatus,
 ) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);

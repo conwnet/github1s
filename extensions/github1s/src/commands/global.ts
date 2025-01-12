@@ -74,6 +74,13 @@ const commandOpenOnlineEditor = async () => {
 	return vscode.commands.executeCommand('vscode.open', targetLink);
 };
 
+const commandRefreshRepository = async () => {
+	if (['github1s', 'gitlab1s'].includes(adapterManager.getCurrentScheme())) {
+		await vscode.commands.executeCommand('github1s.commands.syncSourcegraphRepository');
+	}
+	vscode.commands.executeCommand('workbench.action.reloadWindow');
+};
+
 export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.commands.openOnGitHub', commandOpenOnOfficialPage),
@@ -83,6 +90,7 @@ export const registerGlobalCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.openOnOfficialPage', commandOpenOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openRepository', commandOpenRepository),
 		vscode.commands.registerCommand('github1s.commands.openOnlineEditor', commandOpenOnlineEditor),
-		vscode.commands.registerCommand('remoteHub.openRepository', commandOpenRepository)
+		vscode.commands.registerCommand('github1s.commands.refreshRepository', commandRefreshRepository),
+		vscode.commands.registerCommand('remoteHub.openRepository', commandOpenRepository),
 	);
 };

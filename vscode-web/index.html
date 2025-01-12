@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+		<title>VSCode Web</title>
+		<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" href="/vscode/vs/workbench/workbench.web.main.css" />
+	</head>
+	<body>
+		<script src="/vscode/nls.messages.js"></script>
+		<script>
+			globalThis._VSCODE_FILE_ROOT = new URL('/vscode/', window.location.origin).toString();
+		</script>
+		<script type="module">
+			import { create, URI } from '/vscode/vs/workbench/workbench.web.main.internal.js';
+			create(document.body, {
+				webviewEndpoint: '/vscode/vs/workbench/contrib/webview/browser/pre',
+				workspaceProvider: {
+					workspace: { workspaceUri: URI.from({ scheme: 'tmp', path: '/default.code-workspace' }) },
+				},
+			});
+		</script>
+	</body>
+</html>

@@ -1,30 +1,32 @@
 {
 	"include": ["./src/"],
 	"compilerOptions": {
-		"module": "amd",
+		"module": "es2022",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"noImplicitReturns": true,
+		"noImplicitOverride": true,
 		"noUnusedLocals": true,
 		"allowUnreachableCode": false,
 		"strict": true,
+		"exactOptionalPropertyTypes": false,
+		"useUnknownInCatchVariables": false,
 		"forceConsistentCasingInFileNames": true,
 		"baseUrl": ".",
-		"target": "es2017",
 		"paths": {
 			"vs/*": [
 				"./vscode-web/src/vs/*",
 				"./vscode-web/lib/vscode/src/vs/*"
 			]
 		},
+		"target": "es2022",
+		"useDefineForClassFields": false,
 		"lib": [
-			"ES2015",
-			"ES2016.Array.Include",
-			"ES2017.String",
-			"ES2018.Promise",
+			"ES2022",
 			"DOM",
 			"DOM.Iterable",
 			"WebWorker.ImportScripts"
-		]
+		],
+		"allowSyntheticDefaultImports": true
 	}
 }

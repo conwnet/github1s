@@ -90,7 +90,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	public async lookup(uri: Uri, silent: false): Promise<Entry>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null> {
-		let parts = uri.path.split('/').filter(Boolean);
+		const parts = uri.path.split('/').filter(Boolean);
 		// if the authority of uri is empty, we should use `current authority`
 		const authority = uri.authority || (await router.getAuthority());
 		if (!this.root.has(authority)) {
@@ -189,7 +189,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			throw FileSystemError.FileNotFound('.gitmodules can not be found');
 		}
 		const submodulesFileContent = textDecoder.decode(
-			await this.readFile(Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules'))
+			await this.readFile(Uri.joinPath(parentRepositoryRoot.uri, '.gitmodules')),
 		);
 		// the path should declared in .gitmodules file
 		const submodulePath = trimStart(Uri.joinPath(directory.uri, directory.name).path, '/');
@@ -231,7 +231,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			data?.entries && (await this.populateWithDirectoryEntities(uri, data.entries));
 			return parent.getNameTypePairs();
 		},
-		(uri) => uri.toString()
+		(uri) => uri.toString(),
 	);
 
 	readFile = reuseable(
@@ -254,7 +254,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			}
 			return this.contentCache.get(cacheKey) || new Uint8Array();
 		},
-		(uri) => uri.toString()
+		(uri) => uri.toString(),
 	);
 
 	async createDirectory(uri: Uri): Promise<void> {

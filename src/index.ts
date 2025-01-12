@@ -7,15 +7,7 @@ import { ConnectToGitHub } from './github-auth';
 import { ConnectToGitLab } from './gitlab-auth';
 import { renderNotification } from './notification';
 import { createProductConfiguration } from './product';
-import { createVSCodeWebConfig, Platform } from './config';
-
-declare global {
-	interface Window {
-		require?: { config?: Function };
-		webPackagePaths?: any;
-		github1sExtensions?: any[];
-	}
-}
+import { createVSCodeWebConfig, createWorkbenchOptions, Platform } from './config';
 
 const resolvePlatformState = (): [Platform, string] => {
 	const hostname = window.location.hostname;
@@ -42,44 +34,68 @@ const resolvePlatformState = (): [Platform, string] => {
 	return [Platform.GitHub, repository];
 };
 
-(function () {
-	const [platform, repository] = resolvePlatformState();
-	const staticAssetsPath = '/static-' + STATIC_HASH;
-	const staticAssetsPrefix = window.location.origin + staticAssetsPath;
-	const webPackagesPrefix = staticAssetsPrefix + '/web-packages';
+const [platform, repository] = resolvePlatformState();
+const resolveVscodeUrl = (path: string) => new URL(path, globalThis._VSCODE_FILE_ROOT).href;
 
-	Object.keys(window.webPackagePaths || {}).forEach((key) => {
-		self.webPackagePaths[key] = `${webPackagesPrefix}/${key}/${self.webPackagePaths[key]}`;
-	});
-	// config vscode loader
-	if (window.require && window.require.config) {
-		window.require.config({
-			baseUrl: staticAssetsPrefix + '/vscode',
-			paths: self.webPackagePaths,
-		});
-	}
+const vscodeCommands = [
+	{ id: 'github1s.commands.vscode.getBrowserUrl', handler: () => window.location.href },
+	{ id: 'github1s.commands.vscode.replaceBrowserUrl', handler: (url: string) => history.replaceState(null, '', url) },
+	{ id: 'github1s.commands.vscode.pushBrowserUrl', handler: (url: string) => history.pushState(null, '', url) },
+	{ id: 'github1s.commands.vscode.connectToGitHub', handler: ConnectToGitHub },
+	{ id: 'github1s.commands.vscode.connectToGitLab', handler: ConnectToGitLab },
+];
 
-	const vscodeCommands = [
-		{ id: 'github1s.commands.vscode.getBrowserUrl', handler: () => window.location.href },
-		{ id: 'github1s.commands.vscode.replaceBrowserUrl', handler: (url: string) => history.replaceState(null, '', url) },
-		{ id: 'github1s.commands.vscode.pushBrowserUrl', handler: (url: string) => history.pushState(null, '', url) },
-		{ id: 'github1s.commands.vscode.connectToGitHub', handler: ConnectToGitHub },
-		{ id: 'github1s.commands.vscode.connectToGitLab', handler: ConnectToGitLab },
-	];
+globalThis._VSCODE_WEB = {
+	allowEditorLabelOverride: true,
+	builtinExtensions: GITHUB1S_EXTENSIONS || [],
+	onWorkbenchReady() {
+		const loadSpinner = document.querySelector('#load-spinner');
+		loadSpinner && loadSpinner.remove();
+		renderNotification(platform);
+	},
+	...createVSCodeWebConfig(platform, repository),
+};
 
-	(window as any).vscodeWeb = {
+if (!DEV_VSCODE) {
+	const linkElement = document.createElement('link');
+	linkElement.setAttribute('rel', 'stylesheet');
+	linkElement.setAttribute('href', resolveVscodeUrl('vs/workbench/workbench.web.main.css'));
+	document.head.appendChild(linkElement);
+
+	const languageId = document.cookie.match(/(^| )vscode.nls.locale=([^;]+)/)?.[2] || '';
+	const nlsUrl = AVAILABLE_LANGUAGES.includes(languageId)
+		? resolveVscodeUrl(`../nls/${languageId}/nls.messages.js`)
+		: resolveVscodeUrl('nls.messages.js');
+	const scriptElement = document.createElement('script');
+	scriptElement.setAttribute('src', nlsUrl);
+	document.body.appendChild(scriptElement);
+}
+
+dynamicImport(resolveVscodeUrl('vs/workbench/workbench.web.main.internal.js')).then(({ create, env, URI }) => {
+	const resolveWorkspace = (workspace: any) => {
+		if (workspace?.folderUri) {
+			return { folderUri: URI.from(workspace.folderUri) };
+		}
+		if (workspace?.workspaceUri) {
+			return { workspaceUri: URI.from(workspace.workspaceUri) };
+		}
+		return { workspaceUri: URI.from({ scheme: 'tmp', path: '/default.code-workspace' }) };
+	};
+
+	const vscodeWebConfig = {
 		commands: vscodeCommands,
-		allowEditorLabelOverride: true,
-		additionalBuiltinExtensions: [],
-		webviewEndpoint: staticAssetsPrefix + '/vscode/vs/workbench/contrib/webview/browser/pre',
+		webviewEndpoint: resolveVscodeUrl('vs/workbench/contrib/webview/browser/pre'),
 		productConfiguration: createProductConfiguration(platform),
 		initialColorTheme: { themeType: 'dark' as any },
-		builtinExtensions: window.github1sExtensions || [],
-		onWorkbenchReady() {
-			const loadSpinner = document.querySelector('#load-spinner');
-			loadSpinner && loadSpinner.remove();
-			renderNotification(platform);
-		},
-		...createVSCodeWebConfig(platform, repository),
+		...createWorkbenchOptions(platform, repository),
 	};
-})();
+
+	const workspaceProvider = {
+		trusted: true,
+		workspace: resolveWorkspace(globalThis._VSCODE_WEB.workspace),
+		open: () => Promise.resolve(false),
+	};
+
+	create(document.body, { workspaceProvider, ...vscodeWebConfig });
+	env.getUriScheme().then((scheme: any) => globalThis._VSCODE_WEB.onWorkbenchReady?.(scheme));
+});

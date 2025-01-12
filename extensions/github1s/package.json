@@ -298,12 +298,6 @@
         "category": "GitHub1s",
         "icon": "$(globe)",
         "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'"
-      },
-      {
-        "command": "github1s.commands.syncSourcegraphRepository",
-        "title": "Sync Sourcegraph Repository",
-        "category": "GitHub1s",
-        "enablement": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/"
       }
     ],
     "colors": [
@@ -590,15 +584,14 @@
   },
   "scripts": {
     "clean": "rm -rf dist out",
-    "build": "webpack --config webpack.config.js --mode production",
-    "compile": "webpack --config webpack.config.js --mode production",
-    "dev": "webpack --config webpack.config.js --watch"
+    "watch": "webpack --config webpack.config.js --watch",
+    "compile": "webpack --config webpack.config.js --mode production"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@apollo/client": "^3.5.10",
+    "@apollo/client": "^3.12.5",
     "@octokit/core": "^3.6.0",
     "dayjs": "^1.11.1",
     "graphql": "^16.8.1",
@@ -611,11 +604,11 @@
     "query-string": "^7.1.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.66.0",
+    "@types/vscode": "^1.96.0",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "ts-loader": "^9.2.8",
-    "typescript": "^4.6.3",
-    "webpack": "^5.76.0",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
     "webpack-cli": "^4.9.2"
   }
 }

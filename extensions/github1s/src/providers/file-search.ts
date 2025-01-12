@@ -85,7 +85,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	provideFileSearchResults(
 		query: FileSearchQuery,
 		_options: FileSearchOptions,
-		_token: CancellationToken
+		_token: CancellationToken,
 	): ProviderResult<Uri[]> {
 		return router.getAuthority().then(async (authority) => {
 			return matchSorter(await this.getFileUris(authority), query.pattern);

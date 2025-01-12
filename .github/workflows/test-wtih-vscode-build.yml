@@ -12,32 +12,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-        node-version: [20.16.0]
+        os: [macos-14]
+        node-version: [20.x]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
+          cache: 'npm'
           node-version: ${{ matrix.node-version }}
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-${{ matrix.node-version }}
-
-      - run: sudo apt update && sudo apt install -y libkrb5-dev
-      - run: yarn --frozen-lockfile
-      - run: yarn build:vscode
-      - run: yarn yalc && yarn build
+      - run: npm install && cd vscode-web && npm install
+      - run: cd vscode-web && npm run build
+      - run: npm run link && npm run build
       - uses: microsoft/playwright-github-action@v1
-      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} yarn test:ci
+      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} npm run test:ci

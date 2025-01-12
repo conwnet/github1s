@@ -6,8 +6,19 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import { isNil, trimEnd, trimStart } from '@/helpers/util';
 
+const createFetchWithTimeout = (timeout: number): typeof fetch => {
+	return (uri, opts) => {
+		const ctrl = new AbortController();
+		const timeoutId = setTimeout(() => ctrl.abort(), timeout);
+		return fetch(uri, { ...opts, signal: ctrl.signal }).finally(() => {
+			clearTimeout(timeoutId);
+		});
+	};
+};
+
 const sourcegraphLink = createHttpLink({
 	uri: 'https://sourcegraph.com/.api/graphql',
+	fetch: createFetchWithTimeout(3000),
 });
 
 export const sourcegraphClient = new ApolloClient({
@@ -39,7 +50,7 @@ export const canBeConvertToRegExp = (str: string) => {
 export const combineGlobsToRegExp = (globs: string[]) => {
 	// only support very simple globs convert now
 	const result = Array.from(
-		new Set(globs.map((glob: string) => trimEnd(trimStart(glob, '*/'), '*/').replace(/^\./, '\\.')))
+		new Set(globs.map((glob: string) => trimEnd(trimStart(glob, '*/'), '*/').replace(/^\./, '\\.'))),
 	)
 		// if the glob still not can be convert to a regexp, just ignore it
 		.filter((item) => canBeConvertToRegExp(item))

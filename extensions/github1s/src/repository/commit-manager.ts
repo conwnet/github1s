@@ -25,7 +25,11 @@ class CommitChangedFilesManager {
 		return CommitChangedFilesManager.instancesMap.get(mapKey)!;
 	}
 
-	constructor(private _scheme: string, private _repo: string, private _commitSha: string) {}
+	constructor(
+		private _scheme: string,
+		private _repo: string,
+		private _commitSha: string,
+	) {}
 
 	getList = reuseable(async (forceUpdate: boolean = false): Promise<ChangedFile[]> => {
 		if (forceUpdate || !this._changedFilesList) {
@@ -82,7 +86,7 @@ export class CommitManager {
 		private _scheme: string,
 		private _repo: string,
 		private _from: string,
-		private _filePath: string
+		private _filePath: string,
 	) {}
 
 	// link two commitSha

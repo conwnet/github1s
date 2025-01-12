@@ -12,7 +12,7 @@ const defaultComputeCacheKey = (...args) => jsonStableStringify([...args]);
 // and previous request not completed
 export const reuseable = <T extends (...args: any[]) => Promise<any>>(
 	func: T,
-	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey
+	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey,
 ) => {
 	const cache = new Map<string, ReturnType<T>>();
 
@@ -64,7 +64,7 @@ export const debounceAsyncFunc = <T extends (...args: any[]) => Promise<any>>(fu
 // memorize function result, beware of memory leaks!
 export const memorize = <T extends (...args: any[]) => any>(
 	func: T,
-	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey
+	computeCacheKey: (...args: Parameters<T>) => string = defaultComputeCacheKey,
 ) => {
 	const cache = new Map<string, ReturnType<T>>();
 
