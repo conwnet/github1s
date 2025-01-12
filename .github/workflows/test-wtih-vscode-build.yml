@@ -26,7 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: npm install && cd vscode-web && npm install
-      - run: cd vscode-web && npm run clone && npm run build
-      - run: npm run link & npm run build
+      - run: cd vscode-web && npm run build
+      - run: npm run link && npm run build
       - uses: microsoft/playwright-github-action@v1
       - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} npm run test:ci

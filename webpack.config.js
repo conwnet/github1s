@@ -21,6 +21,7 @@ const copyPluginPatterns = [
 	{ from: path.join(vscodeWebPath, 'vscode'), to: `${staticDir}/vscode`, ...skipMinified },
 	{ from: path.join(vscodeWebPath, 'extensions'), to: `${staticDir}/extensions`, ...skipMinified },
 	{ from: path.join(vscodeWebPath, 'dependencies'), to: `${staticDir}/dependencies`, ...skipMinified },
+	{ from: path.join(vscodeWebPath, 'nls'), to: `${staticDir}/nls`, ...skipMinified },
 ];
 
 const devVscodeStatic = [
@@ -47,6 +48,7 @@ export default (env, argv) => {
 	const devVscode = !!process.env.DEV_VSCODE;
 	const minifyCSS = (code) => (devMode ? code : new CleanCSS().minify(code).styles);
 	const minifyJS = (code) => (devMode ? code : UglifyJS.minify(code).code);
+	const availableLanguages = devVscode ? [] : fs.readdirSync(path.join(vscodeWebPath, 'nls'));
 
 	return {
 		mode: env.mode || 'production',
@@ -84,6 +86,7 @@ export default (env, argv) => {
 				GITHUB_ORIGIN: JSON.stringify(process.env.GITHUB_DOMAIN || 'https://github.com'),
 				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
 				GITHUB1S_EXTENSIONS: JSON.stringify(packUtils.getBuiltinExtensions(devVscode)),
+				AVAILABLE_LANGUAGES: JSON.stringify(availableLanguages),
 			}),
 		],
 		performance: false,

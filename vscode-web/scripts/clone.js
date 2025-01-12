@@ -4,7 +4,7 @@ import path from 'path';
 import cp from 'child_process';
 import fs from 'fs-extra';
 import crypto from 'crypto';
-import { PROJECT_ROOT, getAllFiles } from './utils.js';
+import { executeCommand, PROJECT_ROOT, getAllFiles } from './utils.js';
 
 const fixSourceFiles = () => {
 	const getDiffFiles = (base) => {
@@ -52,13 +52,15 @@ const main = () => {
 
 	const url = 'https://github.com/microsoft/vscode.git';
 	const ref = cp.execSync(`cat ${PROJECT_ROOT}/.VERSION`).toString();
-	const commands = ['git', ['clone', '--depth', '1', '-b', ref, url, 'lib/vscode']];
-	cp.spawnSync(...commands, { stdio: 'inherit', cwd: PROJECT_ROOT });
+	executeCommand('git', ['clone', '--depth', '1', '-b', ref, url, 'lib/vscode'], PROJECT_ROOT);
 
-	const vscodePath = path.join(PROJECT_ROOT, 'lib/vscode');
-	cp.spawnSync('npm', ['install'], { stdio: 'inherit', cwd: vscodePath });
+	const locUrl = 'https://github.com/microsoft/vscode-loc.git';
+	executeCommand('git', ['clone', '--depth', '1', locUrl, 'lib/vscode-loc'], PROJECT_ROOT);
 
 	fixSourceFiles();
+
+	const vscodePath = path.join(PROJECT_ROOT, 'lib/vscode');
+	executeCommand('npm', ['install'], vscodePath);
 };
 
 main();
