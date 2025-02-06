@@ -7,5 +7,6 @@
   "src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "c220568141adf6ed560bab754ea7769795465c6fa93ecd461e9b59f05ca56377",
   "src/vs/workbench/services/label/common/labelService.ts": "9eacdd41cbcf7f5e2ff7e0b524c495c59a8b4a940834385d486cb5c8b39b903d",
   "src/vs/workbench/services/textfile/browser/textFileService.ts": "64fde77a91847e9881f2a1823e0b12d8af15630602ec9b877b43a3a05ac11eef",
-  "src/vs/base/common/network.ts": "e62486b9d0aec931812589c5bd239d7e8240423a3c80b1327afac4a32d44ef7a"
+  "src/vs/base/common/network.ts": "e62486b9d0aec931812589c5bd239d7e8240423a3c80b1327afac4a32d44ef7a",
+  "src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html": "1b7956deade55aa1420516b62251d412fb578bb1165e2580b21d3d8ace968a67"
 }

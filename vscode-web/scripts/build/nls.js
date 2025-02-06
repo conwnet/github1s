@@ -46,7 +46,7 @@ const main = () => {
 
 		for (const [file, keys] of nlsKeys) {
 			for (const key of keys) {
-				langMessages.push(contents[file][key] || nlsMessages[langMessages.length]);
+				langMessages.push(contents[file]?.[key] ?? nlsMessages[langMessages.length]);
 			}
 		}
 		if (langMessages.length !== nlsMessages.length) {
