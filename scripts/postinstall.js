@@ -2,7 +2,6 @@
 
 import path from 'path';
 import fs from 'fs-extra';
-import cp from 'child_process';
 import { executeCommand, PROJECT_ROOT } from './utils.js';
 
 const main = () => {
