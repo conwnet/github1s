@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import path from 'path';
-import cp from 'child_process';
 import { executeCommand, PROJECT_ROOT } from './utils.js';
 
 const main = () => {
