@@ -57,7 +57,7 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 
 	constructor(
 		@IFileService protected readonly fileService: IFileService,
-		@IUntitledTextEditorService private untitledTextEditorService: IUntitledTextEditorService,
+		@IUntitledTextEditorService private untitledTextEditorService: IUntitledTextEditorModelManager,
 		@ILifecycleService protected readonly lifecycleService: ILifecycleService,
 		@IInstantiationService protected readonly instantiationService: IInstantiationService,
 		@IModelService private readonly modelService: IModelService,
@@ -165,7 +165,7 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 		this._register(this.decorationsService.registerDecorationsProvider(provider));
 	}
 
-	//#endregin
+	//#endregion
 
 	//#region text file read / write / create
 
@@ -453,6 +453,11 @@ export abstract class AbstractTextFileService extends Disposable implements ITex
 			// we gracefully catch the error and just log it.
 
 			this.logService.error(error);
+		}
+
+		// Events
+		if (source.scheme === Schemas.untitled) {
+			this.untitled.notifyDidSave(source, target);
 		}
 
 		return target;
