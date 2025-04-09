@@ -1,12 +1,12 @@
 {
-  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "533dd320519e7523e9bfd102ab35b2329223c1cf6fa909210d47ebbb75e7cf41",
-  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "654fa16577a5fcf83f2601f1e22e0a6ac67a9710980d6a762ee68074423a74cc",
+  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "a195c8b4170a58eca301c3044ae278fa3b811539a7274830691afc73f6da86b8",
+  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "6be71e59eeb2e650262bb6d15a05dbd7636928fbbae7f33998f1554b436b4108",
   "src/vs/workbench/browser/web.main.ts": "0cf354b9221fdb15a738366043fbf69d8f8373891faf9f5e66a033de935eba79",
   "src/vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "e986095a30dbea54af56c25fa1b184b55f34f8914129b27e2f20d8c4ea9fd16b",
-  "src/vs/workbench/contrib/webview/browser/pre/index.html": "09664522d7c6b0fdb7728be06b1a1f6ec8bb82c4fd6f2d13a7e84a0fd7d667af",
+  "src/vs/workbench/contrib/webview/browser/pre/index.html": "a325d58526d8ac86f3460afdb63787e09ea71d10e95c20518b92586ed028834c",
   "src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "c220568141adf6ed560bab754ea7769795465c6fa93ecd461e9b59f05ca56377",
   "src/vs/workbench/services/label/common/labelService.ts": "72d72581bd521c2edadd60d4458de4d1c6a9a2cc2cf83820034c82815a2eae6a",
-  "src/vs/workbench/services/textfile/browser/textFileService.ts": "b5ce3f8032cd2fe5a871b33d67f578d209bbae3f42007998559138326fd16b04",
-  "src/vs/base/common/network.ts": "10cb07268d9805b102cf8ab9d5e03f97d935a42304c7bdc5e8c54013038bd9ad",
-  "src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html": "1b7956deade55aa1420516b62251d412fb578bb1165e2580b21d3d8ace968a67"
+  "src/vs/workbench/services/textfile/browser/textFileService.ts": "fbb6ae9a1d9ed4d57ce8b0f91e54c5a9505a293a8b15c72e09773ee54fb5cd28",
+  "src/vs/base/common/network.ts": "34fc2461d4b6029e71b60a3bf5d7438585e9d2b66ccdcab0893cc69d77fab5b5",
+  "src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html": "40d576ad2307d28012b34b86858ba36ba49ae10e5aedb394bd06b14a35b869a5"
 }

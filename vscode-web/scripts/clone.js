@@ -51,7 +51,7 @@ const main = () => {
 	}
 
 	const url = 'https://github.com/microsoft/vscode.git';
-	const ref = cp.execSync(`cat ${PROJECT_ROOT}/.VERSION`).toString();
+	const ref = cp.execSync(`cat ${PROJECT_ROOT}/.VERSION`).toString().trim();
 	executeCommand('git', ['clone', '--depth', '1', '-b', ref, url, 'lib/vscode'], PROJECT_ROOT);
 
 	const locUrl = 'https://github.com/microsoft/vscode-loc.git';
