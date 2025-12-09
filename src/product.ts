@@ -6,7 +6,8 @@ export const createProductConfiguration = (platform: Platform) => ({
 	applicationName: platform + '1s',
 	reportIssueUrl: 'https://github.com/conwnet/github1s/issues/new',
 	extensionsGallery: {
-		resourceUrlTemplate: 'https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}',
+		resourceUrlTemplate: 'https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}',
+		extensionUrlTemplate: 'https://open-vsx.org/vscode/gallery/{publisher}/{name}/latest',
 		serviceUrl: 'https://open-vsx.org/vscode/gallery',
 		itemUrl: 'https://open-vsx.org/vscode/item',
 	},
