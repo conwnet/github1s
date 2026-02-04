@@ -31,15 +31,7 @@
     "watch": "echo done"
   },
   "dependencies": {},
-  "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^10.17.17",
-    "@types/vscode": "^1.27.0",
-    "ovsx": "0.1.0-next.e000fdb",
-    "typescript": "^2.6.1",
-    "vsce": "^1.79.5",
-    "vscode-test": "^1.4.0"
-  },
+  "devDependencies": {},
   "engines": {
     "vscode": "^1.27.0"
   },
