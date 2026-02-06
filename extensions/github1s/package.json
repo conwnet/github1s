@@ -619,7 +619,7 @@
     "node-polyfill-webpack-plugin": "^1.1.4",
     "ts-loader": "^9.2.8",
     "typescript": "^5.7.3",
-    "webpack": "^5.97.1",
+    "webpack": "^5.105.0",
     "webpack-cli": "^4.9.2"
   }
 }
