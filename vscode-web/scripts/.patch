@@ -1,12 +1,12 @@
 {
-  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "49575327f7d302dad48a46beba42a675c75d6bfd2caa6b3e5e3bb3e7f41a71e0",
-  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "6be71e59eeb2e650262bb6d15a05dbd7636928fbbae7f33998f1554b436b4108",
-  "src/vs/workbench/browser/web.main.ts": "b3276e26f954a434d1b6174eeece432f448fbbd831566d6451aa35208a0d5627",
+  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "3edda05b7b7cf235bc0d51f066aa8d57c447ea784ccd507316327150a4bb880c",
+  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "26cdde234b2811b42166224f3b0f12eb6d78d519d5262cc2b12ec08653b3df39",
+  "src/vs/workbench/browser/web.main.ts": "a7c43beaa0f873ce0f9edc1aa03db3e9150fb1ac6dc6479a08e0ea5c8a3b2e76",
   "src/vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "e986095a30dbea54af56c25fa1b184b55f34f8914129b27e2f20d8c4ea9fd16b",
-  "src/vs/workbench/contrib/webview/browser/pre/index.html": "7ce2885c633813288123a7dde3981448e387471450cf0d861c1c02b9cbdbf0bc",
-  "src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "c220568141adf6ed560bab754ea7769795465c6fa93ecd461e9b59f05ca56377",
-  "src/vs/workbench/services/label/common/labelService.ts": "72d72581bd521c2edadd60d4458de4d1c6a9a2cc2cf83820034c82815a2eae6a",
-  "src/vs/workbench/services/textfile/browser/textFileService.ts": "607da093a8562c6a42e9bdb1b2456fa9eb1065a53a5ac6afbb323f6f8505e03f",
-  "src/vs/base/common/network.ts": "34fc2461d4b6029e71b60a3bf5d7438585e9d2b66ccdcab0893cc69d77fab5b5",
+  "src/vs/workbench/contrib/webview/browser/pre/index.html": "8b2e27b411b4fa493fe003c5312378ca0c7164fee99ed288c6e4f47c43dbca1f",
+  "src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "16fc1f8830432097a2de87ba04f9f11e930408df8f672bb7a4bbbe3c1a7c509d",
+  "src/vs/workbench/services/label/common/labelService.ts": "ac42f60193b50a4668384787468758e4b093f9f2da74a7c9604de5c455886e98",
+  "src/vs/workbench/services/textfile/browser/textFileService.ts": "c384a6ec5991888fb09cdbf482a6747fa15d486e1cd8967560da3ca1df65944e",
+  "src/vs/base/common/network.ts": "e8679d4499a7bf7474f31e3dcf61db40be3c0c5c81837cf7adf8e7ea2b656fa1",
   "src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html": "40d576ad2307d28012b34b86858ba36ba49ae10e5aedb394bd06b14a35b869a5"
 }

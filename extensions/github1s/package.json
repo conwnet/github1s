@@ -171,6 +171,12 @@
         "icon": "$(log-in)"
       },
       {
+        "command": "github1s.commands.diffCommitFile",
+        "title": "Diff File",
+        "category": "GitHub1s",
+        "icon": "$(diff)"
+      },
+      {
         "command": "github1s.commands.openCommitOnGitHub",
         "title": "Open on GitHub",
         "category": "GitHub1s",
@@ -528,6 +534,11 @@
           "group": "inline@2"
         },
         {
+          "command": "github1s.commands.diffCommitFile",
+          "when": "viewItem == 'github1s:viewItems:commitListItem' && view == 'github1s.views.fileHistory'",
+          "group": "inline@3"
+        },
+        {
           "command": "github1s.commands.openCommitOnGitLab",
           "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'GitLab'",
           "group": "inline@2"
@@ -608,7 +619,7 @@
     "node-polyfill-webpack-plugin": "^1.1.4",
     "ts-loader": "^9.2.8",
     "typescript": "^5.7.3",
-    "webpack": "^5.97.1",
+    "webpack": "^5.105.0",
     "webpack-cli": "^4.9.2"
   }
 }
