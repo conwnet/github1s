@@ -82,6 +82,20 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 	}
 };
 
+const commandDiffCommitFile = async (commitItem: CommitTreeItem) => {
+	const commitSha = commitItem.commit.sha;
+	if (!commitSha) {
+		return;
+	}
+	const { repo } = await router.getState();
+	const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
+	const fileUri = activeDocumentUri?.with({
+		authority: `${repo}+${commitSha}`,
+		query: '',
+	});
+	return vscode.commands.executeCommand('github1s.commands.openFilePreviousRevision', fileUri);
+};
+
 // this command is used in `source control commit list view`
 const commandOpenCommitOnOfficialPage = async (commitItemOrSha?: string | CommitTreeItem) => {
 	const commitSha = commitItemOrSha
@@ -127,6 +141,7 @@ export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 		vscode.commands.registerCommand('github1s.commands.refreshCommitList', commandRefreshCommitList),
 		vscode.commands.registerCommand('github1s.commands.searchCommit', commandSwitchToCommit),
 		vscode.commands.registerCommand('github1s.commands.switchToCommit', commandSwitchToCommit),
+		vscode.commands.registerCommand('github1s.commands.diffCommitFile', commandDiffCommitFile),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnGitHub', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnGitLab', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnBitbucket', commandOpenCommitOnOfficialPage),
