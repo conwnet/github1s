@@ -33,7 +33,7 @@
     "@github1s/vscode-web": "^0.27.0",
     "chokidar": "^4.0.3",
     "clean-css": "^5.3.3",
-    "copy-webpack-plugin": "^12.0.2",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.2",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
