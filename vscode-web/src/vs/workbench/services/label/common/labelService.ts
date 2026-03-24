@@ -314,6 +314,10 @@ export class LabelService extends Disposable implements ILabelService {
 		/* above codes are changed by github1s */
 
 		if (isWorkspace(workspace)) {
+			if (workspace.isAgentSessionsWorkspace) {
+				return localize('agentSessionsWorkspace', "Agent Sessions");
+			}
+
 			const identifier = toWorkspaceIdentifier(workspace);
 			if (isSingleFolderWorkspaceIdentifier(identifier) || isWorkspaceIdentifier(identifier)) {
 				return this.getWorkspaceLabel(identifier, options);
