@@ -9,6 +9,9 @@ export const executeCommand = (command, args, cwd) => {
 	if (result.error) {
 		throw result.error;
 	}
+	if (result.status !== 0) {
+		throw new Error(`${command} ${args.join(' ')} exited with code ${result.status}`);
+	}
 };
 
 export const getAllFiles = (directory) => {

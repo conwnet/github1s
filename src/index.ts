@@ -59,7 +59,7 @@ globalThis._VSCODE_WEB = {
 if (!DEV_VSCODE) {
 	const linkElement = document.createElement('link');
 	linkElement.setAttribute('rel', 'stylesheet');
-	linkElement.setAttribute('href', resolveVscodeUrl('vs/workbench/workbench.web.main.css'));
+	linkElement.setAttribute('href', resolveVscodeUrl('vs/workbench/workbench.web.main.internal.css'));
 	document.head.appendChild(linkElement);
 
 	const languageId = document.cookie.match(/(^| )vscode.nls.locale=([^;]+)/)?.[2] || '';
