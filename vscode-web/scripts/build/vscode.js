@@ -5,7 +5,8 @@ import { executeCommand, PROJECT_ROOT } from '../utils.js';
 
 const main = () => {
 	const cwd = path.join(PROJECT_ROOT, 'lib/vscode');
-	executeCommand('npm', ['run', 'gulp', 'vscode-web-min'], cwd);
+	executeCommand('npm', ['run', 'gulp', 'core-ci'], cwd);
+	executeCommand('npm', ['run', 'gulp', 'vscode-web-min-ci'], cwd);
 };
 
 main();
