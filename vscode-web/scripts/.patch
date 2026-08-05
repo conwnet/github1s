@@ -1,12 +1,11 @@
 {
-  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "3edda05b7b7cf235bc0d51f066aa8d57c447ea784ccd507316327150a4bb880c",
-  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "26cdde234b2811b42166224f3b0f12eb6d78d519d5262cc2b12ec08653b3df39",
-  "src/vs/workbench/browser/web.main.ts": "a7c43beaa0f873ce0f9edc1aa03db3e9150fb1ac6dc6479a08e0ea5c8a3b2e76",
+  "src/vs/workbench/browser/parts/activitybar/activitybarPart.ts": "1c5075a0d54829eadbb19a214f9913558ddab03c3e088b2ec3590b49b2b8c460",
+  "src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css": "8ffe6921a1c36709db7ed7f5eb705782f55e90acdc780c7722030b0f9e6d6fc5",
+  "src/vs/workbench/browser/web.main.ts": "180c4439bcb518402e34c9b8b154bcd204b4b2e47a3edf2b1c77c612a8ff2bf5",
   "src/vs/workbench/contrib/files/browser/editors/fileEditorInput.ts": "e986095a30dbea54af56c25fa1b184b55f34f8914129b27e2f20d8c4ea9fd16b",
-  "src/vs/workbench/contrib/webview/browser/pre/index.html": "8b2e27b411b4fa493fe003c5312378ca0c7164fee99ed288c6e4f47c43dbca1f",
+  "src/vs/workbench/contrib/webview/browser/pre/index.html": "9f4a216e3c7abfa81d3afa9e215a36e935eb92b9193ae244cf80b1904d3fae0c",
   "src/vs/workbench/services/extensionManagement/browser/builtinExtensionsScannerService.ts": "16fc1f8830432097a2de87ba04f9f11e930408df8f672bb7a4bbbe3c1a7c509d",
-  "src/vs/workbench/services/label/common/labelService.ts": "ac42f60193b50a4668384787468758e4b093f9f2da74a7c9604de5c455886e98",
-  "src/vs/workbench/services/textfile/browser/textFileService.ts": "c384a6ec5991888fb09cdbf482a6747fa15d486e1cd8967560da3ca1df65944e",
-  "src/vs/base/common/network.ts": "e8679d4499a7bf7474f31e3dcf61db40be3c0c5c81837cf7adf8e7ea2b656fa1",
-  "src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html": "40d576ad2307d28012b34b86858ba36ba49ae10e5aedb394bd06b14a35b869a5"
+  "src/vs/workbench/services/label/common/labelService.ts": "9e4e2aafeabc04ccf183b8f2f4ce8a4d39f240831e4005b06149684458caa8d4",
+  "src/vs/workbench/services/textfile/browser/textFileService.ts": "886566605815367d3866be243994829729fd0b85c04ab7450b9de22ee93053eb",
+  "src/vs/base/common/network.ts": "d264af1ba5dbbfaf950c5da336100fb1242802eab92ed3b4692d3c10282b2dee"
 }

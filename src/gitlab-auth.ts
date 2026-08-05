@@ -3,7 +3,7 @@
  * @author netcon
  */
 
-import { timeout } from './github-auth';
+import { timeout, createRandomString } from './github-auth';
 
 const GITLAB_ORIGIN = 'https://gitlab.com';
 const AUTH_PAGE_ORIGIN = 'https://auth.gitlab1s.com';
@@ -11,11 +11,6 @@ const AUTH_REDIRECT_URI = 'https://auth.gitlab1s.com/api/gitlab-auth-callback';
 const CLIENT_ID = '5ef142320efe9d2e8caeb0185771bb126d3035dc0a325c6ad5bab567f320d564';
 const OPEN_WINDOW_FEATURES =
 	'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=800,height=520,top=150,left=150';
-
-const createRandomString = (length: number) => {
-	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	return Array.from({ length }, () => charset.charAt(Math.floor(Math.random() * charset.length))).join('');
-};
 
 const createAuthorizeUrl = (state: string) => {
 	const parameters = Object.entries({
