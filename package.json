@@ -12,6 +12,7 @@
     "link": "node scripts/link.js",
     "format": "prettier --write .",
     "eslint": "eslint --fix",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p functions/tsconfig.json",
     "test:ci": "start-test watch:dev-server 8080 test",
     "test": "cd tests && npm install && npx playwright install && npm run test",
     "postinstall": "husky install && node scripts/postinstall.js"

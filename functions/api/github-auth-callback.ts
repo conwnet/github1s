@@ -3,57 +3,27 @@
  * @author netcon
  */
 
-const createResponseHtml = (text: string, script: string) => `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>Connect to GitHub</title>
-</head>
-<body>
-	<h1>${text}</h1>
-	<script>${script}</script>
-</body>
-</html>
-`;
-
-// return the data to the opener window by postMessage API,
-// and close current window if successfully connected
-const createAuthorizeResultHtml = (data: Record<any, any>, state: string, origins: string) => {
-	const errorText = 'Failed! You can close this window and retry.';
-	const successText = 'Connected! You can now close this window.';
-	const resultStr = JSON.stringify({
-		type: 'authorizing',
-		payload: data,
-		state: state.replace(/[^a-zA-Z0-9]/g, ''),
-	}).replace(/</g, '\\u003c');
-	const script = `
-	'${origins}'.split(',').forEach(function(allowedOrigin) {
-		window.opener.postMessage(${resultStr}, allowedOrigin);
-	});
-	${data.error ? '' : 'setTimeout(() => window.close(), 50);'}`;
-	return createResponseHtml(data.error ? errorText : successText, script);
-};
-
-const MISSING_CODE_ERROR = {
-	error: 'request_invalid',
-	error_description: 'Missing code',
-};
-const UNKNOWN_ERROR = {
-	error: 'internal_error',
-	error_description: 'Unknown error',
-};
+import {
+	createAuthorizeResultHtml,
+	INVALID_ORIGIN_ERROR,
+	MISSING_CODE_ERROR,
+	UNKNOWN_ERROR,
+} from '../../src/oauth-callback';
 
 export const onRequest: PagesFunction<{
 	GITHUB_OAUTH_ID: string;
 	GITHUB_OAUTH_SECRET: string;
 	GITHUB1S_ALLOWED_ORIGINS: string;
 }> = async ({ request, env }) => {
-	const searchParams = new URL(request.url).searchParams;
+	const { searchParams, origin } = new URL(request.url);
 	const code = searchParams.get('code');
+	const allowedOrigins = env.GITHUB1S_ALLOWED_ORIGINS.split(',')
+		.map((item) => item.trim())
+		.filter(Boolean);
 
-	const createResponse = (status, data) => {
+	const createResponse = (status: number, data: Record<string, unknown>) => {
 		const state = searchParams.get('state') || '';
-		const body = createAuthorizeResultHtml(data, state, env.GITHUB1S_ALLOWED_ORIGINS);
+		const body = createAuthorizeResultHtml('Connect to GitHub', data, state, origin);
 		return new Response(body, { status, headers: { 'content-type': 'text/html' } });
 	};
 
@@ -61,14 +31,24 @@ export const onRequest: PagesFunction<{
 		return createResponse(401, MISSING_CODE_ERROR);
 	}
 
+	if (!allowedOrigins.includes(origin)) {
+		return createResponse(401, INVALID_ORIGIN_ERROR);
+	}
+
 	try {
 		// https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
 		const response = await fetch('https://github.com/login/oauth/access_token', {
 			method: 'POST',
-			body: JSON.stringify({ client_id: env.GITHUB_OAUTH_ID, client_secret: env.GITHUB_OAUTH_SECRET, code }),
+			body: JSON.stringify({
+				code,
+				client_id: env.GITHUB_OAUTH_ID,
+				client_secret: env.GITHUB_OAUTH_SECRET,
+				redirect_uri: `${origin}/api/github-auth-callback`,
+			}),
 			headers: { accept: 'application/json', 'content-type': 'application/json' },
 		});
-		return response.json().then((result) => createResponse(response.status, result));
+		const result = (await response.json()) as Record<string, unknown>;
+		return createResponse(response.status, result);
 	} catch (e) {
 		return createResponse(500, UNKNOWN_ERROR);
 	}

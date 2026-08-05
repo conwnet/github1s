@@ -65,6 +65,7 @@ export default (env, argv) => {
 		plugins: [
 			new CopyPlugin({
 				patterns: [
+					{ from: 'public/_headers', to: '_headers', toType: 'file' },
 					{ from: 'public/favicon*', to: '[name][ext]' },
 					{ from: 'public/manifest.json', to: '[name][ext]' },
 					{ from: 'public/robots.txt', to: '[name][ext]' },
