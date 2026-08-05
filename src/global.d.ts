@@ -11,6 +11,8 @@ declare const GITHUB_ORIGIN: string;
 declare const GITLAB_ORIGIN: string;
 declare const GITHUB1S_EXTENSIONS: string;
 declare const AVAILABLE_LANGUAGES: string[];
+declare const GITHUB_OAUTH_ID: string;
+declare const GITLAB_OAUTH_ID: string;
 
 /* eslint-disable no-var */
 declare var dynamicImport: (url: string) => Promise<any>;

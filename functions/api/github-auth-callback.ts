@@ -18,10 +18,14 @@ const createResponseHtml = (text: string, script: string) => `
 
 // return the data to the opener window by postMessage API,
 // and close current window if successfully connected
-const createAuthorizeResultHtml = (data: Record<any, any>, origins: string) => {
+const createAuthorizeResultHtml = (data: Record<any, any>, state: string, origins: string) => {
 	const errorText = 'Failed! You can close this window and retry.';
 	const successText = 'Connected! You can now close this window.';
-	const resultStr = `{ type: 'authorizing', payload: ${JSON.stringify(data)} }`;
+	const resultStr = JSON.stringify({
+		type: 'authorizing',
+		payload: data,
+		state: state.replace(/[^a-zA-Z0-9]/g, ''),
+	}).replace(/</g, '\\u003c');
 	const script = `
 	'${origins}'.split(',').forEach(function(allowedOrigin) {
 		window.opener.postMessage(${resultStr}, allowedOrigin);
@@ -44,10 +48,12 @@ export const onRequest: PagesFunction<{
 	GITHUB_OAUTH_SECRET: string;
 	GITHUB1S_ALLOWED_ORIGINS: string;
 }> = async ({ request, env }) => {
-	const code = new URL(request.url).searchParams.get('code');
+	const searchParams = new URL(request.url).searchParams;
+	const code = searchParams.get('code');
 
 	const createResponse = (status, data) => {
-		const body = createAuthorizeResultHtml(data, env.GITHUB1S_ALLOWED_ORIGINS);
+		const state = searchParams.get('state') || '';
+		const body = createAuthorizeResultHtml(data, state, env.GITHUB1S_ALLOWED_ORIGINS);
 		return new Response(body, { status, headers: { 'content-type': 'text/html' } });
 	};
 
