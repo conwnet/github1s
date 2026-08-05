@@ -3,8 +3,6 @@
  * @author netcon
  */
 
-const AUTH_REDIRECT_URI = 'https://auth.gitlab1s.com/api/gitlab-auth-callback';
-
 const createResponseHtml = (text: string, script: string) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -20,10 +18,14 @@ const createResponseHtml = (text: string, script: string) => `
 
 // return the data to the opener window by postMessage API,
 // and close current window if successfully connected
-const createAuthorizeResultHtml = (data: Record<any, any>, origins: string) => {
+const createAuthorizeResultHtml = (data: Record<any, any>, state: string, origins: string) => {
 	const errorText = 'Failed! You can close this window and retry.';
 	const successText = 'Connected! You can now close this window.';
-	const resultStr = `{ type: 'authorizing', payload: ${JSON.stringify(data)} }`;
+	const resultStr = JSON.stringify({
+		type: 'authorizing',
+		payload: data,
+		state: state.replace(/[^a-zA-Z0-9]/g, ''),
+	}).replace(/</g, '\\u003c');
 	const script = `
 	'${origins}'.split(',').forEach(function(allowedOrigin) {
 		window.opener.postMessage(${resultStr}, allowedOrigin);
@@ -45,11 +47,14 @@ export const onRequest: PagesFunction<{
 	GITLAB_OAUTH_ID: string;
 	GITLAB_OAUTH_SECRET: string;
 	GITLAB1S_ALLOWED_ORIGINS: string;
+	GITLAB_OAUTH_REDIRECT_URI: string;
 }> = async ({ request, env }) => {
-	const code = new URL(request.url).searchParams.get('code');
+	const searchParams = new URL(request.url).searchParams;
+	const code = searchParams.get('code');
 
 	const createResponse = (status, data) => {
-		const body = createAuthorizeResultHtml(data, env.GITLAB1S_ALLOWED_ORIGINS);
+		const state = searchParams.get('state') || '';
+		const body = createAuthorizeResultHtml(data, state, env.GITLAB1S_ALLOWED_ORIGINS);
 		return new Response(body, { status, headers: { 'content-type': 'text/html' } });
 	};
 
@@ -65,7 +70,7 @@ export const onRequest: PagesFunction<{
 				code,
 				client_id: env.GITLAB_OAUTH_ID,
 				client_secret: env.GITLAB_OAUTH_SECRET,
-				redirect_uri: AUTH_REDIRECT_URI,
+				redirect_uri: env.GITLAB_OAUTH_REDIRECT_URI,
 				grant_type: 'authorization_code',
 			}),
 			headers: { accept: 'application/json', 'content-type': 'application/json' },

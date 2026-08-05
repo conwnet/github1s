@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  build:
+  build-with-vscode-build:
     strategy:
       matrix:
         os: [macos-14]

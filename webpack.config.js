@@ -87,6 +87,8 @@ export default (env, argv) => {
 				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
 				GITHUB1S_EXTENSIONS: JSON.stringify(packUtils.getBuiltinExtensions(devVscode)),
 				AVAILABLE_LANGUAGES: JSON.stringify(availableLanguages),
+				GITHUB_OAUTH_ID: JSON.stringify(process.env.GITHUB_OAUTH_ID || ''),
+				GITLAB_OAUTH_ID: JSON.stringify(process.env.GITLAB_OAUTH_ID || ''),
 			}),
 		],
 		performance: false,
