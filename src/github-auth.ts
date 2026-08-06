@@ -3,16 +3,14 @@
  * @author netcon
  */
 
+import { createOAuthState, waitForOAuthResult } from './oauth-web';
+
+export { createOAuthState } from './oauth-web';
+
 const GITHUB_ORIGIN = 'https://github.com';
 const OAUTH_REDIRECT_URI = `${location.origin}/api/github-auth-callback`;
 const OPEN_WINDOW_FEATURES =
 	'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=800,height=520,top=150,left=150';
-
-export const createOAuthState = () => {
-	const bytes = new Uint8Array(16);
-	window.crypto.getRandomValues(bytes);
-	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-};
 
 const createAuthorizeUrl = (state: string) => {
 	const parameters = Object.entries({
@@ -24,33 +22,8 @@ const createAuthorizeUrl = (state: string) => {
 	return `${GITHUB_ORIGIN}/login/oauth/authorize?${parameters.join('&')}`;
 };
 
-export const timeout = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const ConnectToGitHub = () => {
 	const STATE = createOAuthState();
 	const opener = window.open(createAuthorizeUrl(STATE), '_blank', OPEN_WINDOW_FEATURES);
-
-	return new Promise((resolve) => {
-		const handleAuthMessage = (event: MessageEvent) => {
-			// Note that though the browser block opening window and popup a tip,
-			// the user can be still open it from the tip. In this case, the `opener`
-			// is null, and we should still process the authorizing message
-			const isValidOpener = !!(opener && event.source === opener);
-			const isValidOrigin = event.origin === location.origin;
-			const isValidResponse = event.data ? event.data.type === 'authorizing' : false;
-			const isValidState = event.data ? event.data.state === STATE : false;
-			if (!isValidOpener || !isValidOrigin || !isValidResponse || !isValidState) {
-				return;
-			}
-			window.removeEventListener('message', handleAuthMessage);
-			resolve(event.data?.payload);
-		};
-
-		window.addEventListener('message', handleAuthMessage);
-		// if there isn't any message from opener window in 300s, remove the message handler
-		timeout(300 * 1000).then(() => {
-			window.removeEventListener('message', handleAuthMessage);
-			resolve({ error: 'authorizing_timeout', error_description: 'Authorizing timeout' });
-		});
-	});
+	return waitForOAuthResult(STATE, opener);
 };
