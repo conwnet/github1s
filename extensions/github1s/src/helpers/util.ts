@@ -37,6 +37,8 @@ export const dirname = (path: string): string => {
 	return trimmedPath.substr(0, trimmedPath.lastIndexOf('/')) || '';
 };
 
+export const getFileTreeItemDescription = (path: string): string | boolean => dirname(path) || false;
+
 export const basename = (path: string): string => {
 	const trimmedPath = trimEnd(path, '/');
 	return trimmedPath.substr(trimmedPath.lastIndexOf('/') + 1) || '';

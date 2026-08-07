@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import router from '@/router';
 import { emptyFileUri } from '@/providers';
-import { basename } from '@/helpers/util';
 import { FileChangeStatus } from '@/adapters/types';
 import { Repository } from '@/repository';
 import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/changes/files';
@@ -44,14 +43,7 @@ const openFileToEditor = async (fileUri) => {
 	// `fileUri.authority` to '' in this case
 	const targetFileUri = isCurrentAuthority ? fileUri.with({ authority: '' }) : fileUri;
 
-	let editorLabel: string | undefined = undefined;
-	if (!isCurrentAuthority) {
-		// the authority here should be `{repo}+{commitSha}`
-		const [_repo, commitSha] = targetFileUri.authority.split('+');
-		editorLabel = `${basename(targetFileUri.path)} (${commitSha.slice(0, 7)})`;
-	}
-
-	return vscode.commands.executeCommand('vscode.open', targetFileUri, { preview: false }, editorLabel);
+	return vscode.commands.executeCommand('vscode.open', targetFileUri, { preview: false });
 };
 
 // open the left file in the diff editor title

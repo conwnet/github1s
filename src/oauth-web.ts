@@ -1,7 +1,5 @@
 import { getOAuthBroadcastChannelName } from './oauth-common';
 
-export { getOAuthBroadcastChannelName } from './oauth-common';
-
 interface OAuthResultMessage {
 	type: 'authorizing';
 	payload: Record<string, unknown>;

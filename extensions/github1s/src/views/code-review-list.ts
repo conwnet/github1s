@@ -13,6 +13,7 @@ import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
+import { getFileTreeItemDescription } from '@/helpers/util';
 
 enum CodeReviewState {
 	OPEN = 'open',
@@ -179,7 +180,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			return {
 				id,
 				command,
-				description: true,
+				description: getFileTreeItemDescription(filePath),
 				resourceUri: changedFile.headFileUri.with({
 					query: queryString.stringify({ changeStatus: changedFile.status }),
 				}),

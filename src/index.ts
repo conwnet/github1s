@@ -46,7 +46,6 @@ const vscodeCommands = [
 ];
 
 globalThis._VSCODE_WEB = {
-	allowEditorLabelOverride: true,
 	builtinExtensions: GITHUB1S_EXTENSIONS || [],
 	onWorkbenchReady() {
 		const loadSpinner = document.querySelector('#load-spinner');

@@ -13,6 +13,7 @@ import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
+import { getFileTreeItemDescription } from '@/helpers/util';
 
 export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
 	const shortCommitSha = commit.sha.slice(0, 7);
@@ -135,7 +136,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			return {
 				id,
 				command,
-				description: true,
+				description: getFileTreeItemDescription(filePath),
 				resourceUri: changedFile.headFileUri.with({
 					query: queryString.stringify({ changeStatus: changedFile.status }),
 				}),
