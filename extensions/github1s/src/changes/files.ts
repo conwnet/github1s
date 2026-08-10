@@ -42,8 +42,8 @@ export const getCodeReviewChangedFiles = async (
 		const baseFilePath = changedFile.previousPath || changedFile.path;
 		const headFilePath = changedFile.path;
 		return {
-			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
-			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
+			baseFileUri: baseRootUri.with({ path: baseFilePath }),
+			headFileUri: headRootUri.with({ path: headFilePath }),
 			status: changedFile.status,
 		};
 	});
@@ -74,8 +74,8 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 		const baseFilePath = commitFile.previousPath || commitFile.path;
 		const headFilePath = commitFile.path;
 		return {
-			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
-			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
+			baseFileUri: baseRootUri.with({ path: baseFilePath }),
+			headFileUri: headRootUri.with({ path: headFilePath }),
 			status: commitFile.status,
 		};
 	});

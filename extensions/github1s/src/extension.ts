@@ -52,12 +52,12 @@ const initialVSCodeState = async () => {
 	const routerState = await router.getState();
 	const scheme = adapterManager.getCurrentScheme();
 
-	if (routerState.pageType === PageType.Tree && routerState.filePath) {
+	if (routerState.pageType === PageType.Tree && routerState.filePath !== '/') {
 		vscode.commands.executeCommand(
 			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
+			vscode.Uri.parse('').with({ scheme, path: routerState.filePath }),
 		);
-	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
+	} else if (routerState.pageType === PageType.Blob && routerState.filePath !== '/') {
 		const { startLine, endLine } = routerState;
 		let documentShowOptions: vscode.TextDocumentShowOptions = {};
 		if (startLine || endLine) {
@@ -66,7 +66,7 @@ const initialVSCodeState = async () => {
 			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
 		}
 		vscode.window.showTextDocument(
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
+			vscode.Uri.parse('').with({ scheme, path: routerState.filePath }),
 			documentShowOptions,
 		);
 	} else if (routerState.pageType === PageType.CodeReviewList) {

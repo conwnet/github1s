@@ -43,7 +43,7 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 };
 
 const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[]): FileDecoration | null => {
-	const changedFile = changedFiles.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const changedFile = changedFiles.find((changedFile) => changedFile.path === uri.path);
 
 	if (changedFile) {
 		return changedFileDecorationDataMap[changedFile.status];
@@ -51,7 +51,7 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 	// we have to determine the changed folder manually rather then use
 	// the `propagate` property of FileDecoration, because the file tree
 	// in the file explorer is lazy load
-	const folderPath = `${uri.path.slice(1)}/`;
+	const folderPath = uri.path.endsWith('/') ? uri.path : `${uri.path}/`;
 	const includeChangedFile = changedFiles.find((changedFile) => changedFile.path.startsWith(folderPath));
 	if (includeChangedFile) {
 		return {

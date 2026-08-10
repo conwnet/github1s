@@ -47,7 +47,7 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 				// because we set the authority of workspace as '' (on application start)
 				// at src/vs/code/browser/workbench/workbench.ts
 				// so don't specified authority here, or the VS Code won't use the results
-				const fileUri = vscode.Uri.parse('').with({ scheme: currentScheme, path: `/${item.path}` });
+				const fileUri = vscode.Uri.parse('').with({ scheme: currentScheme, path: item.path });
 				const ranges = ensureArray(item.ranges).map((range) => createVscodeRange(range));
 				const previewMatches = ensureArray(item.preview.matches).map((match) => createVscodeRange(match));
 				const preview = { text: item.preview.text, matches: previewMatches };

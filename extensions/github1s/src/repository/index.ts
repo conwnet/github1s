@@ -65,32 +65,32 @@ export class Repository {
 		return this._branchTagManager.hasMoreTags(...args);
 	}
 
-	getCommitList(ref: string = 'HEAD', filePath: string = '', forceUpdate: boolean = false) {
+	getCommitList(ref: string = 'HEAD', filePath: string = '/', forceUpdate: boolean = false) {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
 	}
 
 	getCommitItem(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getItem(forceUpdate);
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getItem(forceUpdate);
 	}
 
-	loadMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+	loadMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
 	}
 
-	hasMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+	hasMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
 	}
 
 	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getChangedFiles(forceUpdate);
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getChangedFiles(forceUpdate);
 	}
 
 	loadMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').loadMoreChangedFiles();
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').loadMoreChangedFiles();
 	}
 
 	hasMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').hasMoreChangedFiles();
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').hasMoreChangedFiles();
 	}
 
 	getFileLatestCommit(ref: string, filePath: string) {

@@ -3,7 +3,6 @@
  * @author netcon
  */
 
-import { joinPath } from '@/helpers/util';
 import { matchSorter } from 'match-sorter';
 import {
 	Branch,
@@ -35,6 +34,7 @@ import { getSymbolReferences } from './reference';
 import { getRepository } from './repository';
 import { getTextSearchResults } from './search';
 import { decorate, memorize } from '@/helpers/func';
+import { normalizePath, trimStart } from '@/helpers/util';
 
 type SupportedPlatform = 'github' | 'gitlab' | 'bitbucket';
 
@@ -71,26 +71,24 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	async provideDirectory(repo: string, ref: string, path: string, recursive = false): Promise<Directory> {
-		const directories = await readDirectory(this.buildRepository(repo), ref, path, recursive);
+		const directories = await readDirectory(this.buildRepository(repo), ref, trimStart(path, '/'), recursive);
 		directories.entries.forEach((entry) => {
-			const mapKey = `${repo} ${ref} ${joinPath(path, entry.path)}`;
+			const mapKey = `${repo} ${ref} ${entry.path}`;
 			this.fileTypeMap.set(mapKey, entry.type);
 		});
 		return directories;
 	}
 
 	async detectPathFileType(repo: string, ref: string, path: string) {
-		const pathParts = path.split('/').filter(Boolean);
-		const trimmedPath = pathParts.join('/');
-		if (!trimmedPath) {
+		if (path === '/') {
 			return FileType.Directory;
 		}
-		const mapKey = `${repo} ${ref} ${trimmedPath}`;
+		const mapKey = `${repo} ${ref} ${path}`;
 		if (this.fileTypeMap.has(mapKey)) {
 			return this.fileTypeMap.get(mapKey)!;
 		}
-		await this.provideDirectory(repo, ref, pathParts.slice(0, -1).join('/'), false);
-		return this.fileTypeMap.get(trimmedPath) || FileType.File;
+		await this.provideDirectory(repo, ref, normalizePath(path.split('/').slice(0, -1).join('/')), false);
+		return this.fileTypeMap.get(mapKey) || FileType.File;
 	}
 
 	async provideRepository(repo: string) {
@@ -101,6 +99,7 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
+		const apiPath = trimStart(path, '/');
 		// sourcegraph api break binary files and text coding, so we use github api first here
 		if (this.platform === 'github') {
 			// For GitHub repositories, request GitHub User Content API first (it seems no Rate Limit),
@@ -108,13 +107,13 @@ export class SourcegraphDataSource extends DataSource {
 			// Content API goes wrong, then try Sourcegraph API. Use `try catch` because if fallback to
 			// GitHub REST API may trigger a pop-up window to request authentication for anonymous users.
 			try {
-				return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`))
+				return fetch(encodeURI(`https://raw.githubusercontent.com/${repo}/${ref}/${apiPath}`))
 					.then((response) => (response.ok ? response.arrayBuffer() : Promise.reject({ response })))
 					.then((buffer) => ({ content: new Uint8Array(buffer) }));
 			} catch {}
 		}
 		// TODO: support binary files for other platforms
-		const { content } = await readFile(this.buildRepository(repo), ref, path);
+		const { content } = await readFile(this.buildRepository(repo), ref, apiPath);
 		return { content: this.textEncoder.encode(content) };
 	}
 
@@ -132,10 +131,10 @@ export class SourcegraphDataSource extends DataSource {
 
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!refAndPath) {
-			return { ref: await this.getDefaultBranch(repo), path: '' };
+			return { ref: await this.getDefaultBranch(repo), path: '/' };
 		}
 		if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
-			return { ref: 'HEAD', path: refAndPath.slice(5) };
+			return { ref: 'HEAD', path: normalizePath(refAndPath.slice(5)) };
 		}
 		if (!this.matchedRefsMap.has(repo)) {
 			this.matchedRefsMap.set(repo, []);
@@ -143,13 +142,13 @@ export class SourcegraphDataSource extends DataSource {
 		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
 		const pathRef = this.matchedRefsMap.get(repo)?.find(matchPathRef);
 		if (pathRef) {
-			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
+			return { ref: pathRef, path: normalizePath(refAndPath.slice(pathRef.length + 1)) };
 		}
 		const { branches, tags } = await this.prepareAllRefs(repo);
 		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
 		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
 		exactRef && this.matchedRefsMap.get(repo)?.push(ref);
-		return { ref, path: refAndPath.slice(ref.length + 1) };
+		return { ref, path: normalizePath(refAndPath.slice(ref.length + 1)) };
 	}
 
 	async provideBranches(repo: string, options?: CommonQueryOptions): Promise<Branch[]> {
@@ -184,17 +183,21 @@ export class SourcegraphDataSource extends DataSource {
 		query: TextSearchQuery,
 		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
-		return getTextSearchResults(this.buildRepository(repo), ref, query, options);
+		const results = await getTextSearchResults(this.buildRepository(repo), ref, query, options);
+		return {
+			...results,
+			results: results.results.map((result) => ({ ...result, path: normalizePath(result.path) })),
+		};
 	}
 
 	async provideCommits(repo: string, options?: CommitsQueryOptions): Promise<(Commit & { files?: ChangedFile[] })[]> {
 		let commits = await getCommits(
 			this.buildRepository(repo),
 			options?.from || 'HEAD',
-			options?.path,
+			options?.path === undefined ? undefined : trimStart(options.path, '/'),
 			options?.pageSize ? options.pageSize * (options.page || 1) : undefined,
 		);
-		if (options?.path && commits.length) {
+		if (options?.path && options.path !== '/' && commits.length) {
 			// find the latested that related the `options.path` file
 			const changedFiles = await this.provideCommitChangedFiles(repo, commits[0].sha);
 			commits = changedFiles.find((file) => file.path === options.path) ? commits : commits.slice(1);
@@ -207,11 +210,15 @@ export class SourcegraphDataSource extends DataSource {
 	}
 
 	async provideCommitChangedFiles(repo: string, ref: string, _options?: CommonQueryOptions): Promise<ChangedFile[]> {
-		return compareCommits(this.buildRepository(repo), `${ref}~`, ref);
+		return (await compareCommits(this.buildRepository(repo), `${ref}~`, ref)).map((file) => ({
+			...file,
+			path: normalizePath(file.path),
+			previousPath: file.previousPath ? normalizePath(file.previousPath) : undefined,
+		}));
 	}
 
 	async provideFileBlameRanges(repo: string, ref: string, path: string): Promise<BlameRange[]> {
-		return getFileBlameRanges(this.buildRepository(repo), ref, path);
+		return getFileBlameRanges(this.buildRepository(repo), ref, trimStart(path, '/'));
 	}
 
 	async provideSymbolDefinitions(
@@ -222,7 +229,10 @@ export class SourcegraphDataSource extends DataSource {
 		character: number,
 		symbol: string,
 	): Promise<SymbolDefinitions> {
-		return getSymbolDefinitions(this.buildRepository(repo), ref, path, line, character, symbol);
+		const apiPath = trimStart(path, '/');
+		return getSymbolDefinitions(this.buildRepository(repo), ref, apiPath, line, character, symbol).then((locations) =>
+			locations.map((location) => ({ ...location, path: normalizePath(location.path) })),
+		);
 	}
 
 	async provideSymbolReferences(
@@ -233,7 +243,10 @@ export class SourcegraphDataSource extends DataSource {
 		character: number,
 		symbol: string,
 	): Promise<SymbolReferences> {
-		return getSymbolReferences(this.buildRepository(repo), ref, path, line, character, symbol);
+		const apiPath = trimStart(path, '/');
+		return getSymbolReferences(this.buildRepository(repo), ref, apiPath, line, character, symbol).then((locations) =>
+			locations.map((location) => ({ ...location, path: normalizePath(location.path) })),
+		);
 	}
 
 	async provideSymbolHover(

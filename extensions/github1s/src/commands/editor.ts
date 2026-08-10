@@ -65,7 +65,7 @@ const getConcreteFileUri = async (fileUri: vscode.Uri) => {
 	const fileAuthority = fileUri.authority || (await router.getAuthority());
 	const [repo, ref] = fileAuthority.split('+').filter(Boolean);
 	const repository = Repository.getInstance(fileUri.scheme, repo);
-	const commit = await repository.getFileLatestCommit(ref, fileUri.path.slice(1));
+	const commit = await repository.getFileLatestCommit(ref, fileUri.path);
 	const latestCommitSha = commit?.sha || (await repository.getCommitItem(ref))?.sha || 'HEAD';
 
 	return fileUri.with({ authority: `${repo}+${latestCommitSha}` });
@@ -82,12 +82,12 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 	const [repo, rightCommitSha] = rightFileUri.authority.split('+').filter(Boolean);
 
 	const repository = Repository.getInstance(fileUri.scheme, repo);
-	const leftCommit = await repository.getPreviousCommit(rightCommitSha, fileUri.path.slice(1));
+	const leftCommit = await repository.getPreviousCommit(rightCommitSha, fileUri.path);
 	// if we can't find previous commit, use the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? rightFileUri.with({ authority: `${repo}+${leftCommit.sha}` }) : emptyFileUri;
 
 	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path.slice(1)));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
@@ -112,14 +112,14 @@ const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
 
 	const [repo, leftCommitSha] = leftFileUri.authority.split('+').filter(Boolean);
 	const repository = Repository.getInstance(fileUri.scheme, repo);
-	const rightCommit = await repository.getNextCommit(leftCommitSha, fileUri.path.slice(1));
+	const rightCommit = await repository.getNextCommit(leftCommitSha, fileUri.path);
 
 	if (!rightCommit) {
 		return vscode.window.showInformationMessage('There is no next commit found.');
 	}
 
 	const rightFileUri = leftFileUri.with({ authority: `${repo}+${rightCommit.sha}` });
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path.slice(1)));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),

@@ -62,7 +62,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 	});
 
 	async resolveFilePath() {
-		return '';
+		return '/';
 	}
 
 	public updateTree(forceUpdate = true) {
@@ -191,11 +191,11 @@ export class FileHistoryTreeDataProvider extends CommitTreeDataProvider {
 	async resolveFilePath() {
 		const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
 		const currentScheme = adapterManager.getCurrentScheme();
-		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path.slice(1) : '';
+		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path : '/';
 	}
 
 	async getCommitItems() {
-		if (!(await this.resolveFilePath())) {
+		if ((await this.resolveFilePath()) === '/') {
 			return [];
 		}
 		return super.getCommitItems();

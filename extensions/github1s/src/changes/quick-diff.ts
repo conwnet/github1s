@@ -16,7 +16,7 @@ const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string)
 	const currentScheme = adapterManager.getCurrentScheme();
 	const repository = Repository.getInstance(currentScheme, routeState.repo);
 	const codeReviewFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
-	const changedFile = codeReviewFiles?.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const changedFile = codeReviewFiles?.find((changedFile) => changedFile.path === uri.path);
 
 	if (
 		!changedFile ||
@@ -32,7 +32,7 @@ const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string)
 	}
 
 	const originalAuthority = `${routeState.repo}+${codeReview!.targetSha}`;
-	const originalPath = changedFile.previousPath ? `/${changedFile.previousPath}` : uri.path;
+	const originalPath = changedFile.previousPath || uri.path;
 
 	return uri.with({ authority: originalAuthority, path: originalPath });
 };
@@ -43,7 +43,7 @@ const getOriginalResourceForCommit = async (uri: vscode.Uri, commitSha: string) 
 	const currentScheme = adapterManager.getCurrentScheme();
 	const repository = Repository.getInstance(currentScheme, routeState.repo);
 	const commitFiles = await repository.getCommitChangedFiles(commitSha);
-	const changedFile = commitFiles?.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const changedFile = commitFiles?.find((changedFile) => changedFile.path === uri.path);
 
 	if (
 		!changedFile ||
@@ -60,7 +60,7 @@ const getOriginalResourceForCommit = async (uri: vscode.Uri, commitSha: string) 
 	}
 
 	const originalAuthority = `${routeState.repo}+${parentCommitSha}`;
-	const originalPath = changedFile.previousPath ? `/${changedFile.previousPath}` : uri.path;
+	const originalPath = changedFile.previousPath || uri.path;
 
 	return uri.with({ authority: originalAuthority, path: originalPath });
 };

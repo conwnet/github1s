@@ -62,11 +62,11 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		// if the definition target and the searched symbol is in the same
 		// repository, just replace the `document.uri.path` with targetPath
 		const targetFileUri = isSameRepo
-			? document.uri.with({ path: `/${target.path}` })
+			? document.uri.with({ path: target.path })
 			: vscode.Uri.parse('').with({
 					scheme: target.scope?.scheme,
 					authority: `${target.scope?.repo}+${target.scope?.ref}`,
-					path: `/${target.path}`,
+					path: target.path,
 				});
 		// open corresponding file with target
 		const textDocument = await vscode.workspace.openTextDocument(targetFileUri);

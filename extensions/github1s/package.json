@@ -623,7 +623,7 @@
     "clean": "rm -rf dist out",
     "watch": "webpack --config webpack.config.js --watch",
     "compile": "webpack --config webpack.config.js --mode production",
-    "test": "node --test test/*.test.js"
+    "test": "node --experimental-strip-types --test test/*.test.ts"
   },
   "keywords": [],
   "author": "",

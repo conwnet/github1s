@@ -64,7 +64,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	// insert DirectoryEntry into the cache `this.root`
 	public async populateWithDirectoryEntities(base: Uri, entries: adapterTypes.DirectoryEntry[]) {
-		const baseDirectory = await this.lookupAsDirectory(base, true);
+		const baseDirectory = await this.lookupAsDirectory(base.with({ path: '/' }), true);
 		if (!baseDirectory) {
 			return;
 		}
@@ -225,10 +225,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 				await this._updateSubmoduleDirectory(parent);
 			}
 			const [repo, ref] = parent.uri.authority.split('+');
-			const path = Uri.joinPath(parent.uri, parent.name).path.slice(1); // delete leading '/'
-			const dataSource = await this._resolveDataSource(uri.scheme);
+			const path = Uri.joinPath(parent.uri, parent.name).path;
+			const dataSource = await this._resolveDataSource(parent.uri.scheme);
 			const data = await dataSource.provideDirectory(repo, ref, path, false);
-			data?.entries && (await this.populateWithDirectoryEntities(uri, data.entries));
+			data?.entries && (await this.populateWithDirectoryEntities(parent.uri, data.entries));
 			return parent.getNameTypePairs();
 		},
 		(uri) => uri.toString(),
@@ -249,7 +249,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			if (!this.contentCache.has(cacheKey)) {
 				const [repo, ref] = authority.split('+');
 				const dataSource = await this._resolveDataSource(scheme);
-				const data = await dataSource.provideFile(repo, ref, path.slice(1));
+				const data = await dataSource.provideFile(repo, ref, path);
 				data && this.contentCache.set(cacheKey, data.content);
 			}
 			return this.contentCache.get(cacheKey) || new Uint8Array();

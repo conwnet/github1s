@@ -63,7 +63,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		const [repo, ref] = authority.split('+');
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const dataSource = await currentAdapter.resolveDataSource();
-		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '', true);
+		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
 		const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
@@ -77,7 +77,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 
 		const fileUris = (rootDirectoryData?.entries || [])
 			.filter((item) => item.type === adapterTypes.FileType.File)
-			.map((item) => Uri.joinPath(rootDirectoryUri, item.path));
+			.map((item) => rootDirectoryUri.with({ path: item.path }));
 		this.fileUrisMap.set(authority, fileUris);
 		return fileUris;
 	});

@@ -32,6 +32,7 @@ import { matchSorter } from 'match-sorter';
 import { GitLabFetcher } from './fetcher';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 import { decorate, memorize } from '@/helpers/func';
+import { trimStart, normalizePath, isString } from '@/helpers/util';
 
 const FileTypeMap = {
 	blob: FileType.File,
@@ -102,13 +103,13 @@ export class GitLab1sDataSource extends DataSource {
 		let page = 1;
 		let files = [];
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
-			path: treeItem.path.slice(path.length),
+			path: normalizePath(treeItem.path),
 			type: FileTypeMap[treeItem.type] || FileType.File,
 			commitSha: FileTypeMap[treeItem.id] === FileType.Submodule ? treeItem.sha || 'HEAD' : undefined,
 			size: treeItem.size,
 		});
 		while (page > 0) {
-			const requestParams = { ref, page, path, repo, recursive };
+			const requestParams = { ref, page, path: trimStart(path, '/'), repo, recursive };
 			const { data, headers } = await fetcher.request(
 				'GET /projects/{repo}/repository/tree?recursive={recursive}&per_page=100&page={page}&ref={ref}&path={path}',
 				requestParams,
@@ -127,7 +128,7 @@ export class GitLab1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
 		const fetcher = GitLabFetcher.getInstance();
-		const requestParams = { ref, path, repo };
+		const requestParams = { ref, path: trimStart(path, '/'), repo };
 		const { data } = await fetcher.request('GET /projects/{repo}/repository/files/{path}?ref={ref}', requestParams);
 		return { content: toUint8Array((data as any).content) };
 	}
@@ -164,10 +165,10 @@ export class GitLab1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async extractRefPath(repo: string, refAndPath: string): Promise<{ ref: string; path: string }> {
 		if (!refAndPath) {
-			return { ref: await this.getDefaultBranch(repo), path: '' };
+			return { ref: await this.getDefaultBranch(repo), path: '/' };
 		}
 		if (refAndPath.match(/^HEAD(\/.*)?$/i)) {
-			return { ref: 'HEAD', path: refAndPath.slice(5) };
+			return { ref: 'HEAD', path: normalizePath(refAndPath.slice(5)) };
 		}
 		if (!this.matchedRefsMap.has(repo)) {
 			this.matchedRefsMap.set(repo, []);
@@ -175,13 +176,13 @@ export class GitLab1sDataSource extends DataSource {
 		const matchPathRef = (ref) => refAndPath.startsWith(`${ref}/`) || refAndPath === ref;
 		const pathRef = this.matchedRefsMap.get(repo)?.find(matchPathRef);
 		if (pathRef) {
-			return { ref: pathRef, path: refAndPath.slice(pathRef.length + 1) };
+			return { ref: pathRef, path: normalizePath(refAndPath.slice(pathRef.length + 1)) };
 		}
 		const [branches, tags] = await this.prepareAllRefs(repo);
 		const exactRef = [...branches, ...tags].map((item) => item.name).find(matchPathRef);
 		const ref = exactRef || refAndPath.split('/')[0] || 'HEAD';
 		exactRef && this.matchedRefsMap.get(repo)?.push(ref);
-		return { ref, path: refAndPath.slice(ref.length + 1) };
+		return { ref, path: normalizePath(refAndPath.slice(ref.length + 1)) };
 	}
 
 	async prepareAllRefs(repo: string) {
@@ -250,7 +251,7 @@ export class GitLab1sDataSource extends DataSource {
 			page: options?.page,
 			per_page: options?.pageSize,
 			sha: options?.from,
-			path: options?.path,
+			path: isString(options?.path) ? trimStart(options.path, '/') : undefined,
 			author: options?.author,
 		};
 		const requestParams = { repo, ...queryParams };
@@ -286,8 +287,8 @@ export class GitLab1sDataSource extends DataSource {
 			createTime: data.created_at ? new Date(data.created_at) : undefined,
 			parents: data.parent_ids || [],
 			files: data.files?.map((item) => ({
-				path: item.filename || item.previous_filename!,
-				previousPath: item.previous_filename,
+				path: normalizePath(item.filename || item.previous_filename!),
+				previousPath: item.previous_filename ? normalizePath(item.previous_filename) : undefined,
 				status: item.status as FileChangeStatus,
 			})),
 			avatarUrl: data?.avatar_url,
@@ -301,8 +302,8 @@ export class GitLab1sDataSource extends DataSource {
 		const { data } = await fetcher.request('GET /projects/{repo}/repository/commits/{ref}/diff', requestParams);
 		return (
 			data?.map((item) => ({
-				path: item.new_path || item.old_path!,
-				previousPath: item.old_path,
+				path: normalizePath(item.new_path || item.old_path!),
+				previousPath: item.old_path ? normalizePath(item.old_path) : undefined,
 				status: item.new_file
 					? FileChangeStatus.Added
 					: item.deleted_file
@@ -373,8 +374,8 @@ export class GitLab1sDataSource extends DataSource {
 		);
 
 		return data.changes.map((item) => ({
-			path: item.new_path,
-			previousPath: item.old_path,
+			path: normalizePath(item.new_path),
+			previousPath: item.old_path ? normalizePath(item.old_path) : undefined,
 			status: item.new_file
 				? FileChangeStatus.Added
 				: item.deleted_file
@@ -388,7 +389,7 @@ export class GitLab1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideFileBlameRanges(repo: string, ref: string, path: string): Promise<BlameRange[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const requestParams = { repo, ref, path };
+		const requestParams = { repo, ref, path: trimStart(path, '/') };
 		const { data } = await fetcher.request(
 			'GET /projects/{repo}/repository/files/{path}/blame?ref={ref}',
 			requestParams,

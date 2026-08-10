@@ -200,7 +200,7 @@ class EditorGitBlame {
 		const [repo, ref] = fileAuthority.split('+').filter(Boolean);
 		const scheme = adapterManager.getCurrentScheme();
 		const repository = Repository.getInstance(scheme, repo);
-		return filePath ? repository.getFileBlameRanges(ref, filePath.slice(1)) : [];
+		return filePath ? repository.getFileBlameRanges(ref, filePath) : [];
 	}
 
 	async open() {

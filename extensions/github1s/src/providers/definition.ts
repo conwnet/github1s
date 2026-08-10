@@ -55,11 +55,11 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)
 			const uri = isSameRepo
-				? document.uri.with({ path: `/${path}` })
+				? document.uri.with({ path })
 				: vscode.Uri.parse('').with({
 						scheme: scope!.scheme,
 						authority: `${scope!.repo}+${scope!.ref}`,
-						path: `/${path}`,
+						path,
 					});
 			const { start, end } = range;
 			return {

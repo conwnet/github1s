@@ -32,7 +32,7 @@ const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | unde
 		return;
 	}
 
-	const browserPath = await routerParser.buildBlobPath(repo, ref, activeFileUri.path.slice(1));
+	const browserPath = await routerParser.buildBlobPath(repo, ref, activeFileUri.path);
 	router.replace(browserPath);
 };
 
@@ -62,7 +62,7 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 	const browserPath = await routerParser.buildBlobPath(
 		repo,
 		ref,
-		activeFileUri.path.slice(1),
+		activeFileUri.path,
 		!editor.selection.isEmpty ? editor.selection.start.line + 1 : undefined,
 		editor.selection.end.line !== editor.selection.start.line ? editor.selection.end.line + 1 : undefined,
 	);

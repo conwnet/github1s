@@ -64,6 +64,6 @@ export const parseBitbucketPath = async (path: string): Promise<RouterState> => 
 		repo: 'atlassian/clover',
 		ref: 'HEAD',
 		pageType: PageType.Tree,
-		filePath: '',
+		filePath: '/',
 	};
 };

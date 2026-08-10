@@ -129,7 +129,7 @@ export class OSSInsightDataSource extends DataSource {
 	}
 
 	async provideDirectory(repo: string, ref: string, path: string, recursive?: boolean): Promise<Directory> {
-		const walk = async (item: StructureItem | undefined, recursive = false, basePath = '') => {
+		const walk = async (item: StructureItem | undefined, recursive = false, basePath = '/') => {
 			const directoryEntires: Directory['entries'] = [];
 			for (const child of await this.getStructureItemChildren(item)) {
 				const currentPath = joinPath(basePath, child.name);
@@ -143,7 +143,7 @@ export class OSSInsightDataSource extends DataSource {
 
 		return {
 			truncated: false,
-			entries: await walk(await this.resolveStructureItem(path), recursive),
+			entries: await walk(await this.resolveStructureItem(path), recursive, path),
 		};
 	}
 
