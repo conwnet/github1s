@@ -8,6 +8,7 @@ import { CommitManager } from './commit-manager';
 import { CodeReviewManager } from './code-review-manager';
 import { BranchTagManager } from './branch-tag-manager';
 import { BlameRange } from '@/adapters/types';
+import router from '@/router';
 
 export class Repository {
 	private static instanceMap = new Map<string, Repository>();
@@ -22,6 +23,12 @@ export class Repository {
 			Repository.instanceMap.set(mapKey, new Repository(scheme, repo));
 		}
 		return Repository.instanceMap.get(mapKey)!;
+	}
+
+	public static async getCurrentInstance() {
+		const state = await router.getState();
+		const scheme = adapterManager.getCurrentScheme();
+		return Repository.getInstance(scheme, state.repo);
 	}
 
 	private constructor(

@@ -64,7 +64,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		const currentAdapter = adapterManager.getCurrentAdapter();
 		const dataSource = await currentAdapter.resolveDataSource();
 		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = Uri.parse('').with({ scheme: currentAdapter.scheme, authority, path: '/' });
+		const rootDirectoryUri = Uri.from({ scheme: currentAdapter.scheme, authority, path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
 		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false

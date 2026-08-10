@@ -201,11 +201,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
 		directory.name = ''; // update the name field to '' to indicated it is an root directory
 		// update the uri field to indicated it is belong the `submodule repository`
-		directory.uri = Uri.parse('').with({
-			scheme: submoduleScheme,
-			authority: submoduleAuthority,
-			path: '/',
-		});
+		directory.uri = Uri.from({ scheme: submoduleScheme, authority: submoduleAuthority, path: '/' });
 		// insert the directory in to this.root map because it indicated another repository
 		this.root.set(submoduleAuthority, directory);
 		return [];
@@ -213,6 +209,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readDirectory = reuseable(
 		async (uri: Uri): Promise<[string, FileType][]> => {
+			console.log('----', uri.authority);
 			const parent = await this.lookupAsDirectory(uri, false);
 			if (!parent) {
 				return [];

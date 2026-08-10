@@ -7,10 +7,11 @@ import * as vscode from 'vscode';
 import * as adapterTypes from '@/adapters/types';
 import { GitHub1sQuickDiffProvider } from './quick-diff';
 import { getChangedFileDiffCommand, getChangedFiles } from './files';
-import adapterManager from '@/adapters/manager';
+import router from '@/router';
 
 export const updateSourceControlChanges = (() => {
-	const rootUri = vscode.Uri.parse('').with({ scheme: adapterManager.getCurrentScheme(), path: '/' });
+	// TODO - test
+	const rootUri = router.buildUri();
 	const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s', rootUri);
 	const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
 	sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();

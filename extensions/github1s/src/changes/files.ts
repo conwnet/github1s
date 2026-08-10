@@ -22,18 +22,10 @@ interface VSCodeChangedFile {
 export const getCodeReviewChangedFiles = async (
 	codeReview: adapterTypes.CodeReview & { sourceSha: string; targetSha: string },
 ) => {
-	const scheme = adapterManager.getCurrentScheme();
-	const { repo } = await router.getState();
-	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: scheme,
-		authority: `${repo}+${codeReview.targetSha}`,
-		path: '/',
-	});
-	const headRootUri = baseRootUri.with({
-		authority: `${repo}+${codeReview.sourceSha}`,
-	});
+	const baseRootUri = router.buildUri({ ref: codeReview.targetSha });
+	const headRootUri = router.buildUri({ ref: codeReview.sourceSha }, baseRootUri);
 
-	const repository = Repository.getInstance(scheme, repo);
+	const repository = await Repository.getCurrentInstance();
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
@@ -50,22 +42,14 @@ export const getCodeReviewChangedFiles = async (
 };
 
 export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
-	const currentAdapter = adapterManager.getCurrentAdapter();
-	const scheme = currentAdapter.scheme;
-	const { repo } = await router.getState();
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// so we use the parents[0].sha as the parent commitSha
-	const baseRef = commit?.parents?.[0];
-	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: currentAdapter.scheme,
-		authority: `${repo}+${baseRef || 'HEAD'}`,
-		path: '/',
-	});
-	const headRootUri = baseRootUri.with({
-		authority: `${repo}+${commit.sha || 'HEAD'}`,
-	});
-	const repository = Repository.getInstance(scheme, repo);
+	const parentCommitSha = commit?.parents?.[0] || '';
+	const baseRootUri = router.buildUri({ ref: parentCommitSha });
+	const headRootUri = router.buildUri({ ref: commit.sha }, baseRootUri);
+
+	const repository = await Repository.getCurrentInstance();
 	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {

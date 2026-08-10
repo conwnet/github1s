@@ -16,6 +16,13 @@ export interface UrlManager {
 	replace: (url: string) => void | Promise<void>;
 }
 
+export interface UriState {
+	scheme: string;
+	repo: string;
+	ref: string;
+	path: string;
+}
+
 export class Router extends EventEmitter<RouterState> {
 	private static instance: Router;
 
@@ -99,6 +106,34 @@ export class Router extends EventEmitter<RouterState> {
 
 	public async href(): Promise<string | undefined> {
 		return this._manager?.href();
+	}
+
+	public parseUri(uri?: vscode.Uri): UriState {
+		const scheme = uri?.scheme || adapterManager.getCurrentScheme();
+		const [repo, ref] = uri?.authority.split('+') || [this._state!.repo, this._state!.ref];
+		return { scheme, repo, ref, path: uri?.path || '/' };
+	}
+
+	public buildUri(state?: Partial<UriState>, base?: vscode.Uri): vscode.Uri {
+		const mergedState: Parameters<NonNullable<typeof base>['with']>[0] = {};
+
+		if (state?.hasOwnProperty('scheme')) {
+			mergedState.scheme = state.scheme || '';
+		}
+		if (state && state.repo && !state.ref) {
+			throw new Error('ref is required when repo is provided');
+		}
+		if (state?.hasOwnProperty('ref')) {
+			const repo = state.repo || base?.authority.split('+')[0] || this._state!.repo;
+			mergedState.authority = repo && state.ref ? `${repo}+${state.ref}` : '';
+		}
+		if (state?.hasOwnProperty('path')) {
+			mergedState.path = `/${state.path?.split('/').filter(Boolean).join('/') || ''}`;
+		}
+
+		return base
+			? base.with(mergedState)
+			: vscode.Uri.from({ scheme: adapterManager.getCurrentScheme(), path: '/', ...mergedState });
 	}
 }
 

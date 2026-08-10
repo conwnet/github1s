@@ -114,7 +114,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				description,
 				tooltip,
 				contextValue,
-				resourceUri: vscode.Uri.parse('').with({
+				resourceUri: vscode.Uri.from({
 					scheme: GitHub1sSourceControlDecorationProvider.commitSchema,
 					query: queryString.stringify({ sha: commit.sha }),
 				}),

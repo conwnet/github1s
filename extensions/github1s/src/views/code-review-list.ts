@@ -153,7 +153,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 				description,
 				tooltip,
 				contextValue,
-				resourceUri: vscode.Uri.parse('').with({
+				resourceUri: vscode.Uri.from({
 					scheme: GitHub1sSourceControlDecorationProvider.codeReviewSchema,
 					query: queryString.stringify({ id: codeReview.id }),
 				}),
