@@ -146,39 +146,17 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		return this.lookup(uri, false);
 	}
 
-	// TODO Update
-	// it used by `@/src/providers/fileDecorationProvider.ts`
-	// update the uri of a git submodule as directory, which the type of corresponding githubEntry should be `commit`.
-	// the `directory.uri.authority` and the `directory.uri.path` must belong to the `parent repository` before called.
-	// and the `directory.name` is the corresponding `directory name` in `parent repository` before called.
-	// once the function is called successful, the `directory.uri.authority` field, the `directory.uri.path`,
-	// and the `directory.uri.name` field would be changed to the `submodule repository's`.
-	//
-	// so this function could be called only once for a submodule directory, for example:
-	// - the directory argument before called may looks like:
-	// {
-	//     uri: {
-	//         scheme: 'github1s',
-	//         authority: 'conwnet/github1s+master', // this is the authority of `parent repository`
-	//         path: '/some/submodule/path' // the corresponding path in `parent repository`
-	//     },
-	//     name: 'vscode', // the name is the `directory name` of `parent repository` before called
-	//     entries: null, // the entries should be null to indicated we haven't call this for `parent`
-	//     isSubmodule: true, // this Directory must be a submodule
-	//     ...otherFields
-	// }
-	// - and the directory argument after called may looks like:
-	// {
-	//     uri: {
-	//         scheme: 'github1s',
-	//         authority: 'microsoft+vscode+master', // this is the authority of `submodule repository`
-	//         path: '/' // the `path` filed should be '/' to indicated to the root directory of `submodule repository`
-	//     },
-	//     name: '', // the name is the '' to indicated it is a root directory of `submodule repository`
-	//     entries: Map<string, Entry> {...}, // the entries contains the files of `submodule repository`
-	//     isSubmodule: true, // this Directory must be a submodule
-	//     ...otherFields
-	// }
+	/**
+	 * Prepares a submodule directory for loading from its own repository.
+	 *
+	 * Before the first read, `directory.uri` and `directory.name` locate the submodule in its parent repository.
+	 * The parent URI may have an empty authority when it belongs to the current workspace. This method resolves
+	 * the matching `.gitmodules` entry, then changes the directory to represent the submodule repository root:
+	 * `directory.uri` receives an explicit repository and ref, and `directory.name` becomes empty. The same
+	 * directory is also registered in `root` under the submodule repository key.
+	 *
+	 * This method does not populate `directory.entries`; `readDirectory` does that after the repository switch.
+	 */
 	private _updateSubmoduleDirectory = reuseable(async (directory: Directory): Promise<[string, FileType][]> => {
 		// if the directory is not submodule, or it has be called already
 		if (!directory.isSubmodule || directory.entries) {
@@ -233,6 +211,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
+			// If a file belongs to the current workspace,
+			// check its existence to avoid unnecessary content requests.
+			// It is efficient for some built-in files like `.vscode/...`
+			!uri.authority && (await this.lookupAsFile(uri, false));
 			const { scheme, repo, ref, path } = router.parseUri(uri);
 			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
