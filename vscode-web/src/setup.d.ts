@@ -4,7 +4,6 @@ declare var _VSCODE_WEB: {
 	workspaceId?: string; // the identifier to distinguish workspace
 	workspaceLabel?: string; // the label shown on explorer
 	hideTextFileLabelDecorations?: boolean; // whether hide the readonly icon for readonly files
-	allowEditorLabelOverride?: boolean; // whether allow override editor label
 	// custom builtin extensions, types see IBundledExtension[]
 	builtinExtensions?: any[] | ((builtinExtensions: any[]) => any[]);
 	logo?: {
