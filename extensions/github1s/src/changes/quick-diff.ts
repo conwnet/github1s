@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { emptyFileUri } from '@/providers';
 import * as adapterTypes from '@/adapters/types';
@@ -64,7 +65,7 @@ export class GitHub1sQuickDiffProvider implements vscode.QuickDiffProvider {
 	provideOriginalResource(uri: vscode.Uri, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Uri> {
 		const routerState = router.getState();
 		// only the file belong to current workspace could be provided a quick diff
-		if (uri.scheme !== routerState.scheme || uri.authority) {
+		if (uri.scheme !== getAdapter().scheme || uri.authority) {
 			return null;
 		}
 

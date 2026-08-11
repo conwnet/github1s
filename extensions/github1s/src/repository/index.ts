@@ -26,8 +26,7 @@ export class Repository {
 	}
 
 	public static getCurrentInstance() {
-		const routerState = router.getState();
-		return Repository.getInstance(routerState.scheme, routerState.repo);
+		return Repository.getInstance(getAdapter().scheme, router.getState().repo);
 	}
 
 	private constructor(

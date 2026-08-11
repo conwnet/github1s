@@ -56,8 +56,8 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	 * cache, and the fuzzy search maybe not work fine
 	 */
 	getFileUris = reuseable(async (): Promise<Uri[]> => {
-		const { scheme, repo, ref } = router.getState();
-		const cacheKey = `${scheme}:${repo}+${ref}`;
+		const { repo, ref } = router.getState();
+		const cacheKey = `${repo}+${ref}`;
 
 		if (this.fileUrisMap.has(cacheKey)) {
 			return this.fileUrisMap.get(cacheKey)!;
@@ -65,7 +65,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 
 		const dataSource = await getAdapter().resolveDataSource();
 		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = router.buildUri({ scheme, repo, ref, path: '/' });
+		const rootDirectoryUri = router.buildUri({ repo, ref, path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
 		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false

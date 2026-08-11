@@ -59,8 +59,8 @@ export class Router extends EventEmitter<RouterState> {
 	}
 
 	// get the routerState for current url
-	public getState(): RouterState & { scheme: string } {
-		return { ...this._state!, scheme: getAdapter().scheme };
+	public getState(): RouterState {
+		return { ...this._state! };
 	}
 
 	public getHistory() {
