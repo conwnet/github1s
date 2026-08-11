@@ -5,11 +5,11 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { Barrier } from '@/helpers/async';
 import * as queryString from 'query-string';
 import { relativeTimeTo, toISOString } from '@/helpers/date';
-import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
@@ -185,8 +185,7 @@ export class FileHistoryTreeDataProvider extends CommitTreeDataProvider {
 
 	async resolveFilePath() {
 		const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
-		const currentScheme = adapterManager.getCurrentScheme();
-		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path : '/';
+		return activeDocumentUri?.scheme === getAdapter().scheme ? activeDocumentUri.path : '/';
 	}
 
 	async getCommitItems() {

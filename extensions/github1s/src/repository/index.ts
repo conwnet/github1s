@@ -3,12 +3,12 @@
  * @author netcon
  */
 
-import { adapterManager } from '@/adapters';
+import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { CommitManager } from './commit-manager';
 import { CodeReviewManager } from './code-review-manager';
 import { BranchTagManager } from './branch-tag-manager';
 import { BlameRange } from '@/adapters/types';
-import router from '@/router';
 
 export class Repository {
 	private static instanceMap = new Map<string, Repository>();
@@ -142,7 +142,7 @@ export class Repository {
 	async getFileBlameRanges(ref: string, path: string) {
 		const cacheKey = `${ref} ${path}`;
 		if (!this._blameRangesCache.has(cacheKey)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
 			this._blameRangesCache.set(cacheKey, blameRanges);
 		}

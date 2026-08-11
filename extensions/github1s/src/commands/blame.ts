@@ -8,9 +8,9 @@ import { relativeTimeTo } from '@/helpers/date';
 import { last } from '@/helpers/util';
 import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { BlameRange, PlatformName } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 
 const ageColors = [
 	'#f66a0a',
@@ -204,7 +204,7 @@ class EditorGitBlame {
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
 		setVSCodeContext('github1s:features:gutterBlame:open', true);
 		const { scheme } = router.parseUri(this.editor.document.uri);
-		const { platformName } = adapterManager.getAdapter(scheme);
+		const platformName = getAdapter(scheme).platformName;
 
 		(await this.getBlameRanges()).forEach((blameRange) => {
 			const hoverMessage = createCommitMessagePreviewMarkdown(blameRange, platformName);

@@ -3,9 +3,9 @@
  * @author netcon
  */
 
+import { getAdapter } from '@/adapters';
 import { reuseable } from '@/helpers/func';
 import { ChangedFile, Commit } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 
 // manage changed files for a commit
 class CommitChangedFilesManager {
@@ -41,7 +41,7 @@ class CommitChangedFilesManager {
 	});
 
 	loadMore = reuseable(async (): Promise<ChangedFile[]> => {
-		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const dataSource = await getAdapter(this._scheme).resolveDataSource();
 		const changedFiles = await dataSource.provideCommitChangedFiles(this._repo, this._commitSha, {
 			pageSize: this._pageSize,
 			page: this._currentPage,
@@ -134,7 +134,7 @@ export class CommitManager {
 
 	getItem = reuseable(async (forceUpdate: boolean = false): Promise<Commit | null> => {
 		if (forceUpdate || !CommitManager._commitMap.has(this._from)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			const commit = await dataSource.provideCommit(this._repo, this._from);
 
 			commit && CommitManager._commitMap.set(this._from, commit);
@@ -149,7 +149,7 @@ export class CommitManager {
 
 	loadMore = reuseable(async (): Promise<Commit[]> => {
 		const commitList = this.resolveCommitList();
-		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const dataSource = await getAdapter(this._scheme).resolveDataSource();
 		const queryOptions = {
 			page: this._currentPage,
 			pageSize: this._pageSize,

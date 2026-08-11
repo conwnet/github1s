@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import {
 	CodeReviewTreeItem,
 	getCodeReviewTreeItemLabel,
@@ -12,7 +13,6 @@ import {
 } from '@/views/code-review-list';
 import { codeReviewRequestTreeDataProvider } from '@/views';
 import { CodeReviewType } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 import { Repository } from '@/repository';
 
 const CodeReviewTypeName = {
@@ -23,7 +23,7 @@ const CodeReviewTypeName = {
 };
 
 const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
-	const adapter = adapterManager.getCurrentAdapter();
+	const adapter = getAdapter();
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCodeReview(repo, codeReviewId));
@@ -44,9 +44,9 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 			? codeReviewItemOrId
 			: codeReviewItemOrId.codeReview.id
 		: '';
+	const adapter = getAdapter();
 	const { repo } = router.getState();
 	const repository = Repository.getCurrentInstance();
-	const adapter = adapterManager.getCurrentAdapter();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
 
 	// if the a codeReviewId isn't provided, use quickInput

@@ -13,12 +13,11 @@ import {
 	FileStat,
 	FileType,
 	Uri,
-	workspace,
 } from 'vscode';
-import adapterManager from '@/adapters/manager';
+import { getAdapter } from '@/adapters';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
-import { noop, trimStart, basename, dirname, joinPath } from '@/helpers/util';
+import { noop, trimStart, basename, dirname } from '@/helpers/util';
 import { parseGitmodules, parseSubmoduleUrl } from '@/helpers/submodule';
 import { reuseable } from '@/helpers/func';
 import { File, Directory, Entry } from './types';
@@ -56,10 +55,6 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	dispose() {
 		this.disposable?.dispose();
-	}
-
-	private async _resolveDataSource(scheme: string) {
-		return adapterManager.getAdapter(scheme).resolveDataSource();
 	}
 
 	// insert DirectoryEntry into the cache `this.root`
@@ -201,7 +196,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			}
 			const { scheme, repo, ref } = router.parseUri(parent.uri);
 			const path = Uri.joinPath(parent.uri, parent.name).path;
-			const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+			const dataSource = await getAdapter(scheme).resolveDataSource();
 			const data = await dataSource.provideDirectory(repo, ref, path, false);
 			data?.entries && (await this.populateWithDirectoryEntities(parent.uri, data.entries));
 			return parent.getNameTypePairs();
@@ -218,7 +213,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			const { scheme, repo, ref, path } = router.parseUri(uri);
 			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
-				const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+				const dataSource = await getAdapter(scheme).resolveDataSource();
 				const data = await dataSource.provideFile(repo, ref, path);
 				data && this.contentCache.set(cacheKey, data.content);
 			}

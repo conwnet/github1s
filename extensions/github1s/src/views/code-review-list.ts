@@ -8,7 +8,6 @@ import * as queryString from 'query-string';
 import { Repository } from '@/repository';
 import { Barrier } from '@/helpers/async';
 import { relativeTimeTo, toISOString } from '@/helpers/date';
-import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';

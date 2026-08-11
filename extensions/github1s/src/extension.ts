@@ -5,14 +5,14 @@
 
 import router from '@/router';
 import * as vscode from 'vscode';
-import { PageType } from './adapters/types';
+import { PageType } from '@/adapters/types';
+import { registerAdapters } from '@/adapters';
 import { registerCustomViews } from '@/views';
 import { decorateStatusBar } from '@/statusbar';
 import { registerEventListeners } from '@/listeners';
 import { registerVSCodeProviders } from '@/providers';
 import { registerGitHub1sCommands } from '@/commands';
 import { updateSourceControlChanges } from '@/changes';
-import { adapterManager, registerAdapters } from '@/adapters';
 import { addRecentRepositories, setExtensionContext } from '@/helpers/context';
 
 const browserUrlManager = {

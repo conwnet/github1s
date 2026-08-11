@@ -5,7 +5,7 @@
 
 import { reuseable } from '@/helpers/func';
 import { Branch, Tag } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
+import { getAdapter } from '@/adapters';
 
 export class BranchTagManager {
 	private static instancesMap = new Map<string, BranchTagManager>();
@@ -46,7 +46,7 @@ export class BranchTagManager {
 
 	getBranchItem = reuseable(async (branchName: string, forceUpdate = false): Promise<Branch | null> => {
 		if (forceUpdate || !this._branchMap.has(branchName)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			const branch = await dataSource.provideBranch(this._repo, branchName);
 			branch && this._branchMap.set(branchName, branch);
 		}
@@ -54,7 +54,7 @@ export class BranchTagManager {
 	});
 
 	loadMoreBranches = reuseable(async (): Promise<Branch[]> => {
-		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const dataSource = await getAdapter(this._scheme).resolveDataSource();
 		const queryOptions = { pageSize: this._branchPageSize, page: this._branchCurrentPage };
 		const branches = await dataSource.provideBranches(this._repo, queryOptions);
 
@@ -81,7 +81,7 @@ export class BranchTagManager {
 
 	getTagItem = reuseable(async (tagName: string, forceUpdate = false): Promise<Tag | null> => {
 		if (forceUpdate || !this._tagMap.has(tagName)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			const tag = await dataSource.provideTag(this._repo, tagName);
 			tag && this._tagMap.set(tagName, tag);
 		}
@@ -89,7 +89,7 @@ export class BranchTagManager {
 	});
 
 	loadMoreTags = reuseable(async (): Promise<Tag[]> => {
-		const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+		const dataSource = await getAdapter(this._scheme).resolveDataSource();
 		const queryOptions = { pageSize: this._tagPageSize, page: this._tagCurrentPage };
 		const tags = await dataSource.provideTags(this._repo, queryOptions);
 

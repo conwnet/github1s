@@ -15,9 +15,9 @@ import {
 	ThemeColor,
 } from 'vscode';
 import router from '@/router';
-import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
+import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
 
 export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeStatus.Added]: {
@@ -101,7 +101,7 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
-		if (uri.scheme !== adapterManager.getCurrentScheme()) {
+		if (uri.scheme !== getAdapter().scheme) {
 			return null;
 		}
 

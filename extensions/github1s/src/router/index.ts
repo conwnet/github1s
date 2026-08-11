@@ -4,10 +4,9 @@
  */
 
 import * as vscode from 'vscode';
+import { getAdapter } from '@/adapters';
 import { History, createMemoryHistory, parsePath, Action } from 'history';
-import { Adapter, RouterParser, RouterState } from '@/adapters/types';
-import { Barrier } from '@/helpers/async';
-import adapterManager from '@/adapters/manager';
+import { RouterParser, RouterState } from '@/adapters/types';
 import { EventEmitter } from './events';
 
 export interface UrlManager {
@@ -28,7 +27,6 @@ export class Router extends EventEmitter<RouterState> {
 
 	private _state: RouterState | null = null;
 	private _history: History | null = null;
-	private _adapter: Adapter | null = null;
 	private _parser: RouterParser | null = null;
 	private _manager: UrlManager | null = null;
 
@@ -43,11 +41,10 @@ export class Router extends EventEmitter<RouterState> {
 	// must be called before any other method is called
 	async initialize(urlManager: UrlManager) {
 		this._manager = urlManager;
-		this._adapter = adapterManager.getCurrentAdapter();
 		const { path: pathname, query, fragment } = vscode.Uri.parse(await this._manager.href());
 		const path = pathname + (query ? `?${query}` : '') + (fragment ? `#${fragment}` : '');
 
-		this._parser = await this._adapter.resolveRouterParser();
+		this._parser = await getAdapter().resolveRouterParser();
 		this._state = await this._parser.parsePath(path);
 		this._history = createMemoryHistory({ initialEntries: [path] });
 
@@ -63,7 +60,7 @@ export class Router extends EventEmitter<RouterState> {
 
 	// get the routerState for current url
 	public getState(): RouterState & { scheme: string } {
-		return { ...this._state!, scheme: this._adapter!.scheme };
+		return { ...this._state!, scheme: getAdapter().scheme };
 	}
 
 	public getHistory() {
@@ -118,9 +115,7 @@ export class Router extends EventEmitter<RouterState> {
 			mergedState.path = `/${state.path?.split('/').filter(Boolean).join('/') || ''}`;
 		}
 
-		return base
-			? base.with(mergedState)
-			: vscode.Uri.from({ scheme: adapterManager.getCurrentScheme(), path: '/', ...mergedState });
+		return base ? base.with(mergedState) : vscode.Uri.from({ scheme: getAdapter().scheme, path: '/', ...mergedState });
 	}
 }
 
