@@ -3,7 +3,6 @@
  * @author netcon
  */
 
-import * as vscode from 'vscode';
 import { adapterManager } from '@/adapters';
 import { CommitManager } from './commit-manager';
 import { CodeReviewManager } from './code-review-manager';
@@ -24,11 +23,6 @@ export class Repository {
 			Repository.instanceMap.set(mapKey, new Repository(scheme, repo));
 		}
 		return Repository.instanceMap.get(mapKey)!;
-	}
-
-	public static getInstanceByUri(uri: vscode.Uri) {
-		const { scheme, repo } = router.parseUri(uri);
-		return Repository.getInstance(scheme, repo);
 	}
 
 	public static getCurrentInstance() {

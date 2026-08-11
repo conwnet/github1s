@@ -45,9 +45,9 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 			: codeReviewItemOrId.codeReview.id
 		: '';
 	const { repo } = router.getState();
+	const repository = Repository.getCurrentInstance();
 	const adapter = adapterManager.getCurrentAdapter();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
-	const repository = Repository.getCurrentInstance();
 
 	// if the a codeReviewId isn't provided, use quickInput
 	if (!codeReviewId) {

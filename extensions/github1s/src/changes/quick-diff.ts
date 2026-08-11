@@ -7,12 +7,11 @@ import * as vscode from 'vscode';
 import router from '@/router';
 import { Repository } from '@/repository';
 import { emptyFileUri } from '@/providers';
-import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 
 // get the original source uri when the `routerState.pageType` is `PageType.PULL`
 const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string): Promise<vscode.Uri | null> => {
-	const repository = await Repository.getCurrentInstance();
+	const repository = Repository.getCurrentInstance();
 	const codeReviewFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	const changedFile = codeReviewFiles?.find((changedFile) => changedFile.path === uri.path);
 

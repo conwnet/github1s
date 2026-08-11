@@ -63,13 +63,15 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 };
 
 const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
-	const repository = Repository.getInstanceByUri(uri);
+	const { scheme, repo } = router.parseUri(uri);
+	const repository = Repository.getInstance(scheme, repo);
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
 const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
-	const repository = Repository.getInstanceByUri(uri);
+	const { scheme, repo } = router.parseUri(uri);
+	const repository = Repository.getInstance(scheme, repo);
 	const changedFiles = await repository.getCommitChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
