@@ -209,7 +209,11 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			// If a file belongs to the current workspace,
 			// check its existence to avoid unnecessary content requests.
 			// It is efficient for some built-in files like `.vscode/...`
-			!uri.authority && (await this.lookupAsFile(uri, false));
+			// The uri is also reset to the correct one for the submodule.
+			if (!uri.authority) {
+				const file = (await this.lookupAsFile(uri, false))!;
+				uri = Uri.joinPath(file.uri, file.name);
+			}
 			const { scheme, repo, ref, path } = router.parseUri(uri);
 			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
