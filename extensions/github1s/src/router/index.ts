@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { getAdapter } from '@/adapters';
 import { History, createMemoryHistory, parsePath, Action } from 'history';
 import { RouterParser, RouterState } from '@/adapters/types';
+import { buildAuthority, parseAuthority } from './authority';
 import { EventEmitter } from './events';
 
 export interface UrlManager {
@@ -93,9 +94,8 @@ export class Router extends EventEmitter<RouterState> {
 	}
 
 	public parseUri(uri: vscode.Uri): UriState {
-		const scheme = uri.scheme;
-		const [repo, ref] = uri.authority ? uri.authority.split('+') : [this._state!.repo, this._state!.ref];
-		return { scheme, repo, ref, path: uri.path || '/' };
+		const { repo, ref } = parseAuthority(uri.authority) || this._state!;
+		return { scheme: uri.scheme, repo, ref, path: uri.path || '/' };
 	}
 
 	public buildUri(state?: Partial<UriState>, base?: vscode.Uri): vscode.Uri {
@@ -108,8 +108,8 @@ export class Router extends EventEmitter<RouterState> {
 			throw new Error('ref is required when repo is provided');
 		}
 		if (state?.hasOwnProperty('ref')) {
-			const repo = state.repo || base?.authority.split('+')[0] || this._state!.repo;
-			mergedState.authority = repo && state.ref ? `${repo}+${state.ref}` : '';
+			const repo = state.repo || parseAuthority(base?.authority || '')?.repo || this._state!.repo;
+			mergedState.authority = buildAuthority(repo, state.ref || '');
 		}
 		if (state?.hasOwnProperty('path')) {
 			mergedState.path = `/${state.path?.split('/').filter(Boolean).join('/') || ''}`;

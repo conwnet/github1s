@@ -57,7 +57,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	 */
 	getFileUris = reuseable(async (): Promise<Uri[]> => {
 		const { repo, ref } = router.getState();
-		const cacheKey = `${repo}+${ref}`;
+		const cacheKey = `${repo}@${ref}`;
 
 		if (this.fileUrisMap.has(cacheKey)) {
 			return this.fileUrisMap.get(cacheKey)!;
@@ -65,7 +65,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 
 		const dataSource = await getAdapter().resolveDataSource();
 		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = router.buildUri({ repo, ref, path: '/' });
+		const rootDirectoryUri = router.buildUri({ path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
 		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
