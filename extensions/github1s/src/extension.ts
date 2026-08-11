@@ -49,7 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // initialize the VSCode's state according to the router url
 const initialVSCodeState = async () => {
-	const routerState = await router.getState();
+	const routerState = router.getState();
 
 	if (routerState.pageType === PageType.Tree && routerState.filePath !== '/') {
 		vscode.commands.executeCommand('revealInExplorer', router.buildUri({ path: routerState.filePath }));

@@ -31,9 +31,8 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 			? commitItemOrSha
 			: commitItemOrSha.commit.sha
 		: '';
-	const adapter = adapterManager.getCurrentAdapter();
-	const { repo } = await router.getState();
-	const repository = Repository.getInstance(adapter.scheme, repo);
+	const { repo } = router.getState();
+	const repository = Repository.getCurrentInstance();
 
 	// if the a commitSha isn't provided, use quickInput
 	if (!commitSha) {
@@ -76,7 +75,7 @@ const commandSwitchToCommit = async (commitItemOrSha?: string | CommitTreeItem) 
 		}
 	}
 
-	const routerParser = await router.resolveParser();
+	const routerParser = router.getParser();
 	if (await checkCommitExists(repo, commitSha!)) {
 		router.replace(await routerParser.buildCommitPath(repo, commitSha!));
 	}
@@ -87,12 +86,11 @@ const commandDiffCommitFile = async (commitItem: CommitTreeItem) => {
 	if (!commitSha) {
 		return;
 	}
-	const { repo } = await router.getState();
 	const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
-	const fileUri = activeDocumentUri?.with({
-		authority: `${repo}+${commitSha}`,
-		query: '',
-	});
+	if (!activeDocumentUri) {
+		return;
+	}
+	const fileUri = router.buildUri({ ref: commitSha }, activeDocumentUri).with({ query: '' });
 	return vscode.commands.executeCommand('github1s.commands.openFilePreviousRevision', fileUri);
 };
 
@@ -104,8 +102,8 @@ const commandOpenCommitOnOfficialPage = async (commitItemOrSha?: string | Commit
 			: commitItemOrSha.commit.sha
 		: '';
 	if (commitSha) {
-		const { repo } = await router.getState();
-		const routerParser = await router.resolveParser();
+		const { repo } = router.getState();
+		const routerParser = router.getParser();
 		const commitPath = await routerParser.buildCommitPath(repo, commitSha);
 		const commitLink = await routerParser.buildExternalLink(commitPath);
 		return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(commitLink));

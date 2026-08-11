@@ -25,7 +25,7 @@ export const getCodeReviewChangedFiles = async (
 	const baseRootUri = router.buildUri({ ref: codeReview.targetSha });
 	const headRootUri = router.buildUri({ ref: codeReview.sourceSha }, baseRootUri);
 
-	const repository = await Repository.getCurrentInstance();
+	const repository = Repository.getCurrentInstance();
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
@@ -49,7 +49,7 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 	const baseRootUri = router.buildUri({ ref: parentCommitSha });
 	const headRootUri = router.buildUri({ ref: commit.sha }, baseRootUri);
 
-	const repository = await Repository.getCurrentInstance();
+	const repository = Repository.getCurrentInstance();
 	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {
@@ -66,18 +66,17 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 };
 
 export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
-	const routerState = await router.getState();
-	const scheme = adapterManager.getCurrentScheme();
+	const routerState = router.getState();
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
-		const repository = Repository.getInstance(scheme, routerState.repo);
+		const repository = Repository.getInstance(routerState.scheme, routerState.repo);
 		const codeReview = await repository.getCodeReviewItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
 	else if (routerState.pageType === adapterTypes.PageType.Commit) {
-		const repository = Repository.getInstance(scheme, routerState.repo);
+		const repository = Repository.getInstance(routerState.scheme, routerState.repo);
 		const commit = await repository.getCommitItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
@@ -92,8 +91,8 @@ export const getChangedFileDiffTitle = (
 ) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
-	const [_repo, baseCommitSha] = baseFileUri.authority.split('+');
-	const [__repo, headCommitSha] = headFileUri.authority.split('+');
+	const { ref: baseCommitSha } = router.parseUri(baseFileUri);
+	const { ref: headCommitSha } = router.parseUri(headFileUri);
 	const baseFileLabel = `${baseFileName} (${baseCommitSha?.slice(0, 7)})`;
 	const headFileLabel = `${headFileName} (${headCommitSha?.slice(0, 7)})`;
 

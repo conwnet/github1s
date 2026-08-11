@@ -42,6 +42,6 @@ export const explorerRouterListener = (currentState: RouterState, previousState:
 		GitHub1sChangedFileDecorationProvider.getInstance().updateDecorations();
 		GitHub1sSubmoduleDecorationProvider.getInstance().updateDecorations();
 		GitHub1sSourceControlDecorationProvider.getInstance().updateDecorations();
-		GitHub1sFileSearchProvider.getInstance().loadFilesForCurrentAuthority();
+		GitHub1sFileSearchProvider.getInstance().loadFilesForCurrentWorkspace();
 	}
 };

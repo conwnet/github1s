@@ -86,17 +86,16 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	}
 
 	// --- lookup
-	// ensure the authority field in `the uri of returned entry` is exists
 	public async lookup(uri: Uri, silent: false): Promise<Entry>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null> {
 		const parts = uri.path.split('/').filter(Boolean);
-		// if the authority of uri is empty, we should use `current authority`
-		const authority = uri.authority || (await router.getAuthority());
-		if (!this.root.has(authority)) {
-			this.root.set(authority, createEntry(adapterTypes.FileType.Directory, uri.with({ authority, path: '/' }), ''));
+		const { scheme, repo, ref } = router.parseUri(uri);
+		const lookupKey = `${scheme}:${repo}+${ref}`;
+		if (!this.root.has(lookupKey)) {
+			this.root.set(lookupKey, createEntry(adapterTypes.FileType.Directory, uri.with({ path: '/' }), ''));
 		}
-		let entry = this.root.get(authority);
+		let entry = this.root.get(lookupKey);
 		for (const part of parts) {
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
@@ -147,6 +146,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		return this.lookup(uri, false);
 	}
 
+	// TODO Update
 	// it used by `@/src/providers/fileDecorationProvider.ts`
 	// update the uri of a git submodule as directory, which the type of corresponding githubEntry should be `commit`.
 	// the `directory.uri.authority` and the `directory.uri.path` must belong to the `parent repository` before called.
@@ -159,7 +159,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	// {
 	//     uri: {
 	//         scheme: 'github1s',
-	//         authority: 'conwnet+github1s+master', // this is the authority of `parent repository`
+	//         authority: 'conwnet/github1s+master', // this is the authority of `parent repository`
 	//         path: '/some/submodule/path' // the corresponding path in `parent repository`
 	//     },
 	//     name: 'vscode', // the name is the `directory name` of `parent repository` before called
@@ -197,19 +197,19 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		if (!gitmoduleData) {
 			throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
 		}
-		const [submoduleScheme, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
-		const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
+		const subRef = directory.sha || 'HEAD';
+		const [subScheme, subRepo] = await parseSubmoduleUrl(gitmoduleData.url);
+		const lookupKey = `${subScheme}:${subRepo}+${subRef}`;
 		directory.name = ''; // update the name field to '' to indicated it is an root directory
 		// update the uri field to indicated it is belong the `submodule repository`
-		directory.uri = Uri.from({ scheme: submoduleScheme, authority: submoduleAuthority, path: '/' });
+		directory.uri = router.buildUri({ scheme: subScheme, repo: subRepo, ref: subRef, path: '/' });
 		// insert the directory in to this.root map because it indicated another repository
-		this.root.set(submoduleAuthority, directory);
+		this.root.set(lookupKey, directory);
 		return [];
 	});
 
 	readDirectory = reuseable(
 		async (uri: Uri): Promise<[string, FileType][]> => {
-			console.log('----', uri.authority);
 			const parent = await this.lookupAsDirectory(uri, false);
 			if (!parent) {
 				return [];
@@ -221,9 +221,9 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			if (parent.isSubmodule) {
 				await this._updateSubmoduleDirectory(parent);
 			}
-			const [repo, ref] = parent.uri.authority.split('+');
+			const { scheme, repo, ref } = router.parseUri(parent.uri);
 			const path = Uri.joinPath(parent.uri, parent.name).path;
-			const dataSource = await this._resolveDataSource(parent.uri.scheme);
+			const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 			const data = await dataSource.provideDirectory(repo, ref, path, false);
 			data?.entries && (await this.populateWithDirectoryEntities(parent.uri, data.entries));
 			return parent.getNameTypePairs();
@@ -233,19 +233,10 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
-			let { scheme, authority, path } = uri;
-			// if `authority` is same with current, try to find it with `this.lookupAsFile`,
-			// we can't use `router.getAuthority()` directly because this file may be in submodule
-			if (authority === workspace.workspaceFolders?.[0].uri.authority) {
-				const file = (await this.lookupAsFile(uri, false))!;
-				scheme = file.uri.scheme;
-				authority = file.uri.authority;
-				path = joinPath(file.uri.path, file.name);
-			}
-			const cacheKey = `${scheme} ${authority} ${path}`;
+			const { scheme, repo, ref, path } = router.parseUri(uri);
+			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
-				const [repo, ref] = authority.split('+');
-				const dataSource = await this._resolveDataSource(scheme);
+				const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 				const data = await dataSource.provideFile(repo, ref, path);
 				data && this.contentCache.set(cacheKey, data.content);
 			}

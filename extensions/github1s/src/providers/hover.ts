@@ -46,11 +46,10 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		symbol: string,
 	): Promise<string | null> {
 		const { line, character } = position;
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 
-		const requestParams = [repo, ref, document.uri.path, line, character, symbol] as const;
+		const requestParams = [repo, ref, path, line, character, symbol] as const;
 		const definitions = await dataSource.provideSymbolDefinitions(...requestParams);
 
 		if (!definitions.length) {
@@ -89,9 +88,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 			return null;
 		}
 
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const path = document.uri.path;
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
 		// get the sourcegraph url for current symbol
@@ -102,7 +99,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		const searchBasedMardownPromise = this.getSearchBasedHover(document, position, symbol);
 
 		// get the hover result based on sourcegraph lsif
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 		const symbolHover = await dataSource.provideSymbolHover(...requestParams);
 
 		const markdown = symbolHover ? symbolHover.markdown : await searchBasedMardownPromise;

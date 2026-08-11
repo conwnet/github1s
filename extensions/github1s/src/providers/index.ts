@@ -18,7 +18,7 @@ import { GitHub1sHoverProvider } from './hover';
 import router from '@/router';
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
-export const emptyFileUri = router.buildUri({ scheme: EMPTY_FILE_SCHEME });
+export const emptyFileUri = vscode.Uri.from({ scheme: EMPTY_FILE_SCHEME });
 
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();

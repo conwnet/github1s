@@ -9,7 +9,7 @@ import { adapterManager } from '@/adapters';
 import { PlatformName } from '@/adapters/types';
 
 const resolveSourcegraphLink = async () => {
-	const { repo, ref } = await router.getState();
+	const { repo, ref } = router.getState();
 	switch (adapterManager.getCurrentAdapter().platformName) {
 		case PlatformName.GitHub:
 			return `https://sourcegraph.com/github.com/${repo}@${ref}`;

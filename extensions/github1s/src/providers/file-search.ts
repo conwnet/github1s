@@ -30,7 +30,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		// Once we have loaded the files, it will also populate the files into
 		// fileSystemProvider's cache. So after that, we don't have to send
 		// a request when you open the new directory in explorer late
-		this.loadFilesForCurrentAuthority();
+		this.loadFilesForCurrentWorkspace();
 	}
 
 	public static getInstance(): GitHub1sFileSearchProvider {
@@ -44,27 +44,30 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		this.disposable?.dispose();
 	}
 
-	// load the files for current authority
-	async loadFilesForCurrentAuthority() {
-		return this.getFileUris(await router.getAuthority());
+	// load the files for current workspace
+	async loadFilesForCurrentWorkspace() {
+		return this.getFileUris();
 	}
 
 	/**
-	 * Get all files for the repo with specified by `authority`.
+	 * Get all files for the repo with specified for current workspace.
 	 * The response of corresponding API maybe truncated, if so,
 	 * we should not insert the response to the fileSystemProvider's
 	 * cache, and the fuzzy search maybe not work fine
 	 */
-	getFileUris = reuseable(async (authority: string): Promise<Uri[]> => {
-		if (this.fileUrisMap.has(authority)) {
-			return this.fileUrisMap.get(authority)!;
+	getFileUris = reuseable(async (): Promise<Uri[]> => {
+		const currentAdapter = adapterManager.getCurrentAdapter();
+		const scheme = currentAdapter.scheme;
+		const { repo, ref } = router.getState();
+		const cacheKey = `${scheme}:${repo}+${ref}`;
+
+		if (this.fileUrisMap.has(cacheKey)) {
+			return this.fileUrisMap.get(cacheKey)!;
 		}
 
-		const [repo, ref] = authority.split('+');
-		const currentAdapter = adapterManager.getCurrentAdapter();
 		const dataSource = await currentAdapter.resolveDataSource();
 		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = Uri.from({ scheme: currentAdapter.scheme, authority, path: '/' });
+		const rootDirectoryUri = router.buildUri({ scheme, repo, ref, path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
 		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
@@ -78,7 +81,7 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		const fileUris = (rootDirectoryData?.entries || [])
 			.filter((item) => item.type === adapterTypes.FileType.File)
 			.map((item) => rootDirectoryUri.with({ path: item.path }));
-		this.fileUrisMap.set(authority, fileUris);
+		this.fileUrisMap.set(cacheKey, fileUris);
 		return fileUris;
 	});
 
@@ -87,8 +90,8 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 		_options: FileSearchOptions,
 		_token: CancellationToken,
 	): ProviderResult<Uri[]> {
-		return router.getAuthority().then(async (authority) => {
-			return matchSorter(await this.getFileUris(authority), query.pattern);
+		return new Promise(async (resolve) => {
+			resolve(matchSorter(await this.getFileUris(), query.pattern));
 		});
 	}
 }

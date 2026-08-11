@@ -63,15 +63,13 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 };
 
 const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
-	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const repository = Repository.getInstance(uri.scheme, repo);
+	const repository = Repository.getInstanceByUri(uri);
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
 const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
-	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const repository = Repository.getInstance(uri.scheme, repo);
+	const repository = Repository.getInstanceByUri(uri);
 	const changedFiles = await repository.getCommitChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
@@ -105,14 +103,13 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 			return null;
 		}
 
-		return router.getState().then((routerState) => {
-			if (routerState.pageType === PageType.CodeReview) {
-				return getFileDecorationForCodeReview(uri, routerState.codeReviewId);
-			}
-			if (routerState.pageType === PageType.Commit) {
-				return getFileDecorationForCommit(uri, routerState.commitSha);
-			}
-			return null;
-		});
+		const routerState = router.getState();
+		if (routerState.pageType === PageType.CodeReview) {
+			return getFileDecorationForCodeReview(uri, routerState.codeReviewId);
+		}
+		if (routerState.pageType === PageType.Commit) {
+			return getFileDecorationForCommit(uri, routerState.commitSha);
+		}
+		return null;
 	}
 }

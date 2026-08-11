@@ -116,7 +116,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = await router.getState();
+			const { repo } = router.getState();
 			await Repository.getInstance(scheme, repo).loadMoreCodeReviews();
 			this._loadingBarrier.open();
 		}
@@ -127,7 +127,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = await router.getState();
+			const { repo } = router.getState();
 			await Repository.getInstance(scheme, repo).loadMoreCodeReviewChangedFiles(codeReviewId);
 			this._loadingBarrier.open();
 		}
@@ -136,7 +136,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 	async getCodeReviewItems(): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const currentScheme = adapterManager.getCurrentScheme();
-		const { repo } = await router.getState();
+		const { repo } = router.getState();
 		const repository = Repository.getInstance(currentScheme, repo);
 		const codeReviews = await repository.getCodeReviewList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
@@ -167,9 +167,7 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 
 	async getCodeReviewFileItems(codeReview: adapterTypes.CodeReview): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
-		const scheme = adapterManager.getCurrentScheme();
-		const { repo } = await router.getState();
-		const repository = Repository.getInstance(scheme, repo);
+		const repository = Repository.getCurrentInstance();
 		const _codeReview = await repository.getCodeReviewItem(codeReview.id);
 		const changedFiles = _codeReview ? await getCodeReviewChangedFiles(_codeReview) : [];
 		const changedFileItems = changedFiles.map((changedFile) => {

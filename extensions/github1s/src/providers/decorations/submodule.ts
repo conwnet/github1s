@@ -16,6 +16,7 @@ import {
 } from 'vscode';
 import { GitHub1sFileSystemProvider } from '../file-system';
 import { Directory } from '../file-system/types';
+import adapterManager from '@/adapters/manager';
 
 export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvider, Disposable {
 	private static instance: GitHub1sSubmoduleDecorationProvider | null = null;
@@ -49,6 +50,9 @@ export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvid
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
+		if (!adapterManager.getAllAdapters().some((adapter) => adapter.scheme === uri.scheme)) {
+			return null;
+		}
 		return GitHub1sFileSystemProvider.getInstance()
 			.lookup(uri, false)
 			.then((entry) => {

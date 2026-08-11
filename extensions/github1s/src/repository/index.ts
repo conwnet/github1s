@@ -3,6 +3,7 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { adapterManager } from '@/adapters';
 import { CommitManager } from './commit-manager';
 import { CodeReviewManager } from './code-review-manager';
@@ -25,10 +26,14 @@ export class Repository {
 		return Repository.instanceMap.get(mapKey)!;
 	}
 
-	public static async getCurrentInstance() {
-		const state = await router.getState();
-		const scheme = adapterManager.getCurrentScheme();
-		return Repository.getInstance(scheme, state.repo);
+	public static getInstanceByUri(uri: vscode.Uri) {
+		const { scheme, repo } = router.parseUri(uri);
+		return Repository.getInstance(scheme, repo);
+	}
+
+	public static getCurrentInstance() {
+		const routerState = router.getState();
+		return Repository.getInstance(routerState.scheme, routerState.repo);
 	}
 
 	private constructor(

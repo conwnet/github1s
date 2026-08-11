@@ -49,12 +49,10 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 			return [];
 		}
 
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const { scheme, path } = document.uri;
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 		const symbolDefinitions = await dataSource.provideSymbolDefinitions(repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {

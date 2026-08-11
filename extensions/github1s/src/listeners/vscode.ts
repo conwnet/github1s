@@ -13,9 +13,9 @@ import { adapterManager } from '@/adapters';
 
 const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {
 	// replace current url when user change active editor
-	const { repo, ref, pageType } = await router.getState();
+	const { repo, ref, pageType } = router.getState();
 	const activeFileUri = editor?.document.uri;
-	const routerParser = await router.resolveParser();
+	const routerParser = router.getParser();
 
 	// only `tree/blob` page will replace url with the active editor change
 	if (![PageType.Tree, PageType.Blob].includes(pageType)) {
@@ -50,8 +50,8 @@ const handlegutterBlameOpenContextOnActiveEditorChange = async () => {
 
 // add the line number anchor when user selection lines in a editor
 const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor) => {
-	const { repo, ref, pageType } = await router.getState();
-	const routerParser = await router.resolveParser();
+	const { repo, ref, pageType } = router.getState();
+	const routerParser = router.getParser();
 
 	// only add the line number anchor when pageType is PageType.Blob
 	if (pageType !== PageType.Blob || !editor?.selection) {
@@ -67,7 +67,7 @@ const handleRouterOnTextEditorSelectionChange = async (editor: vscode.TextEditor
 		editor.selection.end.line !== editor.selection.start.line ? editor.selection.end.line + 1 : undefined,
 	);
 
-	browserPath !== (await router.getPath()) && router.replace(browserPath);
+	browserPath !== router.getPath() && router.replace(browserPath);
 };
 
 // refresh file history view if active editor changed

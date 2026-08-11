@@ -44,10 +44,10 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 			? codeReviewItemOrId
 			: codeReviewItemOrId.codeReview.id
 		: '';
+	const { repo } = router.getState();
 	const adapter = adapterManager.getCurrentAdapter();
-	const { repo } = await router.getState();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
-	const repository = Repository.getInstance(adapter.scheme, repo);
+	const repository = Repository.getCurrentInstance();
 
 	// if the a codeReviewId isn't provided, use quickInput
 	if (!codeReviewId) {
@@ -90,7 +90,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 		}
 	}
 
-	const routerParser = await router.resolveParser();
+	const routerParser = router.getParser();
 	(await checkCodeReviewExists(repo, codeReviewId!)) &&
 		router.replace(await routerParser.buildCodeReviewPath(repo, codeReviewId!));
 };
@@ -103,8 +103,8 @@ const commandOpenCodeReviewOnOfficialPage = async (codeReviewItemOrId?: string |
 			: codeReviewItemOrId.codeReview.id
 		: '';
 	if (codeReviewId) {
-		const { repo } = await router.getState();
-		const routerParser = await router.resolveParser();
+		const { repo } = router.getState();
+		const routerParser = router.getParser();
 		const codeReviewPath = await routerParser.buildCodeReviewPath(repo, codeReviewId);
 		const codeReviewLink = await routerParser.buildExternalLink(codeReviewPath);
 		return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(codeReviewLink));

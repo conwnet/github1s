@@ -36,9 +36,9 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		progress: vscode.Progress<vscode.TextSearchResult>,
 		_token: vscode.CancellationToken,
 	) {
-		return router.getAuthority().then(async (authority) => {
-			const [repo, ref] = authority.split('+');
-			const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		return Promise.resolve().then(async () => {
+			const { scheme, repo, ref } = router.getState();
+			const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 			const searchOptions = { page: 1, pageSize: 100, includes: options.includes, excludes: options.excludes };
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
 

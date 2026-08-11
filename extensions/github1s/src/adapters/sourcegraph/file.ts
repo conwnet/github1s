@@ -44,7 +44,7 @@ export const readDirectory = async (
 		entries: files.map((file) => ({
 			path: normalizePath(file.path),
 			type: file.isDirectory ? FileType.Directory : file.submodule ? FileType.Submodule : FileType.File,
-			commitSha: file.submodule?.sha,
+			commitSha: file.submodule?.commit,
 		})),
 		truncated: files.length >= FILE_COUNT_LIMIT,
 	};

@@ -13,9 +13,14 @@ const parseTreeOrBlobUrl = async (path: string): Promise<RouterState> => {
 	const repoFullName = `${owner}/${repo}`;
 	const dataSource = SourcegraphDataSource.getInstance('bitbucket');
 	const { ref, path: filePath } = await dataSource.extractRefPath(repoFullName, restParts.join('/'));
-	const fileType = await dataSource.detectPathFileType(repo, ref, filePath);
+	const fileType = await dataSource.detectPathFileType(repoFullName, ref, filePath);
 
-	return { pageType: fileType === FileType.Directory ? PageType.Tree : PageType.Blob, repo, ref, filePath };
+	return {
+		pageType: fileType === FileType.Directory ? PageType.Tree : PageType.Blob,
+		repo: repoFullName,
+		ref,
+		filePath,
+	};
 };
 
 const parseCommitsUrl = async (path: string): Promise<RouterState> => {
