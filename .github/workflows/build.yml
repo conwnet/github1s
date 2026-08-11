@@ -29,4 +29,4 @@ jobs:
       - run: npm run eslint
       - run: npm run build
       - uses: microsoft/playwright-github-action@v1
-      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} npm run test:ci
+      - run: npm run test:ci

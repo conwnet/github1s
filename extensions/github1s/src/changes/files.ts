@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import * as adapterTypes from '@/adapters/types';
-import adapterManager from '@/adapters/manager';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
@@ -22,10 +21,9 @@ interface VSCodeChangedFile {
 export const getCodeReviewChangedFiles = async (
 	codeReview: adapterTypes.CodeReview & { sourceSha: string; targetSha: string },
 ) => {
+	const repository = Repository.getCurrentInstance();
 	const baseRootUri = router.buildUri({ ref: codeReview.targetSha });
 	const headRootUri = router.buildUri({ ref: codeReview.sourceSha }, baseRootUri);
-
-	const repository = Repository.getCurrentInstance();
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
@@ -42,14 +40,13 @@ export const getCodeReviewChangedFiles = async (
 };
 
 export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
+	const repository = Repository.getCurrentInstance();
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// so we use the parents[0].sha as the parent commitSha
 	const parentCommitSha = commit?.parents?.[0] || '';
 	const baseRootUri = router.buildUri({ ref: parentCommitSha });
 	const headRootUri = router.buildUri({ ref: commit.sha }, baseRootUri);
-
-	const repository = Repository.getCurrentInstance();
 	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {
@@ -67,16 +64,15 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 
 export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
 	const routerState = router.getState();
+	const repository = Repository.getCurrentInstance();
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
-		const repository = Repository.getInstance(routerState.scheme, routerState.repo);
 		const codeReview = await repository.getCodeReviewItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
 	else if (routerState.pageType === adapterTypes.PageType.Commit) {
-		const repository = Repository.getInstance(routerState.scheme, routerState.repo);
 		const commit = await repository.getCommitItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}

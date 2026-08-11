@@ -54,8 +54,8 @@ const commandDiffViewOpenRightFile = async (fileUri: vscode.Uri) => {
 // get the file uri with the concrete commit sha, the `ref` in
 // `fileUri.authority` maybe newer but not related this file
 const getConcreteFileUri = async (fileUri: vscode.Uri) => {
-	const { ref, path } = router.parseUri(fileUri);
-	const repository = Repository.getInstanceByUri(fileUri);
+	const { scheme, repo, ref, path } = router.parseUri(fileUri);
+	const repository = Repository.getInstance(scheme, repo);
 	const commit = await repository.getFileLatestCommit(ref, path);
 	const latestCommitSha = commit?.sha || (await repository.getCommitItem(ref))?.sha;
 
@@ -70,9 +70,8 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 		// a normal file editor (not a diff editor), just use `fileUri` in this case
 		queryBaseUriStr ? vscode.Uri.parse(queryBaseUriStr as string) : fileUri,
 	);
-	const { repo, ref: rightCommitSha } = router.parseUri(rightFileUri);
-
-	const repository = Repository.getInstanceByUri(rightFileUri);
+	const { scheme, repo, ref: rightCommitSha } = router.parseUri(rightFileUri);
+	const repository = Repository.getInstance(scheme, repo);
 	const leftCommit = await repository.getPreviousCommit(rightCommitSha, rightFileUri.path);
 	// if we can't find previous commit, use the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? router.buildUri({ ref: leftCommit.sha }, rightFileUri) : emptyFileUri;
@@ -101,8 +100,8 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
 	const leftFileUri = await getConcreteFileUri(fileUri);
 
-	const { ref: leftCommitSha } = router.parseUri(leftFileUri);
-	const repository = Repository.getInstanceByUri(leftFileUri);
+	const { scheme, repo, ref: leftCommitSha } = router.parseUri(leftFileUri);
+	const repository = Repository.getInstance(scheme, repo);
 	const rightCommit = await repository.getNextCommit(leftCommitSha, leftFileUri.path);
 
 	if (!rightCommit) {

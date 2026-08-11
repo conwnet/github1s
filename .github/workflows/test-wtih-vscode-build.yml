@@ -10,6 +10,9 @@ on:
 
 jobs:
   build-with-vscode-build:
+    permissions:
+      contents: read
+
     strategy:
       matrix:
         os: [macos-14]
@@ -19,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -26,7 +31,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: npm install && cd vscode-web && npm install
-      - run: cd vscode-web && npm run build
+      - name: Build VS Code web
+        working-directory: vscode-web
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build
       - run: npm run link && npm run build
       - uses: microsoft/playwright-github-action@v1
-      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} npm run test:ci
+      - run: npm run test:ci

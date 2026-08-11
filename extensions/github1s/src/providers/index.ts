@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import adapterManager from '@/adapters/manager';
+import { getAllAdapters } from '@/adapters';
 import { getExtensionContext } from '@/helpers/context';
 import { GitHub1sFileSystemProvider } from './file-system';
 import { GitHub1sFileSearchProvider } from './file-search';
@@ -22,8 +22,7 @@ export const emptyFileUri = vscode.Uri.from({ scheme: EMPTY_FILE_SCHEME });
 
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
-
-	const allSchemes = adapterManager.getAllAdapters().map((item) => item.scheme);
+	const allSchemes = getAllAdapters().map((item) => item.scheme);
 
 	allSchemes.forEach((scheme) => {
 		context.subscriptions.push(

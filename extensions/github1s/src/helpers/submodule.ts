@@ -3,7 +3,6 @@
  * @author netcon
  */
 
-import { AdapterManager } from '@/adapters/manager';
 import { FileSystemError, Uri } from 'vscode';
 
 // the code below is come from https://github.com/microsoft/vscode/blob/1.52.1/extensions/git/src/git.ts#L661

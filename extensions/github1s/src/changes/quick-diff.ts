@@ -5,14 +5,14 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { emptyFileUri } from '@/providers';
-import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 
 // get the original source uri when the `routerState.pageType` is `PageType.PULL`
 const getOriginalResourceForPull = async (uri: vscode.Uri, codeReviewId: string): Promise<vscode.Uri | null> => {
-	const repository = await Repository.getCurrentInstance();
+	const repository = Repository.getCurrentInstance();
 	const codeReviewFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	const changedFile = codeReviewFiles?.find((changedFile) => changedFile.path === uri.path);
 
@@ -65,7 +65,7 @@ export class GitHub1sQuickDiffProvider implements vscode.QuickDiffProvider {
 	provideOriginalResource(uri: vscode.Uri, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Uri> {
 		const routerState = router.getState();
 		// only the file belong to current workspace could be provided a quick diff
-		if (uri.scheme !== routerState.scheme || uri.authority) {
+		if (uri.scheme !== getAdapter().scheme || uri.authority) {
 			return null;
 		}
 

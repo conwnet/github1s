@@ -5,11 +5,11 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { setVSCodeContext } from '@/helpers/vscode';
 import { getChangedFileFromSourceControl } from '@/commands/editor';
 import { debounce } from '@/helpers/func';
 import { PageType } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 
 const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | undefined) => {
 	// replace current url when user change active editor
@@ -24,7 +24,7 @@ const handleRouterOnActiveEditorChange = async (editor: vscode.TextEditor | unde
 
 	// if the file which not belong to current workspace is opened, or no file
 	// is opened, only retain `repo` (and `ref` if need) in browser url
-	if (!activeFileUri || activeFileUri?.authority || activeFileUri?.scheme !== adapterManager.getCurrentScheme()) {
+	if (!activeFileUri || activeFileUri?.authority || activeFileUri?.scheme !== getAdapter().scheme) {
 		const browserPath = await (ref.toUpperCase() === 'HEAD'
 			? routerParser.buildTreePath(repo)
 			: routerParser.buildTreePath(repo, ref));

@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import adapterManager from '@/adapters/manager';
+import { getAdapter } from '@/adapters';
 import { showSourcegraphSearchMessage } from '@/messages';
 import * as adapterTypes from '@/adapters/types';
 
@@ -37,8 +37,8 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		_token: vscode.CancellationToken,
 	) {
 		return Promise.resolve().then(async () => {
-			const { scheme, repo, ref } = router.getState();
-			const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+			const { repo, ref } = router.getState();
+			const dataSource = await getAdapter().resolveDataSource();
 			const searchOptions = { page: 1, pageSize: 100, includes: options.includes, excludes: options.excludes };
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
 

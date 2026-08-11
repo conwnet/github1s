@@ -5,8 +5,8 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import adapterManager from '@/adapters/manager';
 
 export const mapScopeScheme = (scopeScheme: string) => {
 	if (scopeScheme === 'github') {
@@ -52,7 +52,7 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
-		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+		const dataSource = await getAdapter(scheme).resolveDataSource();
 		const symbolDefinitions = await dataSource.provideSymbolDefinitions(repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {

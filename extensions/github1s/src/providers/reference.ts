@@ -5,8 +5,8 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import adapterManager from '@/adapters/manager';
 import { mapScopeScheme } from './definition';
 
 export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vscode.Disposable {
@@ -42,7 +42,7 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
-		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+		const dataSource = await getAdapter(scheme).resolveDataSource();
 		const symbolReferences = await dataSource.provideSymbolReferences(repo, ref, path, line, character, symbol);
 
 		if (symbolReferences.length) {

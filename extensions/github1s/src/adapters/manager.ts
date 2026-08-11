@@ -40,20 +40,16 @@ export class AdapterManager {
 		return Array.from(this.adaptersMap.values());
 	}
 
-	public getAdapter(scheme: string): Adapter {
+	public getAdapter(scheme?: string): Adapter {
+		scheme = scheme || this.getCurrentScheme();
 		if (!this.adaptersMap.has(scheme)) {
 			throw new Error(`Adapter with scheme '${scheme}' can not found.`);
 		}
 		return this.adaptersMap.get(scheme)!;
 	}
 
-	public getCurrentScheme(): string {
+	private getCurrentScheme(): string {
 		return vscode.workspace.workspaceFolders?.[0]?.uri?.scheme || 'empty';
-	}
-
-	public getCurrentAdapter(): Adapter {
-		const scheme = this.getCurrentScheme();
-		return this.getAdapter(scheme);
 	}
 }
 

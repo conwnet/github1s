@@ -13,12 +13,12 @@ import {
 	Uri,
 	window,
 } from 'vscode';
+import { getAdapter } from '@/adapters';
 import { matchSorter } from 'match-sorter';
 import { reuseable } from '@/helpers/func';
 import router from '@/router';
 import * as adapterTypes from '@/adapters/types';
 import { GitHub1sFileSystemProvider } from './file-system';
-import adapterManager from '@/adapters/manager';
 
 export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposable {
 	private static instance: GitHub1sFileSearchProvider | null = null;
@@ -56,18 +56,16 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 	 * cache, and the fuzzy search maybe not work fine
 	 */
 	getFileUris = reuseable(async (): Promise<Uri[]> => {
-		const currentAdapter = adapterManager.getCurrentAdapter();
-		const scheme = currentAdapter.scheme;
 		const { repo, ref } = router.getState();
-		const cacheKey = `${scheme}:${repo}+${ref}`;
+		const cacheKey = `${repo}+${ref}`;
 
 		if (this.fileUrisMap.has(cacheKey)) {
 			return this.fileUrisMap.get(cacheKey)!;
 		}
 
-		const dataSource = await currentAdapter.resolveDataSource();
+		const dataSource = await getAdapter().resolveDataSource();
 		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = router.buildUri({ scheme, repo, ref, path: '/' });
+		const rootDirectoryUri = router.buildUri({ repo, ref, path: '/' });
 
 		// the number of items in the tree array maybe exceeded maximum limit, only
 		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false

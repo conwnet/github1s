@@ -5,11 +5,9 @@
 
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
-import router from '@/router';
-import { Barrier } from '@/helpers/async';
 import { Repository } from '@/repository';
+import { Barrier } from '@/helpers/async';
 import { relativeTimeTo, toISOString } from '@/helpers/date';
-import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCodeReviewChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
@@ -115,9 +113,8 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
-			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = router.getState();
-			await Repository.getInstance(scheme, repo).loadMoreCodeReviews();
+			const repository = Repository.getCurrentInstance();
+			await repository.loadMoreCodeReviews();
 			this._loadingBarrier.open();
 		}
 	}
@@ -126,18 +123,15 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
-			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = router.getState();
-			await Repository.getInstance(scheme, repo).loadMoreCodeReviewChangedFiles(codeReviewId);
+			const repository = Repository.getCurrentInstance();
+			await repository.loadMoreCodeReviewChangedFiles(codeReviewId);
 			this._loadingBarrier.open();
 		}
 	}
 
 	async getCodeReviewItems(): Promise<vscode.TreeItem[]> {
+		const repository = Repository.getCurrentInstance();
 		this._loadingBarrier && (await this._loadingBarrier.wait());
-		const currentScheme = adapterManager.getCurrentScheme();
-		const { repo } = router.getState();
-		const repository = Repository.getInstance(currentScheme, repo);
 		const codeReviews = await repository.getCodeReviewList(this._forceUpdate);
 		const codeReviewTreeItems = codeReviews.map((codeReview) => {
 			const label = getCodeReviewTreeItemLabel(codeReview);
@@ -166,8 +160,8 @@ export class CodeReviewTreeDataProvider implements vscode.TreeDataProvider<vscod
 	}
 
 	async getCodeReviewFileItems(codeReview: adapterTypes.CodeReview): Promise<vscode.TreeItem[]> {
-		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const repository = Repository.getCurrentInstance();
+		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const _codeReview = await repository.getCodeReviewItem(codeReview.id);
 		const changedFiles = _codeReview ? await getCodeReviewChangedFiles(_codeReview) : [];
 		const changedFileItems = changedFiles.map((changedFile) => {

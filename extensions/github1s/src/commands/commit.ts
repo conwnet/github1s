@@ -5,14 +5,13 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
+import { Repository } from '@/repository';
 import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list';
 import { commitTreeDataProvider, fileHistoryTreeDataProvider } from '@/views';
-import { adapterManager } from '@/adapters';
-import { Repository } from '@/repository';
 
 export const checkCommitExists = async (repo: string, commitSha: string) => {
-	const adapter = adapterManager.getCurrentAdapter();
-	const dataSoruce = await adapter.resolveDataSource();
+	const dataSoruce = await getAdapter().resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCommit(repo, commitSha));
 	} catch (error) {

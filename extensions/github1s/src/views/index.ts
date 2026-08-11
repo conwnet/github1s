@@ -3,7 +3,7 @@
  */
 
 import * as vscode from 'vscode';
-import { adapterManager } from '@/adapters';
+import { getAdapter } from '@/adapters';
 import { CodeReviewType } from '@/adapters/types';
 import { getExtensionContext } from '@/helpers/context';
 import { CodeReviewTreeDataProvider } from './code-review-list';
@@ -28,7 +28,7 @@ export const registerCustomViews = () => {
 		treeDataProvider: codeReviewRequestTreeDataProvider,
 	});
 	// set code view list view title according code review type
-	const codeReviewType = adapterManager.getCurrentAdapter().codeReviewType || CodeReviewType.CodeReview;
+	const codeReviewType = getAdapter().codeReviewType || CodeReviewType.CodeReview;
 	codeReviewTreeView.title = codeReviewViewTitle[codeReviewType];
 
 	context.subscriptions.push(

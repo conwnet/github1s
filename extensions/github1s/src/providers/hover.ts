@@ -5,8 +5,8 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { getSourcegraphUrl } from '@/helpers/urls';
-import { adapterManager } from '@/adapters';
 import { mapScopeScheme } from './definition';
 
 const getSemanticMarkdownSuffix = (sourcegraphUrl: string) => `
@@ -47,7 +47,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 	): Promise<string | null> {
 		const { line, character } = position;
 		const { scheme, repo, ref, path } = router.parseUri(document.uri);
-		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+		const dataSource = await getAdapter(scheme).resolveDataSource();
 
 		const requestParams = [repo, ref, path, line, character, symbol] as const;
 		const definitions = await dataSource.provideSymbolDefinitions(...requestParams);
@@ -99,7 +99,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		const searchBasedMardownPromise = this.getSearchBasedHover(document, position, symbol);
 
 		// get the hover result based on sourcegraph lsif
-		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+		const dataSource = await getAdapter(scheme).resolveDataSource();
 		const symbolHover = await dataSource.provideSymbolHover(...requestParams);
 
 		const markdown = symbolHover ? symbolHover.markdown : await searchBasedMardownPromise;
