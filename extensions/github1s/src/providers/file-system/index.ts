@@ -86,7 +86,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null> {
 		const parts = uri.path.split('/').filter(Boolean);
 		const { scheme, repo, ref } = router.parseUri(uri);
-		const lookupKey = `${scheme}:${repo}+${ref}`;
+		const lookupKey = `${scheme}:${repo}@${ref}`;
 		if (!this.root.has(lookupKey)) {
 			this.root.set(lookupKey, createEntry(adapterTypes.FileType.Directory, uri.with({ path: '/' }), ''));
 		}
@@ -172,7 +172,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		}
 		const subRef = directory.sha || 'HEAD';
 		const [subScheme, subRepo] = await parseSubmoduleUrl(gitmoduleData.url);
-		const lookupKey = `${subScheme}:${subRepo}+${subRef}`;
+		const lookupKey = `${subScheme}:${subRepo}@${subRef}`;
 		directory.name = ''; // update the name field to '' to indicated it is an root directory
 		// update the uri field to indicated it is belong the `submodule repository`
 		directory.uri = router.buildUri({ scheme: subScheme, repo: subRepo, ref: subRef, path: '/' });
@@ -215,7 +215,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 				uri = Uri.joinPath(file.uri, file.name);
 			}
 			const { scheme, repo, ref, path } = router.parseUri(uri);
-			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
+			const cacheKey = `${scheme}:${repo}@${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
 				const dataSource = await getAdapter(scheme).resolveDataSource();
 				const data = await dataSource.provideFile(repo, ref, path);
