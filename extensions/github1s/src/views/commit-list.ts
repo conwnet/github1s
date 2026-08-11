@@ -13,6 +13,7 @@ import adapterManager from '@/adapters/manager';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
 import { GitHub1sSourceControlDecorationProvider } from '@/providers/decorations/source-control';
+import { getFileTreeItemDescription } from '@/helpers/util';
 
 export const getCommitTreeItemDescription = (commit: adapterTypes.Commit): string => {
 	const shortCommitSha = commit.sha.slice(0, 7);
@@ -61,7 +62,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 	});
 
 	async resolveFilePath() {
-		return '';
+		return '/';
 	}
 
 	public updateTree(forceUpdate = true) {
@@ -74,7 +75,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
-			const { repo, ref } = await router.getState();
+			const { repo, ref } = router.getState();
 			const repository = Repository.getInstance(scheme, repo);
 			await repository.loadMoreCommits(ref, await this.resolveFilePath());
 			this._loadingBarrier.open();
@@ -86,7 +87,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
 			const scheme = adapterManager.getCurrentScheme();
-			const { repo } = await router.getState();
+			const { repo } = router.getState();
 			await Repository.getInstance(scheme, repo).loadMoreCommitChangedFiles(commitSha);
 			this._loadingBarrier.open();
 		}
@@ -96,7 +97,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const filePath = await this.resolveFilePath();
 		const currentAdapter = adapterManager.getCurrentAdapter();
-		const { repo, ref } = await router.getState();
+		const { repo, ref } = router.getState();
 		const repository = Repository.getInstance(currentAdapter.scheme, repo);
 		const repositoryCommits = await repository.getCommitList(ref, filePath, this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
@@ -113,7 +114,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 				description,
 				tooltip,
 				contextValue,
-				resourceUri: vscode.Uri.parse('').with({
+				resourceUri: vscode.Uri.from({
 					scheme: GitHub1sSourceControlDecorationProvider.commitSchema,
 					query: queryString.stringify({ sha: commit.sha }),
 				}),
@@ -135,7 +136,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			return {
 				id,
 				command,
-				description: true,
+				description: getFileTreeItemDescription(filePath),
 				resourceUri: changedFile.headFileUri.with({
 					query: queryString.stringify({ changeStatus: changedFile.status }),
 				}),
@@ -143,7 +144,7 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 			};
 		});
 		const scheme = adapterManager.getCurrentScheme();
-		const { repo } = await router.getState();
+		const { repo } = router.getState();
 		const repository = Repository.getInstance(scheme, repo);
 		const hasMore = await repository.hasMoreCommitChangedFiles(commit.sha);
 		const loadMoreChangedFilesItem = this.createLoadMoreChangedFilesItem(commit.sha);
@@ -190,11 +191,11 @@ export class FileHistoryTreeDataProvider extends CommitTreeDataProvider {
 	async resolveFilePath() {
 		const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
 		const currentScheme = adapterManager.getCurrentScheme();
-		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path.slice(1) : '';
+		return activeDocumentUri?.scheme === currentScheme ? activeDocumentUri.path : '/';
 	}
 
 	async getCommitItems() {
-		if (!(await this.resolveFilePath())) {
+		if ((await this.resolveFilePath()) === '/') {
 			return [];
 		}
 		return super.getCommitItems();

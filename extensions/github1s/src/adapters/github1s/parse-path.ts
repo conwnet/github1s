@@ -164,6 +164,6 @@ export const parseGitHubPath = async (path: string): Promise<RouterState> => {
 		repo: DEFAULT_REPO,
 		ref: await getDefaultBranch(DEFAULT_REPO),
 		pageType: PageType.Tree,
-		filePath: '',
+		filePath: '/',
 	};
 };

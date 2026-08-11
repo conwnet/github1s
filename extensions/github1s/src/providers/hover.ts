@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import router from '@/router';
 import { getSourcegraphUrl } from '@/helpers/urls';
 import { adapterManager } from '@/adapters';
+import { mapScopeScheme } from './definition';
 
 const getSemanticMarkdownSuffix = (sourcegraphUrl: string) => `
 
@@ -45,11 +46,10 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		symbol: string,
 	): Promise<string | null> {
 		const { line, character } = position;
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 
-		const requestParams = [repo, ref, document.uri.path, line, character, symbol] as const;
+		const requestParams = [repo, ref, path, line, character, symbol] as const;
 		const definitions = await dataSource.provideSymbolDefinitions(...requestParams);
 
 		if (!definitions.length) {
@@ -58,16 +58,13 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 
 		// use the information of first definition as hover context
 		const target = definitions[0];
-		const isSameRepo = !target.scope || (target.scope.scheme === document.uri.scheme && target.scope.repo === repo);
+		const toScheme = mapScopeScheme(target.scope?.scheme || '');
+		const isSameRepo = !target.scope || (toScheme === document.uri.scheme && target.scope.repo === repo);
 		// if the definition target and the searched symbol is in the same
 		// repository, just replace the `document.uri.path` with targetPath
 		const targetFileUri = isSameRepo
-			? document.uri.with({ path: `/${target.path}` })
-			: vscode.Uri.parse('').with({
-					scheme: target.scope?.scheme,
-					authority: `${target.scope?.repo}+${target.scope?.ref}`,
-					path: `/${target.path}`,
-				});
+			? document.uri.with({ path: target.path })
+			: router.buildUri({ scheme: toScheme, repo: target.scope?.repo, ref: target.scope?.ref, path: target.path });
 		// open corresponding file with target
 		const textDocument = await vscode.workspace.openTextDocument(targetFileUri);
 		// get the content in `[range.start.line - 2, range.end.line + 2]` lines
@@ -91,9 +88,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 			return null;
 		}
 
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const path = document.uri.path;
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
 		// get the sourcegraph url for current symbol
@@ -104,7 +99,7 @@ export class GitHub1sHoverProvider implements vscode.HoverProvider, vscode.Dispo
 		const searchBasedMardownPromise = this.getSearchBasedHover(document, position, symbol);
 
 		// get the hover result based on sourcegraph lsif
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 		const symbolHover = await dataSource.provideSymbolHover(...requestParams);
 
 		const markdown = symbolHover ? symbolHover.markdown : await searchBasedMardownPromise;

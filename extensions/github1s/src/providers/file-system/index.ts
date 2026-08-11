@@ -64,7 +64,7 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	// insert DirectoryEntry into the cache `this.root`
 	public async populateWithDirectoryEntities(base: Uri, entries: adapterTypes.DirectoryEntry[]) {
-		const baseDirectory = await this.lookupAsDirectory(base, true);
+		const baseDirectory = await this.lookupAsDirectory(base.with({ path: '/' }), true);
 		if (!baseDirectory) {
 			return;
 		}
@@ -86,17 +86,16 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 	}
 
 	// --- lookup
-	// ensure the authority field in `the uri of returned entry` is exists
 	public async lookup(uri: Uri, silent: false): Promise<Entry>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null>;
 	public async lookup(uri: Uri, silent: boolean): Promise<Entry | null> {
 		const parts = uri.path.split('/').filter(Boolean);
-		// if the authority of uri is empty, we should use `current authority`
-		const authority = uri.authority || (await router.getAuthority());
-		if (!this.root.has(authority)) {
-			this.root.set(authority, createEntry(adapterTypes.FileType.Directory, uri.with({ authority, path: '/' }), ''));
+		const { scheme, repo, ref } = router.parseUri(uri);
+		const lookupKey = `${scheme}:${repo}+${ref}`;
+		if (!this.root.has(lookupKey)) {
+			this.root.set(lookupKey, createEntry(adapterTypes.FileType.Directory, uri.with({ path: '/' }), ''));
 		}
-		let entry = this.root.get(authority);
+		let entry = this.root.get(lookupKey);
 		for (const part of parts) {
 			let child: Entry | undefined;
 			if (entry instanceof Directory) {
@@ -147,38 +146,17 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		return this.lookup(uri, false);
 	}
 
-	// it used by `@/src/providers/fileDecorationProvider.ts`
-	// update the uri of a git submodule as directory, which the type of corresponding githubEntry should be `commit`.
-	// the `directory.uri.authority` and the `directory.uri.path` must belong to the `parent repository` before called.
-	// and the `directory.name` is the corresponding `directory name` in `parent repository` before called.
-	// once the function is called successful, the `directory.uri.authority` field, the `directory.uri.path`,
-	// and the `directory.uri.name` field would be changed to the `submodule repository's`.
-	//
-	// so this function could be called only once for a submodule directory, for example:
-	// - the directory argument before called may looks like:
-	// {
-	//     uri: {
-	//         scheme: 'github1s',
-	//         authority: 'conwnet+github1s+master', // this is the authority of `parent repository`
-	//         path: '/some/submodule/path' // the corresponding path in `parent repository`
-	//     },
-	//     name: 'vscode', // the name is the `directory name` of `parent repository` before called
-	//     entries: null, // the entries should be null to indicated we haven't call this for `parent`
-	//     isSubmodule: true, // this Directory must be a submodule
-	//     ...otherFields
-	// }
-	// - and the directory argument after called may looks like:
-	// {
-	//     uri: {
-	//         scheme: 'github1s',
-	//         authority: 'microsoft+vscode+master', // this is the authority of `submodule repository`
-	//         path: '/' // the `path` filed should be '/' to indicated to the root directory of `submodule repository`
-	//     },
-	//     name: '', // the name is the '' to indicated it is a root directory of `submodule repository`
-	//     entries: Map<string, Entry> {...}, // the entries contains the files of `submodule repository`
-	//     isSubmodule: true, // this Directory must be a submodule
-	//     ...otherFields
-	// }
+	/**
+	 * Prepares a submodule directory for loading from its own repository.
+	 *
+	 * Before the first read, `directory.uri` and `directory.name` locate the submodule in its parent repository.
+	 * The parent URI may have an empty authority when it belongs to the current workspace. This method resolves
+	 * the matching `.gitmodules` entry, then changes the directory to represent the submodule repository root:
+	 * `directory.uri` receives an explicit repository and ref, and `directory.name` becomes empty. The same
+	 * directory is also registered in `root` under the submodule repository key.
+	 *
+	 * This method does not populate `directory.entries`; `readDirectory` does that after the repository switch.
+	 */
 	private _updateSubmoduleDirectory = reuseable(async (directory: Directory): Promise<[string, FileType][]> => {
 		// if the directory is not submodule, or it has be called already
 		if (!directory.isSubmodule || directory.entries) {
@@ -197,17 +175,14 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 		if (!gitmoduleData) {
 			throw FileSystemError.FileNotFound(`can't found corresponding declare in .gitmodules`);
 		}
-		const [submoduleScheme, submoduleRepo] = parseSubmoduleUrl(gitmoduleData.url);
-		const submoduleAuthority = `${submoduleRepo}+${directory.sha || 'HEAD'}`;
+		const subRef = directory.sha || 'HEAD';
+		const [subScheme, subRepo] = await parseSubmoduleUrl(gitmoduleData.url);
+		const lookupKey = `${subScheme}:${subRepo}+${subRef}`;
 		directory.name = ''; // update the name field to '' to indicated it is an root directory
 		// update the uri field to indicated it is belong the `submodule repository`
-		directory.uri = Uri.parse('').with({
-			scheme: submoduleScheme,
-			authority: submoduleAuthority,
-			path: '/',
-		});
+		directory.uri = router.buildUri({ scheme: subScheme, repo: subRepo, ref: subRef, path: '/' });
 		// insert the directory in to this.root map because it indicated another repository
-		this.root.set(submoduleAuthority, directory);
+		this.root.set(lookupKey, directory);
 		return [];
 	});
 
@@ -224,11 +199,11 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			if (parent.isSubmodule) {
 				await this._updateSubmoduleDirectory(parent);
 			}
-			const [repo, ref] = parent.uri.authority.split('+');
-			const path = Uri.joinPath(parent.uri, parent.name).path.slice(1); // delete leading '/'
-			const dataSource = await this._resolveDataSource(uri.scheme);
+			const { scheme, repo, ref } = router.parseUri(parent.uri);
+			const path = Uri.joinPath(parent.uri, parent.name).path;
+			const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 			const data = await dataSource.provideDirectory(repo, ref, path, false);
-			data?.entries && (await this.populateWithDirectoryEntities(uri, data.entries));
+			data?.entries && (await this.populateWithDirectoryEntities(parent.uri, data.entries));
 			return parent.getNameTypePairs();
 		},
 		(uri) => uri.toString(),
@@ -236,20 +211,15 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 
 	readFile = reuseable(
 		async (uri: Uri): Promise<Uint8Array> => {
-			let { scheme, authority, path } = uri;
-			// if `authority` is same with current, try to find it with `this.lookupAsFile`,
-			// we can't use `router.getAuthority()` directly because this file may be in submodule
-			if (authority === workspace.workspaceFolders?.[0].uri.authority) {
-				const file = (await this.lookupAsFile(uri, false))!;
-				scheme = file.uri.scheme;
-				authority = file.uri.authority;
-				path = joinPath(file.uri.path, file.name);
-			}
-			const cacheKey = `${scheme} ${authority} ${path}`;
+			// If a file belongs to the current workspace,
+			// check its existence to avoid unnecessary content requests.
+			// It is efficient for some built-in files like `.vscode/...`
+			!uri.authority && (await this.lookupAsFile(uri, false));
+			const { scheme, repo, ref, path } = router.parseUri(uri);
+			const cacheKey = `${scheme}:${repo}+${ref}${path}`;
 			if (!this.contentCache.has(cacheKey)) {
-				const [repo, ref] = authority.split('+');
-				const dataSource = await this._resolveDataSource(scheme);
-				const data = await dataSource.provideFile(repo, ref, path.slice(1));
+				const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
+				const data = await dataSource.provideFile(repo, ref, path);
 				data && this.contentCache.set(cacheKey, data.content);
 			}
 			return this.contentCache.get(cacheKey) || new Uint8Array();

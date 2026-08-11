@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import router from '@/router';
 import { showSourcegraphSymbolMessage } from '@/messages';
 import adapterManager from '@/adapters/manager';
+import { mapScopeScheme } from './definition';
 
 export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vscode.Disposable {
 	private static instance: GitHub1sReferenceProvider | null = null;
@@ -38,12 +39,10 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 			return [];
 		}
 
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const { scheme, path } = document.uri;
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await adapterManager.getAdapter(scheme).resolveDataSource();
 		const symbolReferences = await dataSource.provideSymbolReferences(repo, ref, path, line, character, symbol);
 
 		if (symbolReferences.length) {
@@ -51,17 +50,14 @@ export class GitHub1sReferenceProvider implements vscode.ReferenceProvider, vsco
 		}
 
 		return symbolReferences.map(({ scope, path, range }) => {
-			const isSameRepo = !scope || (scope.scheme === scheme && scope.repo === repo);
+			const toScheme = mapScopeScheme(scope?.scheme || '');
+			const isSameRepo = !scope || (toScheme === scheme && scope.repo === repo);
 			// if the reference target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)
 			const uri = isSameRepo
-				? document.uri.with({ path: `/${path}` })
-				: vscode.Uri.parse('').with({
-						scheme: scope!.scheme,
-						authority: `${scope!.repo}+${scope!.ref}`,
-						path: `/${path}`,
-					});
+				? document.uri.with({ path })
+				: router.buildUri({ scheme: toScheme, repo: scope?.repo, ref: scope?.ref, path });
 			const { start, end } = range;
 			return {
 				uri,

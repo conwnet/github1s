@@ -169,10 +169,9 @@ export type SymbolReferences = CodeLocation[];
 
 export type SymbolHover = { markdown: string };
 
+// All repository path parameters and return values start with '/'.
 export class DataSource {
 	// if `recursive` is true, it should try to return all subtrees
-	// the returned Directory.entries.path is relative the `path` in arguments,
-	// so if `recursive` is false, the returned path should be the file name
 	provideDirectory(repo: string, ref: string, path: string, recursive = false): Promisable<Directory | null> {
 		return null;
 	}
@@ -344,7 +343,7 @@ export type RouterState = { repo: string; ref: string } & (
 export class RouterParser {
 	// parse giving path (starts with '/', may includes search and hash) to Router state,
 	parsePath(path: string): Promisable<RouterState> {
-		return { repo: '', ref: 'HEAD', pageType: PageType.Tree, filePath: '' };
+		return { repo: '', ref: 'HEAD', pageType: PageType.Tree, filePath: '/' };
 	}
 
 	// build the tree page path

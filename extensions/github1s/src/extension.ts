@@ -49,15 +49,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // initialize the VSCode's state according to the router url
 const initialVSCodeState = async () => {
-	const routerState = await router.getState();
-	const scheme = adapterManager.getCurrentScheme();
+	const routerState = router.getState();
 
-	if (routerState.pageType === PageType.Tree && routerState.filePath) {
-		vscode.commands.executeCommand(
-			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
-		);
-	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
+	if (routerState.pageType === PageType.Tree && routerState.filePath !== '/') {
+		vscode.commands.executeCommand('revealInExplorer', router.buildUri({ path: routerState.filePath }));
+	} else if (routerState.pageType === PageType.Blob && routerState.filePath !== '/') {
 		const { startLine, endLine } = routerState;
 		let documentShowOptions: vscode.TextDocumentShowOptions = {};
 		if (startLine || endLine) {
@@ -65,10 +61,7 @@ const initialVSCodeState = async () => {
 			const endPosition = new vscode.Position((endLine || startLine)! - 1, 1 << 20);
 			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
 		}
-		vscode.window.showTextDocument(
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
-			documentShowOptions,
-		);
+		vscode.window.showTextDocument(router.buildUri({ path: routerState.filePath }), documentShowOptions);
 	} else if (routerState.pageType === PageType.CodeReviewList) {
 		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');
 	} else if (routerState.pageType === PageType.CommitList) {

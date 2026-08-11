@@ -56,17 +56,15 @@ export class GitHub1sSourceControlDecorationProvider implements FileDecorationPr
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.codeReviewSchema) {
-			return router.getState().then((routerState) => {
-				const query = queryString.parse(uri.query);
-				return +(routerState as any).codeReviewId === +query.id! ? selectedViewItemDecoration : null;
-			});
+			const routerState = router.getState();
+			const query = queryString.parse(uri.query);
+			return +(routerState as any).codeReviewId === +query.id! ? selectedViewItemDecoration : null;
 		}
 
 		if (uri.scheme === GitHub1sSourceControlDecorationProvider.commitSchema) {
-			return router.getState().then((routerState) => {
-				const query = queryString.parse(uri.query);
-				return (routerState as any).commitSha === query.sha ? selectedViewItemDecoration : null;
-			});
+			const routerState = router.getState();
+			const query = queryString.parse(uri.query);
+			return (routerState as any).commitSha === query.sha ? selectedViewItemDecoration : null;
 		}
 	}
 }

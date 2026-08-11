@@ -160,8 +160,8 @@ export class CommitManager {
 
 		if (this._currentPage === 1 && commits.length) {
 			this._latestCommitSha = commits[0].sha;
-			// also map `this._from` to the first commit if currentPage is 1 and filePath is empty
-			!this._filePath && CommitManager._commitMap.set(this._from, commits[0]);
+			// also map `this._from` to the first commit for repository history
+			this._filePath === '/' && CommitManager._commitMap.set(this._from, commits[0]);
 		}
 		commits.forEach((commit) => {
 			CommitManager._commitMap.set(commit.sha, commit);

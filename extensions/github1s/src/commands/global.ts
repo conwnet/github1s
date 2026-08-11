@@ -10,8 +10,8 @@ import { getRecentRepositories, removeRecentRepository } from '@/helpers/context
 import { adapterManager } from '@/adapters';
 
 export const commandOpenOnOfficialPage = async () => {
-	const location = (await router.getHistory()).location;
-	const routerParser = await router.resolveParser();
+	const location = router.getHistory().location;
+	const routerParser = router.getParser();
 	const fullPath = `${location.pathname}${location.search}${location.hash}`;
 	const externalLink = await routerParser.buildExternalLink(fullPath);
 
@@ -60,7 +60,7 @@ export const commandOpenRepository = async () => {
 		const choice = quickPick.activeItems[0];
 		const repository = choice === manualInputItem ? quickPick.value : choice.label;
 		const targetLink = vscode.Uri.parse((await router.href()) || '').with({
-			path: await (await router.resolveParser()).buildTreePath(repository),
+			path: await router.getParser().buildTreePath(repository),
 		});
 		vscode.commands.executeCommand('vscode.open', targetLink);
 		quickPick.hide();

@@ -6,6 +6,7 @@
 import { CommonQueryOptions, DataSource, Directory, DirectoryEntry, File, FileType, Tag } from '../types';
 import { matchSorter } from 'match-sorter';
 import * as dayjs from 'dayjs';
+import { normalizePath } from '@/helpers/util';
 
 type PackageFile = {
 	path: string;
@@ -23,14 +24,13 @@ type PackageEntry = PackageFile | PackageDirectory;
 
 type PackageVersion = { name: string; tag?: string; time?: Date };
 
-const retrieveFiles = (files: PackageEntry[], pathDeep: number, recursive: boolean) => {
+const retrieveFiles = (files: PackageEntry[], recursive: boolean) => {
 	const entries: DirectoryEntry[] = [];
 	for (const item of files) {
 		const fileType = item.type === 'directory' ? FileType.Directory : FileType.File;
-		const filePath = item.path.split(/\/+/).filter(Boolean).slice(pathDeep).join('/');
-		entries.push({ type: fileType, path: filePath });
+		entries.push({ type: fileType, path: normalizePath(item.path) });
 		if (recursive && item.type === 'directory' && item.files?.length) {
-			entries.push(...retrieveFiles(item.files, pathDeep, recursive));
+			entries.push(...retrieveFiles(item.files, recursive));
 		}
 	}
 	return entries;
@@ -70,12 +70,12 @@ export class Npmjs1sDataSource extends DataSource {
 			},
 			await this.getPackageFiles(packageName, version),
 		);
-		const entries = parentFiles ? retrieveFiles(parentFiles, pathParts.length, recursive) : [];
+		const entries = parentFiles ? retrieveFiles(parentFiles, recursive) : [];
 		return { entries, truncated: false };
 	}
 
 	async provideFile(packageName: string, version: string, path: string): Promise<File> {
-		const response = await fetch(`https://unpkg.com/${packageName}@${version}/${path}`);
+		const response = await fetch(`https://unpkg.com/${packageName}@${version}${path}`);
 		return { content: new Uint8Array(await response.arrayBuffer()) };
 	}
 

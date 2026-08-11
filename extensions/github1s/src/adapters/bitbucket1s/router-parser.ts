@@ -21,12 +21,12 @@ export class BitbucketRouterParser extends adapterTypes.RouterParser {
 	}
 
 	buildTreePath(repo: string, ref?: string, filePath?: string): string {
-		return ref ? (filePath ? `/${repo}/src/${ref}/${filePath}` : `/${repo}/src/${ref}`) : `/${repo}`;
+		return ref ? `/${repo}/src/${ref}${filePath && filePath !== '/' ? filePath : ''}` : `/${repo}`;
 	}
 
 	buildBlobPath(repo: string, ref: string, filePath: string, startLine?: number, endLine?: number): string {
 		const hash = startLine ? (endLine ? `#L${startLine}-L${endLine}` : `#L${startLine}`) : '';
-		return `/${repo}/src/${ref}/${filePath}${hash}`;
+		return `/${repo}/src/${ref}${filePath}${hash}`;
 	}
 
 	buildCommitListPath(repo: string): string {

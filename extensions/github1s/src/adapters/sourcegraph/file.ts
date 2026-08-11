@@ -6,6 +6,7 @@
 import { gql } from '@apollo/client/core';
 import { querySourcegraphRepository } from './common';
 import { Directory, FileType } from '../types';
+import { normalizePath } from '@/helpers/util';
 
 const FILE_COUNT_LIMIT = 50000;
 
@@ -39,12 +40,11 @@ export const readDirectory = async (
 		variables: { repository, ref, path, recursive },
 	});
 	const files = repositoryData.commit?.tree?.entries || [];
-	const pathParts = path.split('/').filter(Boolean);
 	return {
 		entries: files.map((file) => ({
-			path: file.path.split('/').filter(Boolean).slice(pathParts.length).join('/'),
+			path: normalizePath(file.path),
 			type: file.isDirectory ? FileType.Directory : file.submodule ? FileType.Submodule : FileType.File,
-			commitSha: file.submodule?.sha,
+			commitSha: file.submodule?.commit,
 		})),
 		truncated: files.length >= FILE_COUNT_LIMIT,
 	};

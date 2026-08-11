@@ -20,8 +20,8 @@ const checkoutToItem: vscode.QuickPickItem = {
 
 // check out to branch/tag/commit
 const commandCheckoutTo = async () => {
-	const routerParser = await router.resolveParser();
-	const routeState = await router.getState();
+	const routerParser = router.getParser();
+	const routeState = router.getState();
 	const quickPick = vscode.window.createQuickPick();
 
 	const loadMoreRefPickerItems = async () => {
