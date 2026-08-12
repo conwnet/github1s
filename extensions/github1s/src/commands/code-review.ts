@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import {
 	CodeReviewTreeItem,
 	getCodeReviewTreeItemLabel,
@@ -12,7 +13,6 @@ import {
 } from '@/views/code-review-list';
 import { codeReviewRequestTreeDataProvider } from '@/views';
 import { CodeReviewType } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 import { Repository } from '@/repository';
 
 const CodeReviewTypeName = {
@@ -23,7 +23,7 @@ const CodeReviewTypeName = {
 };
 
 const checkCodeReviewExists = async (repo: string, codeReviewId: string) => {
-	const adapter = adapterManager.getCurrentAdapter();
+	const adapter = getAdapter();
 	const dataSoruce = await adapter.resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCodeReview(repo, codeReviewId));
@@ -44,10 +44,10 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 			? codeReviewItemOrId
 			: codeReviewItemOrId.codeReview.id
 		: '';
-	const adapter = adapterManager.getCurrentAdapter();
-	const { repo } = await router.getState();
+	const adapter = getAdapter();
+	const { repo } = router.getState();
+	const repository = Repository.getCurrentInstance();
 	const typeName = CodeReviewTypeName[adapter.codeReviewType || CodeReviewType.CodeReview];
-	const repository = Repository.getInstance(adapter.scheme, repo);
 
 	// if the a codeReviewId isn't provided, use quickInput
 	if (!codeReviewId) {
@@ -90,7 +90,7 @@ const commandSwitchToCodeReview = async (codeReviewItemOrId?: string | CodeRevie
 		}
 	}
 
-	const routerParser = await router.resolveParser();
+	const routerParser = router.getParser();
 	(await checkCodeReviewExists(repo, codeReviewId!)) &&
 		router.replace(await routerParser.buildCodeReviewPath(repo, codeReviewId!));
 };
@@ -103,8 +103,8 @@ const commandOpenCodeReviewOnOfficialPage = async (codeReviewItemOrId?: string |
 			: codeReviewItemOrId.codeReview.id
 		: '';
 	if (codeReviewId) {
-		const { repo } = await router.getState();
-		const routerParser = await router.resolveParser();
+		const { repo } = router.getState();
+		const routerParser = router.getParser();
 		const codeReviewPath = await routerParser.buildCodeReviewPath(repo, codeReviewId);
 		const codeReviewLink = await routerParser.buildExternalLink(codeReviewPath);
 		return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(codeReviewLink));

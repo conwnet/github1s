@@ -5,13 +5,13 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { relativeTimeTo } from '@/helpers/date';
 import { getRecentRepositories, removeRecentRepository } from '@/helpers/context';
-import { adapterManager } from '@/adapters';
 
 export const commandOpenOnOfficialPage = async () => {
-	const location = (await router.getHistory()).location;
-	const routerParser = await router.resolveParser();
+	const location = router.getHistory().location;
+	const routerParser = router.getParser();
 	const fullPath = `${location.pathname}${location.search}${location.hash}`;
 	const externalLink = await routerParser.buildExternalLink(fullPath);
 
@@ -60,7 +60,7 @@ export const commandOpenRepository = async () => {
 		const choice = quickPick.activeItems[0];
 		const repository = choice === manualInputItem ? quickPick.value : choice.label;
 		const targetLink = vscode.Uri.parse((await router.href()) || '').with({
-			path: await (await router.resolveParser()).buildTreePath(repository),
+			path: await router.getParser().buildTreePath(repository),
 		});
 		vscode.commands.executeCommand('vscode.open', targetLink);
 		quickPick.hide();
@@ -68,14 +68,13 @@ export const commandOpenRepository = async () => {
 };
 
 const commandOpenOnlineEditor = async () => {
-	const currentScheme = adapterManager.getCurrentScheme();
-	const onlineEditorPath = ['github1s', 'ossinsight'].includes(currentScheme) ? '/editor' : '/';
+	const onlineEditorPath = ['github1s', 'ossinsight'].includes(getAdapter().scheme) ? '/editor' : '/';
 	const targetLink = vscode.Uri.parse((await router.href()) || '').with({ path: onlineEditorPath });
 	return vscode.commands.executeCommand('vscode.open', targetLink);
 };
 
 const commandRefreshRepository = async () => {
-	if (['github1s', 'gitlab1s'].includes(adapterManager.getCurrentScheme())) {
+	if (['github1s', 'gitlab1s'].includes(getAdapter().scheme)) {
 		await vscode.commands.executeCommand('github1s.commands.syncSourcegraphRepository');
 	}
 	vscode.commands.executeCommand('workbench.action.reloadWindow');

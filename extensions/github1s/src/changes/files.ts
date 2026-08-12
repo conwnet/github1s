@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import * as queryString from 'query-string';
 import * as adapterTypes from '@/adapters/types';
-import adapterManager from '@/adapters/manager';
 import router from '@/router';
 import { basename } from '@/helpers/util';
 import { emptyFileUri } from '@/providers';
@@ -22,18 +21,9 @@ interface VSCodeChangedFile {
 export const getCodeReviewChangedFiles = async (
 	codeReview: adapterTypes.CodeReview & { sourceSha: string; targetSha: string },
 ) => {
-	const scheme = adapterManager.getCurrentScheme();
-	const { repo } = await router.getState();
-	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: scheme,
-		authority: `${repo}+${codeReview.targetSha}`,
-		path: '/',
-	});
-	const headRootUri = baseRootUri.with({
-		authority: `${repo}+${codeReview.sourceSha}`,
-	});
-
-	const repository = Repository.getInstance(scheme, repo);
+	const repository = Repository.getCurrentInstance();
+	const baseRootUri = router.buildUri({ ref: codeReview.targetSha });
+	const headRootUri = router.buildUri({ ref: codeReview.sourceSha }, baseRootUri);
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReview.id);
 
 	return changedFiles.map((changedFile) => {
@@ -42,30 +32,21 @@ export const getCodeReviewChangedFiles = async (
 		const baseFilePath = changedFile.previousPath || changedFile.path;
 		const headFilePath = changedFile.path;
 		return {
-			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
-			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
+			baseFileUri: baseRootUri.with({ path: baseFilePath }),
+			headFileUri: headRootUri.with({ path: headFilePath }),
 			status: changedFile.status,
 		};
 	});
 };
 
 export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
-	const currentAdapter = adapterManager.getCurrentAdapter();
-	const scheme = currentAdapter.scheme;
-	const { repo } = await router.getState();
+	const repository = Repository.getCurrentInstance();
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// so we use the parents[0].sha as the parent commitSha
-	const baseRef = commit?.parents?.[0];
-	const baseRootUri = vscode.Uri.parse('').with({
-		scheme: currentAdapter.scheme,
-		authority: `${repo}+${baseRef || 'HEAD'}`,
-		path: '/',
-	});
-	const headRootUri = baseRootUri.with({
-		authority: `${repo}+${commit.sha || 'HEAD'}`,
-	});
-	const repository = Repository.getInstance(scheme, repo);
+	const parentCommitSha = commit?.parents?.[0] || '';
+	const baseRootUri = router.buildUri({ ref: parentCommitSha });
+	const headRootUri = router.buildUri({ ref: commit.sha }, baseRootUri);
 	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {
@@ -74,26 +55,24 @@ export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
 		const baseFilePath = commitFile.previousPath || commitFile.path;
 		const headFilePath = commitFile.path;
 		return {
-			baseFileUri: vscode.Uri.joinPath(baseRootUri, baseFilePath),
-			headFileUri: vscode.Uri.joinPath(headRootUri, headFilePath),
+			baseFileUri: baseRootUri.with({ path: baseFilePath }),
+			headFileUri: headRootUri.with({ path: headFilePath }),
 			status: commitFile.status,
 		};
 	});
 };
 
 export const getChangedFiles = async (): Promise<VSCodeChangedFile[]> => {
-	const routerState = await router.getState();
-	const scheme = adapterManager.getCurrentScheme();
+	const routerState = router.getState();
+	const repository = Repository.getCurrentInstance();
 
 	// code review page
 	if (routerState.pageType === adapterTypes.PageType.CodeReview) {
-		const repository = Repository.getInstance(scheme, routerState.repo);
 		const codeReview = await repository.getCodeReviewItem(routerState.codeReviewId);
 		return codeReview ? getCodeReviewChangedFiles(codeReview) : [];
 	}
 	// commit page
 	else if (routerState.pageType === adapterTypes.PageType.Commit) {
-		const repository = Repository.getInstance(scheme, routerState.repo);
 		const commit = await repository.getCommitItem(routerState.commitSha);
 		return commit ? getCommitChangedFiles(commit) : [];
 	}
@@ -108,8 +87,8 @@ export const getChangedFileDiffTitle = (
 ) => {
 	const baseFileName = basename(baseFileUri.path);
 	const headFileName = basename(headFileUri.path);
-	const [_repo, baseCommitSha] = baseFileUri.authority.split('+');
-	const [__repo, headCommitSha] = headFileUri.authority.split('+');
+	const { ref: baseCommitSha } = router.parseUri(baseFileUri);
+	const { ref: headCommitSha } = router.parseUri(headFileUri);
 	const baseFileLabel = `${baseFileName} (${baseCommitSha?.slice(0, 7)})`;
 	const headFileLabel = `${headFileName} (${headCommitSha?.slice(0, 7)})`;
 

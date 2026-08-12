@@ -12,6 +12,7 @@
     "link": "node scripts/link.js",
     "format": "prettier --write .",
     "eslint": "eslint --fix",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p functions/tsconfig.json",
     "test:ci": "start-test watch:dev-server 8080 test",
     "test": "cd tests && npm install && npx playwright install && npm run test",
     "postinstall": "husky install && node scripts/postinstall.js"
@@ -30,7 +31,7 @@
   "license": "ISC",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250109.0",
-    "@github1s/vscode-web": "^0.28.1",
+    "@github1s/vscode-web": "^0.30.1",
     "chokidar": "^4.0.3",
     "clean-css": "^5.3.3",
     "copy-webpack-plugin": "^14.0.0",

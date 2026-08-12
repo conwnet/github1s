@@ -5,8 +5,20 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { showSourcegraphSymbolMessage } from '@/messages';
-import adapterManager from '@/adapters/manager';
+
+export const mapScopeScheme = (scopeScheme: string) => {
+	if (scopeScheme === 'github') {
+		return 'github1s';
+	} else if (scopeScheme === 'gitlab') {
+		return 'gitlab1s';
+	} else if (scopeScheme === 'bitbucket') {
+		return 'bitbucket1s';
+	} else {
+		return scopeScheme;
+	}
+};
 
 export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vscode.Disposable {
 	private static instance: GitHub1sDefinitionProvider | null = null;
@@ -37,12 +49,10 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 			return [];
 		}
 
-		const authority = document.uri.authority || (await router.getAuthority());
-		const [repo, ref] = authority.split('+').filter(Boolean);
-		const { scheme, path } = document.uri;
+		const { scheme, repo, ref, path } = router.parseUri(document.uri);
 		const { line, character } = position;
 
-		const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		const dataSource = await getAdapter(scheme).resolveDataSource();
 		const symbolDefinitions = await dataSource.provideSymbolDefinitions(repo, ref, path, line, character, symbol);
 
 		if (symbolDefinitions.length) {
@@ -50,17 +60,14 @@ export class GitHub1sDefinitionProvider implements vscode.DefinitionProvider, vs
 		}
 
 		return symbolDefinitions.map(({ scope, path, range }) => {
-			const isSameRepo = !scope || (scope.scheme === scheme && scope.repo === repo);
+			const toScheme = mapScopeScheme(scope?.scheme || '');
+			const isSameRepo = !scope || (toScheme === scheme && scope.repo === repo);
 			// if the definition target and the searched symbol is in the same
 			// repository, just replace the `document.uri.path` with targetPath
 			// (so that the target file will open with expanding the file explorer)
 			const uri = isSameRepo
-				? document.uri.with({ path: `/${path}` })
-				: vscode.Uri.parse('').with({
-						scheme: scope!.scheme,
-						authority: `${scope!.repo}+${scope!.ref}`,
-						path: `/${path}`,
-					});
+				? document.uri.with({ path })
+				: router.buildUri({ scheme: toScheme, repo: scope?.repo, ref: scope?.ref, path });
 			const { start, end } = range;
 			return {
 				uri,

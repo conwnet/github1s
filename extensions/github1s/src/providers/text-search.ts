@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import adapterManager from '@/adapters/manager';
+import { getAdapter } from '@/adapters';
 import { showSourcegraphSearchMessage } from '@/messages';
 import * as adapterTypes from '@/adapters/types';
 
@@ -36,18 +36,17 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		progress: vscode.Progress<vscode.TextSearchResult>,
 		_token: vscode.CancellationToken,
 	) {
-		return router.getAuthority().then(async (authority) => {
-			const [repo, ref] = authority.split('+');
-			const dataSource = await adapterManager.getCurrentAdapter().resolveDataSource();
+		return Promise.resolve().then(async () => {
+			const { repo, ref } = router.getState();
+			const dataSource = await getAdapter().resolveDataSource();
 			const searchOptions = { page: 1, pageSize: 100, includes: options.includes, excludes: options.excludes };
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
-			const currentScheme = adapterManager.getCurrentScheme();
 
 			(searchResults.results || []).forEach((item) => {
 				// because we set the authority of workspace as '' (on application start)
 				// at src/vs/code/browser/workbench/workbench.ts
 				// so don't specified authority here, or the VS Code won't use the results
-				const fileUri = vscode.Uri.parse('').with({ scheme: currentScheme, path: `/${item.path}` });
+				const fileUri = router.buildUri({ path: item.path });
 				const ranges = ensureArray(item.ranges).map((range) => createVscodeRange(range));
 				const previewMatches = ensureArray(item.preview.matches).map((match) => createVscodeRange(match));
 				const preview = { text: item.preview.text, matches: previewMatches };

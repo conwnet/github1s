@@ -5,6 +5,7 @@
 
 export const noop = () => {};
 export const isNil = (value: any) => value === undefined || value === null;
+export const isString = (value: any) => typeof value === 'string';
 
 export const trimStart = (str: string, chars: string = ' '): string => {
 	let index = 0;
@@ -32,10 +33,18 @@ export const joinPath = (...segments: string[]): string => {
 	});
 };
 
+export const normalizePath = (path: string): string => (path.startsWith('/') ? path : `/${path}`);
+
+export const concatPath = (basePath: string, path: string): string => {
+	return joinPath(normalizePath(basePath), path);
+};
+
 export const dirname = (path: string): string => {
 	const trimmedPath = trimEnd(path, '/');
 	return trimmedPath.substr(0, trimmedPath.lastIndexOf('/')) || '';
 };
+
+export const getFileTreeItemDescription = (path: string): string | boolean => dirname(path) || false;
 
 export const basename = (path: string): string => {
 	const trimmedPath = trimEnd(path, '/');
@@ -55,11 +64,4 @@ export const prop = (obj: object, path: (string | number)[] = []): any => {
 
 export const last = <T>(array: readonly T[]): T => {
 	return array[array.length - 1];
-};
-
-export const encodeFilePath = (filePath: string): string => {
-	return filePath
-		.split('/')
-		.map((segment) => encodeURIComponent(segment))
-		.join('/');
 };

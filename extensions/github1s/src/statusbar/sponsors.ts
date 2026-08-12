@@ -5,12 +5,12 @@
 
 import * as vscode from 'vscode';
 import router from '@/router';
-import { adapterManager } from '@/adapters';
+import { getAdapter } from '@/adapters';
 import { PlatformName } from '@/adapters/types';
 
 const resolveSourcegraphLink = async () => {
-	const { repo, ref } = await router.getState();
-	switch (adapterManager.getCurrentAdapter().platformName) {
+	const { repo, ref } = router.getState();
+	switch (getAdapter().platformName) {
 		case PlatformName.GitHub:
 			return `https://sourcegraph.com/github.com/${repo}@${ref}`;
 		case PlatformName.GitLab:

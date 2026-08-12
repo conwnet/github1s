@@ -10,7 +10,7 @@ export const updateCheckoutTo = (() => {
 	const checkoutItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 	const refreshItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
 	return async () => {
-		const { repo, ref } = await router.getState();
+		const { repo, ref } = router.getState();
 
 		checkoutItem.text = `$(git-branch) ${ref}`;
 		checkoutItem.tooltip = 'Checkout branch/tag/commit...';

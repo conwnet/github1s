@@ -26,6 +26,32 @@
     "vscode": "^1.48.0"
   },
   "contributes": {
+    "resourceLabelFormatters": [
+      {
+        "scheme": "github1s",
+        "authority": "?*/**",
+        "formatting": {
+          "label": "${path} (${authoritySuffix})",
+          "separator": "/"
+        }
+      },
+      {
+        "scheme": "gitlab1s",
+        "authority": "?*/**",
+        "formatting": {
+          "label": "${path} (${authoritySuffix})",
+          "separator": "/"
+        }
+      },
+      {
+        "scheme": "bitbucket1s",
+        "authority": "?*/**",
+        "formatting": {
+          "label": "${path} (${authoritySuffix})",
+          "separator": "/"
+        }
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -596,7 +622,8 @@
   "scripts": {
     "clean": "rm -rf dist out",
     "watch": "webpack --config webpack.config.js --watch",
-    "compile": "webpack --config webpack.config.js --mode production"
+    "compile": "webpack --config webpack.config.js --mode production",
+    "test": "node --experimental-strip-types --test test/*.test.ts"
   },
   "keywords": [],
   "author": "",

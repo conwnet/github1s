@@ -10,7 +10,7 @@ export const parseNpmPath = async (path: string): Promise<RouterState> => {
 	const pathParts = parsePath(path).pathname?.split('/').filter(Boolean) || [];
 
 	if (!pathParts.length) {
-		return { pageType: PageType.Tree, repo: 'lodash', ref: 'latest', filePath: '' };
+		return { pageType: PageType.Tree, repo: 'lodash', ref: 'latest', filePath: '/' };
 	}
 
 	const trimedParts = pathParts[0] === 'package' ? pathParts.slice(1) : pathParts;
@@ -20,7 +20,7 @@ export const parseNpmPath = async (path: string): Promise<RouterState> => {
 	const packageVersion =
 		trimedParts[packagePartsLength] === 'v' ? trimedParts[packagePartsLength + 1] || 'latest' : 'latest';
 
-	return { pageType: PageType.Tree as const, repo: packageName, ref: packageVersion, filePath: '' };
+	return { pageType: PageType.Tree as const, repo: packageName, ref: packageVersion, filePath: '/' };
 };
 
 export class Npmjs1sRouterParser extends RouterParser {

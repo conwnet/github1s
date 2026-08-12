@@ -65,6 +65,7 @@ export default (env, argv) => {
 		plugins: [
 			new CopyPlugin({
 				patterns: [
+					{ from: 'public/_headers', to: '_headers', toType: 'file' },
 					{ from: 'public/favicon*', to: '[name][ext]' },
 					{ from: 'public/manifest.json', to: '[name][ext]' },
 					{ from: 'public/robots.txt', to: '[name][ext]' },
@@ -87,6 +88,8 @@ export default (env, argv) => {
 				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
 				GITHUB1S_EXTENSIONS: JSON.stringify(packUtils.getBuiltinExtensions(devVscode)),
 				AVAILABLE_LANGUAGES: JSON.stringify(availableLanguages),
+				GITHUB_OAUTH_ID: JSON.stringify(process.env.GITHUB_OAUTH_ID || ''),
+				GITLAB_OAUTH_ID: JSON.stringify(process.env.GITLAB_OAUTH_ID || ''),
 			}),
 		],
 		performance: false,

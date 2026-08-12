@@ -8,9 +8,9 @@ import { relativeTimeTo } from '@/helpers/date';
 import { last } from '@/helpers/util';
 import { setVSCodeContext } from '@/helpers/vscode';
 import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { BlameRange, PlatformName } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
 
 const ageColors = [
 	'#f66a0a',
@@ -195,18 +195,16 @@ class EditorGitBlame {
 	}
 
 	async getBlameRanges(): Promise<BlameRange[]> {
-		const filePath = this.editor.document?.uri.path;
-		const fileAuthority = this.editor.document?.uri.authority || (await router.getAuthority());
-		const [repo, ref] = fileAuthority.split('+').filter(Boolean);
-		const scheme = adapterManager.getCurrentScheme();
+		const { scheme, repo, ref, path } = router.parseUri(this.editor.document?.uri);
 		const repository = Repository.getInstance(scheme, repo);
-		return filePath ? repository.getFileBlameRanges(ref, filePath.slice(1)) : [];
+		return path.length > 1 ? repository.getFileBlameRanges(ref, path) : [];
 	}
 
 	async open() {
 		this.refreshDisposables.forEach((disposable) => disposable.dispose());
 		setVSCodeContext('github1s:features:gutterBlame:open', true);
-		const { platformName } = adapterManager.getCurrentAdapter();
+		const { scheme } = router.parseUri(this.editor.document.uri);
+		const platformName = getAdapter(scheme).platformName;
 
 		(await this.getBlameRanges()).forEach((blameRange) => {
 			const hoverMessage = createCommitMessagePreviewMarkdown(blameRange, platformName);

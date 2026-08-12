@@ -15,9 +15,9 @@ import {
 	ThemeColor,
 } from 'vscode';
 import router from '@/router';
-import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
-import { adapterManager } from '@/adapters';
+import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
+import { ChangedFile, FileChangeStatus, PageType } from '@/adapters/types';
 
 export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 	[FileChangeStatus.Added]: {
@@ -43,7 +43,7 @@ export const changedFileDecorationDataMap: { [key: string]: FileDecoration } = {
 };
 
 const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[]): FileDecoration | null => {
-	const changedFile = changedFiles.find((changedFile) => changedFile.path === uri.path.slice(1));
+	const changedFile = changedFiles.find((changedFile) => changedFile.path === uri.path);
 
 	if (changedFile) {
 		return changedFileDecorationDataMap[changedFile.status];
@@ -51,7 +51,7 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 	// we have to determine the changed folder manually rather then use
 	// the `propagate` property of FileDecoration, because the file tree
 	// in the file explorer is lazy load
-	const folderPath = `${uri.path.slice(1)}/`;
+	const folderPath = uri.path.endsWith('/') ? uri.path : `${uri.path}/`;
 	const includeChangedFile = changedFiles.find((changedFile) => changedFile.path.startsWith(folderPath));
 	if (includeChangedFile) {
 		return {
@@ -63,15 +63,15 @@ const getFileDecorationFromChangeFiles = (uri: Uri, changedFiles: ChangedFile[])
 };
 
 const getFileDecorationForCodeReview = async (uri: Uri, codeReviewId: string): Promise<FileDecoration | null> => {
-	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const repository = Repository.getInstance(uri.scheme, repo);
+	const { scheme, repo } = router.parseUri(uri);
+	const repository = Repository.getInstance(scheme, repo);
 	const changedFiles = await repository.getCodeReviewChangedFiles(codeReviewId);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
 
 const getFileDecorationForCommit = async (uri: Uri, commitSha: string): Promise<FileDecoration | null> => {
-	const [repo] = (uri.authority || (await router.getAuthority()))?.split('+') || [];
-	const repository = Repository.getInstance(uri.scheme, repo);
+	const { scheme, repo } = router.parseUri(uri);
+	const repository = Repository.getInstance(scheme, repo);
 	const changedFiles = await repository.getCommitChangedFiles(commitSha);
 	return getFileDecorationFromChangeFiles(uri, changedFiles);
 };
@@ -101,18 +101,17 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
-		if (uri.scheme !== adapterManager.getCurrentScheme()) {
+		if (uri.scheme !== getAdapter().scheme) {
 			return null;
 		}
 
-		return router.getState().then((routerState) => {
-			if (routerState.pageType === PageType.CodeReview) {
-				return getFileDecorationForCodeReview(uri, routerState.codeReviewId);
-			}
-			if (routerState.pageType === PageType.Commit) {
-				return getFileDecorationForCommit(uri, routerState.commitSha);
-			}
-			return null;
-		});
+		const routerState = router.getState();
+		if (routerState.pageType === PageType.CodeReview) {
+			return getFileDecorationForCodeReview(uri, routerState.codeReviewId);
+		}
+		if (routerState.pageType === PageType.Commit) {
+			return getFileDecorationForCommit(uri, routerState.commitSha);
+		}
+		return null;
 	}
 }

@@ -3,7 +3,8 @@
  * @author netcon
  */
 
-import { adapterManager } from '@/adapters';
+import router from '@/router';
+import { getAdapter } from '@/adapters';
 import { CommitManager } from './commit-manager';
 import { CodeReviewManager } from './code-review-manager';
 import { BranchTagManager } from './branch-tag-manager';
@@ -22,6 +23,10 @@ export class Repository {
 			Repository.instanceMap.set(mapKey, new Repository(scheme, repo));
 		}
 		return Repository.instanceMap.get(mapKey)!;
+	}
+
+	public static getCurrentInstance() {
+		return Repository.getInstance(getAdapter().scheme, router.getState().repo);
 	}
 
 	private constructor(
@@ -65,32 +70,32 @@ export class Repository {
 		return this._branchTagManager.hasMoreTags(...args);
 	}
 
-	getCommitList(ref: string = 'HEAD', filePath: string = '', forceUpdate: boolean = false) {
+	getCommitList(ref: string = 'HEAD', filePath: string = '/', forceUpdate: boolean = false) {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
 	}
 
 	getCommitItem(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getItem(forceUpdate);
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getItem(forceUpdate);
 	}
 
-	loadMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+	loadMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
 	}
 
-	hasMoreCommits(ref: string = 'HEAD', filePath: string = '') {
+	hasMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
 		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
 	}
 
 	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').getChangedFiles(forceUpdate);
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getChangedFiles(forceUpdate);
 	}
 
 	loadMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').loadMoreChangedFiles();
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').loadMoreChangedFiles();
 	}
 
 	hasMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '').hasMoreChangedFiles();
+		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').hasMoreChangedFiles();
 	}
 
 	getFileLatestCommit(ref: string, filePath: string) {
@@ -136,7 +141,7 @@ export class Repository {
 	async getFileBlameRanges(ref: string, path: string) {
 		const cacheKey = `${ref} ${path}`;
 		if (!this._blameRangesCache.has(cacheKey)) {
-			const dataSource = await adapterManager.getAdapter(this._scheme).resolveDataSource();
+			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
 			this._blameRangesCache.set(cacheKey, blameRanges);
 		}

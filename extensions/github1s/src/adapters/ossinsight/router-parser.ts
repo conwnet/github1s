@@ -7,6 +7,7 @@ import { parsePath } from 'history';
 import * as queryString from 'query-string';
 import * as adapterTypes from '../types';
 import { GitHub1sRouterParser } from '../github1s/router-parser';
+import { normalizePath } from '@/helpers/util';
 
 export class OSSInsightRouterParser extends GitHub1sRouterParser {
 	protected static instance: OSSInsightRouterParser | null = null;
@@ -20,7 +21,7 @@ export class OSSInsightRouterParser extends GitHub1sRouterParser {
 
 	async parsePath(path: string): Promise<adapterTypes.RouterState> {
 		const { path: pathsOrNull } = queryString.parse((parsePath(path).search || '').slice(1));
-		const filePath = (Array.isArray(pathsOrNull) ? pathsOrNull[0] : pathsOrNull) || '';
+		const filePath = normalizePath((Array.isArray(pathsOrNull) ? pathsOrNull[0] : pathsOrNull) || '');
 		const pageType = filePath.endsWith('.md') ? adapterTypes.PageType.Blob : adapterTypes.PageType.Tree;
 		return { pageType, repo: '', ref: '', filePath };
 	}

@@ -14,7 +14,7 @@ export const showSourcegraphSearchMessage = (() => {
 			return;
 		}
 		alreadyShown = true;
-		const { repo, ref } = await router.getState();
+		const { repo, ref } = router.getState();
 		const url = `https://sourcegraph.com/github.com/${repo}@${ref}`;
 		vscode.window.showInformationMessage(`The code search ability is powered by [Sourcegraph](${url})`);
 	};

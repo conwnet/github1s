@@ -14,6 +14,7 @@ import {
 	ThemeColor,
 	Uri,
 } from 'vscode';
+import { getAllAdapters } from '@/adapters';
 import { GitHub1sFileSystemProvider } from '../file-system';
 import { Directory } from '../file-system/types';
 
@@ -49,6 +50,9 @@ export class GitHub1sSubmoduleDecorationProvider implements FileDecorationProvid
 	}
 
 	provideFileDecoration(uri: Uri, _token: CancellationToken): ProviderResult<FileDecoration> {
+		if (!getAllAdapters().some((adapter) => adapter.scheme === uri.scheme)) {
+			return null;
+		}
 		return GitHub1sFileSystemProvider.getInstance()
 			.lookup(uri, false)
 			.then((entry) => {

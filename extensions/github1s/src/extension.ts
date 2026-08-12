@@ -5,14 +5,14 @@
 
 import router from '@/router';
 import * as vscode from 'vscode';
-import { PageType } from './adapters/types';
+import { PageType } from '@/adapters/types';
+import { registerAdapters } from '@/adapters';
 import { registerCustomViews } from '@/views';
 import { decorateStatusBar } from '@/statusbar';
 import { registerEventListeners } from '@/listeners';
 import { registerVSCodeProviders } from '@/providers';
 import { registerGitHub1sCommands } from '@/commands';
 import { updateSourceControlChanges } from '@/changes';
-import { adapterManager, registerAdapters } from '@/adapters';
 import { addRecentRepositories, setExtensionContext } from '@/helpers/context';
 
 const browserUrlManager = {
@@ -49,15 +49,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // initialize the VSCode's state according to the router url
 const initialVSCodeState = async () => {
-	const routerState = await router.getState();
-	const scheme = adapterManager.getCurrentScheme();
+	const routerState = router.getState();
 
-	if (routerState.pageType === PageType.Tree && routerState.filePath) {
-		vscode.commands.executeCommand(
-			'revealInExplorer',
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
-		);
-	} else if (routerState.pageType === PageType.Blob && routerState.filePath) {
+	if (routerState.pageType === PageType.Tree && routerState.filePath !== '/') {
+		vscode.commands.executeCommand('revealInExplorer', router.buildUri({ path: routerState.filePath }));
+	} else if (routerState.pageType === PageType.Blob && routerState.filePath !== '/') {
 		const { startLine, endLine } = routerState;
 		let documentShowOptions: vscode.TextDocumentShowOptions = {};
 		if (startLine || endLine) {
@@ -65,10 +61,7 @@ const initialVSCodeState = async () => {
 			const endPosition = new vscode.Position((endLine || startLine)! - 1, 1 << 20);
 			documentShowOptions = { selection: new vscode.Range(startPosition, endPosition) };
 		}
-		vscode.window.showTextDocument(
-			vscode.Uri.parse('').with({ scheme, path: `/${routerState.filePath}` }),
-			documentShowOptions,
-		);
+		vscode.window.showTextDocument(router.buildUri({ path: routerState.filePath }), documentShowOptions);
 	} else if (routerState.pageType === PageType.CodeReviewList) {
 		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');
 	} else if (routerState.pageType === PageType.CommitList) {

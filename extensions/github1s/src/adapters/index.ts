@@ -9,7 +9,7 @@ import { GitLab1sAdapter } from './gitlab1s';
 import { BitbucketAdapter } from './bitbucket1s';
 import { Npmjs1sAdapter } from './npmjs1s';
 import { OSSInsightAdapter } from './ossinsight';
-import { DataSource, PlatformName, RouterParser } from './types';
+import { Adapter, DataSource, PlatformName, RouterParser } from './types';
 
 const emptyAdapter = {
 	scheme: 'empty',
@@ -29,4 +29,10 @@ export const registerAdapters = async (): Promise<void> => {
 	]);
 };
 
-export { adapterManager };
+export const getAdapter = (scheme?: string): Adapter => {
+	return adapterManager.getAdapter(scheme);
+};
+
+export const getAllAdapters = (): Adapter[] => {
+	return adapterManager.getAllAdapters();
+};
