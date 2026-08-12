@@ -77,9 +77,7 @@ const resourceLabelFormattersExtPoint = ExtensionsRegistry.registerExtensionPoin
 
 const posixPathSeparatorRegexp = /\//g; // on Unix, backslash is a valid filename character
 const winPathSeparatorRegexp = /[\\\/]/g; // on Windows, neither slash nor backslash are valid filename characters
-// below codes are changed by github1s
-const labelMatchingRegexp = /\$\{(scheme|authoritySuffix(?::\d+)?|authority|path|(query)\.(.+?))\}/g;
-// above codes are changed by github1s
+const labelMatchingRegexp = /\$\{(scheme|authoritySuffix|authority|path|(query)\.(.+?))\}/g;
 
 function hasDriveLetterIgnorePlatform(path: string): boolean {
 	return !!(path && path[2] === ':');
@@ -454,19 +452,13 @@ export class LabelService extends Disposable implements ILabelService {
 	}
 
 	private formatUri(resource: URI, formatting: ResourceLabelFormatting, forceNoTildify?: boolean): string {
-		// below codes are changed by github1s
-		let label = formatting.label.replace(labelMatchingRegexp, (match, tokenWithArgument, qsToken, qsValue) => {
-			const [token, argument] = tokenWithArgument.split(':');
-			// above codes are changed by github1s
+		let label = formatting.label.replace(labelMatchingRegexp, (match, token, qsToken, qsValue) => {
 			switch (token) {
 				case 'scheme': return resource.scheme;
 				case 'authority': return resource.authority;
 				case 'authoritySuffix': {
 					const i = resource.authority.indexOf('+');
-					// below codes are changed by github1s
-					const authoritySuffix = i === -1 ? resource.authority : resource.authority.slice(i + 1);
-					return argument === undefined ? authoritySuffix : authoritySuffix.slice(0, Number(argument));
-					// above codes are changed by github1s
+					return i === -1 ? resource.authority : resource.authority.slice(i + 1);
 				}
 				case 'path': {
 					let pathValue = resource.path;
