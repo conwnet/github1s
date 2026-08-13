@@ -159,7 +159,7 @@ We are partnered with [OSS Insight](https://ossinsight.io/?utm_source=github1s&u
 
 ## Stargazers over time
 
-[![Stargazers over time](https://api.star-history.com/svg?repos=conwnet/github1s&type=Date)](https://star-history.com/#conwnet/github1s&Date)
+[![Stargazers over time](https://star-history.dera.page/svg?repos=conwnet/github1s&type=Date)](https://star-history.dera.page/#conwnet/github1s&Date)
 
 <details>
 <summary>Third-party Related Projects</summary>
