@@ -176,7 +176,7 @@ export class GitHub1sDataSource extends DataSource {
 				const response = await fetcher.request(requestUrl, requestParams).catch(reject);
 				response?.data?.ref && this.matchedRefsMap.get(repoFullName)?.push(response.data.ref);
 				const result = response?.data || { ref: 'HEAD', path: '/' };
-				return resolve({ ...result, path: normalizePath(result.path) });
+				return resolve({ ...result, path: normalizePath(result.path || '') });
 			});
 			this.refPathPromiseMap.set(mapKey, refPathPromise);
 		}
