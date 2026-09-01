@@ -51,10 +51,13 @@ export class Npmjs1sDataSource extends DataSource {
 	getPackageFiles(packageName: string, version: string): Promise<PackageEntry[]> {
 		const mapKey = `${packageName} ${version}`;
 		if (!this._filesPromiseMap.has(mapKey)) {
-			const requestUrl = `https://unpkg.com/${packageName}@${version}/?meta`;
-			const filesPromise = fetch(requestUrl)
-				.then((response) => response.json())
-				.then((data) => data?.files || []);
+			const filesPromise = (async () => {
+				const packageVersions = version === 'latest' ? await this.getPackageVersions(packageName) : [];
+				const exactVersion = packageVersions.find((packageVersion) => packageVersion.tag === 'latest')?.name || version;
+				const requestUrl = `https://unpkg.com/${packageName}@${exactVersion}/?meta`;
+				const data = await fetch(requestUrl).then((response) => response.json());
+				return data?.files || [];
+			})();
 			this._filesPromiseMap.set(mapKey, filesPromise);
 		}
 		return this._filesPromiseMap.get(mapKey)!;
@@ -86,7 +89,9 @@ export class Npmjs1sDataSource extends DataSource {
 				const data = await fetch(requestUrl).then((response) => response.json(), reject);
 				const tagEntries = Object.entries(data?.['dist-tags'] || {}) as [string, string][];
 				const versionTag = tagEntries.reduce((prevVersionTag, [tag, version]) => {
-					prevVersionTag[version] = tag;
+					if (!prevVersionTag[version] || tag === 'latest') {
+						prevVersionTag[version] = tag;
+					}
 					return prevVersionTag;
 				}, {}) as Record<string, string>;
 				const packageVersions = Object.keys(data?.versions || {}).map((version) => {

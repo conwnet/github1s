@@ -39,7 +39,7 @@ export class Directory implements FileStat {
 	isSubmodule: boolean;
 
 	constructor(
-		public uri: Uri,
+		public uri: Uri, // parent directory uri
 		name: string,
 		options?: any,
 	) {
