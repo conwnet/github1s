@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
 import { basename } from '@/helpers/util';

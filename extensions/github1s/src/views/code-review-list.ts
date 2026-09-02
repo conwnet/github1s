@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import { Repository } from '@/repository';
 import { Barrier } from '@/helpers/async';
 import { relativeTimeTo, toISOString } from '@/helpers/date';
