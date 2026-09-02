@@ -8,7 +8,7 @@ import router from '@/router';
 import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
 import { Barrier } from '@/helpers/async';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import { relativeTimeTo, toISOString } from '@/helpers/date';
 import * as adapterTypes from '@/adapters/types';
 import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
