@@ -105,10 +105,29 @@ export class GitHub1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const fetcher = GitHubFetcher.getInstance();
+		const repositoryParams = parseRepoFullName(repoFullName);
+		if (recursive) {
+			const response = await fetcher
+				.request('GET /repos/{owner}/{repo}/git/tree-file-list/{ref}', { ref, ...repositoryParams })
+				.catch(() => null);
+			const filePaths = response?.data;
+			if (Array.isArray(filePaths) && filePaths.every(isString)) {
+				const directoryPath = path.split('/').filter(Boolean).join('/');
+				const directoryPrefix = directoryPath ? `${directoryPath}/` : '';
+				const entries: DirectoryEntry[] = filePaths
+					.filter((filePath: string) => filePath.startsWith(directoryPrefix))
+					.map((filePath: string) => ({
+						path: concatPath(path, filePath.slice(directoryPrefix.length)),
+						type: FileType.File,
+					}));
+				return { entries, truncated: false };
+			}
+		}
+
 		const encodedPath = trimStart(encodeFilePath(path), '/');
 		// github api will return all files if `recursive` exists, even the value if false
 		const recursiveParams = recursive ? { recursive } : {};
-		const requestParams = { ref, path: encodedPath, ...parseRepoFullName(repoFullName), ...recursiveParams };
+		const requestParams = { ref, path: encodedPath, ...repositoryParams, ...recursiveParams };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
 			path: concatPath(path, treeItem.path),
