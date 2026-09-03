@@ -11,18 +11,19 @@
     "watch-with-vscode": "DEV_VSCODE=true npm run watch",
     "link": "node scripts/link.js",
     "format": "prettier --write .",
-    "eslint": "eslint --fix",
+    "eslint": "eslint . --fix",
+    "eslint:check": "eslint .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p functions/tsconfig.json",
     "test:ci": "start-test watch:dev-server 8080 test",
     "test": "cd tests && npm install && npx playwright install && npm run test",
     "postinstall": "husky install && node scripts/postinstall.js"
   },
   "lint-staged": {
-    "*.{js,ts}": [
+    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{json.css,md,yml,yaml}": [
+    "*.{json,css,md,yml,yaml}": [
       "prettier --write"
     ]
   },
