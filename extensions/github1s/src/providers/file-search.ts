@@ -23,7 +23,7 @@ import { GitHub1sFileSystemProvider } from './file-system';
 export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposable {
 	private static instance: GitHub1sFileSearchProvider | null = null;
 	private readonly disposable: Disposable;
-	private fileUrisMap: Map<string, Uri[]> = new Map();
+	private filePathsMap: Map<string, string[]> = new Map();
 
 	private constructor() {
 		// Preload the files for better `ctrl/command + p` experience.
@@ -46,50 +46,58 @@ export class GitHub1sFileSearchProvider implements FileSearchProvider, Disposabl
 
 	// load the files for current workspace
 	async loadFilesForCurrentWorkspace() {
-		return this.getFileUris();
+		return this.getFileUris(router.buildUri({ path: '/' }));
 	}
 
 	/**
-	 * Get all files for the repo with specified for current workspace.
+	 * Get all files for the repo with specified rootUri.
 	 * The response of corresponding API maybe truncated, if so,
 	 * we should not insert the response to the fileSystemProvider's
 	 * cache, and the fuzzy search maybe not work fine
 	 */
-	getFileUris = reuseable(async (): Promise<Uri[]> => {
-		const { repo, ref } = router.getState();
-		const cacheKey = `${repo}@${ref}`;
+	getFileUris = reuseable(
+		async (rootUri: Uri): Promise<Uri[]> => {
+			const { scheme, repo, ref } = router.parseUri(rootUri);
+			const cacheKey = `${scheme}:${repo}@${ref}`;
 
-		if (this.fileUrisMap.has(cacheKey)) {
-			return this.fileUrisMap.get(cacheKey)!;
-		}
+			if (this.filePathsMap.has(cacheKey)) {
+				return this.filePathsMap.get(cacheKey)!.map((path) => {
+					return rootUri.with({ path });
+				});
+			}
 
-		const dataSource = await getAdapter().resolveDataSource();
-		const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
-		const rootDirectoryUri = router.buildUri({ path: '/' });
+			rootUri = rootUri.with({ path: '/' }); // ensure the rootPath
+			const dataSource = await getAdapter(scheme).resolveDataSource();
+			const rootDirectoryData = await dataSource.provideDirectory(repo, ref, '/', true);
 
-		// the number of items in the tree array maybe exceeded maximum limit, only
-		// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
-		if (!rootDirectoryData?.truncated) {
-			const fsProvider = GitHub1sFileSystemProvider.getInstance();
-			fsProvider.populateWithDirectoryEntities(rootDirectoryUri, rootDirectoryData?.entries || []);
-		} else {
-			window.showWarningMessage('Too many files in this repository, file search feature may be limited.');
-		}
+			// the number of items in the tree array maybe exceeded maximum limit, only
+			// insert the data to fileSystemProvider's cache if `treeData.truncated` is false
+			if (!rootDirectoryData?.truncated) {
+				const fsProvider = GitHub1sFileSystemProvider.getInstance();
+				fsProvider.populateWithDirectoryEntities(rootUri, rootDirectoryData?.entries || []);
+			} else {
+				window.showWarningMessage('Too many files in this repository, file search feature may be limited.');
+			}
 
-		const fileUris = (rootDirectoryData?.entries || [])
-			.filter((item) => item.type === adapterTypes.FileType.File)
-			.map((item) => rootDirectoryUri.with({ path: item.path }));
-		this.fileUrisMap.set(cacheKey, fileUris);
-		return fileUris;
-	});
+			const filePaths = (rootDirectoryData?.entries || [])
+				.filter((item) => item.type === adapterTypes.FileType.File)
+				.map((item) => item.path);
+			this.filePathsMap.set(cacheKey, filePaths);
+			return filePaths.map((path) => rootUri.with({ path }));
+		},
+		(rootUri) => rootUri.toString(),
+	);
 
 	provideFileSearchResults(
 		query: FileSearchQuery,
-		_options: FileSearchOptions,
+		options: FileSearchOptions,
 		_token: CancellationToken,
 	): ProviderResult<Uri[]> {
 		return new Promise(async (resolve) => {
-			resolve(matchSorter(await this.getFileUris(), query.pattern));
+			const folderPath = options.folder.path.replace(/\/+$/, '');
+			const rootUri = options.folder.with({ path: '/' });
+			const fileUris = (await this.getFileUris(rootUri)).filter((uri) => uri.path.startsWith(`${folderPath}/`));
+			resolve(matchSorter(fileUris, query.pattern));
 		});
 	}
 }
