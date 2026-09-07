@@ -73,8 +73,13 @@ export interface TextSearchQuery {
 	isWordMatch?: boolean;
 }
 
-// `includes` and `excludes` both are glob strings
-export type TextSearchOptions = { includes?: string[]; excludes?: string[] } & PaginationOptions;
+// `includes` and `excludes` both are glob strings; `path` limits the workspace folder.
+export type TextSearchOptions = {
+	path?: string;
+	includes?: string[];
+	excludes?: string[];
+	maxResults?: number;
+} & PaginationOptions;
 
 export interface TextSearchResults {
 	results: {

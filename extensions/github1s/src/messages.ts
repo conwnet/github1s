@@ -3,22 +3,7 @@
  */
 
 import * as vscode from 'vscode';
-import router from '@/router';
 import { getSourcegraphUrl } from '@/helpers/urls';
-
-export const showSourcegraphSearchMessage = (() => {
-	let alreadyShown = false;
-
-	return async () => {
-		if (alreadyShown) {
-			return;
-		}
-		alreadyShown = true;
-		const { repo, ref } = router.getState();
-		const url = `https://sourcegraph.com/github.com/${repo}@${ref}`;
-		vscode.window.showInformationMessage(`The code search ability is powered by [Sourcegraph](${url})`);
-	};
-})();
 
 export const showSourcegraphSymbolMessage = (() => {
 	let alreadyShown = false;

@@ -31,6 +31,7 @@ import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
+import { getGitHubTextSearchResults, getSearchcodeTextSearchResults } from './search';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 import { decorate, memorize } from '@/helpers/func';
 import { normalizePath, trimStart, concatPath, isString } from '@/helpers/util';
@@ -248,13 +249,23 @@ export class GitHub1sDataSource extends DataSource {
 		return tags.find((item) => item.name === tagName) || null;
 	}
 
+	@trySourcegraphApiFirst
 	async provideTextSearchResults(
 		repoFullName: string,
 		ref: string,
 		query: TextSearchQuery,
 		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
-		return sourcegraphDataSource.provideTextSearchResults(repoFullName, ref, query, options);
+		try {
+			// Prefer using the searchcode.com API, and fallback to GitHub API if it's unavailable.
+			return await getSearchcodeTextSearchResults(`${GITHUB_ORIGIN}/${repoFullName}`, query, options);
+		} catch {
+			// Now Github API is blocked by CORS, so we use a CF Worker to proxy this request temporarily
+			// Proxy Worker source code: functions/api/github/search/code.ts
+			// Also see https://github.com/orgs/community/discussions/206576
+			const baseUrl = `${self.location.origin}/api/github`;
+			return getGitHubTextSearchResults(GitHubFetcher.getInstance().request, baseUrl, repoFullName, query, options);
+		}
 	}
 
 	@trySourcegraphApiFirst
