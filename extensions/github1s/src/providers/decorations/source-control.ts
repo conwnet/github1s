@@ -14,7 +14,7 @@ import {
 	Uri,
 } from 'vscode';
 import router from '@/router';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import { changedFileDecorationDataMap } from './changed-file';
 
 const selectedViewItemDecoration: FileDecoration = {

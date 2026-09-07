@@ -82,15 +82,16 @@ export class GitHubFetcher {
 
 		this._request = octokit.request;
 		this.request = Object.assign((...args: Parameters<Octokit['request']>) => {
-			return octokit.request(...args).catch(async (error) => {
+			return this._request!(...args).catch(async (error) => {
 				const errorStatus = error?.response?.status as number | undefined;
 				const repoNotFound = errorStatus === 404 && !(await this.resolveCurrentRepo());
 				if ((errorStatus && [401, 403].includes(errorStatus)) || repoNotFound) {
 					// maybe we have to acquire github access token to continue
-					const message = detectErrorMessage(error?.response, !!accessToken);
+					const message = detectErrorMessage(error?.response, !!GitHubTokenManager.getInstance().getToken());
 					await GitHub1sAuthenticationView.getInstance().open(message, true);
 					return this._request!(...args);
 				}
+				throw error;
 			});
 		}, this._request);
 

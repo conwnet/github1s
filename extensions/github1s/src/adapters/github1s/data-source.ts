@@ -31,6 +31,7 @@ import { toUint8Array } from 'js-base64';
 import { matchSorter } from 'match-sorter';
 import { FILE_BLAME_QUERY } from './graphql';
 import { GitHubFetcher } from './fetcher';
+import { getGitHubTextSearchResults, getSearchcodeTextSearchResults } from './search';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 import { decorate, memorize } from '@/helpers/func';
 import { normalizePath, trimStart, concatPath, isString } from '@/helpers/util';
@@ -105,10 +106,29 @@ export class GitHub1sDataSource extends DataSource {
 	@trySourcegraphApiFirst
 	async provideDirectory(repoFullName: string, ref: string, path: string, recursive = false): Promise<Directory> {
 		const fetcher = GitHubFetcher.getInstance();
+		const repositoryParams = parseRepoFullName(repoFullName);
+		if (recursive) {
+			const response = await fetcher
+				.request('GET /repos/{owner}/{repo}/git/tree-file-list/{ref}', { ref, ...repositoryParams })
+				.catch(() => null);
+			const filePaths = response?.data;
+			if (Array.isArray(filePaths) && filePaths.every(isString)) {
+				const directoryPath = path.split('/').filter(Boolean).join('/');
+				const directoryPrefix = directoryPath ? `${directoryPath}/` : '';
+				const entries: DirectoryEntry[] = filePaths
+					.filter((filePath: string) => filePath.startsWith(directoryPrefix))
+					.map((filePath: string) => ({
+						path: concatPath(path, filePath.slice(directoryPrefix.length)),
+						type: FileType.File,
+					}));
+				return { entries, truncated: false };
+			}
+		}
+
 		const encodedPath = trimStart(encodeFilePath(path), '/');
 		// github api will return all files if `recursive` exists, even the value if false
 		const recursiveParams = recursive ? { recursive } : {};
-		const requestParams = { ref, path: encodedPath, ...parseRepoFullName(repoFullName), ...recursiveParams };
+		const requestParams = { ref, path: encodedPath, ...repositoryParams, ...recursiveParams };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/git/trees/{ref}:{path}', requestParams);
 		const parseTreeItem = (treeItem): DirectoryEntry => ({
 			path: concatPath(path, treeItem.path),
@@ -176,7 +196,7 @@ export class GitHub1sDataSource extends DataSource {
 				const response = await fetcher.request(requestUrl, requestParams).catch(reject);
 				response?.data?.ref && this.matchedRefsMap.get(repoFullName)?.push(response.data.ref);
 				const result = response?.data || { ref: 'HEAD', path: '/' };
-				return resolve({ ...result, path: normalizePath(result.path) });
+				return resolve({ ...result, path: normalizePath(result.path || '') });
 			});
 			this.refPathPromiseMap.set(mapKey, refPathPromise);
 		}
@@ -229,13 +249,23 @@ export class GitHub1sDataSource extends DataSource {
 		return tags.find((item) => item.name === tagName) || null;
 	}
 
+	@trySourcegraphApiFirst
 	async provideTextSearchResults(
 		repoFullName: string,
 		ref: string,
 		query: TextSearchQuery,
 		options: TextSearchOptions,
 	): Promise<TextSearchResults> {
-		return sourcegraphDataSource.provideTextSearchResults(repoFullName, ref, query, options);
+		try {
+			// Prefer using the searchcode.com API, and fallback to GitHub API if it's unavailable.
+			return await getSearchcodeTextSearchResults(`${GITHUB_ORIGIN}/${repoFullName}`, query, options);
+		} catch {
+			// Now Github API is blocked by CORS, so we use a CF Worker to proxy this request temporarily
+			// Proxy Worker source code: functions/api/github/search/code.ts
+			// Also see https://github.com/orgs/community/discussions/206576
+			const baseUrl = `${self.location.origin}/api/github`;
+			return getGitHubTextSearchResults(GitHubFetcher.getInstance().request, baseUrl, repoFullName, query, options);
+		}
 	}
 
 	@trySourcegraphApiFirst

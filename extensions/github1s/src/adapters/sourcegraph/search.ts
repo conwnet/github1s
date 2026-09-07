@@ -17,10 +17,17 @@ export const buildTextSearchQueryString = (
 	const repoPattern = buildRepoPattern(repository);
 	const countString = `count:${options.pageSize ? (options.page || 1) * options.pageSize : 100}`;
 	const repoRefString = ref.toUpperCase() === 'HEAD' ? `repo:${repoPattern}` : `repo:${repoPattern}@${ref}`;
+	const pathPattern = options.path
+		?.split('/')
+		.filter(Boolean)
+		.map((segment) => escapeRegexp(segment))
+		.join('/');
+	const includePattern = options.includes?.length ? combineGlobsToRegExp(options.includes) : '';
 	// the string may looks like `case:yse file:src -file:node_modules`
 	const optionsString = [
 		query.isCaseSensitive ? `case:yes` : '',
-		options.includes?.length ? `file:${combineGlobsToRegExp(options.includes)}` : '',
+		pathPattern ? `file:^${pathPattern}/` : '',
+		includePattern ? `file:${includePattern}` : '',
 		options.excludes?.length ? `-file:${combineGlobsToRegExp(options.excludes)}` : '',
 	]
 		.filter(Boolean)
@@ -79,7 +86,13 @@ const textSearchQuery = gql`
 `;
 
 const formatTextSearchResults = (searchResults, offset: number, limit: number) => {
-	const truncated = !!searchResults?.limitHit;
+	const truncated = !!(
+		searchResults?.limitHit ||
+		searchResults?.missing?.length ||
+		searchResults?.cloning?.length ||
+		searchResults?.timedout?.length ||
+		searchResults?.indexUnavailable
+	);
 	const results = (searchResults?.results || []).slice(offset, limit).flatMap((fileMatch) => {
 		const path = fileMatch?.file?.path;
 
@@ -116,5 +129,9 @@ export const getTextSearchResults = (
 			query: textSearchQuery,
 			variables: { query: buildTextSearchQueryString(repository, ref, query, options) },
 		})
-		.then((response) => formatTextSearchResults(response?.data?.search?.results, offset, limit));
+		.then((response) => {
+			const searchResults = response?.data?.search?.results;
+			if (!searchResults) throw new Error('Sourcegraph returned an invalid search response.');
+			return formatTextSearchResults(searchResults, offset, limit);
+		});
 };

@@ -68,7 +68,8 @@ export class GitHub1sFileSystemProvider implements FileSystemProvider, Disposabl
 			const pathParts = dirname(entry.path).split('/').filter(Boolean);
 			pathParts.forEach((part) => {
 				if (!(current.entries || (current.entries = new Map<string, Entry>())).has(part)) {
-					current.entries.set(part, createEntry(adapterTypes.FileType.Directory, current.uri, current.name));
+					const entryUri = Uri.joinPath(current.uri, current.name);
+					current.entries.set(part, createEntry(adapterTypes.FileType.Directory, entryUri, part));
 				}
 				current = current.entries.get(part) as Directory;
 			});

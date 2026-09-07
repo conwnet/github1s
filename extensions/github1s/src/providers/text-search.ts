@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import router from '@/router';
 import { getAdapter } from '@/adapters';
-import { showSourcegraphSearchMessage } from '@/messages';
 import * as adapterTypes from '@/adapters/types';
 
 const ensureArray = <T>(arrayOrItem: T | T[]): T[] => (Array.isArray(arrayOrItem) ? arrayOrItem : [arrayOrItem]);
@@ -39,7 +38,14 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 		return Promise.resolve().then(async () => {
 			const { repo, ref } = router.getState();
 			const dataSource = await getAdapter().resolveDataSource();
-			const searchOptions = { page: 1, pageSize: 100, includes: options.includes, excludes: options.excludes };
+			const searchOptions = {
+				page: 1,
+				pageSize: 100,
+				path: options.folder.path,
+				includes: options.includes,
+				excludes: options.excludes,
+				maxResults: options.maxResults,
+			};
 			const searchResults = await dataSource.provideTextSearchResults(repo, ref, query, searchOptions);
 
 			(searchResults.results || []).forEach((item) => {
@@ -54,7 +60,6 @@ export class GitHub1sTextSearchProvider implements vscode.TextSearchProvider, vs
 				progress.report({ uri: fileUri, ranges, preview });
 			});
 
-			showSourcegraphSearchMessage();
 			return { limitHit: searchResults.truncated };
 		});
 	}

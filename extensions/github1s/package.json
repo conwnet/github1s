@@ -637,9 +637,10 @@
     "js-base64": "^3.7.2",
     "json-stable-stringify": "^1.0.1",
     "match-sorter": "^6.3.1",
+    "minimatch": "^9.0.9",
     "p-finally": "^3.0.0",
     "process": "^0.11.10",
-    "query-string": "^7.1.1"
+    "query-string": "^9.5.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.96.0",

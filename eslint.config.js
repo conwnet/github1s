@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default [
-	{ ignores: ['**/dist', '**/assets', 'vscode-web/lib', '**/vs', '**/vscode.proposed.d.ts'] },
+	{ ignores: ['**/dist', '**/out', '**/assets', 'vscode-web/lib', '**/vs', '**/vscode.proposed.d.ts'] },
 	...tseslint.configs.recommended,
 	jsdoc.configs['flat/recommended-typescript'],
 	eslintPluginPrettierRecommended,

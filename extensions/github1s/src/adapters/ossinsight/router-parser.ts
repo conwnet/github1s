@@ -4,7 +4,7 @@
  */
 
 import { parsePath } from 'history';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import * as adapterTypes from '../types';
 import { GitHub1sRouterParser } from '../github1s/router-parser';
 import { normalizePath } from '@/helpers/util';

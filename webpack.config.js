@@ -95,6 +95,21 @@ export default (env, argv) => {
 		performance: false,
 		devServer: {
 			port: 8080,
+			proxy: [
+				{
+					context: ['/api/github/search/code'],
+					target: 'https://api.github.com',
+					changeOrigin: true,
+					pathRewrite: { '^/api/github': '' },
+					headers: { 'user-agent': 'GitHub1s' },
+					on: {
+						proxyReq: (proxyReq) => {
+							proxyReq.removeHeader('cookie');
+							proxyReq.removeHeader('origin');
+						},
+					},
+				},
+			],
 			liveReload: false,
 			allowedHosts: 'all',
 			client: { overlay: false },

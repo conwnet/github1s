@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { parsePath } from 'history';
 import { PageType, RouterState } from '@/adapters/types';
 import { GitHub1sDataSource } from './data-source';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import { memorize } from '@/helpers/func';
 import { getBrowserUrl } from '@/helpers/context';
 

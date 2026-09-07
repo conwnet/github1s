@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import * as queryString from 'query-string';
+import queryString from 'query-string';
 import router from '@/router';
 import { emptyFileUri } from '@/providers';
 import { FileChangeStatus } from '@/adapters/types';
