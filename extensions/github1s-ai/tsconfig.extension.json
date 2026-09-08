@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "out-extension"
+  },
+  "include": ["src"],
+  "exclude": ["src/webview"]
+}
