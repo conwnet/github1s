@@ -25,5 +25,8 @@ export const createProductConfiguration = (platform: Platform) => ({
 		'*.ossinsight.io',
 		'*.open-vsx.org',
 	],
-	extensionEnabledApiProposals: { 'ms-vscode.anycode': ['extensionsAny'] },
+	extensionEnabledApiProposals: {
+		'ms-vscode.anycode': ['extensionsAny'],
+		'github1s.github1s-ai': ['documentSyntaxHighlighting', 'findTextInFiles'],
+	},
 });

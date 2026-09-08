@@ -1,0 +1,135 @@
+{
+  "name": "github1s-ai",
+  "version": "0.0.1",
+  "publisher": "github1s",
+  "description": "AI chat for GitHub1s.",
+  "icon": "assets/extension.png",
+  "private": true,
+  "browser": "./dist/extension",
+  "engines": {
+    "vscode": "^1.132.0"
+  },
+  "capabilities": {
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "github1s-ai.openChat",
+        "title": "Open Chat",
+        "category": "GitHub1s AI"
+      },
+      {
+        "command": "github1s-ai.openChatHistory",
+        "title": "Show History",
+        "category": "GitHub1s AI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "github1s-ai.newChat",
+        "title": "New Chat",
+        "category": "GitHub1s AI",
+        "icon": "$(add)"
+      },
+      {
+        "command": "github1s-ai.openSettings",
+        "title": "Open AI Settings",
+        "category": "GitHub1s AI",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "github1s-ai.addContextToChat",
+        "title": "Add to GitHub1s AI Chat",
+        "category": "GitHub1s AI",
+        "icon": {
+          "light": "assets/view.svg",
+          "dark": "assets/view-dark.svg"
+        }
+      }
+    ],
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "github1s-ai",
+          "title": "GitHub1s AI",
+          "icon": "assets/view.svg"
+        }
+      ]
+    },
+    "views": {
+      "github1s-ai": [
+        {
+          "id": "github1s-ai.chatView",
+          "name": "Chat",
+          "type": "webview",
+          "icon": "assets/view.svg"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "github1s-ai.addContextToChat",
+          "when": "activeEditor == workbench.editors.files.textFileEditor && !isInDiffEditor",
+          "group": "navigation@-1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "github1s-ai.addContextToChat",
+          "when": "editorHasSelection && !isInDiffEditor && !isInEmbeddedEditor",
+          "group": "github1s-ai@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "github1s-ai.newChat",
+          "when": "view == github1s-ai.chatView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "github1s-ai.openChatHistory",
+          "when": "view == github1s-ai.chatView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "github1s-ai.openSettings",
+          "when": "view == github1s-ai.chatView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist out",
+    "watch": "webpack --config webpack.config.js --mode development --watch",
+    "test": "tsx --tsconfig test/tsconfig.json --test test/*.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.extension.json && tsc --noEmit -p tsconfig.webview.json",
+    "compile": "npm run clean && webpack --config webpack.config.js --mode production"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.46",
+    "@ai-sdk/mcp": "2.0.41",
+    "@ai-sdk/openai": "4.0.53",
+    "@ai-sdk/openai-compatible": "3.0.41",
+    "ai": "7.0.87",
+    "dompurify": "3.4.13",
+    "htm": "3.1.1",
+    "lodash-es": "4.18.1",
+    "markdown-it": "15.0.0",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "4.17.12",
+    "@types/vscode": "1.125.0",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-minimizer-webpack-plugin": "^8.0.0",
+    "ts-loader": "^9.5.1",
+    "tsx": "4.23.12",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
