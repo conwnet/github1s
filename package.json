@@ -8,6 +8,7 @@
     "watch": "rm -rf dist && run-p watch:*",
     "watch:dev-server": "webpack serve --mode=development",
     "watch:github1s-extension": "cd extensions/github1s && npm run watch",
+    "watch:github1s-ai-extension": "cd extensions/github1s-ai && npm run watch",
     "watch-with-vscode": "DEV_VSCODE=true npm run watch",
     "link": "node scripts/link.js",
     "format": "prettier --write .",
