@@ -76,13 +76,26 @@ export const memorize = <T extends (...args: any[]) => any>(
 
 		const result = func.call(this, ...args);
 		cache.set(key, result);
+		// Retain pending and fulfilled results, but allow the next call to retry a failure.
+		if (result && typeof result.then === 'function') {
+			Promise.resolve(result).catch(() => cache.delete(key));
+		}
 		return result;
 	};
 };
 
 export const decorate = <F extends (...args: unknown[]) => unknown>(transformer: (func: F) => F) => {
 	return <T>(_target: T, _propertyKey: string, descriptor: PropertyDescriptor) => {
-		const originalMethod = descriptor.value;
-		descriptor.value = transformer(originalMethod as F);
+		const originalMethod: F = descriptor.value;
+		// Stateful transformers, such as memorize, need a separate wrapper for each instance.
+		const methods = new WeakMap<object, F>();
+		descriptor.value = function (this: object, ...args: Parameters<F>): ReturnType<F> {
+			let method = methods.get(this);
+			if (!method) {
+				method = transformer(originalMethod);
+				methods.set(this, method);
+			}
+			return method.apply(this, args);
+		};
 	};
 };
