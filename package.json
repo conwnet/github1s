@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
+    "discovery": "node scripts/run-discovery.ts",
     "watch": "rm -rf dist && run-p watch:*",
     "watch:dev-server": "webpack serve --mode=development",
     "watch:github1s-extension": "cd extensions/github1s && npm run watch",
@@ -32,8 +33,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250109.0",
+    "@cloudflare/workers-types": "^5.20260910.1",
     "@github1s/vscode-web": "^0.30.2",
+    "@types/node": "^22.10.5",
     "chokidar": "^4.0.3",
     "clean-css": "^5.3.3",
     "copy-webpack-plugin": "^14.0.0",

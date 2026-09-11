@@ -41,7 +41,6 @@ type SupportedPlatform = 'github' | 'gitlab' | 'bitbucket';
 export class SourcegraphDataSource extends DataSource {
 	private static instanceMap: Map<SupportedPlatform, SourcegraphDataSource> = new Map();
 	private refsPromiseMap: Map<string, Promise<{ branches: Branch[]; tags: Tag[] }>> = new Map();
-	private repositoryPromiseMap: Map<string, Promise<{ private: boolean; defaultBranch: string } | null>> = new Map();
 	private fileTypeMap: Map<string, FileType> = new Map(); // cache if path is a directory
 	private matchedRefsMap: Map<string, string[]> = new Map();
 	private textEncoder = new TextEncoder();
@@ -91,11 +90,9 @@ export class SourcegraphDataSource extends DataSource {
 		return this.fileTypeMap.get(mapKey) || FileType.File;
 	}
 
+	@decorate(memorize)
 	async provideRepository(repo: string) {
-		if (!this.repositoryPromiseMap.has(repo)) {
-			this.repositoryPromiseMap.set(repo, getRepository(this.buildRepository(repo)));
-		}
-		return this.repositoryPromiseMap.get(repo);
+		return getRepository(this.buildRepository(repo));
 	}
 
 	async provideFile(repo: string, ref: string, path: string): Promise<File> {
