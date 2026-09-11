@@ -13,7 +13,7 @@ const createFolderWorkspace = (scheme: string) => ({
 });
 
 const openGitHub1sPage = () => {
-	return window.open('https://github.com/conwnet/github1s', '_blank');
+	return window.open('https://github.com/conwnet/github1s', '_blank');code
 };
 
 const openOfficialPage = (origin: string) => {
