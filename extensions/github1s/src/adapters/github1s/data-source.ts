@@ -74,7 +74,9 @@ const trySourcegraphApiFirst = (_target: any, propertyKey: string, descriptor: P
 		if (await githubFetcher.getPreferSourcegraphApi(args[0])) {
 			try {
 				return await sourcegraphDataSource[propertyKey](...args);
-			} catch (e) {}
+			} catch {
+				await githubFetcher.setPreferSourcegraphApi(false, args[0]);
+			}
 		}
 		return originalMethod.apply(this, args);
 	};
