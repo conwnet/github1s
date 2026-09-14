@@ -1307,6 +1307,10 @@ summary:focus-visible,
 
 .attachment-name {
 	gap: 3px;
+	padding: 0;
+	color: inherit;
+	background: transparent;
+	border: 0;
 }
 
 .attachment-label {

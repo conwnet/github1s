@@ -1,6 +1,6 @@
 import { html, render } from 'htm/preact';
 
-import type { ViewMessage, ViewRequest } from '@/common/protocol';
+import type { ViewEvent, ViewMessage } from '@/common/protocol';
 
 import { App } from './App';
 import { setiFileIconPresentation } from './helpers/attachments';
@@ -10,7 +10,7 @@ const root = document.getElementById('app');
 
 if (!root) throw new Error('Missing webview app root.');
 
-const post = (request: ViewRequest): void => vscode.postMessage(request);
+const post = (event: ViewEvent): void => vscode.postMessage(event);
 
 window.addEventListener('message', ({ data }: MessageEvent<unknown>) => {
 	if (!data || typeof data !== 'object') return;

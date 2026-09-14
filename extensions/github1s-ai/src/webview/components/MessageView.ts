@@ -1,8 +1,8 @@
 import { html } from 'htm/preact';
 
 import type { ConversationMessage } from '@/common/conversation';
+import type { ViewEvent } from '@/common/protocol';
 
-import type { PostMarkdownHighlightRequest } from '../helpers/highlighting';
 import { messageStatusLabel } from '../helpers/presentation';
 import { AssistantActivity, isAssistantActivityPart, type AssistantActivityPart } from './AssistantActivity';
 import { AttachmentChips } from './AttachmentChips';
@@ -15,7 +15,7 @@ type AssistantSegment =
 
 interface MessageViewProps {
 	message: ConversationMessage;
-	post: PostMarkdownHighlightRequest;
+	post: (event: ViewEvent) => void;
 }
 
 export const MessageView = ({ message, post }: MessageViewProps) => {
@@ -28,7 +28,7 @@ export const MessageView = ({ message, post }: MessageViewProps) => {
 
 	return html`<article class=${`message message-${message.role}`}>
 		${message.role === 'user'
-			? html`<${UserRequest} message=${message} />`
+			? html`<${UserRequest} message=${message} post=${post} />`
 			: html`<div class="assistant-response">
 					${segments.map((segment) =>
 						segment.type === 'text'
@@ -86,13 +86,16 @@ const assistantSegments = (message: ConversationMessage): AssistantSegment[] => 
 	return segments;
 };
 
-const UserRequest = ({ message }: { message: ConversationMessage }) => {
+const UserRequest = ({ message, post }: MessageViewProps) => {
 	const text = message.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('');
 	const attachments = message.parts.flatMap((part) => (part.type === 'data-attachments' ? part.data : []));
 	const recentFiles = message.parts.flatMap((part) => (part.type === 'data-recentFiles' ? part.data : []));
 	const request = html`<div class="user-request" tabindex=${recentFiles.length > 0 ? 0 : undefined}>
 		<div class="user-content">${text}</div>
-		<${AttachmentChips} attachments=${attachments} />
+		<${AttachmentChips}
+			attachments=${attachments}
+			onOpen=${(source: string) => post({ type: 'app.openFile', source })}
+		/>
 	</div>`;
 	return recentFiles.length > 0 ? html`<${RecentFilesTooltip} files=${recentFiles}>${request}<//>` : request;
 };
