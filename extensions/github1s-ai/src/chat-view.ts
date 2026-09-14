@@ -1,13 +1,8 @@
 import * as vscode from 'vscode';
 
-import {
-	parseMarkdownHighlightRequest,
-	parseViewEvent,
-	type MarkdownHighlightRequest,
-	type ViewMessage,
-} from '@/common/protocol';
-import { currentFile, currentSelection } from '@/contexts';
+import { parseViewEvent, type ViewEvent, type ViewMessage } from '@/common/protocol';
 import { Controllers } from '@/controllers';
+import { currentFile, currentSelection } from '@/controllers/context';
 import { computeSyntaxHighlighting, onDidChangeSyntaxHighlighting } from '@/helpers/highlighting';
 
 interface ChatHtmlOptions {
@@ -78,18 +73,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider, vscode.Disp
 				void view.webview.postMessage({ type: 'app.setState', state } satisfies ViewMessage);
 			}),
 			view.webview.onDidReceiveMessage((event) => {
-				const highlightRequest = parseMarkdownHighlightRequest(event);
-				if (highlightRequest) {
-					void this.respondWithSyntaxHighlighting(view.webview, highlightRequest).catch(() => undefined);
+				const parsed = parseViewEvent(event);
+				if (!parsed) return;
+				if (parsed.type === 'markdown.highlight') {
+					// Bypass Controllers.emit to avoid syncing the full view state for each code block.
+					void this.respondWithSyntaxHighlighting(view.webview, parsed).catch(() => undefined);
 					return;
 				}
-				const parsed = parseViewEvent(event);
-				if (parsed) {
-					this.controllers
-						.emit(parsed)
-						.then((message) => message && view.webview.postMessage(message))
-						.catch(() => undefined);
-				}
+				this.controllers
+					.emit(parsed)
+					.then((message) => message && view.webview.postMessage(message))
+					.catch(() => undefined);
 			}),
 		);
 		const highlightingListener = onDidChangeSyntaxHighlighting(() => {
@@ -137,7 +131,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider, vscode.Disp
 
 	private async respondWithSyntaxHighlighting(
 		webview: vscode.Webview,
-		request: MarkdownHighlightRequest,
+		request: ViewEvent<'markdown.highlight'>,
 	): Promise<void> {
 		const highlighting = await computeSyntaxHighlighting(request.source, request.languageId);
 		await webview.postMessage({

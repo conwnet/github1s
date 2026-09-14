@@ -54,6 +54,7 @@ type ConversationUsage = Pick<LanguageModelUsage, 'inputTokens' | 'outputTokens'
 export interface ConversationUsagePresentation {
 	title: string;
 	value: string;
+	details: string[];
 }
 
 export const presentConversationUsage = (
@@ -75,14 +76,15 @@ export const presentConversationUsage = (
 		maximumFractionDigits: 1,
 	});
 	const details = [
-		`${exact.format(totalTokens)} tokens total`,
+		`${exact.format(totalTokens)} total`,
 		...(inputTokens === undefined ? [] : [`${exact.format(inputTokens)} input`]),
 		...(outputTokens === undefined ? [] : [`${exact.format(outputTokens)} output`]),
 	];
 
 	return {
-		title: `Conversation usage: ${details.join(' · ')}`,
+		title: `Tokens usage:\n${details.join('\n')}`,
 		value: compact.format(totalTokens),
+		details,
 	};
 };
 

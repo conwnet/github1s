@@ -2,7 +2,7 @@ import { html } from 'htm/preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 
 import type { ConversationMessage } from '@/common/conversation';
-import type { ViewRequest, ViewState } from '@/common/protocol';
+import type { ViewEvent, ViewState } from '@/common/protocol';
 import { QUICK_ACTIONS } from '@/common/quick-actions';
 
 import { Composer } from './Composer';
@@ -11,7 +11,7 @@ import { MessageView } from './MessageView';
 
 interface ChatContextProps {
 	state: ViewState;
-	post: (request: ViewRequest) => void;
+	post: (event: ViewEvent) => void;
 }
 
 interface ChatPageProps extends ChatContextProps {

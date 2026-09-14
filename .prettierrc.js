@@ -6,9 +6,15 @@ export default {
 	printWidth: 120,
 	overrides: [
 		{
-			files: ['*.yml', '*.yaml', '*.json'],
+			files: ['*.yml', '*.yaml', '*.json', '*.jsonc'],
 			options: {
 				useTabs: false,
+			},
+		},
+		{
+			files: ['*.jsonc'],
+			options: {
+				trailingComma: 'none',
 			},
 		},
 	],

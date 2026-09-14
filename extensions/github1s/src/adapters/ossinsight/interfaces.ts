@@ -55,9 +55,13 @@ export type CollectionItem = {
 	name: string;
 };
 
-export const getCollections = memorize((): Promise<CollectionItem[]> => {
+export const getCollections = memorize(async (): Promise<CollectionItem[]> => {
 	const requestUrl = `${OSSInsightEndpoint}/v1/collections/`;
-	return fetch(requestUrl).then(resolveDataFromResponse);
+	const response = await fetch(requestUrl);
+	if (!response.ok) {
+		throw new Error(`Unable to load OSSInsight collections: HTTP ${response.status}.`);
+	}
+	return resolveDataFromResponse(response);
 });
 
 export const getCollectionIdByName = async (collectionName: string): Promise<string | null> => {

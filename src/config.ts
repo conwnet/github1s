@@ -107,9 +107,9 @@ export const createVSCodeWebConfig = (platform: Platform, repository: string): a
 	const isOnlineEditor = repository === 'editor';
 	return {
 		hideTextFileLabelDecorations: !isOnlineEditor,
-		workspace: !isOnlineEditor ? createFolderWorkspace(repository ? 'github1s' : 'ossinsight') : undefined,
-		workspaceId: !isOnlineEditor ? 'github1s:' + (repository || 'trending') : '',
-		workspaceLabel: repository || (isOnlineEditor ? '' : 'GitHub Trending'),
+		workspace: !isOnlineEditor ? createFolderWorkspace(repository ? 'github1s' : 'discovery') : undefined,
+		workspaceId: !isOnlineEditor ? 'github1s:' + (repository || 'discovery') : '',
+		workspaceLabel: repository || (isOnlineEditor ? '' : 'GitHub Discovery'),
 		logo: {
 			title: 'Open on GitHub',
 			icon: githubLogoUrl,

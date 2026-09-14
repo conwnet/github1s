@@ -1,0 +1,24 @@
+{
+  "name": "discovery",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-09",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "discovery.github1s.com",
+      "custom_domain": true
+    }
+  ],
+  "cache": {
+    "enabled": true
+  },
+  "triggers": {
+    // Run at 12:15 UTC every day
+    "crons": ["15 12 * * *"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "DISCOVERY_KV"
+    }
+  ]
+}

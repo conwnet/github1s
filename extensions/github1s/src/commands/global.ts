@@ -68,7 +68,7 @@ export const commandOpenRepository = async () => {
 };
 
 const commandOpenOnlineEditor = async () => {
-	const onlineEditorPath = ['github1s', 'ossinsight'].includes(getAdapter().scheme) ? '/editor' : '/';
+	const onlineEditorPath = ['github1s', 'ossinsight', 'discovery'].includes(getAdapter().scheme) ? '/editor' : '/';
 	const targetLink = vscode.Uri.parse((await router.href()) || '').with({ path: onlineEditorPath });
 	return vscode.commands.executeCommand('vscode.open', targetLink);
 };

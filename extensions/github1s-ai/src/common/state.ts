@@ -1,5 +1,4 @@
-import type { ContextAttachmentDescriptor } from '@/contexts/types';
-
+import type { ContextAttachmentDescriptor, ContextReference } from './context';
 import type { Conversation } from './conversation';
 
 export interface Notice {
@@ -14,6 +13,8 @@ export interface RuntimeState {
 		currentFile?: ContextAttachmentDescriptor;
 		currentSelection?: ContextAttachmentDescriptor;
 		pendingAttachments?: ContextAttachmentDescriptor[];
+		recentFiles?: ContextReference[];
+		includeRecentFiles?: boolean;
 		preparing?: boolean;
 		notice?: Notice;
 	};

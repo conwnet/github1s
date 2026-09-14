@@ -1,7 +1,7 @@
 import { isSyntaxHighlightingData, type SyntaxHighlightingData } from '@/common/highlighting';
-import { MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH, type MarkdownHighlightRequest } from '@/common/protocol';
+import { MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH, type ViewEvent } from '@/common/protocol';
 
-export type PostMarkdownHighlightRequest = (request: MarkdownHighlightRequest) => void;
+export type PostMarkdownHighlightRequest = (request: ViewEvent<'markdown.highlight'>) => void;
 
 interface CodeBlockRegistration {
 	element: HTMLElement;
