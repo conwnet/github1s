@@ -39,6 +39,7 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 	const [draft, setDraft] = useState('');
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const chat = state.runtime.chat;
+	const preparing = chat.preparing === true;
 	const selectedModelConfig = state.modelConfigs.configs.find(({ id }) => id === state.modelConfigs.selectedId);
 	const selectedModelConfigId = selectedModelConfig?.id;
 	const conversationUsage = chat.conversation?.usage;
@@ -75,14 +76,14 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 		<div class="composer-surface">
 			<${AttachmentChips}
 				attachments=${chat.pendingAttachments ?? []}
-				disabled=${busy}
+				disabled=${preparing}
 				onRemove=${(id: string) => post({ type: 'chat.removeContextAttachment', id })}
 			/>
 			<textarea
 				ref=${textarea}
 				class="composer-input"
 				value=${draft}
-				disabled=${busy}
+				disabled=${preparing}
 				rows="1"
 				aria-label="Ask GitHub1s AI"
 				placeholder="Ask about this repository…"
@@ -99,7 +100,7 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 							type="button"
 							title=${presentation.title}
 							aria-label=${presentation.title}
-							disabled=${busy || !presentation.available}
+							disabled=${preparing || !presentation.available}
 							onClick=${() => post({ type: 'chat.addContextAttachment', action: item.action })}
 						>
 							<${Icon} name=${item.icon} />
@@ -120,7 +121,6 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 							title=${selectedModelConfig
 								? `${selectedModelConfig.name} — ${selectedModelConfig.modelId}`
 								: 'Select AI model'}
-							disabled=${busy}
 							value=${selectedModelConfigId ?? ''}
 							onChange=${(event: Event) =>
 								post({
