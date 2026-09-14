@@ -1,14 +1,10 @@
+import type { ContextAttachmentDescriptor } from '@/common/context';
 import type { ViewEvent } from '@/common/protocol';
 import { getQuickAction } from '@/common/quick-actions';
-import {
-	isSameContextAttachment,
-	preserveContextAttachmentId,
-	selectFile,
-	type ContextAttachmentDescriptor,
-} from '@/contexts';
 import type { Stores } from '@/stores';
 
 import { Controller } from './common';
+import { isSameContextAttachment, preserveContextAttachmentId, selectFile } from './context';
 import type { ConversationRunner } from './runner';
 
 export class ChatController extends Controller {
@@ -27,6 +23,11 @@ export class ChatController extends Controller {
 	@Controller.handler('chat.cancel')
 	async handleCancel(_event: ViewEvent<'chat.cancel'>): Promise<void> {
 		await this.runner.cancelCurrent();
+	}
+
+	@Controller.handler('chat.setIncludeRecentFiles')
+	async handleSetIncludeRecentFiles(event: ViewEvent<'chat.setIncludeRecentFiles'>): Promise<void> {
+		await this.stores.runtime.setIn('chat.includeRecentFiles', event.enabled);
 	}
 
 	@Controller.handler('chat.runQuickAction')

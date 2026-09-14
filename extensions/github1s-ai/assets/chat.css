@@ -45,7 +45,8 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-summary:focus-visible {
+summary:focus-visible,
+[tabindex='0']:focus-visible {
 	outline: 1px solid var(--vscode-focusBorder);
 	outline-offset: 1px;
 }
@@ -701,11 +702,16 @@ summary:focus-visible {
 }
 
 .user-request {
-	max-width: 88%;
+	min-width: 0;
 	padding: 8px 10px;
 	background: var(--vscode-chat-requestBubbleBackground, var(--vscode-list-hoverBackground));
 	border: 1px solid var(--vscode-chat-requestBubbleBorder, transparent);
 	border-radius: 9px;
+}
+
+.message-user > .user-request,
+.message-user > .tooltip-anchor {
+	max-width: 88%;
 }
 
 .markdown > :first-child {
@@ -1230,11 +1236,48 @@ summary:focus-visible {
 	gap: 6px;
 }
 
+.recent-files-action {
+	position: relative;
+}
+
+.recent-files-badge {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	display: grid;
+	width: 8px;
+	height: 8px;
+	place-items: center;
+	/* An opaque base hides the icon when the input background is translucent. */
+	background-color: var(--vscode-sideBar-background);
+	background-image: linear-gradient(var(--vscode-input-background), var(--vscode-input-background));
+	border-radius: 50%;
+	font-size: 8px;
+	font-weight: 600;
+	line-height: 1;
+	pointer-events: none;
+}
+
+.recent-files-action[aria-pressed='false'] .recent-files-badge {
+	box-sizing: border-box;
+	border: 1px solid currentColor;
+	transform: scale(0.9);
+}
+
+.recent-files-action[aria-pressed='false'] .recent-files-badge::after {
+	width: 1px;
+	height: 6px;
+	background: currentColor;
+	transform: rotate(45deg);
+	content: '';
+}
+
 /* Attachments */
 
 .attachment-row {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 	gap: 3px;
 	padding-bottom: 4px;
 }
@@ -1262,11 +1305,12 @@ summary:focus-visible {
 	line-height: 1.2;
 }
 
+.attachment-name {
+	gap: 3px;
+}
+
 .attachment-label {
-	display: inline-flex;
-	height: 14px;
 	min-width: 0;
-	align-items: center;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	line-height: 14px;
@@ -1387,6 +1431,62 @@ body.vscode-high-contrast-light .seti-file-icon {
 
 /* Shared controls */
 
+.attachment-name,
+.tooltip-anchor {
+	display: inline-flex;
+	min-width: 0;
+	align-items: center;
+}
+
+.tooltip-anchor {
+	max-width: 100%;
+}
+
+.tooltip-anchor > :disabled {
+	pointer-events: none;
+}
+
+.tooltip {
+	position: fixed;
+	z-index: 100;
+	box-sizing: border-box;
+	width: max-content;
+	max-width: min(320px, calc(100vw - 16px));
+	max-height: calc(100vh - 16px);
+	overflow: auto;
+	padding: 4px 6px;
+	color: var(--vscode-editorHoverWidget-foreground, var(--vscode-foreground));
+	background: var(--vscode-editorHoverWidget-background, var(--vscode-sideBar-background));
+	border: 1px solid var(--vscode-editorHoverWidget-border, var(--vscode-widget-border, transparent));
+	border-radius: 4px;
+	box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.2));
+	font-size: 11px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.tooltip-content {
+	display: grid;
+	gap: 2px;
+	white-space: normal;
+}
+
+.tooltip-content strong {
+	font-weight: 600;
+}
+
+.tooltip-content ul {
+	margin: 0;
+	padding: 0 0 0 14px;
+	list-style: disc;
+	white-space: pre-wrap;
+}
+
+.tooltip-hint {
+	color: var(--vscode-descriptionForeground);
+}
+
 .icon {
 	width: 16px;
 	height: 16px;
@@ -1485,6 +1585,10 @@ body.vscode-high-contrast-light .seti-file-icon {
 	white-space: nowrap;
 }
 
+.model-config-picker > .tooltip-anchor {
+	width: 100%;
+}
+
 .model-config-picker:hover .model-config-select:not(:disabled),
 .model-config-select:focus {
 	background-color: var(--vscode-toolbar-hoverBackground, var(--vscode-list-hoverBackground));
@@ -1506,10 +1610,6 @@ body.vscode-high-contrast-light .seti-file-icon {
 	width: 12px;
 	height: 12px;
 	transform: rotate(90deg);
-}
-
-.model-config-select:disabled + .model-config-chevron {
-	opacity: 0.6;
 }
 
 .submit-button {
@@ -1635,7 +1735,8 @@ body.vscode-high-contrast-light .seti-file-icon {
 	.assistant-activity-body,
 	.settings-security,
 	.settings-card,
-	.settings-control {
+	.settings-control,
+	.tooltip {
 		border-color: CanvasText;
 	}
 }

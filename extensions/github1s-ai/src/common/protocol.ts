@@ -1,13 +1,13 @@
 import { isPlainObject } from 'lodash-es';
 
+import { exactString, hasExactKeys } from '@/helpers/validate';
+
 import {
 	isContextAttachmentAction,
 	isContextAttachmentDescriptor,
 	type ContextAttachmentAction,
 	type ContextAttachmentDescriptor,
-} from '@/contexts/types';
-import { exactString, hasExactKeys } from '@/helpers/validate';
-
+} from './context';
 import type { ConversationSummary } from './conversation';
 import type { SyntaxHighlightingData } from './highlighting';
 import type { McpConfig } from './mcp-config';
@@ -16,7 +16,7 @@ import { isPromptsConfig, type PromptsConfig } from './prompts-config';
 import { isQuickAction, type ChatQuickAction } from './quick-actions';
 import type { RuntimeState } from './state';
 
-export type { ContextAttachmentDescriptor } from '@/contexts/types';
+export type { ContextAttachmentDescriptor } from './context';
 export type { ModelConfigInput } from './model-config';
 export type { Notice } from './state';
 
@@ -51,6 +51,7 @@ type AllViewEvents =
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
 	| { type: 'chat.addContextAttachment'; action: 'descriptor'; descriptor: ContextAttachmentDescriptor }
 	| { type: 'chat.removeContextAttachment'; id: string }
+	| { type: 'chat.setIncludeRecentFiles'; enabled: boolean }
 	| { type: 'chat.cancel' }
 	| { type: 'history.selectConversation'; id: string }
 	| { type: 'history.deleteConversation'; id: string }
@@ -117,6 +118,11 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 		case 'chat.send':
 			return hasExactKeys(event, ['type', 'text']) && typeof event.text === 'string'
 				? { type: event.type, text: event.text }
+				: undefined;
+
+		case 'chat.setIncludeRecentFiles':
+			return hasExactKeys(event, ['type', 'enabled']) && typeof event.enabled === 'boolean'
+				? { type: event.type, enabled: event.enabled }
 				: undefined;
 
 		case 'chat.removeContextAttachment':

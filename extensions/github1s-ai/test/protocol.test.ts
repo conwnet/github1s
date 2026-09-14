@@ -7,6 +7,8 @@ test('view events accept chat commands and context descriptors', () => {
 	for (const event of [
 		{ type: 'chat.send', text: 'Explain this repository.' },
 		{ type: 'chat.cancel' },
+		{ type: 'chat.setIncludeRecentFiles', enabled: false },
+		{ type: 'chat.setIncludeRecentFiles', enabled: true },
 		{ type: 'chat.runQuickAction', action: 'repositoryOverview' },
 		{
 			type: 'chat.addContextAttachment',
@@ -23,6 +25,7 @@ test('view events reject malformed payloads, unknown actions and unexpected fiel
 		null,
 		{ type: 'unknown' },
 		{ type: 'chat.send', text: 123 },
+		{ type: 'chat.setIncludeRecentFiles', enabled: 'false' },
 		{ type: 'chat.cancel', extra: true },
 		{ type: 'history.selectConversation', id: 123 },
 		{ type: 'chat.runQuickAction', action: 'unknown' },

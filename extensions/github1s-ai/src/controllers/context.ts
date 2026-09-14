@@ -1,7 +1,22 @@
 import * as vscode from 'vscode';
 
-import type { ContextAttachment, ContextAttachmentDescriptor } from './types';
-export type { ContextAttachment, ContextAttachmentDescriptor } from './types';
+import {
+	fileName,
+	type ContextAttachment,
+	type ContextAttachmentDescriptor,
+	type ContextReference,
+} from '@/common/context';
+
+export const currentFileReference = (
+	document = vscode.window.activeTextEditor?.document,
+): ContextReference | undefined => {
+	const root = vscode.workspace.workspaceFolders?.[0]?.uri;
+	const uri = document?.uri;
+	// Only include paths that the repository tools can read.
+	if (!root || !uri || document.isClosed || uri.scheme !== root.scheme || uri.authority !== root.authority)
+		return undefined;
+	return { source: uri.toString() };
+};
 
 export const isSameContextAttachment = (
 	left: ContextAttachmentDescriptor,
@@ -96,8 +111,6 @@ const toFileQuickPickItem = (uri: vscode.Uri): FileQuickPickItem => {
 		uri,
 	};
 };
-
-const fileName = (path: string): string => path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1);
 
 const showFileQuickPick = (items: readonly FileQuickPickItem[]): Promise<FileQuickPickItem | undefined> => {
 	const picker = vscode.window.createQuickPick<FileQuickPickItem>();

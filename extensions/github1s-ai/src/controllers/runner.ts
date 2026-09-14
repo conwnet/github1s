@@ -10,11 +10,12 @@ import {
 } from '@/common/conversation';
 import { resolvePrompts } from '@/common/prompts-config';
 import type { ChatQuickAction } from '@/common/quick-actions';
-import { resolveContextAttachments } from '@/contexts';
 import { buildModelMessages } from '@/llm/helpers';
 import { connectMcpTools } from '@/llm/mcp';
 import { streamLLMAgent } from '@/llm/transport';
 import type { Stores } from '@/stores';
+
+import { resolveContextAttachments } from './context';
 
 type ActiveRequest = {
 	controller: AbortController;
@@ -74,7 +75,8 @@ export class ConversationRunner {
 		}
 
 		const turnId = globalThis.crypto.randomUUID();
-		const userMessage = createUserMessage(turnId, text, attachments);
+		const recentFiles = runtime.chat.includeRecentFiles === false ? [] : runtime.chat.recentFiles;
+		const userMessage = createUserMessage(turnId, text, attachments, recentFiles);
 		let providerMessages;
 		try {
 			providerMessages = await buildModelMessages(previous?.messages ?? [], [userMessage]);
