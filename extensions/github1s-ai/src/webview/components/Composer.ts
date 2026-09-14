@@ -81,6 +81,7 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 			<${AttachmentChips}
 				attachments=${chat.pendingAttachments ?? []}
 				disabled=${preparing}
+				onOpen=${(source: string) => post({ type: 'app.openFile', source })}
 				onRemove=${(id: string) => post({ type: 'chat.removeContextAttachment', id })}
 			/>
 			<textarea

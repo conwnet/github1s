@@ -1,14 +1,14 @@
 import { html } from 'htm/preact';
 import { useEffect, useState } from 'preact/hooks';
 
-import type { ViewMessage, ViewRequest, ViewState } from '@/common/protocol';
+import type { ViewEvent, ViewMessage, ViewState } from '@/common/protocol';
 
 import { ChatPage } from './components/ChatPage';
 import { HistoryPage } from './components/HistoryPage';
 import { SettingsPage } from './components/SettingsPage';
 
 interface AppProps {
-	post: (request: ViewRequest) => void;
+	post: (event: ViewEvent) => void;
 }
 
 export const App = ({ post }: AppProps) => {

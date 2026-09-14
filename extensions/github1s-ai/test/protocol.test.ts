@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH, parseMarkdownHighlightRequest, parseViewEvent } from '@/common/protocol';
+import { MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH, parseViewEvent } from '@/common/protocol';
 
 test('view events accept chat commands and context descriptors', () => {
 	for (const event of [
@@ -43,8 +43,8 @@ test('highlight requests enforce the source length limit and required fields', (
 		languageId: 'typescript',
 		source: 'x'.repeat(MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH),
 	};
-	assert.deepEqual(parseMarkdownHighlightRequest(request), request);
-	assert.equal(parseMarkdownHighlightRequest({ ...request, source: `${request.source}x` }), undefined);
-	assert.equal(parseMarkdownHighlightRequest({ ...request, requestId: '' }), undefined);
-	assert.equal(parseMarkdownHighlightRequest({ ...request, extra: true }), undefined);
+	assert.deepEqual(parseViewEvent(request), request);
+	assert.equal(parseViewEvent({ ...request, source: `${request.source}x` }), undefined);
+	assert.equal(parseViewEvent({ ...request, requestId: '' }), undefined);
+	assert.equal(parseViewEvent({ ...request, extra: true }), undefined);
 });

@@ -9,10 +9,11 @@ import { Tooltip, TooltipButton } from './Tooltip';
 interface AttachmentChipsProps {
 	attachments: readonly ContextAttachmentDescriptor[];
 	disabled?: boolean;
+	onOpen: (source: string) => void;
 	onRemove?: (id: string) => void;
 }
 
-export const AttachmentChips = ({ attachments, disabled = false, onRemove }: AttachmentChipsProps) => {
+export const AttachmentChips = ({ attachments, disabled = false, onOpen, onRemove }: AttachmentChipsProps) => {
 	if (attachments.length === 0) return null;
 	const readOnly = onRemove === undefined;
 
@@ -27,11 +28,11 @@ export const AttachmentChips = ({ attachments, disabled = false, onRemove }: Att
 			const iconClass = `seti-file-icon seti-file-icon-${icon} seti-file-icon-color-${presentation.color} attachment-icon`;
 			return html`<span class="attachment-chip" key=${attachment.id}>
 				<${Tooltip} content=${attachment.source}>
-					<span class="attachment-name" tabindex="0">
+					<button class="attachment-name" type="button" onClick=${() => onOpen(attachment.source)}>
 						<${Icon} name="file" className="attachment-file-fallback" />
 						<span class=${iconClass} aria-hidden="true">${presentation.glyph}</span>
 						<span class="attachment-label">${attachment.label}</span>
-					</span>
+					</button>
 				<//>
 				${onRemove
 					? html`<${TooltipButton}

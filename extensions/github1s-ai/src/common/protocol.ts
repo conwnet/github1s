@@ -33,19 +33,13 @@ export interface ViewState {
 	conversations: ConversationSummary[];
 }
 
-export interface MarkdownHighlightRequest {
-	type: 'markdown.highlight';
-	requestId: string;
-	languageId: string;
-	source: string;
-}
-
 type AllViewEvents =
 	| { type: 'app.ready' }
 	| { type: 'app.newChat' }
 	| { type: 'app.openChat' }
 	| { type: 'app.openHistory' }
 	| { type: 'app.openSettings' }
+	| { type: 'app.openFile'; source: string }
 	| { type: 'chat.send'; text: string }
 	| { type: 'chat.runQuickAction'; action: ChatQuickAction }
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
@@ -55,6 +49,7 @@ type AllViewEvents =
 	| { type: 'chat.cancel' }
 	| { type: 'history.selectConversation'; id: string }
 	| { type: 'history.deleteConversation'; id: string }
+	| { type: 'markdown.highlight'; requestId: string; languageId: string; source: string }
 	| { type: 'settings.selectModelConfig'; id: string }
 	| { type: 'settings.clearFeedback' }
 	| { type: 'settings.exportHistory' }
@@ -66,38 +61,11 @@ type AllViewEvents =
 
 export type ViewEvent<K extends AllViewEvents['type'] = AllViewEvents['type']> = Extract<AllViewEvents, { type: K }>;
 
-export type ViewRequest = ViewEvent | MarkdownHighlightRequest;
-
 export type ViewMessage =
 	| { type: 'app.setState'; state: ViewState }
 	| { type: 'settings.historyExport'; filename: string; content: string }
 	| { type: 'markdown.highlightResult'; requestId: string; highlighting?: SyntaxHighlightingData }
 	| { type: 'markdown.highlightingChanged' };
-
-export const parseMarkdownHighlightRequest = (value: unknown): MarkdownHighlightRequest | undefined => {
-	if (!isPlainObject(value)) return undefined;
-	const request = value as Record<string, unknown>;
-	if (
-		!hasExactKeys(request, ['type', 'requestId', 'languageId', 'source']) ||
-		request.type !== 'markdown.highlight' ||
-		typeof request.requestId !== 'string' ||
-		request.requestId.length === 0 ||
-		request.requestId.length > 100 ||
-		typeof request.languageId !== 'string' ||
-		request.languageId.length === 0 ||
-		request.languageId.length > 100 ||
-		typeof request.source !== 'string' ||
-		request.source.length > MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH
-	) {
-		return undefined;
-	}
-	return {
-		type: request.type,
-		requestId: request.requestId,
-		languageId: request.languageId,
-		source: request.source,
-	};
-};
 
 export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 	if (!isPlainObject(value)) return undefined;
@@ -114,6 +82,9 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 		case 'settings.exportHistory':
 		case 'settings.clearAllData':
 			return hasExactKeys(event, ['type']) ? { type: event.type } : undefined;
+
+		case 'app.openFile':
+			return exactString(event, 'source') ? { type: event.type, source: event.source as string } : undefined;
 
 		case 'chat.send':
 			return hasExactKeys(event, ['type', 'text']) && typeof event.text === 'string'
@@ -146,6 +117,25 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 			return exactString(event, 'action') && isContextAttachmentAction(event.action)
 				? { type: event.type, action: event.action }
 				: undefined;
+
+		case 'markdown.highlight':
+			if (
+				!hasExactKeys(event, ['type', 'requestId', 'languageId', 'source']) ||
+				typeof event.requestId !== 'string' ||
+				event.requestId.length === 0 ||
+				typeof event.languageId !== 'string' ||
+				event.languageId.length === 0 ||
+				typeof event.source !== 'string' ||
+				event.source.length > MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH
+			) {
+				return undefined;
+			}
+			return {
+				type: event.type,
+				requestId: event.requestId,
+				languageId: event.languageId,
+				source: event.source,
+			};
 
 		case 'settings.saveModelConfig': {
 			if (!hasExactKeys(event, ['type', 'config'])) return undefined;

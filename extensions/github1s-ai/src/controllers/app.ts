@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 import { markStreamingMessagesUnknown } from '@/common/conversation';
 import type { ViewEvent } from '@/common/protocol';
 import type { RuntimeState } from '@/common/state';
@@ -45,6 +47,19 @@ export class AppController extends Controller {
 	@Controller.handler('app.openSettings')
 	async handleOpenSettings(_event: ViewEvent<'app.openSettings'>): Promise<void> {
 		await this.openPage('settings');
+	}
+
+	@Controller.handler('app.openFile')
+	async handleOpenFile(event: ViewEvent<'app.openFile'>): Promise<void> {
+		const uri = vscode.Uri.parse(event.source);
+		const match = /^L(\d+):(\d+)-L(\d+):(\d+)$/.exec(uri.fragment);
+		const positions = match?.slice(1).map(Number);
+		let selection: vscode.Range | undefined;
+		if (positions && positions.every((position) => position >= 1)) {
+			const [startLine, startCharacter, endLine, endCharacter] = positions;
+			selection = new vscode.Range(startLine - 1, startCharacter - 1, endLine - 1, endCharacter - 1);
+		}
+		await vscode.window.showTextDocument(uri.with({ fragment: '' }), { selection });
 	}
 
 	private async openPage(page: RuntimeState['page'], resetConversation = false): Promise<void> {
