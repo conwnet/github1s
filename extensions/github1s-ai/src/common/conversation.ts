@@ -1,7 +1,7 @@
 import { jsonSchema, validateUIMessages, type LanguageModelUsage, type UIMessage } from 'ai';
 import { isPlainObject } from 'lodash-es';
 
-import type { ContextAttachment } from '@/contexts/types';
+import { isContextAttachment, isContextReference, type ContextAttachment, type ContextReference } from './context';
 
 export interface ConversationSummary {
 	id: string;
@@ -21,6 +21,7 @@ export interface ConversationMessageMetadata {
 
 export type ConversationMessageData = {
 	attachments: ContextAttachment[];
+	recentFiles: ContextReference[];
 };
 
 type BaseConversationMessage = UIMessage<ConversationMessageMetadata, ConversationMessageData>;
@@ -37,22 +38,18 @@ export const createUserMessage = (
 	turnId: string,
 	text: string,
 	attachments: readonly ContextAttachment[],
-): ConversationMessage => ({
-	id: turnId,
-	role: 'user',
-	metadata: { turnId, status: 'completed' },
-	parts: [
-		...(attachments.length > 0
-			? [
-					{
-						type: 'data-attachments' as const,
-						data: attachments.map((attachment) => ({ ...attachment })),
-					},
-				]
-			: []),
-		{ type: 'text', text },
-	],
-});
+	recentFiles: readonly ContextReference[] = [],
+): ConversationMessage => {
+	const parts: ConversationMessage['parts'] = [];
+	if (recentFiles.length > 0) {
+		parts.push({ type: 'data-recentFiles', data: recentFiles.map((reference) => ({ ...reference })) });
+	}
+	if (attachments.length > 0) {
+		parts.push({ type: 'data-attachments', data: attachments.map((attachment) => ({ ...attachment })) });
+	}
+	parts.push({ type: 'text', text });
+	return { id: turnId, role: 'user', metadata: { turnId, status: 'completed' }, parts };
+};
 
 export const createAssistantMessage = (id: string, turnId: string): ConversationMessage => ({
 	id,
@@ -110,10 +107,10 @@ const attachmentsSchema = jsonSchema<ContextAttachment[]>(
 			additionalProperties: false,
 			required: ['id', 'type', 'label', 'source', 'content'],
 			properties: {
-				id: { type: 'string' },
+				id: { type: 'string', minLength: 1 },
 				type: { enum: ['file', 'selection'] },
 				label: { type: 'string' },
-				source: { type: 'string' },
+				source: { type: 'string', minLength: 1 },
 				languageId: { type: 'string' },
 				content: { type: 'string' },
 			},
@@ -127,11 +124,29 @@ const attachmentsSchema = jsonSchema<ContextAttachment[]>(
 	},
 );
 
+const recentFilesSchema = jsonSchema<ContextReference[]>(
+	{
+		type: 'array',
+		items: {
+			type: 'object',
+			additionalProperties: false,
+			required: ['source'],
+			properties: { source: { type: 'string', minLength: 1 } },
+		},
+	},
+	{
+		validate: (value) =>
+			Array.isArray(value) && value.every(isContextReference)
+				? { success: true, value }
+				: { success: false, error: new Error('Invalid recent files') },
+	},
+);
+
 export const validateConversationMessages = (messages: unknown): Promise<ConversationMessage[]> =>
 	validateUIMessages<ConversationMessage>({
 		messages,
 		metadataSchema,
-		dataSchemas: { attachments: attachmentsSchema },
+		dataSchemas: { attachments: attachmentsSchema, recentFiles: recentFilesSchema },
 	});
 
 const isConversationMessageMetadata = (value: unknown): value is ConversationMessageMetadata => {
@@ -147,28 +162,5 @@ const isConversationMessageMetadata = (value: unknown): value is ConversationMes
 			metadata.status === 'aborted' ||
 			metadata.status === 'unknown') &&
 		(metadata.error === undefined || typeof metadata.error === 'string')
-	);
-};
-
-const isContextAttachment = (value: unknown): value is ContextAttachment => {
-	if (!isPlainObject(value)) return false;
-	const attachment = value as Record<string, unknown>;
-	return (
-		Object.keys(attachment).every(
-			(key) =>
-				key === 'id' ||
-				key === 'type' ||
-				key === 'label' ||
-				key === 'source' ||
-				key === 'languageId' ||
-				key === 'content',
-		) &&
-		typeof attachment.id === 'string' &&
-		attachment.id.length > 0 &&
-		(attachment.type === 'file' || attachment.type === 'selection') &&
-		typeof attachment.label === 'string' &&
-		typeof attachment.source === 'string' &&
-		(attachment.languageId === undefined || typeof attachment.languageId === 'string') &&
-		typeof attachment.content === 'string'
 	);
 };

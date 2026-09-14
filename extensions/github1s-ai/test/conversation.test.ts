@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import type { ContextAttachment } from '@/common/context';
 import {
 	createAssistantMessage,
 	createUserMessage,
@@ -9,7 +10,6 @@ import {
 	withMessageStatus,
 	type Conversation,
 } from '@/common/conversation';
-import type { ContextAttachment } from '@/contexts/types';
 
 test('user messages capture attachments and pass conversation validation', async () => {
 	const attachment: ContextAttachment = {
@@ -75,4 +75,13 @@ test('conversation validation rejects corrupt metadata and attachments', async (
 		validateConversationMessages([{ ...message, parts: [{ type: 'data-attachments', data: [{ id: 'file-1' }] }] }]),
 		/Invalid context attachments/,
 	);
+});
+
+test('recent file snapshots survive conversation round-trips without sharing mutable references', async () => {
+	const source = 'github1s:/src/index.ts';
+	const recentFiles = [{ source }];
+	const message = createUserMessage('turn-1', 'Explain this.', [], recentFiles);
+	recentFiles[0].source = 'github1s:/changed.ts';
+	assert.deepEqual(message.parts[0], { type: 'data-recentFiles', data: [{ source }] });
+	assert.deepEqual(await validateConversationMessages(JSON.parse(JSON.stringify([message]))), [message]);
 });

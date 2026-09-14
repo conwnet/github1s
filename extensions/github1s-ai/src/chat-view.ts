@@ -6,8 +6,8 @@ import {
 	type MarkdownHighlightRequest,
 	type ViewMessage,
 } from '@/common/protocol';
-import { currentFile, currentSelection } from '@/contexts';
 import { Controllers } from '@/controllers';
+import { currentFile, currentSelection } from '@/controllers/context';
 import { computeSyntaxHighlighting, onDidChangeSyntaxHighlighting } from '@/helpers/highlighting';
 
 interface ChatHtmlOptions {

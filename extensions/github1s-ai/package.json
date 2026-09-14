@@ -6,6 +6,9 @@
   "icon": "assets/extension.png",
   "private": true,
   "browser": "./dist/extension",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "engines": {
     "vscode": "^1.132.0"
   },

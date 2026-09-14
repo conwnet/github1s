@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
 import type { ViewEvent, ViewMessage, ViewState } from '@/common/protocol';
-import { currentFile, currentSelection, preserveContextAttachmentId } from '@/contexts';
 import type { Stores } from '@/stores';
 
 import { AppController } from './app';
 import { ChatController } from './chat';
+import { currentFile, currentFileReference, currentSelection, preserveContextAttachmentId } from './context';
 import { HistoryController } from './history';
 import { ConversationRunner } from './runner';
 import { SettingsController } from './settings';
@@ -87,14 +87,20 @@ export class Controllers {
 
 	async refreshAttachmentsStatus(): Promise<void> {
 		const refresh = ++this.editorAttachmentRefresh;
+		const reference = currentFileReference();
 		const [currentFileDescriptor, currentSelectionDescriptor] = await Promise.all([
 			currentFile().catch(() => undefined),
 			currentSelection().catch(() => undefined),
 		]);
 		if (refresh !== this.editorAttachmentRefresh) return;
 		const runtime = await this.stores.runtime.get();
+		const prevRecentFiles = runtime.chat.recentFiles ?? [];
 		await this.stores.runtime.setIn('chat', {
 			...runtime.chat,
+			recentFiles:
+				reference && reference.source !== prevRecentFiles[0]?.source
+					? [reference, ...prevRecentFiles.filter((file) => file.source !== reference.source)].slice(0, 5)
+					: prevRecentFiles,
 			currentFile: currentFileDescriptor
 				? preserveContextAttachmentId(currentFileDescriptor, runtime.chat.currentFile)
 				: undefined,
@@ -109,6 +115,10 @@ export class Controllers {
 		return [
 			vscode.window.onDidChangeActiveTextEditor(() => this.refreshAttachmentsStatus()),
 			vscode.window.onDidChangeTextEditorSelection(() => this.refreshAttachmentsStatus()),
+			vscode.workspace.onDidChangeWorkspaceFolders(async () => {
+				await this.stores.runtime.setIn('chat.recentFiles', []);
+				await this.refreshAttachmentsStatus();
+			}),
 			vscode.workspace.onDidChangeTextDocument((event) => {
 				if (event.document === vscode.window.activeTextEditor?.document) {
 					this.refreshAttachmentsStatus();
