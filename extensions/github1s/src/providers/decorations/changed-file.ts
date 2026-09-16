@@ -104,6 +104,10 @@ export class GitHub1sChangedFileDecorationProvider implements FileDecorationProv
 		if (uri.scheme !== getAdapter().scheme) {
 			return null;
 		}
+		// Explicit revision statuses are decorated by the source-control provider.
+		if (uri.query.includes('changeStatus')) {
+			return null;
+		}
 
 		const routerState = router.getState();
 		if (routerState.pageType === PageType.CodeReview) {

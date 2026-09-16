@@ -15,7 +15,6 @@ import { GitHub1sSourceControlDecorationProvider } from './decorations/source-co
 import { GitHub1sDefinitionProvider } from './definition';
 import { GitHub1sReferenceProvider } from './reference';
 import { GitHub1sHoverProvider } from './hover';
-import router from '@/router';
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
 export const emptyFileUri = vscode.Uri.from({ scheme: EMPTY_FILE_SCHEME });
