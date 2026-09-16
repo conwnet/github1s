@@ -64,7 +64,13 @@ const getConcreteFileUri = async (fileUri: vscode.Uri) => {
 
 // show the file's diff between current commit and previous commit
 const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
-	const queryBaseUriStr = queryString.parse(fileUri.query).base;
+	const queryParams = queryString.parse(fileUri.query);
+	const queryBaseUriStr = queryParams.base;
+	const headFileUri = typeof queryParams.head === 'string' ? vscode.Uri.parse(queryParams.head) : undefined;
+	const from =
+		typeof queryParams.from === 'string'
+			? queryParams.from
+			: router.parseUri(headFileUri && headFileUri.scheme !== emptyFileUri.scheme ? headFileUri : fileUri).ref;
 	const rightFileUri = await getConcreteFileUri(
 		// if the `queryBaseUriStr` is empty, which means this command is called from
 		// a normal file editor (not a diff editor), just use `fileUri` in this case
@@ -72,16 +78,17 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 	);
 	const { scheme, repo, ref: rightCommitSha } = router.parseUri(rightFileUri);
 	const repository = Repository.getInstance(scheme, repo);
-	const leftCommit = await repository.getPreviousCommit(rightCommitSha, rightFileUri.path);
+	const leftCommit = await repository.getPreviousCommit(rightCommitSha, rightFileUri.path, from);
 	// if we can't find previous commit, use the `emptyFileUri` as the leftFileUri
 	const leftFileUri = leftCommit ? router.buildUri({ ref: leftCommit.sha }, rightFileUri) : emptyFileUri;
 
 	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path, from));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
 		head: rightFileUri.with({ query: '' }).toString(),
+		from,
 		status: changedStatus,
 		// if we can't find a newer commit for this file,
 		// the `Show Next Commit` Button would be disabled.
@@ -98,22 +105,26 @@ const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
 
 // show the file's diff between current commit and next commit
 const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
-	const leftFileUri = await getConcreteFileUri(fileUri);
+	const queryParams = queryString.parse(fileUri.query);
+	const headFileUri = typeof queryParams.head === 'string' ? vscode.Uri.parse(queryParams.head) : fileUri;
+	const from = typeof queryParams.from === 'string' ? queryParams.from : router.parseUri(headFileUri).ref;
+	const leftFileUri = await getConcreteFileUri(headFileUri);
 
 	const { scheme, repo, ref: leftCommitSha } = router.parseUri(leftFileUri);
 	const repository = Repository.getInstance(scheme, repo);
-	const rightCommit = await repository.getNextCommit(leftCommitSha, leftFileUri.path);
+	const rightCommit = await repository.getNextCommit(leftCommitSha, leftFileUri.path, from);
 
 	if (!rightCommit) {
 		return vscode.window.showInformationMessage('There is no next commit found.');
 	}
 
 	const rightFileUri = router.buildUri({ ref: rightCommit.sha }, leftFileUri);
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path));
+	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path, from));
 
 	const query = queryString.stringify({
 		base: leftFileUri.with({ query: '' }).toString(),
 		head: rightFileUri.with({ query: '' }).toString(),
+		from,
 		status: FileChangeStatus.Modified,
 		hasNextRevision,
 	});

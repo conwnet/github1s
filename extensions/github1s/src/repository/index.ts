@@ -15,6 +15,7 @@ export class Repository {
 
 	private _branchTagManager: BranchTagManager;
 	private _codeReviewManager: CodeReviewManager;
+	private _commitManager: CommitManager;
 	private _blameRangesCache: Map<string, BlameRange[]>;
 
 	public static getInstance(scheme: string, repo: string) {
@@ -35,6 +36,7 @@ export class Repository {
 	) {
 		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
 		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
+		this._commitManager = CommitManager.getInstance(_scheme, _repo);
 		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
 
@@ -71,43 +73,43 @@ export class Repository {
 	}
 
 	getCommitList(ref: string = 'HEAD', filePath: string = '/', forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
+		return this._commitManager.getList(ref, filePath, forceUpdate);
 	}
 
 	getCommitItem(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getItem(forceUpdate);
+		return this._commitManager.getItem(ref, forceUpdate);
 	}
 
 	loadMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
+		return this._commitManager.loadMore(ref, filePath);
 	}
 
 	hasMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
+		return this._commitManager.hasMore(ref, filePath);
 	}
 
 	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getChangedFiles(forceUpdate);
+		return this._commitManager.getChangedFiles(ref, forceUpdate);
 	}
 
 	loadMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').loadMoreChangedFiles();
+		return this._commitManager.loadMoreChangedFiles(ref);
 	}
 
 	hasMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').hasMoreChangedFiles();
+		return this._commitManager.hasMoreChangedFiles(ref);
 	}
 
 	getFileLatestCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getLatestCommit();
+		return this._commitManager.getLatestCommit(ref, filePath);
 	}
 
-	getPreviousCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getPreviousCommit();
+	getPreviousCommit(ref: string, filePath: string, from: string) {
+		return this._commitManager.getPreviousCommit(ref, filePath, from);
 	}
 
-	getNextCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getNextCommit();
+	getNextCommit(ref: string, filePath: string, from: string) {
+		return this._commitManager.getNextCommit(ref, filePath, from);
 	}
 
 	getCodeReviewList(...args: Parameters<CodeReviewManager['getList']>) {

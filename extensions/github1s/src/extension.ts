@@ -12,7 +12,7 @@ import { decorateStatusBar } from '@/statusbar';
 import { registerEventListeners } from '@/listeners';
 import { registerVSCodeProviders } from '@/providers';
 import { registerGitHub1sCommands } from '@/commands';
-import { updateSourceControlChanges } from '@/changes';
+import { registerSourceControlHistory, updateSourceControlChanges } from '@/changes';
 import { addRecentRepositories, setExtensionContext } from '@/helpers/context';
 
 const browserUrlManager = {
@@ -40,6 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		registerEventListeners(),
 		registerGitHub1sCommands(),
 		registerCustomViews(),
+		registerSourceControlHistory(),
 		updateSourceControlChanges(),
 		decorateStatusBar(),
 	]);
@@ -65,7 +66,7 @@ const initialVSCodeState = async () => {
 	} else if (routerState.pageType === PageType.CodeReviewList) {
 		vscode.commands.executeCommand('github1s.views.codeReviewList.focus');
 	} else if (routerState.pageType === PageType.CommitList) {
-		vscode.commands.executeCommand('github1s.views.commitList.focus');
+		vscode.commands.executeCommand('workbench.scm.history.focus');
 	} else if ([PageType.CodeReview, PageType.Commit].includes(routerState.pageType)) {
 		vscode.commands.executeCommand('workbench.scm.focus');
 	} else if (routerState.pageType === PageType.Search) {
