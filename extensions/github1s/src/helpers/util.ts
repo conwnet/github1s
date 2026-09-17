@@ -65,3 +65,11 @@ export const prop = (obj: object, path: (string | number)[] = []): any => {
 export const last = <T>(array: readonly T[]): T => {
 	return array[array.length - 1];
 };
+
+export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> => {
+	const result = { ...obj };
+	for (const key of keys) {
+		delete result[key];
+	}
+	return result as Omit<T, K>;
+};

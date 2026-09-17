@@ -4,7 +4,6 @@
  */
 
 import * as vscode from 'vscode';
-import queryString from 'query-string';
 import * as adapterTypes from '@/adapters/types';
 import router from '@/router';
 import { basename } from '@/helpers/util';
@@ -117,15 +116,10 @@ export const getChangedFileDiffCommand = (changedFile: VSCodeChangedFile): vscod
 	}
 
 	const title = getChangedFileDiffTitle(baseFileUri, headFileUri, status);
-	const query = queryString.stringify({
-		status,
-		base: baseFileUri.with({ query: '' }).toString(),
-		head: headFileUri.with({ query: '' }).toString(),
-	});
 
 	return {
 		title: 'Diff',
 		command: 'vscode.diff',
-		arguments: [baseFileUri.with({ query }), headFileUri.with({ query }), title],
+		arguments: [baseFileUri, headFileUri, title],
 	};
 };
