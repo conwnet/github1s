@@ -74,9 +74,11 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 		if (!this._loadingBarrier || this._loadingBarrier.isOpen()) {
 			this._loadingBarrier = new Barrier(5000);
 			this.updateTree(false);
-			const { ref } = router.getState();
 			const repository = Repository.getCurrentInstance();
-			await repository.loadMoreCommits(ref, await this.resolveFilePath());
+			const commit = await repository.getCommitItem(router.getState().ref);
+			if (commit) {
+				await repository.loadMoreCommits(commit.sha, await this.resolveFilePath());
+			}
 			this._loadingBarrier.open();
 		}
 	}
@@ -94,8 +96,13 @@ export class CommitTreeDataProvider implements vscode.TreeDataProvider<vscode.Tr
 	async getCommitItems(): Promise<vscode.TreeItem[]> {
 		this._loadingBarrier && (await this._loadingBarrier.wait());
 		const filePath = await this.resolveFilePath();
-		const { ref } = router.getState();
 		const repository = Repository.getCurrentInstance();
+		// Use the same pinned history as revision navigation, including loaded pages.
+		const commit = await repository.getCommitItem(router.getState().ref, this._forceUpdate);
+		if (!commit) {
+			return [];
+		}
+		const ref = commit.sha;
 		const repositoryCommits = await repository.getCommitList(ref, filePath, this._forceUpdate);
 		const commitTreeItems = repositoryCommits.map((commit) => {
 			const label = commit.message.split(/[\r\n]/)[0];

@@ -95,21 +95,12 @@ export class GitHub1sHistoryProvider implements vscode.SourceControlHistoryProvi
 			// A missing side makes VS Code open the existing file directly for additions/deletions.
 			const originalUri = !parentId || file.status === FileChangeStatus.Added ? undefined : file.baseFileUri;
 			const modifiedUri = file.status === FileChangeStatus.Removed ? undefined : file.headFileUri;
-			// Carry context for our diff editor commands (open either side, previous/next revision).
-			const query =
-				originalUri && modifiedUri
-					? queryString.stringify({
-							base: originalUri.with({ query: '' }).toString(),
-							head: modifiedUri.with({ query: '' }).toString(),
-							status: file.status,
-						})
-					: '';
 			return {
 				// Display resource for the file label and status badge, including deleted files.
 				uri: file.headFileUri.with({ query: queryString.stringify({ changeStatus: file.status }) }),
 				// Content resources for the diff's left (before) and right (after) sides.
-				originalUri: originalUri?.with({ query }),
-				modifiedUri: modifiedUri?.with({ query }),
+				originalUri,
+				modifiedUri,
 			};
 		});
 	}

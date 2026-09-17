@@ -25,7 +25,7 @@
   ],
   "browser": "./dist/extension",
   "engines": {
-    "vscode": "^1.48.0"
+    "vscode": "^1.96.0"
   },
   "contributes": {
     "resourceLabelFormatters": [
@@ -244,7 +244,7 @@
           "dark": "assets/icons/dark/open-left-file.svg",
           "light": "assets/icons/light/open-left-file.svg"
         },
-        "enablement": "isInDiffEditor && resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
+        "enablement": "isInDiffEditor && diffEditorOriginalUri && !(diffEditorOriginalUri =~ /^github1s-empty-file:/)"
       },
       {
         "command": "github1s.commands.diffViewOpenRightFile",
@@ -254,21 +254,21 @@
           "dark": "assets/icons/dark/open-right-file.svg",
           "light": "assets/icons/light/open-right-file.svg"
         },
-        "enablement": "isInDiffEditor && resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)head(=|%3D|%3d)github1s-empty-file)/"
+        "enablement": "isInDiffEditor && diffEditorModifiedUri && !(diffEditorModifiedUri =~ /^github1s-empty-file:/)"
       },
       {
         "command": "github1s.commands.openFilePreviousRevision",
         "title": "Open Previous Revision",
         "category": "GitHub1s",
         "icon": "$(arrow-left)",
-        "enablement": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)$/ && resource =~ /^(?![^?]*\\?[^#]*(%26|\\b)base(=|%3D|%3d)github1s-empty-file)/"
+        "enablement": "(!isInDiffEditor && resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)$/) || (isInDiffEditor && diffEditorOriginalUri =~ /^(github1s|gitlab1s|bitbucket1s):/)"
       },
       {
         "command": "github1s.commands.openFileNextRevision",
         "title": "Open Next Revision",
         "category": "GitHub1s",
         "icon": "$(arrow-right)",
-        "enablement": "resource =~ /^[^?]*\\?[^#]*(%26|\\b)hasNextRevision(=|%3D|%3d)true/"
+        "enablement": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)$/ && resource =~ /^[^?]*\\?([^#]*(&|%26))?hasNext(=|%3D|%3d)true/"
       },
       {
         "command": "github1s.commands.toggleEditorGutterBlame",
@@ -588,12 +588,12 @@
         },
         {
           "command": "github1s.commands.openFilePreviousRevision",
-          "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/",
+          "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)$/ || (isInDiffEditor && diffEditorOriginalUri =~ /^(github1s|gitlab1s|bitbucket1s):/)",
           "group": "navigation@4"
         },
         {
           "command": "github1s.commands.openFileNextRevision",
-          "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)/",
+          "when": "resourceScheme =~ /^(github1s|gitlab1s|bitbucket1s)$/ || (isInDiffEditor && diffEditorOriginalUri =~ /^(github1s|gitlab1s|bitbucket1s):/)",
           "group": "navigation@5"
         },
         {

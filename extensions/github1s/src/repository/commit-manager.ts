@@ -68,9 +68,8 @@ const historyKey = (from: string, filePath: string) => `${from} ${filePath}`;
 
 export class CommitManager {
 	private static instancesMap = new Map<string, CommitManager>();
-	private _refMap = new Map<string, string>(); // ref -> sha
 	private _shaMap = new Map<string, Commit>(); // sha -> commit
-	// `from filePath` -> [sha[], page, hasMore]
+	// historyKey -> [sha[], page, hasMore]
 	private _historyMap = new Map<string, [string[], number, boolean]>();
 	private _pageSize = 100;
 
@@ -95,31 +94,33 @@ export class CommitManager {
 			pageSize: this._pageSize,
 			...(!filePath || filePath === '/' ? {} : { path: filePath }),
 		});
-		if (page == 1 && commits.length && (!filePath || filePath === '/')) {
-			this._refMap.set(from, commits[0]?.sha);
-		}
 		commits.forEach((commit) => this._shaMap.set(commit.sha, commit));
 		return commits;
 	}
 
 	getList = reuseable(async (from: string, filePath: string, forceUpdate = false): Promise<Commit[]> => {
-		const history = this._historyMap.get(historyKey(from, filePath));
+		let history = this._historyMap.get(historyKey(from, filePath));
 		if (forceUpdate || !history) {
 			const commits = await this.fetchCommits(from, 1, filePath);
 			const hasMore = commits.length >= this._pageSize;
-			this._historyMap.set(historyKey(from, filePath), [commits.map((commit) => commit.sha), 1, hasMore]);
-			return commits;
+			history = [commits.map((commit) => commit.sha), 1, hasMore] as [string[], number, boolean];
+			this._historyMap.set(historyKey(from, filePath), history);
+			if (commits.length > 0 && from !== commits[0].sha) {
+				// also cache the history for the latest commit sha, so that
+				// we can get the history from the latest commit sha directly
+				// Note when filePath is not empty, ref may not be history[0][0]
+				this._historyMap.set(historyKey(commits[0].sha, filePath), history);
+			}
 		}
 		return history[0].map((sha) => this._shaMap.get(sha)!).filter(Boolean);
 	});
 
 	getItem = reuseable(async (ref: string, forceUpdate = false): Promise<Commit | null> => {
-		const sha = this._refMap.get(ref) || ref;
+		const sha = this._historyMap.get(historyKey(ref, '/'))?.[0]?.[0] || ref;
 		let commit: Commit | null | undefined = this._shaMap.get(sha);
 		if (forceUpdate || !commit) {
 			const dataSource = await getAdapter(this._scheme).resolveDataSource();
 			commit = await dataSource.provideCommit(this._repo, ref);
-			commit && this._refMap.set(ref, commit.sha);
 			commit && this._shaMap.set(commit.sha, commit);
 		}
 		return commit;
@@ -127,24 +128,23 @@ export class CommitManager {
 
 	loadMore = reuseable(async (from: string, filePath: string): Promise<Commit[]> => {
 		const key = historyKey(from, filePath);
-		const history = this._historyMap.get(key);
+		let history = this._historyMap.get(key);
 		if (history && !history[2]) {
 			// no more commits to load
 			return Promise.resolve([]);
 		}
+		const fromSha = history?.[0]?.[0] || from;
 		const nextPage = (history?.[1] || 0) + 1;
-		// TODO: Pin a root SHA per history and use it from the first page onward.
-		// File history queries may leave _refMap unset, while other queries can
-		// overwrite it between pages, causing duplicate or inconsistent results.
-		const fromSha = this._refMap.get(from) || from;
 		const commits = await this.fetchCommits(fromSha, nextPage, filePath);
-		// A refresh may have replaced this history while the page was loading.
-		if (this._historyMap.get(key) !== history) {
+		// Ignore responses if a refresh replaced the history or another request already loaded this page.
+		if (this._historyMap.get(key) !== history || (history && history[1] >= nextPage)) {
 			return [];
 		}
-		const hasMore = commits.length >= this._pageSize;
-		const allCommits = [...(history?.[0] || []), ...commits.map((commit) => commit.sha)];
-		this._historyMap.set(key, [allCommits, nextPage, hasMore]);
+		history = history || ([[], 0, true] as [string[], number, boolean]);
+		history[0].push(...commits.map((commit) => commit.sha));
+		history[1] = nextPage;
+		history[2] = commits.length >= this._pageSize;
+		this._historyMap.set(key, history);
 		return commits;
 	});
 
@@ -180,7 +180,7 @@ export class CommitManager {
 	// Keep the original history's `from`: at merges, the previous file revision
 	// in that list can differ from the one found by querying from `sha`.
 	public getPreviousCommit = reuseable(async (sha: string, filePath: string, from: string): Promise<Commit | null> => {
-		let key = historyKey(from, filePath);
+		const key = historyKey(from, filePath);
 		let history = this._historyMap.get(key);
 		if (!history) {
 			// no history for the file, fetch the history first.
@@ -189,12 +189,9 @@ export class CommitManager {
 		}
 
 		if (history[0].indexOf(sha) < 0) {
-			// If history exists, but sha is not in it. We use `sha` as
-			// `from` to request commitList again. This might not be very
-			// accurate, but it avoids an unknown number of fetch requests.
-			key = historyKey((from = sha), filePath);
-			await this.getList(from, filePath);
-			history = this._historyMap.get(key)!;
+			// Should appear only after moving forward a lot (exceeds page size)
+			// and already lost the history (For example, refreshed the page)
+			throw new Error(`Commit not found in the history`);
 		}
 
 		let index = history[0].indexOf(sha);
@@ -205,15 +202,22 @@ export class CommitManager {
 			history = this._historyMap.get(key);
 			index = history?.[0].indexOf(sha) ?? -1;
 		}
-		const targetSha = index >= 0 ? history?.[0][index + 1] : null;
+		// use the first commit if index is -1
+		const targetSha = history?.[0][index + 1];
 		return targetSha ? this._shaMap.get(targetSha) || null : null;
 	});
 
 	// Newer entries depend on the original history's `from`; a commit
 	// SHA and file path alone do not provide that navigation context.
-	public getNextCommit = reuseable(async (ref: string, filePath: string, from: string): Promise<Commit | null> => {
-		const history = this._historyMap.get(historyKey(from || ref, filePath));
-		const index = history?.[0].indexOf(ref) ?? -1;
+	public getNextCommit = reuseable(async (sha: string, filePath: string, from: string): Promise<Commit | null> => {
+		const key = historyKey(from, filePath);
+		let history = this._historyMap.get(key);
+		if (!history) {
+			// no history for the file, fetch the history first.
+			await this.getList(from, filePath);
+			history = this._historyMap.get(key)!;
+		}
+		const index = history?.[0].indexOf(sha) ?? -1;
 		return index > 0 ? this._shaMap.get(history![0][index - 1]) || null : null;
 	});
 }

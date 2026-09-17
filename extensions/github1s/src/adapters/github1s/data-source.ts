@@ -281,7 +281,7 @@ export class GitHub1sDataSource extends DataSource {
 			page: options?.page,
 			per_page: options?.pageSize,
 			sha: options?.from,
-			path: isString(options?.path) ? trimStart(options.path, '/') : undefined,
+			path: trimStart(options?.path || '', '/') || undefined,
 			author: options?.author,
 		};
 		const requestParams = { owner, repo, ...queryParams };

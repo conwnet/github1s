@@ -99,9 +99,11 @@ const commandDiffCommitFile = async (commitItem: CommitTreeItem) => {
 	if (!activeDocumentUri) {
 		return;
 	}
-	const fileUri = router.buildUri({ ref: commitSha }, activeDocumentUri).with({
-		query: queryString.stringify({ from: router.getState().ref }),
-	});
+	const from = await Repository.getCurrentInstance().getCommitItem(router.getState().ref);
+	if (!from) {
+		return;
+	}
+	const fileUri = router.buildUri({ ref: commitSha }, activeDocumentUri);
 	return vscode.commands.executeCommand('github1s.commands.openFilePreviousRevision', fileUri);
 };
 

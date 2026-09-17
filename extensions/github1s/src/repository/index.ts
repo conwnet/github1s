@@ -104,12 +104,12 @@ export class Repository {
 		return this._commitManager.getLatestCommit(ref, filePath);
 	}
 
-	getPreviousCommit(ref: string, filePath: string, from: string) {
-		return this._commitManager.getPreviousCommit(ref, filePath, from);
+	getPreviousCommit(sha: string, filePath: string, fromSha: string) {
+		return this._commitManager.getPreviousCommit(sha, filePath, fromSha);
 	}
 
-	getNextCommit(ref: string, filePath: string, from: string) {
-		return this._commitManager.getNextCommit(ref, filePath, from);
+	getNextCommit(sha: string, filePath: string, fromSha: string) {
+		return this._commitManager.getNextCommit(sha, filePath, fromSha);
 	}
 
 	getCodeReviewList(...args: Parameters<CodeReviewManager['getList']>) {

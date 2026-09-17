@@ -191,7 +191,7 @@ export class SourcegraphDataSource extends DataSource {
 		let commits = await getCommits(
 			this.buildRepository(repo),
 			options?.from || 'HEAD',
-			options?.path === undefined ? undefined : trimStart(options.path, '/'),
+			trimStart(options?.path || '', '/') || undefined,
 			options?.pageSize ? options.pageSize * (options.page || 1) : undefined,
 		);
 		if (options?.path && options.path !== '/' && commits.length) {
