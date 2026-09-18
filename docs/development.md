@@ -25,7 +25,7 @@ The install step also installs dependencies for the local extensions. Watch mode
 
 Wait for the application and both extensions to finish compiling, then open [localhost:8080/conwnet/github1s](http://localhost:8080/conwnet/github1s). The development server uses port `8080` and writes generated assets to `dist/`.
 
-GitHub code search is proxied by the development server. OAuth callback Functions are not run by `npm run watch`; use a manually supplied token for repository authentication or follow the [Pages development instructions](deployment.md#preview-pages-functions-locally).
+OAuth callback Functions are not run by `npm run watch`; use a manually supplied token for repository authentication or follow the [Pages development instructions](deployment.md#preview-pages-functions-locally).
 
 ## Build the application
 

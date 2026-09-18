@@ -37,5 +37,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
       - run: npm run link && npm run build
-      - uses: microsoft/playwright-github-action@v1
-      - run: npm run test:ci
+        env:
+          GITHUB_API_PREFIX: http://localhost:8080/api/github
+      - name: Install snapshot test dependencies
+        working-directory: tests
+        run: npm ci && npx playwright install --with-deps
+      - name: Run snapshot tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx start-server-and-test watch:dev-server http://localhost:8080 "env -u GITHUB_TOKEN npm --prefix tests test"
