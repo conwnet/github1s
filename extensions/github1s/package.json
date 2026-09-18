@@ -9,7 +9,8 @@
     "textSearchProvider",
     "scmHistoryProvider",
     "contribSourceControlHistoryTitleMenu",
-    "contribSourceControlHistoryItemMenu"
+    "contribSourceControlHistoryItemMenu",
+    "timeline"
   ],
   "directories": {
     "lib": "lib"
@@ -74,12 +75,6 @@
         }
       ],
       "scm": [
-        {
-          "id": "github1s.views.fileHistory",
-          "name": "File History",
-          "icon": "$(history)",
-          "when": "github1s:views:fileHistory:visible == true"
-        },
         {
           "id": "github1s.views.codeReviewList",
           "name": "Code Reviews",
@@ -173,18 +168,6 @@
         "enablement": "github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket'"
       },
       {
-        "command": "github1s.commands.refreshFileHistoryCommitList",
-        "title": "Refresh",
-        "category": "GitHub1s",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "github1s.commands.refreshCommitList",
-        "title": "Refresh",
-        "category": "GitHub1s",
-        "icon": "$(refresh)"
-      },
-      {
         "command": "github1s.commands.searchCommit",
         "title": "Search",
         "category": "GitHub1s",
@@ -195,12 +178,6 @@
         "title": "Switch to Commit",
         "category": "GitHub1s",
         "icon": "$(log-in)"
-      },
-      {
-        "command": "github1s.commands.diffCommitFile",
-        "title": "Diff File",
-        "category": "GitHub1s",
-        "icon": "$(diff)"
       },
       {
         "command": "github1s.commands.openCommitOnGitHub",
@@ -424,10 +401,6 @@
           "when": "false"
         },
         {
-          "command": "github1s.commands.refreshCommitList",
-          "when": "false"
-        },
-        {
           "command": "github1s.commands.searchCommit",
           "when": "false"
         },
@@ -486,16 +459,6 @@
           "command": "github1s.commands.searchCodeReview",
           "when": "view == 'github1s.views.codeReviewList'",
           "group": "navigation@2"
-        },
-        {
-          "command": "github1s.commands.refreshFileHistoryCommitList",
-          "when": "view == 'github1s.views.fileHistory'",
-          "group": "navigation@1"
-        },
-        {
-          "command": "github1s.commands.searchCommit",
-          "when": "view == 'github1s.views.fileHistory'",
-          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -537,36 +500,6 @@
         {
           "command": "github1s.commands.openCodeReviewOnOfficialPage",
           "when": "viewItem == 'github1s:viewItems:codeReviewListItem' && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'",
-          "group": "inline@2"
-        },
-        {
-          "command": "github1s.commands.switchToCommit",
-          "when": "viewItem == 'github1s:viewItems:commitListItem'",
-          "group": "inline@1"
-        },
-        {
-          "command": "github1s.commands.openCommitOnGitHub",
-          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'GitHub'",
-          "group": "inline@2"
-        },
-        {
-          "command": "github1s.commands.diffCommitFile",
-          "when": "viewItem == 'github1s:viewItems:commitListItem' && view == 'github1s.views.fileHistory'",
-          "group": "inline@3"
-        },
-        {
-          "command": "github1s.commands.openCommitOnGitLab",
-          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'GitLab'",
-          "group": "inline@2"
-        },
-        {
-          "command": "github1s.commands.openCommitOnBitbucket",
-          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName == 'Bitbucket'",
-          "group": "inline@2"
-        },
-        {
-          "command": "github1s.commands.openCommitOnOfficialPage",
-          "when": "viewItem == 'github1s:viewItems:commitListItem' && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'",
           "group": "inline@2"
         }
       ],
@@ -638,6 +571,33 @@
         {
           "command": "github1s.commands.openCommitOnOfficialPage",
           "when": "scmProvider == github1s && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'",
+          "group": "inline@2"
+        }
+      ],
+      "timeline/item/context": [
+        {
+          "command": "github1s.commands.switchToCommit",
+          "when": "timelineItem == 'github1s:timeline:commit'",
+          "group": "inline@1"
+        },
+        {
+          "command": "github1s.commands.openCommitOnGitHub",
+          "when": "timelineItem == 'github1s:timeline:commit' && github1s:adapters:default:platformName == 'GitHub'",
+          "group": "inline@2"
+        },
+        {
+          "command": "github1s.commands.openCommitOnGitLab",
+          "when": "timelineItem == 'github1s:timeline:commit' && github1s:adapters:default:platformName == 'GitLab'",
+          "group": "inline@2"
+        },
+        {
+          "command": "github1s.commands.openCommitOnBitbucket",
+          "when": "timelineItem == 'github1s:timeline:commit' && github1s:adapters:default:platformName == 'Bitbucket'",
+          "group": "inline@2"
+        },
+        {
+          "command": "github1s.commands.openCommitOnOfficialPage",
+          "when": "timelineItem == 'github1s:timeline:commit' && github1s:adapters:default:platformName != 'GitHub' && github1s:adapters:default:platformName != 'GitLab' && github1s:adapters:default:platformName != 'Bitbucket' && github1s:adapters:default:platformName != 'npm'",
           "group": "inline@2"
         }
       ]

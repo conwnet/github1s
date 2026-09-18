@@ -16,7 +16,7 @@ sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
 
 export const registerSourceControlHistory = () => {
 	const context = getExtensionContext();
-	const historyProvider = new GitHub1sHistoryProvider();
+	const historyProvider = GitHub1sHistoryProvider.getInstance();
 	sourceControl.historyProvider = historyProvider;
 	context.subscriptions.push(sourceControl, historyProvider);
 	historyProvider.refresh();

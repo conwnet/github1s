@@ -31,12 +31,12 @@ export class Repository {
 	}
 
 	private constructor(
-		private _scheme: string,
-		private _repo: string,
+		public readonly scheme: string,
+		public readonly repo: string,
 	) {
-		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
-		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
-		this._commitManager = CommitManager.getInstance(_scheme, _repo);
+		this._branchTagManager = BranchTagManager.getInstance(scheme, repo);
+		this._codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
+		this._commitManager = CommitManager.getInstance(scheme, repo);
 		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
 
@@ -143,8 +143,8 @@ export class Repository {
 	async getFileBlameRanges(ref: string, path: string) {
 		const cacheKey = `${ref} ${path}`;
 		if (!this._blameRangesCache.has(cacheKey)) {
-			const dataSource = await getAdapter(this._scheme).resolveDataSource();
-			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
+			const dataSource = await getAdapter(this.scheme).resolveDataSource();
+			const blameRanges = await dataSource.provideFileBlameRanges(this.repo, ref, path);
 			this._blameRangesCache.set(cacheKey, blameRanges);
 		}
 		return this._blameRangesCache.get(cacheKey) || [];
