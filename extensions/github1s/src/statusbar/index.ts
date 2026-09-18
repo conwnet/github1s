@@ -4,9 +4,9 @@
  */
 
 import { updateCheckoutTo } from './checkout';
-import { showSponsors } from './sponsors';
+import { showThanks } from './thanks';
 
 export const decorateStatusBar = () => {
 	updateCheckoutTo();
-	showSponsors();
+	showThanks();
 };

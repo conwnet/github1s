@@ -58,9 +58,9 @@ See the [development guide](docs/development.md) to run GitHub1s locally. Report
 
 [conwnet](https://github.com/conwnet) · [xcv58](https://github.com/xcv58) · [Siddhant Khare](https://github.com/Siddhant-K-code)
 
-## 💖 Acknowledgments
+## 💖 Thanks
 
-Thanks to everyone who has contributed to GitHub1s, and to [Sourcegraph](https://sourcegraph.com/), [searchcode](https://searchcode.com/), and [OSS Insight](https://ossinsight.io/) for their support of the project.
+Thanks to everyone who has contributed to GitHub1s, and to [Sourcegraph](https://sourcegraph.com/), [searchcode](https://searchcode.com/), and [OSS Insight](https://ossinsight.io/) for the tools and services used by GitHub1s.
 
 ## 📄 License
 
