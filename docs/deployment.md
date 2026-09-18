@@ -93,7 +93,7 @@ npm run build
 npx wrangler pages dev dist
 ```
 
-Omit the OAuth configuration and export for a preview without GitHub OAuth. Open `http://localhost:8788/conwnet/github1s`. This differs from `npm run watch`, whose webpack server runs on port `8080` and only proxies GitHub code search. See [Pages local development](https://developers.cloudflare.com/pages/functions/local-development/) and [local secrets](https://developers.cloudflare.com/pages/functions/bindings/#local-development-with-secrets).
+Omit the OAuth configuration and export for a preview without GitHub OAuth. Open `http://localhost:8788/conwnet/github1s`. See [Pages local development](https://developers.cloudflare.com/pages/functions/local-development/) and [local secrets](https://developers.cloudflare.com/pages/functions/bindings/#local-development-with-secrets).
 
 ## Other static hosts
 

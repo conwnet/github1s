@@ -4,3 +4,4 @@ dist
 out
 node_modules
 .worktrees/
+tests/__tests__/__image_snapshots__/__diff_output__/
