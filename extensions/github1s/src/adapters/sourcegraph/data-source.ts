@@ -206,8 +206,15 @@ export class SourcegraphDataSource extends DataSource {
 		return getCommit(this.buildRepository(repo), ref);
 	}
 
-	async provideCommitChangedFiles(repo: string, ref: string, _options?: CommonQueryOptions): Promise<ChangedFile[]> {
-		return (await compareCommits(this.buildRepository(repo), `${ref}~`, ref)).map((file) => ({
+	async provideCommitChangedFiles(repo: string, ref: string, options?: CommonQueryOptions): Promise<ChangedFile[]> {
+		const changedFiles = await compareCommits(
+			this.buildRepository(repo),
+			`${ref}~`,
+			ref,
+			options?.pageSize ? options.pageSize * (options.page || 1) : undefined,
+		);
+		const files = options?.pageSize ? changedFiles.slice(options.pageSize * ((options.page || 1) - 1)) : changedFiles;
+		return files.map((file) => ({
 			...file,
 			path: normalizePath(file.path),
 			previousPath: file.previousPath ? normalizePath(file.previousPath) : undefined,

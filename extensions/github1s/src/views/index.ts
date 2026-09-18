@@ -7,9 +7,7 @@ import { getAdapter } from '@/adapters';
 import { CodeReviewType } from '@/adapters/types';
 import { getExtensionContext } from '@/helpers/context';
 import { CodeReviewTreeDataProvider } from './code-review-list';
-import { FileHistoryTreeDataProvider } from './commit-list';
 
-export const fileHistoryTreeDataProvider = new FileHistoryTreeDataProvider();
 export const codeReviewRequestTreeDataProvider = new CodeReviewTreeDataProvider();
 
 export const codeReviewViewTitle = {
@@ -30,8 +28,5 @@ export const registerCustomViews = () => {
 	const codeReviewType = getAdapter().codeReviewType || CodeReviewType.CodeReview;
 	codeReviewTreeView.title = codeReviewViewTitle[codeReviewType];
 
-	context.subscriptions.push(
-		// register commit view which is in source control panel
-		vscode.window.registerTreeDataProvider(FileHistoryTreeDataProvider.viewType, fileHistoryTreeDataProvider),
-	);
+	context.subscriptions.push(codeReviewTreeView);
 };

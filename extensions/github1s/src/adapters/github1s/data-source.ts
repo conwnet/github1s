@@ -325,11 +325,11 @@ export class GitHub1sDataSource extends DataSource {
 	async provideCommitChangedFiles(
 		repoFullName: string,
 		ref: string,
-		_options?: CommonQueryOptions,
+		options?: CommonQueryOptions,
 	): Promise<ChangedFile[]> {
 		const fetcher = GitHubFetcher.getInstance();
 		const { owner, repo } = parseRepoFullName(repoFullName);
-		const requestParams = { owner, repo, ref };
+		const requestParams = { owner, repo, ref, per_page: options?.pageSize, page: options?.page };
 		const { data } = await fetcher.request('GET /repos/{owner}/{repo}/commits/{ref}', requestParams);
 		return (
 			data.files?.map((item) => ({

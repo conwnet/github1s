@@ -38,14 +38,17 @@ export const getCodeReviewChangedFiles = async (
 	});
 };
 
-export const getCommitChangedFiles = async (commit: adapterTypes.Commit) => {
-	const repository = Repository.getCurrentInstance();
+export const getCommitChangedFiles = async (
+	commit: adapterTypes.Commit,
+	repository = Repository.getCurrentInstance(),
+) => {
+	const { scheme, repo } = repository;
 	// if the commit.parents is more than one element
 	// the parents[1].sha should be the merge source commitSha
 	// so we use the parents[0].sha as the parent commitSha
 	const parentCommitSha = commit?.parents?.[0] || '';
-	const baseRootUri = router.buildUri({ ref: parentCommitSha });
-	const headRootUri = router.buildUri({ ref: commit.sha }, baseRootUri);
+	const headRootUri = router.buildUri({ scheme, repo, ref: commit.sha });
+	const baseRootUri = router.buildUri({ ref: parentCommitSha }, headRootUri);
 	const changedFiles = await repository.getCommitChangedFiles(commit.sha);
 
 	return changedFiles.map((commitFile) => {

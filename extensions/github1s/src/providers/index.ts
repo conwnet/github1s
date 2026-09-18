@@ -15,12 +15,14 @@ import { GitHub1sSourceControlDecorationProvider } from './decorations/source-co
 import { GitHub1sDefinitionProvider } from './definition';
 import { GitHub1sReferenceProvider } from './reference';
 import { GitHub1sHoverProvider } from './hover';
+import { FileHistoryTimelineProvider } from './timeline';
 
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
 export const emptyFileUri = vscode.Uri.from({ scheme: EMPTY_FILE_SCHEME });
 
 export const registerVSCodeProviders = () => {
 	const context = getExtensionContext();
+	const fileHistoryProvider = FileHistoryTimelineProvider.getInstance();
 	const allSchemes = getAllAdapters().map((item) => item.scheme);
 
 	allSchemes.forEach((scheme) => {
@@ -38,6 +40,8 @@ export const registerVSCodeProviders = () => {
 	});
 
 	context.subscriptions.push(
+		fileHistoryProvider,
+		vscode.workspace.registerTimelineProvider(FileHistoryTimelineProvider.schemes, fileHistoryProvider),
 		vscode.window.registerFileDecorationProvider(GitHub1sSubmoduleDecorationProvider.getInstance()),
 		vscode.window.registerFileDecorationProvider(GitHub1sChangedFileDecorationProvider.getInstance()),
 		vscode.window.registerFileDecorationProvider(GitHub1sSourceControlDecorationProvider.getInstance()),

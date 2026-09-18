@@ -4,25 +4,44 @@
  */
 
 import * as vscode from 'vscode';
-import queryString from 'query-string';
 import router from '@/router';
 import { getAdapter } from '@/adapters';
 import { Repository } from '@/repository';
-import { CommitTreeItem, getCommitTreeItemDescription } from '@/views/commit-list';
-import { fileHistoryTreeDataProvider } from '@/views';
+import { getCommitDescription } from '@/helpers/commit';
+import { getChangedFileDiffCommand, getCommitChangedFiles } from '@/changes/files';
 
-type CommitCommandArgument = string | CommitTreeItem | vscode.SourceControl;
+type CommitCommandArgument = string | vscode.TimelineItem | vscode.SourceControl;
 
-// Graph actions pass (sourceControl, historyItem); tree actions pass a CommitTreeItem.
-const getCommitSha = (item?: CommitCommandArgument, historyItem?: vscode.SourceControlHistoryItem): string => {
-	if (historyItem) {
-		return historyItem.id;
+interface CommitContext {
+	scheme: string;
+	repo: string;
+	sha?: string;
+}
+
+// SCM menus pass (sourceControl, historyItem); timeline menus pass (item, uri, source).
+const resolveCommitContext = (
+	item?: CommitCommandArgument,
+	historyItemOrUri?: vscode.SourceControlHistoryItem | vscode.Uri,
+): CommitContext => {
+	if (historyItemOrUri && 'scheme' in historyItemOrUri) {
+		// for extensions/github1s/src/changes/history.ts
+		const { scheme, repo } = router.parseUri(historyItemOrUri);
+		return { scheme, repo, sha: typeof item === 'object' ? item.id : item };
 	}
-	return typeof item === 'string' ? item : item && 'commit' in item ? item.commit.sha : '';
+
+	let sha: string | undefined;
+	if (historyItemOrUri && 'id' in historyItemOrUri) {
+		// for extensions/github1s/src/providers/timeline.ts
+		sha = historyItemOrUri.id;
+	} else if (typeof item === 'string') {
+		sha = item;
+	}
+
+	return { scheme: getAdapter().scheme, repo: router.getState().repo, sha };
 };
 
-export const checkCommitExists = async (repo: string, commitSha: string) => {
-	const dataSoruce = await getAdapter().resolveDataSource();
+const checkCommitExists = async (repo: string, commitSha: string, scheme?: string) => {
+	const dataSoruce = await getAdapter(scheme).resolveDataSource();
 	try {
 		return !!(await dataSoruce.provideCommit(repo, commitSha));
 	} catch (error) {
@@ -37,11 +56,10 @@ export const checkCommitExists = async (repo: string, commitSha: string) => {
 
 const commandSwitchToCommit = async (
 	commitItemOrSha?: CommitCommandArgument,
-	historyItem?: vscode.SourceControlHistoryItem,
+	historyItemOrUri?: vscode.SourceControlHistoryItem | vscode.Uri,
 ) => {
-	let commitSha: string | undefined = getCommitSha(commitItemOrSha, historyItem);
-	const { repo } = router.getState();
-	const repository = Repository.getCurrentInstance();
+	const { scheme, repo, sha } = resolveCommitContext(commitItemOrSha, historyItemOrUri);
+	let commitSha = sha;
 
 	// if the a commitSha isn't provided, use quickInput
 	if (!commitSha) {
@@ -51,22 +69,18 @@ const commandSwitchToCommit = async (
 			alwaysShow: true,
 		};
 		// use the commit list as the candidates
+		const repository = Repository.getInstance(scheme, repo);
 		const commits = await repository.getCommitList();
 		const commitItems: vscode.QuickPickItem[] = commits.map((commit) => ({
 			commitSha: commit.sha,
 			label: commit.message,
-			description: getCommitTreeItemDescription(commit),
+			description: getCommitDescription(commit),
 		}));
 
-		const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
-		quickPick.matchOnDescription = true;
-		quickPick.items = [inputCommitShaItem, ...commitItems];
-		quickPick.show();
-
-		const choice = (await new Promise<vscode.QuickPickItem | undefined>((resolve) =>
-			quickPick.onDidAccept(() => resolve(quickPick.activeItems[0])),
-		)) as vscode.QuickPickItem & { commitSha?: string };
-		quickPick.hide();
+		const choice = await vscode.window.showQuickPick<vscode.QuickPickItem & { commitSha?: string }>(
+			[inputCommitShaItem, ...commitItems],
+			{ matchOnDescription: true },
+		);
 
 		// select nothing
 		if (!choice) {
@@ -84,78 +98,56 @@ const commandSwitchToCommit = async (
 		}
 	}
 
-	const routerParser = router.getParser();
-	if (await checkCommitExists(repo, commitSha!)) {
-		router.replace(await routerParser.buildCommitPath(repo, commitSha!));
-	}
-};
-
-const commandDiffCommitFile = async (commitItem: CommitTreeItem) => {
-	const commitSha = commitItem.commit.sha;
 	if (!commitSha) {
 		return;
 	}
-	const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
-	if (!activeDocumentUri) {
-		return;
+
+	if (await checkCommitExists(repo, commitSha, scheme)) {
+		const routerParser = await getAdapter(scheme).resolveRouterParser();
+		router.replace(await routerParser.buildCommitPath(repo, commitSha));
 	}
-	const from = await Repository.getCurrentInstance().getCommitItem(router.getState().ref);
-	if (!from) {
-		return;
-	}
-	const fileUri = router.buildUri({ ref: commitSha }, activeDocumentUri);
-	return vscode.commands.executeCommand('github1s.commands.openFilePreviousRevision', fileUri);
 };
 
-// this command is used in `source control commit list view`
 const commandOpenCommitOnOfficialPage = async (
 	commitItemOrSha?: CommitCommandArgument,
-	historyItem?: vscode.SourceControlHistoryItem,
+	historyItemOrUri?: vscode.SourceControlHistoryItem | vscode.Uri,
 ) => {
-	const commitSha = getCommitSha(commitItemOrSha, historyItem);
-	if (commitSha) {
-		const { repo } = router.getState();
-		const routerParser = router.getParser();
-		const commitPath = await routerParser.buildCommitPath(repo, commitSha);
-		const commitLink = await routerParser.buildExternalLink(commitPath);
-		return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(commitLink));
+	const { scheme, repo, sha } = resolveCommitContext(commitItemOrSha, historyItemOrUri);
+	if (!sha) {
+		return;
 	}
+
+	const routerParser = await getAdapter(scheme).resolveRouterParser();
+	const commitPath = await routerParser.buildCommitPath(repo, sha);
+	const commitLink = await routerParser.buildExternalLink(commitPath);
+	return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(commitLink));
 };
 
-const commandRefreshCommitList = () => {
-	return vscode.commands.executeCommand('workbench.scm.action.graph.refresh');
-};
-
-const commandRefreshFileHistoryCommitList = (forceUpdate = true) => {
-	return fileHistoryTreeDataProvider.updateTree(forceUpdate);
-};
-
-const commandLoadMoreFileHistoryCommits = async () => {
-	return fileHistoryTreeDataProvider.loadMoreCommits();
-};
-
-const commandLoadMoreFileHistoryCommitChangedFiles = async (commitSha: string) => {
-	return fileHistoryTreeDataProvider.loadMoreChangedFiles(commitSha);
+const commandDiffCommitFile = async (uri: vscode.Uri) => {
+	const { scheme, repo, ref, path } = router.parseUri(uri);
+	const repository = Repository.getInstance(scheme, repo);
+	const commit = await repository.getCommitItem(ref);
+	if (!commit) {
+		throw new Error(`Commit not found: ${ref}`);
+	}
+	const files = await getCommitChangedFiles(commit, repository);
+	const file =
+		files.find((file) => file.headFileUri.path === path) || files.find((file) => file.baseFileUri.path === path);
+	if (!file) {
+		throw new Error(`No changes found for ${path} in ${commit.sha}`);
+	}
+	const command = getChangedFileDiffCommand(file);
+	return vscode.commands.executeCommand(command.command, ...(command.arguments || []));
 };
 
 export const registerCommitCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
-		vscode.commands.registerCommand('github1s.commands.refreshCommitList', commandRefreshCommitList),
+		vscode.commands.registerCommand('github1s.commands.diffCommitFile', commandDiffCommitFile),
 		vscode.commands.registerCommand('github1s.commands.searchCommit', commandSwitchToCommit),
 		vscode.commands.registerCommand('github1s.commands.switchToCommit', commandSwitchToCommit),
-		vscode.commands.registerCommand('github1s.commands.diffCommitFile', commandDiffCommitFile),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnGitHub', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnGitLab', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnBitbucket', commandOpenCommitOnOfficialPage),
 		vscode.commands.registerCommand('github1s.commands.openCommitOnOfficialPage', commandOpenCommitOnOfficialPage),
-		vscode.commands.registerCommand('github1s.commands.loadMoreFileHistoryCommits', commandLoadMoreFileHistoryCommits),
-		vscode.commands.registerCommand(
-			'github1s.commands.loadMoreFileHistoryCommitChangedFiles',
-			commandLoadMoreFileHistoryCommitChangedFiles,
-		),
-		vscode.commands.registerCommand(
-			'github1s.commands.refreshFileHistoryCommitList',
-			commandRefreshFileHistoryCommitList,
-		),
 	);
 };
