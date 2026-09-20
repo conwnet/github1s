@@ -34,7 +34,7 @@
   "license": "ISC",
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260910.1",
-    "@github1s/vscode-web": "^0.30.2",
+    "@github1s/vscode-web": "^0.30.3",
     "@types/node": "^22.10.5",
     "chokidar": "^4.0.3",
     "clean-css": "^5.3.3",
