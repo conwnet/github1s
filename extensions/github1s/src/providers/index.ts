@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { getAllAdapters } from '@/adapters';
+import { getAllAdapters, supportsCommitFeatures } from '@/adapters';
 import { getExtensionContext } from '@/helpers/context';
 import { GitHub1sFileSystemProvider } from './file-system';
 import { GitHub1sFileSearchProvider } from './file-search';
@@ -20,7 +20,7 @@ import { FileHistoryTimelineProvider } from './timeline';
 export const EMPTY_FILE_SCHEME = 'github1s-empty-file';
 export const emptyFileUri = vscode.Uri.from({ scheme: EMPTY_FILE_SCHEME });
 
-export const registerVSCodeProviders = () => {
+export const registerVSCodeProviders = async () => {
 	const context = getExtensionContext();
 	const fileHistoryProvider = FileHistoryTimelineProvider.getInstance();
 	const allSchemes = getAllAdapters().map((item) => item.scheme);
@@ -39,9 +39,12 @@ export const registerVSCodeProviders = () => {
 		);
 	});
 
+	const timelineSupport = await Promise.all(allSchemes.map(supportsCommitFeatures));
+	const timelineSchemes = allSchemes.filter((_, index) => timelineSupport[index]);
+
 	context.subscriptions.push(
 		fileHistoryProvider,
-		vscode.workspace.registerTimelineProvider(FileHistoryTimelineProvider.schemes, fileHistoryProvider),
+		vscode.workspace.registerTimelineProvider(timelineSchemes, fileHistoryProvider),
 		vscode.window.registerFileDecorationProvider(GitHub1sSubmoduleDecorationProvider.getInstance()),
 		vscode.window.registerFileDecorationProvider(GitHub1sChangedFileDecorationProvider.getInstance()),
 		vscode.window.registerFileDecorationProvider(GitHub1sSourceControlDecorationProvider.getInstance()),

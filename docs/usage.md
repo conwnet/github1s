@@ -35,8 +35,9 @@ For branches or tags, you can also run **GitHub1s: Checkout to...**. Its **Check
 
 - Use **Explorer** to browse files and directories, or **Go to File** to find a file by name.
 - Use **Search** for text across the repository and the editor's **Find** action for the open file.
-- Open **Source Control** to inspect **Commits**, **File History**, and **Code Reviews** where the platform supports them.
-- Select a commit or pull/merge request to inspect its changed files and diffs.
+- Open a file and expand **Timeline** in **Explorer** to inspect its history. Select a commit entry to open that file's diff.
+- In **Source Control**, use the built-in **Graph** view to browse commits for the current ref and inspect their changed files and diffs.
+- In **Source Control**, select a pull/merge request from **Pull Requests** (GitHub) or **Merge Requests** (GitLab) to inspect its changed files and diffs.
 - Run **GitHub1s: Toggle File Blame** to display revision information beside file lines where available.
 
 Open the Command Palette with `F1`, `Ctrl+Shift+P`, or `Cmd+Shift+P` on macOS. Browser and operating-system shortcuts can take precedence.

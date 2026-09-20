@@ -1,5 +1,5 @@
 /**
- * @file Show Sponsors In Status Bar
+ * @file Show Thanks In Status Bar
  * @author netcon
  */
 
@@ -22,7 +22,7 @@ const resolveSourcegraphLink = async () => {
 	}
 };
 
-const resolveSponsors = async () => {
+const resolveThanks = async () => {
 	return [
 		{
 			name: 'Sourcegraph',
@@ -32,20 +32,20 @@ const resolveSponsors = async () => {
 	];
 };
 
-export const showSponsors = async () => {
+export const showThanks = async () => {
 	const titleItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-	titleItem.text = '  $(heart) Sponsors:';
+	titleItem.text = '  $(heart) Thanks:';
 	titleItem.show();
 
-	(await resolveSponsors()).forEach((sponsor) => {
-		const sponsorItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-		sponsorItem.text = sponsor.name;
-		sponsorItem.tooltip = sponsor.description;
-		sponsorItem.command = {
-			title: `Visit ${sponsor.name}`,
+	(await resolveThanks()).forEach((service) => {
+		const serviceItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+		serviceItem.text = service.name;
+		serviceItem.tooltip = service.description;
+		serviceItem.command = {
+			title: `Visit ${service.name}`,
 			command: 'vscode.open',
-			arguments: [vscode.Uri.parse(sponsor.link)],
+			arguments: [vscode.Uri.parse(service.link)],
 		};
-		sponsorItem.show();
+		serviceItem.show();
 	});
 };

@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import queryString from 'query-string';
 import router from '@/router';
 import { emptyFileUri } from '@/providers';
+import { supportsCommitFeatures } from '@/adapters';
 import { FileChangeStatus } from '@/adapters/types';
 import { Repository } from '@/repository';
 import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/changes/files';
@@ -36,8 +37,8 @@ const commandDiffChangedFile = async (fileUri: vscode.Uri) => {
 	vscode.commands.executeCommand(command.command, ...(command.arguments || []));
 };
 
-const isRepositoryFileUri = (uri: vscode.Uri | undefined): uri is vscode.Uri => {
-	return !!uri && /^(github1s|gitlab1s|bitbucket1s)$/.test(uri.scheme);
+const isRepositoryFileUri = async (uri: vscode.Uri | undefined): Promise<boolean> => {
+	return !!uri && supportsCommitFeatures(uri.scheme);
 };
 
 const getActiveDiffInput = (resource?: vscode.Uri): vscode.TabInputTextDiff | undefined => {
@@ -74,8 +75,10 @@ const resolveOpenFileRevisionArgs = async (
 	if (textDiffInput) {
 		// this is a diff editor
 		const { original, modified } = textDiffInput;
-		const hasLeftFile = isRepositoryFileUri(original);
-		const hasRightFile = isRepositoryFileUri(modified);
+		const [hasLeftFile, hasRightFile] = await Promise.all([
+			isRepositoryFileUri(original),
+			isRepositoryFileUri(modified),
+		]);
 
 		if (direction === 'previous' && hasLeftFile) {
 			baseUri = original;
@@ -86,7 +89,7 @@ const resolveOpenFileRevisionArgs = async (
 		if (hasRightFile) {
 			from = getQueryFrom(modified);
 		}
-	} else if (isRepositoryFileUri(fileUri)) {
+	} else if (fileUri && (await isRepositoryFileUri(fileUri))) {
 		// this is a single file editor
 		from = getQueryFrom(fileUri);
 		baseUri = fileUri;

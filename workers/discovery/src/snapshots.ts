@@ -1,6 +1,6 @@
 import type { DiscoverySnapshot } from './types.ts';
 
-export const LATEST_KEY = 'latest';
+export const LATEST_KEY = 'github:latest';
 export const SNAPSHOT_RETENTION_SECONDS = 90 * 24 * 60 * 60;
 
 // Use the scheduled UTC date so execution delays cannot change the archive day.

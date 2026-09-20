@@ -29,9 +29,6 @@ export class GitLab1sAdapter implements Adapter {
 	activateAsDefault() {
 		// register settings view and show it in activity bar
 		setVSCodeContext('github1s:views:settings:visible', true);
-		setVSCodeContext('github1s:views:codeReviewList:visible', true);
-		setVSCodeContext('github1s:views:commitList:visible', true);
-		setVSCodeContext('github1s:features:gutterBlame:enabled', true);
 
 		vscode.window.registerWebviewViewProvider(
 			GitLab1sSettingsViewProvider.viewType,
@@ -49,8 +46,5 @@ export class GitLab1sAdapter implements Adapter {
 
 	deactivateAsDefault() {
 		setVSCodeContext('github1s:views:settings:visible', false);
-		setVSCodeContext('github1s:views:codeReviewList:visible', false);
-		setVSCodeContext('github1s:views:commitList:visible', false);
-		setVSCodeContext('github1s:features:gutterBlame:enabled', false);
 	}
 }
