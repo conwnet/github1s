@@ -10,6 +10,7 @@ import { BitbucketAdapter } from './bitbucket1s';
 import { Npmjs1sAdapter } from './npmjs1s';
 import { DiscoveryAdapter } from './discovery';
 import { Adapter, DataSource, PlatformName, RouterParser } from './types';
+import { setVSCodeContext } from '@/helpers/vscode';
 
 const emptyAdapter = {
 	scheme: 'empty',
@@ -27,6 +28,8 @@ export const registerAdapters = async (): Promise<void> => {
 		adapterManager.registerAdapter(new Npmjs1sAdapter()),
 		adapterManager.registerAdapter(new DiscoveryAdapter()),
 	]);
+	await setVSCodeContext('github1s:views:codeReviewList:visible', await supportsCodeReviewFeatures());
+	await setVSCodeContext('github1s:features:gutterBlame:enabled', await supportsGutterBlameFeatures());
 };
 
 export const getAdapter = (scheme?: string): Adapter => {
@@ -35,4 +38,32 @@ export const getAdapter = (scheme?: string): Adapter => {
 
 export const getAllAdapters = (): Adapter[] => {
 	return adapterManager.getAllAdapters();
+};
+
+export const supportsDataSourceMethods = async (
+	methods: (keyof DataSource)[],
+	scheme: string = getAdapter().scheme,
+): Promise<boolean> => {
+	const adapter = getAllAdapters().find((adapter) => adapter.scheme === scheme);
+	if (!adapter) {
+		return false;
+	}
+	const dataSource = await adapter.resolveDataSource();
+	// Inherited default methods return empty results and do not indicate support.
+	return methods.every((method) => dataSource[method] !== DataSource.prototype[method]);
+};
+
+export const supportsCommitFeatures = (scheme?: string): Promise<boolean> => {
+	return supportsDataSourceMethods(['provideCommits', 'provideCommit', 'provideCommitChangedFiles'], scheme);
+};
+
+export const supportsCodeReviewFeatures = (scheme?: string): Promise<boolean> => {
+	return supportsDataSourceMethods(
+		['provideCodeReviews', 'provideCodeReview', 'provideCodeReviewChangedFiles'],
+		scheme,
+	);
+};
+
+export const supportsGutterBlameFeatures = (scheme?: string): Promise<boolean> => {
+	return supportsDataSourceMethods(['provideFileBlameRanges'], scheme);
 };

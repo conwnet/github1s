@@ -15,6 +15,7 @@ export class Repository {
 
 	private _branchTagManager: BranchTagManager;
 	private _codeReviewManager: CodeReviewManager;
+	private _commitManager: CommitManager;
 	private _blameRangesCache: Map<string, BlameRange[]>;
 
 	public static getInstance(scheme: string, repo: string) {
@@ -30,11 +31,12 @@ export class Repository {
 	}
 
 	private constructor(
-		private _scheme: string,
-		private _repo: string,
+		public readonly scheme: string,
+		public readonly repo: string,
 	) {
-		this._branchTagManager = BranchTagManager.getInstance(_scheme, _repo);
-		this._codeReviewManager = CodeReviewManager.getInstance(_scheme, _repo);
+		this._branchTagManager = BranchTagManager.getInstance(scheme, repo);
+		this._codeReviewManager = CodeReviewManager.getInstance(scheme, repo);
+		this._commitManager = CommitManager.getInstance(scheme, repo);
 		this._blameRangesCache = new Map<string, BlameRange[]>();
 	}
 
@@ -71,43 +73,43 @@ export class Repository {
 	}
 
 	getCommitList(ref: string = 'HEAD', filePath: string = '/', forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getList(forceUpdate);
+		return this._commitManager.getList(ref, filePath, forceUpdate);
 	}
 
 	getCommitItem(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getItem(forceUpdate);
+		return this._commitManager.getItem(ref, forceUpdate);
 	}
 
 	loadMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).loadMore();
+		return this._commitManager.loadMore(ref, filePath);
 	}
 
 	hasMoreCommits(ref: string = 'HEAD', filePath: string = '/') {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).hasMore();
+		return this._commitManager.hasMore(ref, filePath);
 	}
 
 	getCommitChangedFiles(ref: string, forceUpdate: boolean = false) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').getChangedFiles(forceUpdate);
+		return this._commitManager.getChangedFiles(ref, forceUpdate);
 	}
 
 	loadMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').loadMoreChangedFiles();
+		return this._commitManager.loadMoreChangedFiles(ref);
 	}
 
 	hasMoreCommitChangedFiles(ref: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, '/').hasMoreChangedFiles();
+		return this._commitManager.hasMoreChangedFiles(ref);
 	}
 
 	getFileLatestCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getLatestCommit();
+		return this._commitManager.getLatestCommit(ref, filePath);
 	}
 
-	getPreviousCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getPreviousCommit();
+	getPreviousCommit(sha: string, filePath: string, fromSha: string) {
+		return this._commitManager.getPreviousCommit(sha, filePath, fromSha);
 	}
 
-	getNextCommit(ref: string, filePath: string) {
-		return CommitManager.getInstance(this._scheme, this._repo, ref, filePath).getNextCommit();
+	getNextCommit(sha: string, filePath: string, fromSha: string) {
+		return this._commitManager.getNextCommit(sha, filePath, fromSha);
 	}
 
 	getCodeReviewList(...args: Parameters<CodeReviewManager['getList']>) {
@@ -141,8 +143,8 @@ export class Repository {
 	async getFileBlameRanges(ref: string, path: string) {
 		const cacheKey = `${ref} ${path}`;
 		if (!this._blameRangesCache.has(cacheKey)) {
-			const dataSource = await getAdapter(this._scheme).resolveDataSource();
-			const blameRanges = await dataSource.provideFileBlameRanges(this._repo, ref, path);
+			const dataSource = await getAdapter(this.scheme).resolveDataSource();
+			const blameRanges = await dataSource.provideFileBlameRanges(this.repo, ref, path);
 			this._blameRangesCache.set(cacheKey, blameRanges);
 		}
 		return this._blameRangesCache.get(cacheKey) || [];

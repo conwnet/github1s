@@ -5,26 +5,39 @@
 
 import * as vscode from 'vscode';
 import * as adapterTypes from '@/adapters/types';
+import { supportsCommitFeatures } from '@/adapters';
+import { getExtensionContext } from '@/helpers/context';
 import { GitHub1sQuickDiffProvider } from './quick-diff';
 import { getChangedFileDiffCommand, getChangedFiles } from './files';
+import { GitHub1sHistoryProvider } from './history';
 
-export const updateSourceControlChanges = (() => {
-	const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s');
-	const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
-	sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
+const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s');
+const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
+sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
 
-	return async () => {
-		const changedFiles = await getChangedFiles();
+export const registerSourceControlHistory = async () => {
+	const context = getExtensionContext();
+	context.subscriptions.push(sourceControl);
+	if (!(await supportsCommitFeatures())) {
+		return;
+	}
+	const historyProvider = GitHub1sHistoryProvider.getInstance();
+	sourceControl.historyProvider = historyProvider;
+	context.subscriptions.push(historyProvider);
+	historyProvider.refresh();
+};
 
-		changesGroup.resourceStates = changedFiles.map((changedFile) => {
-			return {
-				resourceUri: changedFile.headFileUri.with({ authority: '' }),
-				decorations: {
-					strikeThrough: changedFile.status === adapterTypes.FileChangeStatus.Removed,
-					tooltip: changedFile.status,
-				},
-				command: getChangedFileDiffCommand(changedFile),
-			};
-		});
-	};
-})();
+export const updateSourceControlChanges = async () => {
+	const changedFiles = await getChangedFiles();
+
+	changesGroup.resourceStates = changedFiles.map((changedFile) => {
+		return {
+			resourceUri: changedFile.headFileUri.with({ authority: '' }),
+			decorations: {
+				strikeThrough: changedFile.status === adapterTypes.FileChangeStatus.Removed,
+				tooltip: changedFile.status,
+			},
+			command: getChangedFileDiffCommand(changedFile),
+		};
+	});
+};

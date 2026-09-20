@@ -46,6 +46,7 @@ const devVscodeStatic = [
 export default (env, argv) => {
 	const devMode = argv.mode === 'development';
 	const devVscode = !!process.env.DEV_VSCODE;
+	const ciGithubProxy = devMode && process.env.CI === 'true' && !!process.env.GITHUB_TOKEN;
 	const minifyCSS = (code) => (devMode ? code : new CleanCSS().minify(code).styles);
 	const minifyJS = (code) => (devMode ? code : UglifyJS.minify(code).code);
 	const availableLanguages = devVscode ? [] : fs.readdirSync(path.join(vscodeWebPath, 'nls'));
@@ -94,24 +95,31 @@ export default (env, argv) => {
 		],
 		performance: false,
 		devServer: {
+			host: ciGithubProxy ? 'localhost' : undefined,
 			port: 8080,
 			proxy: [
 				{
-					context: ['/api/github/search/code'],
+					// Used by code search and by CI builds that point GITHUB_API_PREFIX here.
+					context: (pathname, req) => pathname.startsWith('/api/github/'),
 					target: 'https://api.github.com',
 					changeOrigin: true,
+					followRedirects: false,
 					pathRewrite: { '^/api/github': '' },
 					headers: { 'user-agent': 'GitHub1s' },
 					on: {
 						proxyReq: (proxyReq) => {
 							proxyReq.removeHeader('cookie');
 							proxyReq.removeHeader('origin');
+							if (ciGithubProxy) {
+								// Set up credentials for the CI environment to avoid GitHub API rate limits.
+								proxyReq.setHeader('authorization', `Bearer ${process.env.GITHUB_TOKEN}`);
+							}
 						},
 					},
 				},
 			],
 			liveReload: false,
-			allowedHosts: 'all',
+			allowedHosts: ciGithubProxy ? 'auto' : 'all',
 			client: { overlay: false },
 			devMiddleware: { writeToDisk: true },
 			static: devVscode ? devVscodeStatic : [],

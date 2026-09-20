@@ -62,10 +62,11 @@ it('should load successfully', async () => {
 
 it('should open file correctly', async () => {
 	await page.goto(`${BASE_URL}/conwnet/github1s`);
-	await page.waitForTimeout(3000);
+	await page.waitForSelector('iframe.webview.ready');
 	await page.click('[aria-label="~/tsconfig.json"]');
 	await page.click('[data-resource-name="tsconfig.json"]');
-	await page.waitForTimeout(3000);
+	await page.waitForSelector('[role="tab"][aria-selected="true"][data-resource-name="tsconfig.json"]');
+	await page.waitForSelector('.monaco-editor[data-uri="github1s:/tsconfig.json"] .view-lines');
 
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);

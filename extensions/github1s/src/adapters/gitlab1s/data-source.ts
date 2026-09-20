@@ -251,7 +251,7 @@ export class GitLab1sDataSource extends DataSource {
 			page: options?.page,
 			per_page: options?.pageSize,
 			sha: options?.from,
-			path: isString(options?.path) ? trimStart(options.path, '/') : undefined,
+			path: trimStart(options?.path || '', '/') || undefined,
 			author: options?.author,
 		};
 		const requestParams = { repo, ...queryParams };
@@ -296,10 +296,13 @@ export class GitLab1sDataSource extends DataSource {
 	}
 
 	@trySourcegraphApiFirst
-	async provideCommitChangedFiles(repo: string, ref: string, _options?: CommonQueryOptions): Promise<ChangedFile[]> {
+	async provideCommitChangedFiles(repo: string, ref: string, options?: CommonQueryOptions): Promise<ChangedFile[]> {
 		const fetcher = GitLabFetcher.getInstance();
-		const requestParams = { repo, ref };
-		const { data } = await fetcher.request('GET /projects/{repo}/repository/commits/{ref}/diff', requestParams);
+		const requestParams = { repo, ref, per_page: options?.pageSize, page: options?.page };
+		const { data } = await fetcher.request(
+			'GET /projects/{repo}/repository/commits/{ref}/diff?per_page={per_page}&page={page}',
+			requestParams,
+		);
 		return (
 			data?.map((item) => ({
 				path: normalizePath(item.new_path || item.old_path!),

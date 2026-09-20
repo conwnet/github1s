@@ -7,9 +7,11 @@ import * as vscode from 'vscode';
 import queryString from 'query-string';
 import router from '@/router';
 import { emptyFileUri } from '@/providers';
+import { supportsCommitFeatures } from '@/adapters';
 import { FileChangeStatus } from '@/adapters/types';
 import { Repository } from '@/repository';
 import { getChangedFiles, getChangedFileDiffCommand, getChangedFileDiffTitle } from '@/changes/files';
+import { omit } from '@/helpers/util';
 
 export const getChangedFileFromSourceControl = async (fileUri: vscode.Uri) => {
 	// the file should belong to current workspace
@@ -35,103 +37,138 @@ const commandDiffChangedFile = async (fileUri: vscode.Uri) => {
 	vscode.commands.executeCommand(command.command, ...(command.arguments || []));
 };
 
-const openFileToEditor = async (fileUri) => {
-	return vscode.commands.executeCommand('vscode.open', fileUri, { preview: false });
+const isRepositoryFileUri = async (uri: vscode.Uri | undefined): Promise<boolean> => {
+	return !!uri && supportsCommitFeatures(uri.scheme);
 };
 
-// open the left file in the diff editor title
-const commandDiffViewOpenLeftFile = async (fileUri: vscode.Uri) => {
-	const query = queryString.parse(fileUri?.query || '');
-	return query.base ? openFileToEditor(vscode.Uri.parse(query.base as string)) : null;
-};
-
-// open the right file in the diff editor title
-const commandDiffViewOpenRightFile = async (fileUri: vscode.Uri) => {
-	const query = queryString.parse(fileUri?.query || '');
-	return query.head ? openFileToEditor(vscode.Uri.parse(query.head as string)) : null;
-};
-
-// get the file uri with the concrete commit sha, the `ref` in
-// `fileUri.authority` maybe newer but not related this file
-const getConcreteFileUri = async (fileUri: vscode.Uri) => {
-	const { scheme, repo, ref, path } = router.parseUri(fileUri);
-	const repository = Repository.getInstance(scheme, repo);
-	const commit = await repository.getFileLatestCommit(ref, path);
-	const latestCommitSha = commit?.sha || (await repository.getCommitItem(ref))?.sha;
-
-	return router.buildUri({ ref: latestCommitSha }, fileUri);
-};
-
-// show the file's diff between current commit and previous commit
-const commandOpenFilePreviousRevision = async (fileUri: vscode.Uri) => {
-	const queryBaseUriStr = queryString.parse(fileUri.query).base;
-	const rightFileUri = await getConcreteFileUri(
-		// if the `queryBaseUriStr` is empty, which means this command is called from
-		// a normal file editor (not a diff editor), just use `fileUri` in this case
-		queryBaseUriStr ? vscode.Uri.parse(queryBaseUriStr as string) : fileUri,
-	);
-	const { scheme, repo, ref: rightCommitSha } = router.parseUri(rightFileUri);
-	const repository = Repository.getInstance(scheme, repo);
-	const leftCommit = await repository.getPreviousCommit(rightCommitSha, rightFileUri.path);
-	// if we can't find previous commit, use the `emptyFileUri` as the leftFileUri
-	const leftFileUri = leftCommit ? router.buildUri({ ref: leftCommit.sha }, rightFileUri) : emptyFileUri;
-
-	const changedStatus = leftCommit ? FileChangeStatus.Modified : FileChangeStatus.Added;
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommitSha, rightFileUri.path));
-
-	const query = queryString.stringify({
-		base: leftFileUri.with({ query: '' }).toString(),
-		head: rightFileUri.with({ query: '' }).toString(),
-		status: changedStatus,
-		// if we can't find a newer commit for this file,
-		// the `Show Next Commit` Button would be disabled.
-		hasNextRevision,
-	});
-
-	return vscode.commands.executeCommand(
-		'vscode.diff',
-		leftFileUri.with({ query }),
-		rightFileUri.with({ query }),
-		getChangedFileDiffTitle(leftFileUri, rightFileUri, changedStatus),
-	);
-};
-
-// show the file's diff between current commit and next commit
-const commandOpenFileNextRevision = async (fileUri: vscode.Uri) => {
-	const leftFileUri = await getConcreteFileUri(fileUri);
-
-	const { scheme, repo, ref: leftCommitSha } = router.parseUri(leftFileUri);
-	const repository = Repository.getInstance(scheme, repo);
-	const rightCommit = await repository.getNextCommit(leftCommitSha, leftFileUri.path);
-
-	if (!rightCommit) {
-		return vscode.window.showInformationMessage('There is no next commit found.');
+const getActiveDiffInput = (resource?: vscode.Uri): vscode.TabInputTextDiff | undefined => {
+	const input = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
+	if (!(input instanceof vscode.TabInputTextDiff)) {
+		return;
 	}
 
-	const rightFileUri = router.buildUri({ ref: rightCommit.sha }, leftFileUri);
-	const hasNextRevision = !!(await repository.getNextCommit(rightCommit.sha, rightFileUri.path));
+	// Title actions receive the modified URI. Ignore actions targeting another diff.
+	if (resource && resource.toString() !== input.modified.toString()) {
+		return;
+	}
+	return input;
+};
 
-	const query = queryString.stringify({
-		base: leftFileUri.with({ query: '' }).toString(),
-		head: rightFileUri.with({ query: '' }).toString(),
-		status: FileChangeStatus.Modified,
-		hasNextRevision,
-	});
+const createCommandDiffViewOpenFile = (side: 'original' | 'modified') => async (resource?: vscode.Uri) => {
+	const fileUri = getActiveDiffInput(resource)?.[side];
+	if (fileUri && fileUri?.scheme !== emptyFileUri.scheme) {
+		await vscode.commands.executeCommand('workbench.action.keepEditor');
+		return vscode.commands.executeCommand('vscode.open', fileUri, {});
+	}
+};
 
-	return vscode.commands.executeCommand(
-		'vscode.diff',
-		leftFileUri.with({ query }),
-		rightFileUri.with({ query }),
-		getChangedFileDiffTitle(leftFileUri, rightFileUri, FileChangeStatus.Modified),
-	);
+const resolveOpenFileRevisionArgs = async (
+	fileUri: vscode.Uri | undefined,
+	direction: 'previous' | 'next',
+): Promise<[vscode.Uri, string]> => {
+	let baseUri: vscode.Uri | undefined, from: string | undefined;
+	const getQueryFrom = (uri: vscode.Uri): string | undefined => {
+		return queryString.parse(uri.query).from as string | undefined;
+	};
+
+	const textDiffInput = getActiveDiffInput(fileUri);
+	if (textDiffInput) {
+		// this is a diff editor
+		const { original, modified } = textDiffInput;
+		const [hasLeftFile, hasRightFile] = await Promise.all([
+			isRepositoryFileUri(original),
+			isRepositoryFileUri(modified),
+		]);
+
+		if (direction === 'previous' && hasLeftFile) {
+			baseUri = original;
+		}
+		if (direction === 'next' && hasRightFile) {
+			baseUri = modified;
+		}
+		if (hasRightFile) {
+			from = getQueryFrom(modified);
+		}
+	} else if (fileUri && (await isRepositoryFileUri(fileUri))) {
+		// this is a single file editor
+		from = getQueryFrom(fileUri);
+		baseUri = fileUri;
+	}
+
+	if (!baseUri) {
+		throw new Error('Unable to resolve the target file.');
+	}
+
+	if (!from) {
+		// If 'from' cannot be obtained in the query, use the ref of baseUri as 'from'
+		const { scheme, repo, ref, path } = router.parseUri(baseUri);
+		const repository = Repository.getInstance(scheme, repo);
+		from = (await repository.getFileLatestCommit(ref, path))?.sha;
+		if (!from) {
+			throw new Error('Unable to resolve the latest commit for this file.');
+		}
+		baseUri = router.buildUri({ ref: from }, baseUri);
+	}
+
+	return [baseUri, from];
+};
+
+const createCommandOpenFileRevision = (direction: 'previous' | 'next') => async (fileUri?: vscode.Uri) => {
+	try {
+		const [baseUri, from] = await resolveOpenFileRevisionArgs(fileUri, direction);
+		const { scheme, repo, ref, path } = router.parseUri(baseUri);
+		const repository = Repository.getInstance(scheme, repo);
+		const baseSha = (await repository.getCommitItem(ref))?.sha;
+		if (!baseSha) {
+			throw new Error('Unable to resolve the commit for this file.');
+		}
+
+		let leftFileUri: vscode.Uri | undefined, rightFileUri: vscode.Uri | undefined;
+		if (direction === 'previous') {
+			const prevCommit = await repository.getPreviousCommit(baseSha, path, from);
+			leftFileUri = prevCommit ? router.buildUri({ ref: prevCommit.sha }, baseUri) : emptyFileUri;
+			rightFileUri = baseUri;
+		} else {
+			const nextCommit = await repository.getNextCommit(baseSha, path, from);
+			if (!nextCommit) throw new Error('Unable to find next commit for this file.');
+			leftFileUri = baseUri;
+			rightFileUri = router.buildUri({ ref: nextCommit.sha }, baseUri);
+		}
+
+		const hasNext = router.parseUri(rightFileUri).ref !== from || undefined;
+		const leftQuery = queryString.stringify(omit(queryString.parse(baseUri.query), ['from']));
+		const rightQuery = queryString.stringify({ ...queryString.parse(baseUri.query), from, hasNext });
+
+		if (fileUri && !queryString.parse(fileUri.query).from) {
+			await vscode.commands.executeCommand('workbench.action.keepEditor');
+		}
+
+		return await vscode.commands.executeCommand(
+			'vscode.diff',
+			leftFileUri.with({ query: leftQuery }),
+			rightFileUri.with({ query: rightQuery }),
+			getChangedFileDiffTitle(leftFileUri, rightFileUri, FileChangeStatus.Modified),
+		);
+	} catch (error) {
+		return vscode.window.showErrorMessage(`Unable to open file revision: ${error.message}`);
+	}
 };
 
 export const registerEditorCommands = (context: vscode.ExtensionContext) => {
 	return context.subscriptions.push(
 		vscode.commands.registerCommand('github1s.commands.diffChangedFile', commandDiffChangedFile),
-		vscode.commands.registerCommand('github1s.commands.diffViewOpenLeftFile', commandDiffViewOpenLeftFile),
-		vscode.commands.registerCommand('github1s.commands.diffViewOpenRightFile', commandDiffViewOpenRightFile),
-		vscode.commands.registerCommand('github1s.commands.openFilePreviousRevision', commandOpenFilePreviousRevision),
-		vscode.commands.registerCommand('github1s.commands.openFileNextRevision', commandOpenFileNextRevision),
+		vscode.commands.registerCommand(
+			'github1s.commands.diffViewOpenLeftFile',
+			createCommandDiffViewOpenFile('original'),
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.diffViewOpenRightFile',
+			createCommandDiffViewOpenFile('modified'),
+		),
+		vscode.commands.registerCommand(
+			'github1s.commands.openFilePreviousRevision',
+			createCommandOpenFileRevision('previous'),
+		),
+		vscode.commands.registerCommand('github1s.commands.openFileNextRevision', createCommandOpenFileRevision('next')),
 	);
 };

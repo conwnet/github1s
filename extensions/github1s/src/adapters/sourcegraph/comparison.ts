@@ -8,10 +8,10 @@ import { ChangedFile, FileChangeStatus } from '../types';
 import { querySourcegraphRepository } from './common';
 
 const ComparisonQuery = gql`
-	query ($repository: String!, $base: String!, $head: String!) {
+	query ($repository: String!, $base: String!, $head: String!, $first: Int) {
 		repository(name: $repository) {
 			comparison(base: $base, head: $head) {
-				fileDiffs {
+				fileDiffs(first: $first) {
 					nodes {
 						newPath
 						oldPath
@@ -35,10 +35,15 @@ const getFileChangeStatus = (oldPath: string | null, newPath: string | null): Fi
 	return FileChangeStatus.Modified;
 };
 
-export const compareCommits = async (repository: string, base: string, head: string): Promise<ChangedFile[]> => {
+export const compareCommits = async (
+	repository: string,
+	base: string,
+	head: string,
+	limit?: number,
+): Promise<ChangedFile[]> => {
 	const repositoryData = await querySourcegraphRepository({
 		query: ComparisonQuery,
-		variables: { repository, base, head },
+		variables: { repository, base, head, first: limit },
 	});
 	const diffFiles = repositoryData.comparison?.fileDiffs?.nodes || [];
 
