@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import * as adapterTypes from '@/adapters/types';
+import { supportsCommitFeatures } from '@/adapters';
 import { getExtensionContext } from '@/helpers/context';
 import { GitHub1sQuickDiffProvider } from './quick-diff';
 import { getChangedFileDiffCommand, getChangedFiles } from './files';
@@ -14,11 +15,15 @@ const sourceControl = vscode.scm.createSourceControl('github1s', 'GitHub1s');
 const changesGroup = sourceControl.createResourceGroup('changes', 'Changes');
 sourceControl.quickDiffProvider = new GitHub1sQuickDiffProvider();
 
-export const registerSourceControlHistory = () => {
+export const registerSourceControlHistory = async () => {
 	const context = getExtensionContext();
+	context.subscriptions.push(sourceControl);
+	if (!(await supportsCommitFeatures())) {
+		return;
+	}
 	const historyProvider = GitHub1sHistoryProvider.getInstance();
 	sourceControl.historyProvider = historyProvider;
-	context.subscriptions.push(sourceControl, historyProvider);
+	context.subscriptions.push(historyProvider);
 	historyProvider.refresh();
 };
 

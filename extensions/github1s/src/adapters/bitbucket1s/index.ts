@@ -6,7 +6,6 @@
 import { BitbucketRouterParser } from './router-parser';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 import { Adapter, CodeReviewType, PlatformName } from '../types';
-import { setVSCodeContext } from '@/helpers/vscode';
 
 export class BitbucketAdapter implements Adapter {
 	public scheme: string = 'bitbucket1s';
@@ -19,13 +18,5 @@ export class BitbucketAdapter implements Adapter {
 
 	resolveRouterParser() {
 		return Promise.resolve(BitbucketRouterParser.getInstance());
-	}
-
-	activateAsDefault() {
-		setVSCodeContext('github1s:features:gutterBlame:enabled', true);
-	}
-
-	deactivateAsDefault() {
-		setVSCodeContext('github1s:features:gutterBlame:enabled', false);
 	}
 }

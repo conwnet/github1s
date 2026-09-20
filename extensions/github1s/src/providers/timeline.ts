@@ -7,10 +7,10 @@ import router, { UriState } from '@/router';
 import { Repository } from '@/repository';
 import { getCommitTooltip } from '@/helpers/commit';
 import { Commit } from '@/adapters/types';
+import { supportsCommitFeatures } from '@/adapters';
 
 export class FileHistoryTimelineProvider implements vscode.TimelineProvider, vscode.Disposable {
 	private static instance: FileHistoryTimelineProvider | null = null;
-	public static readonly schemes = ['github1s', 'gitlab1s', 'bitbucket1s'];
 	readonly id = 'github1s.fileHistory';
 	readonly label = 'Git History';
 
@@ -43,11 +43,7 @@ export class FileHistoryTimelineProvider implements vscode.TimelineProvider, vsc
 		options: vscode.TimelineOptions,
 		token: vscode.CancellationToken,
 	): Promise<vscode.Timeline | undefined> {
-		if (
-			!FileHistoryTimelineProvider.schemes.includes(uri.scheme) ||
-			uri.path === '/' ||
-			token.isCancellationRequested
-		) {
+		if (uri.path === '/' || token.isCancellationRequested || !(await supportsCommitFeatures(uri.scheme))) {
 			return undefined;
 		}
 
