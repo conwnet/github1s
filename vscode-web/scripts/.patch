@@ -7,5 +7,6 @@
   "src/vs/workbench/services/label/common/labelService.ts": "9e4e2aafeabc04ccf183b8f2f4ce8a4d39f240831e4005b06149684458caa8d4",
   "src/vs/workbench/services/textfile/browser/textFileService.ts": "886566605815367d3866be243994829729fd0b85c04ab7450b9de22ee93053eb",
   "src/vs/base/common/network.ts": "d264af1ba5dbbfaf950c5da336100fb1242802eab92ed3b4692d3c10282b2dee",
-  "src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts": "f77c8e0d95ff5e0b15f0ea5135f3b454ee6b12dbf07c793ae3e053ead954e47a"
+  "src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts": "f77c8e0d95ff5e0b15f0ea5135f3b454ee6b12dbf07c793ae3e053ead954e47a",
+  "src/vs/workbench/contrib/scm/browser/scm.contribution.ts": "82d17f9575c13d810e9f65ef5e47c68ff007c0155db9eaa0c434d67e67cd63b8"
 }
