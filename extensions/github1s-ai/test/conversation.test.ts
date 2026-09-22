@@ -5,11 +5,19 @@ import type { ContextAttachment } from '@/common/context';
 import {
 	createAssistantMessage,
 	createUserMessage,
+	getRetryableMessage,
 	markStreamingMessagesUnknown,
 	validateConversationMessages,
 	withMessageStatus,
 	type Conversation,
 } from '@/common/conversation';
+
+test('the latest failed assistant can be retried until completed', () => {
+	const user = createUserMessage('turn-1', 'Hello', []);
+	const assistant = withMessageStatus(createAssistantMessage('assistant-1', 'turn-1'), 'failed');
+	assert.equal(getRetryableMessage([user, assistant]), assistant);
+	assert.equal(getRetryableMessage([user, withMessageStatus(assistant, 'completed')]), undefined);
+});
 
 test('user messages capture attachments and pass conversation validation', async () => {
 	const attachment: ContextAttachment = {

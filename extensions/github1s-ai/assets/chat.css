@@ -1144,6 +1144,16 @@ summary:focus-visible,
 	font: inherit;
 }
 
+.message-retry {
+	gap: 4px;
+	margin-top: 6px;
+}
+
+.message-retry .icon {
+	width: 12px;
+	height: 12px;
+}
+
 .message-status {
 	margin: 5px 0 0;
 	color: var(--vscode-descriptionForeground);
