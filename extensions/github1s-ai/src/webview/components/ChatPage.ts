@@ -1,7 +1,7 @@
 import { html } from 'htm/preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 
-import type { ConversationMessage } from '@/common/conversation';
+import { getRetryableMessage, type ConversationMessage } from '@/common/conversation';
 import type { ViewEvent, ViewState } from '@/common/protocol';
 import { QUICK_ACTIONS } from '@/common/quick-actions';
 
@@ -47,6 +47,7 @@ interface TranscriptProps extends ChatContentProps {
 }
 
 const Transcript = ({ state, messages, busy, post }: TranscriptProps) => {
+	const retryableMessage = busy ? undefined : getRetryableMessage(messages);
 	const transcript = useRef<HTMLElement>(null);
 	const content = useRef<HTMLDivElement>(null);
 	const followOutput = useRef(true);
@@ -78,7 +79,15 @@ const Transcript = ({ state, messages, busy, post }: TranscriptProps) => {
 		<div ref=${content} class="transcript-content">
 			${messages.length === 0
 				? html`<${EmptyChat} state=${state} busy=${busy} post=${post} />`
-				: messages.map((message) => html`<${MessageView} key=${message.id} message=${message} post=${post} />`)}
+				: messages.map(
+						(message) =>
+							html`<${MessageView}
+								key=${message.id}
+								message=${message}
+								canRetry=${message === retryableMessage}
+								post=${post}
+							/>`,
+					)}
 		</div>
 	</section>`;
 };
