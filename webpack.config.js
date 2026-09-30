@@ -47,6 +47,9 @@ export default (env, argv) => {
 	const devMode = argv.mode === 'development';
 	const devVscode = !!process.env.DEV_VSCODE;
 	const ciGithubProxy = devMode && process.env.CI === 'true' && !!process.env.GITHUB_TOKEN;
+	const gitlabDomain = process.env.GITLAB_DOMAIN || 'https://gitlab.com';
+	const gitlabApiPrefix = process.env.GITLAB_API_PREFIX || `${gitlabDomain}/api/v4`;
+	const gitlabDevProxy = devMode && gitlabApiPrefix.startsWith('/api/gitlab');
 	const minifyCSS = (code) => (devMode ? code : new CleanCSS().minify(code).styles);
 	const minifyJS = (code) => (devMode ? code : UglifyJS.minify(code).code);
 	const availableLanguages = devVscode ? [] : fs.readdirSync(path.join(vscodeWebPath, 'nls'));
@@ -86,7 +89,8 @@ export default (env, argv) => {
 			new webpack.DefinePlugin({
 				DEV_VSCODE: JSON.stringify(devVscode),
 				GITHUB_ORIGIN: JSON.stringify(process.env.GITHUB_DOMAIN || 'https://github.com'),
-				GITLAB_ORIGIN: JSON.stringify(process.env.GITLAB_DOMAIN || 'https://gitlab.com'),
+				GITLAB_ORIGIN: JSON.stringify(gitlabDomain),
+				GITHUB1S_PLATFORM: JSON.stringify(process.env.PLATFORM || ''),
 				GITHUB1S_EXTENSIONS: JSON.stringify(packUtils.getBuiltinExtensions(devVscode)),
 				AVAILABLE_LANGUAGES: JSON.stringify(availableLanguages),
 				GITHUB_OAUTH_ID: JSON.stringify(process.env.GITHUB_OAUTH_ID || ''),
@@ -117,6 +121,23 @@ export default (env, argv) => {
 						},
 					},
 				},
+				...(gitlabDevProxy
+					? [
+							{
+								context: (pathname) => pathname.startsWith('/api/gitlab/'),
+								target: gitlabDomain,
+								changeOrigin: true,
+								followRedirects: false,
+								pathRewrite: { '^/api/gitlab': '/api/v4' },
+								on: {
+									proxyReq: (proxyReq) => {
+										proxyReq.removeHeader('cookie');
+										proxyReq.removeHeader('origin');
+									},
+								},
+							},
+						]
+					: []),
 			],
 			liveReload: false,
 			allowedHosts: ciGithubProxy ? 'auto' : 'all',

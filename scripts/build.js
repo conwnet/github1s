@@ -3,8 +3,10 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { executeCommand, PROJECT_ROOT } from './utils.js';
+import { loadEnvLocal } from './load-env-local.js';
 
 const main = () => {
+	loadEnvLocal();
 	for (const extension of fs.readdirSync('extensions')) {
 		const extensionPath = path.join(PROJECT_ROOT, 'extensions', extension);
 		if (fs.existsSync(path.join(extensionPath, 'package.json'))) {

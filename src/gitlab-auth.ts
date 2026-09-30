@@ -5,7 +5,6 @@
 
 import { createOAuthState, waitForOAuthResult } from './oauth-web';
 
-const GITLAB_ORIGIN = 'https://gitlab.com';
 const OAUTH_REDIRECT_URI = `${location.origin}/api/gitlab-auth-callback`;
 const OPEN_WINDOW_FEATURES =
 	'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=800,height=520,top=150,left=150';

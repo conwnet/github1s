@@ -9,14 +9,30 @@ import { renderNotification } from './notification';
 import { createProductConfiguration } from './product';
 import { createVSCodeWebConfig, createWorkbenchOptions, Platform } from './config';
 
+const parseGitLabRepository = (pathParts: string[]): string => {
+	const dashIndex = pathParts.indexOf('-');
+	return (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
+};
+
+const resolveGitLabHostname = (): string => {
+	try {
+		return new URL(GITLAB_ORIGIN).hostname;
+	} catch {
+		return '';
+	}
+};
+
 const resolvePlatformState = (): [Platform, string] => {
 	const hostname = window.location.hostname;
 	const pathParts = window.location.pathname.split('/').filter(Boolean);
+	const gitlabHostname = resolveGitLabHostname();
 
-	if (hostname.match(/^(.*\.)?gitlab1s\.com$/i)) {
-		const dashIndex = pathParts.indexOf('-');
-		const repository = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
-		return [Platform.GitLab, repository];
+	if (
+		GITHUB1S_PLATFORM === 'gitlab' ||
+		hostname.match(/^(.*\.)?gitlab1s\.com$/i) ||
+		(gitlabHostname && hostname === gitlabHostname)
+	) {
+		return [Platform.GitLab, parseGitLabRepository(pathParts)];
 	}
 	if (hostname.match(/^(.*\.)?bitbucket1s\.org$/i)) {
 		const repository = pathParts.length >= 2 ? pathParts.slice(0, 2).join('/') : '';

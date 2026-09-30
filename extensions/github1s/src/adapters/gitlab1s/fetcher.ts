@@ -4,12 +4,14 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionContext } from '@/helpers/context';
+import { getExtensionContext, getBrowserUrl } from '@/helpers/context';
 import { GitLab1sAuthenticationView } from './authentication';
 import { GitLabTokenManager } from './token';
 import { isNil } from '@/helpers/util';
 import { reuseable } from '@/helpers/func';
 import { getCurrentRepo } from './parse-path';
+import { isSelfHostedGitLab, resolveGitLabApiUrl } from './api-url';
+import { gitLabAuthHeaderAttempts } from './token';
 import { SourcegraphDataSource } from '../sourcegraph/data-source';
 
 export const errorMessages = {
@@ -71,16 +73,26 @@ export class GitLabFetcher {
 				path = path.replace(`{${el}}`, `${encodeURIComponent(params[el] || '')}`);
 			});
 			const accessToken = GitLabTokenManager.getInstance().getToken();
-			const fetchOptions: { headers: Record<string, string> } =
-				accessToken?.length < 60
-					? { headers: { 'PRIVATE-TOKEN': `${accessToken}` } }
-					: { headers: { Authorization: `Bearer ${accessToken}` } };
-			return fetch(GITLAB_API_PREFIX + path, {
-				...fetchOptions,
-				method,
-			}).then(async (response: Response & { data: any }) => {
-				response.data = await response.json();
-				return response.ok ? response : Promise.reject({ response });
+			const headerAttempts = accessToken ? gitLabAuthHeaderAttempts(accessToken) : [{} as Record<string, string>];
+			return getBrowserUrl().then(async (browserUrl: string) => {
+				const url = resolveGitLabApiUrl(GITLAB_API_PREFIX + path, browserUrl);
+				let lastResponse: (Response & { data: any }) | null = null;
+				for (const headers of headerAttempts) {
+					const response = (await fetch(url, { headers, method })) as Response & { data: any };
+					try {
+						response.data = await response.json();
+					} catch {
+						response.data = null;
+					}
+					if (response.ok) {
+						return response;
+					}
+					lastResponse = response;
+					if (response.status !== 401) {
+						return Promise.reject({ response });
+					}
+				}
+				return Promise.reject({ response: lastResponse });
 			});
 		},
 	);
@@ -110,6 +122,9 @@ export class GitLabFetcher {
 	}
 
 	private async initPreferSourcegraphApi() {
+		if (isSelfHostedGitLab()) {
+			return;
+		}
 		if (await this.getPreferSourcegraphApi()) {
 			const sgDataSource = SourcegraphDataSource.getInstance('github');
 			if (!(await sgDataSource.provideRepository(await getCurrentRepo()))) {
@@ -121,6 +136,9 @@ export class GitLabFetcher {
 	}
 
 	public async getPreferSourcegraphApi(repo?: string): Promise<boolean> {
+		if (isSelfHostedGitLab()) {
+			return false;
+		}
 		const targetRepo = repo || (await getCurrentRepo());
 		const globalState = getExtensionContext().globalState;
 		const cachedData: Record<string, boolean> | undefined = globalState.get(PREFER_SOURCEGRAPH_API);

@@ -9,6 +9,7 @@ declare module '*.svg' {
 declare const DEV_VSCODE: boolean;
 declare const GITHUB_ORIGIN: string;
 declare const GITLAB_ORIGIN: string;
+declare const GITHUB1S_PLATFORM: string;
 declare const GITHUB1S_EXTENSIONS: string;
 declare const AVAILABLE_LANGUAGES: string[];
 declare const GITHUB_OAUTH_ID: string;

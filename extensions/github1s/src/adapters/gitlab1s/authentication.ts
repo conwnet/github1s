@@ -5,6 +5,8 @@
 
 import { GitHub1sAuthenticationView } from '../github1s/authentication';
 import { GitLabTokenManager } from './token';
+import { getCurrentRepo } from './parse-path';
+import { resolveProjectAccessTokenLink } from './links';
 
 export class GitLab1sAuthenticationView extends GitHub1sAuthenticationView {
 	protected tokenManager = GitLabTokenManager.getInstance();
@@ -14,16 +16,26 @@ export class GitLab1sAuthenticationView extends GitHub1sAuthenticationView {
 		authenticationFormTitle: 'Authenticating to GitLab',
 		OAuthButtonText: 'Connect to GitLab',
 		OAuthButtonLogo: 'assets/pages/assets/gitlab.svg',
-		createTokenLink: `${GITLAB_ORIGIN}/-/profile/personal_access_tokens?scopes=read_api&name=GitLab1s`,
+		createTokenLink: resolveProjectAccessTokenLink(''),
 		authenticationFeatures: [
 			{
-				text: 'Access GitLab personal repository',
-				link: 'https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html',
+				text: 'Use a Project Access Token from Settings → Access Tokens (glpat-)',
+				link: 'https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html',
 			},
 			{
-				text: 'Higher rate limit for GitLab official API',
-				link: 'https://docs.gitlab.com/ee/security/rate_limits.html',
+				text: 'Do not use Pipeline trigger tokens (glptt-) for code browsing',
+				link: 'https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html',
 			},
 		],
 	};
+
+	public open(notice: string = '', withBarrier = false) {
+		return getCurrentRepo().then((repo) => {
+			this.pageConfig = {
+				...this.pageConfig,
+				createTokenLink: resolveProjectAccessTokenLink(repo),
+			};
+			return super.open(notice, withBarrier);
+		});
+	}
 }

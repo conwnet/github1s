@@ -1,4 +1,6 @@
 .DS_Store
+.env.local
+.dev.vars
 lib
 dist
 out

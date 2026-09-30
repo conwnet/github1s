@@ -27,6 +27,19 @@ Wait for the application and both extensions to finish compiling, then open [loc
 
 OAuth callback Functions are not run by `npm run watch`; use a manually supplied token for repository authentication or follow the [Pages development instructions](deployment.md#preview-pages-functions-locally).
 
+### Self-hosted GitLab (this fork)
+
+Copy `.env.local.example` to `.env.local` and set your GitLab host. Watch and build load that file automatically.
+
+| Variable              | Purpose                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------- |
+| `PLATFORM=gitlab`     | Force GitLab mode on `localhost` (and any host that is not gitlab1s.com).                                |
+| `GITLAB_DOMAIN`       | GitLab web origin (links, OAuth authorize URL).                                                          |
+| `GITLAB_API_PREFIX`   | Dev: `/api/gitlab` (proxied to `{GITLAB_DOMAIN}/api/v4`). Prod build: full API URL or your gateway path. |
+| `GITLAB_TEST_PROJECT` | Optional `group/project` when validating a token outside a project URL.                                  |
+
+Open a project at `http://localhost:8080/group/project`. For private projects, use **Settings** and paste a **Project Access Token** with `read_api` (and usually `read_repository`).
+
 ## Build the application
 
 ```bash

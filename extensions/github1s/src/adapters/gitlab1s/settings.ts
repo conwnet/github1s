@@ -3,8 +3,11 @@
  * @author netcon
  */
 
+import * as vscode from 'vscode';
 import { GitLabTokenManager } from './token';
 import { GitLabFetcher } from './fetcher';
+import { getCurrentRepo } from './parse-path';
+import { resolveProjectAccessTokenLink } from './links';
 import { GitHub1sSettingsViewProvider } from '../github1s/settings';
 
 export class GitLab1sSettingsViewProvider extends GitHub1sSettingsViewProvider {
@@ -15,10 +18,20 @@ export class GitLab1sSettingsViewProvider extends GitHub1sSettingsViewProvider {
 	protected detailPageCommand = 'github1s.commands.openGitLab1sAuthPage';
 	protected pageConfig = {
 		pageDescriptionLines: [
-			'You can provide a Personal Access Token or an OAuth token to access private repositories or to increase rate limits.',
-			"Your token will only be stored locally in your browser. Don't forget to clean it while you are using a public device.",
+			'Create a Project Access Token and copy it immediately — GitLab shows it only once.',
+			'Scopes: read_api and read_repository. No prefix is normal on newer GitLab versions.',
+			'The token is validated against the project in the current URL before it is saved.',
 		],
 		OAuthButtonText: 'Connect to GitLab',
-		createTokenLink: `${GITLAB_ORIGIN}/-/profile/personal_access_tokens?scopes=read_api&name=GitLab1s`,
+		createTokenLink: resolveProjectAccessTokenLink(''),
 	};
+
+	public async resolveWebviewView(webviewView: vscode.WebviewView): Promise<void> {
+		const repo = await getCurrentRepo();
+		this.pageConfig = {
+			...this.pageConfig,
+			createTokenLink: resolveProjectAccessTokenLink(repo),
+		};
+		return super.resolveWebviewView(webviewView);
+	}
 }

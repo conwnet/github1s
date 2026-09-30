@@ -12,11 +12,22 @@ import { getBrowserUrl } from '@/helpers/context';
 
 export const DEFAULT_REPO = 'gitlab-org/gitlab-docs';
 
+export const parseRepoFromBrowserUrl = (browserUrl: string): string => {
+	const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
+	const dashIndex = pathParts.indexOf('-');
+	const repo = (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/');
+	if (!repo) {
+		return '';
+	}
+	// group/project or a single project id / path slug (self-hosted)
+	return repo;
+};
+
+const resolveFallbackRepo = (): string => GITLAB_TEST_PROJECT || DEFAULT_REPO;
+
 export const getCurrentRepo = memorize(() => {
 	return getBrowserUrl().then((browserUrl: string) => {
-		const pathParts = vscode.Uri.parse(browserUrl).path.split('/').filter(Boolean);
-		const dashIndex = pathParts.indexOf('-');
-		return (dashIndex < 0 ? pathParts : pathParts.slice(0, dashIndex)).join('/') || DEFAULT_REPO;
+		return parseRepoFromBrowserUrl(browserUrl) || resolveFallbackRepo();
 	});
 });
 
@@ -160,9 +171,10 @@ export const parseGitLabPath = async (path: string): Promise<RouterState> => {
 	}
 
 	// fallback to default
+	const fallbackRepo = resolveFallbackRepo();
 	return {
-		repo: DEFAULT_REPO,
-		ref: await getDefaultBranch(DEFAULT_REPO),
+		repo: fallbackRepo,
+		ref: await getDefaultBranch(fallbackRepo),
 		pageType: PageType.Tree,
 		filePath: '/',
 	};

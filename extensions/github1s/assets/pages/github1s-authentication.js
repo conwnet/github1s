@@ -44,14 +44,14 @@ const ManualInputToken = () => {
 	const handleSubmit = useCallback(() => {
 		if (inputToken) {
 			setLoading(true);
-			bridgeCommands.validateToken(inputToken).then((tokenStatus) => {
+			bridgeCommands.validateToken(inputToken.trim()).then((tokenStatus) => {
 				if (!tokenStatus) {
 					const messageArgs = { level: 'info', args: ['This AccessToken is invalid'] };
 					bridgeCommands.alertMessage(messageArgs);
 					setLoading(false);
 					return;
 				}
-				bridgeCommands.setToken(inputToken).then(() => setLoading(false));
+				bridgeCommands.setToken(inputToken.trim()).then(() => setLoading(false));
 			});
 		}
 	}, [inputToken]);
