@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { createAssistantMessage, createUserMessage, type ConversationMessage } from '@/common/conversation';
+import {
+	createAssistantMessage,
+	createUserMessage,
+	withMessageStatus,
+	type ConversationMessage,
+} from '@/common/conversation';
 import { buildModelMessages } from '@/llm/helpers';
 
 const completedTurn = (turnId: string, text: string): ConversationMessage[] => [
@@ -101,7 +106,7 @@ test('model history keeps the latest turn even when that turn exceeds the budget
 	]);
 });
 
-test('model history omits unfinished tool calls from aborted turns', async () => {
+test('model history pairs a tool with an unknown result when execution was interrupted', async () => {
 	const assistant: ConversationMessage = {
 		id: 'assistant-1',
 		role: 'assistant',
@@ -123,7 +128,48 @@ test('model history omits unfinished tool calls from aborted turns', async () =>
 	);
 	assert.deepEqual(messages, [
 		{ role: 'user', content: [{ type: 'text', text: 'Read a.ts' }] },
-		{ role: 'assistant', content: [{ type: 'text', text: 'Reading the file.' }] },
+		{
+			role: 'assistant',
+			content: [
+				{ type: 'text', text: 'Reading the file.' },
+				{
+					type: 'tool-call',
+					toolName: 'read',
+					toolCallId: 'call-1',
+					input: { path: 'a.ts' },
+					providerExecuted: undefined,
+				},
+			],
+		},
+		{
+			role: 'tool',
+			content: [
+				{
+					type: 'tool-result',
+					toolName: 'read',
+					toolCallId: 'call-1',
+					output: {
+						type: 'error-text',
+						value: 'Tool execution was interrupted; its result is unknown.',
+					},
+				},
+			],
+		},
+		{ role: 'assistant', content: [{ type: 'text', text: '[The previous assistant response was interrupted.]' }] },
 		{ role: 'user', content: [{ type: 'text', text: 'Continue' }] },
 	]);
+});
+
+test('an empty failed reply gets an interruption marker before the next question', async () => {
+	const assistant = withMessageStatus(createAssistantMessage('assistant-1', 'turn-1'), 'failed');
+	const messages = await buildModelMessages(
+		[createUserMessage('turn-1', 'Question', []), assistant],
+		[createUserMessage('turn-2', 'Next', [])],
+	);
+	assert.deepEqual(messages, [
+		{ role: 'user', content: [{ type: 'text', text: 'Question' }] },
+		{ role: 'assistant', content: [{ type: 'text', text: '[The previous assistant response was interrupted.]' }] },
+		{ role: 'user', content: [{ type: 'text', text: 'Next' }] },
+	]);
+	assert.deepEqual(assistant.parts, []);
 });

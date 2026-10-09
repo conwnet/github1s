@@ -41,6 +41,7 @@ type AllViewEvents =
 	| { type: 'app.openSettings' }
 	| { type: 'app.openFile'; source: string }
 	| { type: 'chat.send'; text: string }
+	| { type: 'chat.retry'; id: string }
 	| { type: 'chat.runQuickAction'; action: ChatQuickAction }
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
 	| { type: 'chat.addContextAttachment'; action: 'descriptor'; descriptor: ContextAttachmentDescriptor }
@@ -96,6 +97,7 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 				? { type: event.type, enabled: event.enabled }
 				: undefined;
 
+		case 'chat.retry':
 		case 'chat.removeContextAttachment':
 		case 'history.selectConversation':
 		case 'history.deleteConversation':

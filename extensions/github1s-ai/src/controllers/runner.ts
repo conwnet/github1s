@@ -4,6 +4,7 @@ import { addLanguageModelUsage, createNullLanguageModelUsage } from 'ai/internal
 import {
 	createAssistantMessage,
 	createUserMessage,
+	getRetryableMessage,
 	withMessageStatus,
 	type Conversation,
 	type ConversationMessage,
@@ -19,7 +20,7 @@ import { resolveContextAttachments } from './context';
 
 type ActiveRequest = {
 	controller: AbortController;
-	turnId: string;
+	messageId: string;
 };
 
 export class ConversationRunner {
@@ -31,7 +32,7 @@ export class ConversationRunner {
 		private readonly publishState: () => Promise<void>,
 	) {}
 
-	async send(input: { text: string } | { action: ChatQuickAction }): Promise<void> {
+	async send(input: { text: string } | { action: ChatQuickAction } | { retryMessageId: string }): Promise<void> {
 		if (('text' in input && !input.text.trim()) || this.preparation) return;
 
 		const [promptsConfig, config] = await Promise.all([
@@ -39,7 +40,8 @@ export class ConversationRunner {
 			this.stores.modelConfigs.getSelected(),
 		]);
 		const prompts = resolvePrompts(promptsConfig);
-		const text = 'text' in input ? input.text : prompts.quickActions[input.action];
+		const text = 'text' in input ? input.text : 'action' in input ? prompts.quickActions[input.action] : '';
+		const retry = 'retryMessageId' in input;
 
 		if (!config) {
 			await this.stores.runtime.setIn('chat.notice', {
@@ -50,15 +52,25 @@ export class ConversationRunner {
 		}
 		const runtime = await this.stores.runtime.get();
 		if (this.preparation) return;
+		const previous = runtime.chat.conversation;
+		if (retry && (!previous || getRetryableMessage(previous.messages)?.id !== input.retryMessageId)) return;
+		const conversationId = previous?.id ?? globalThis.crypto.randomUUID();
+		if (this.requests.has(conversationId)) return;
 		const descriptors = (runtime.chat.pendingAttachments ?? []).map((descriptor) => ({ ...descriptor }));
 		const preparation = Symbol('conversation-preparation');
 		this.preparation = preparation;
 		await this.stores.runtime.setIn('chat', { ...runtime.chat, preparing: true, notice: undefined });
 
-		let attachments;
+		let userMessage: ConversationMessage;
 		try {
 			await this.publishState();
-			attachments = await resolveContextAttachments(descriptors);
+			if (retry) {
+				userMessage = previous!.messages.at(-2)!;
+			} else {
+				const attachments = await resolveContextAttachments(descriptors);
+				const recentFiles = runtime.chat.includeRecentFiles === false ? [] : runtime.chat.recentFiles;
+				userMessage = createUserMessage(globalThis.crypto.randomUUID(), text, attachments, recentFiles);
+			}
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.finishPreparation(preparation, `Unable to read the selected context attachment. ${detail}`);
@@ -66,20 +78,12 @@ export class ConversationRunner {
 		}
 		if (this.preparation !== preparation) return;
 
-		const previous = runtime.chat.conversation;
 		const startedAt = Date.now();
-		const conversationId = previous?.id ?? globalThis.crypto.randomUUID();
-		if (this.requests.has(conversationId)) {
-			await this.finishPreparation(preparation);
-			return;
-		}
-
-		const turnId = globalThis.crypto.randomUUID();
-		const recentFiles = runtime.chat.includeRecentFiles === false ? [] : runtime.chat.recentFiles;
-		const userMessage = createUserMessage(turnId, text, attachments, recentFiles);
+		const turnId = userMessage.metadata.turnId;
+		const history = retry ? previous!.messages.slice(0, -2) : (previous?.messages ?? []);
 		let providerMessages;
 		try {
-			providerMessages = await buildModelMessages(previous?.messages ?? [], [userMessage]);
+			providerMessages = await buildModelMessages(history, [userMessage]);
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.finishPreparation(preparation, `Unable to prepare the conversation. ${detail}`);
@@ -91,7 +95,7 @@ export class ConversationRunner {
 		const conversation: Conversation = previous
 			? {
 					...previous,
-					messages: [...previous.messages, userMessage, assistantMessage],
+					messages: [...history, userMessage, assistantMessage],
 					updatedAt: startedAt,
 				}
 			: {
@@ -116,7 +120,7 @@ export class ConversationRunner {
 			return;
 		}
 		if (this.preparation !== preparation) {
-			await this.finishTurn(conversationId, turnId, 'aborted');
+			await this.setMessageStatus(conversationId, assistantMessage.id, 'aborted');
 			return;
 		}
 
@@ -124,7 +128,7 @@ export class ConversationRunner {
 		const abortController = new AbortController();
 		const request: ActiveRequest = {
 			controller: abortController,
-			turnId,
+			messageId: assistantMessage.id,
 		};
 		this.requests.set(conversationId, request);
 		let mcp: Awaited<ReturnType<typeof connectMcpTools>> | undefined;
@@ -134,7 +138,7 @@ export class ConversationRunner {
 				await this.stores.runtime.setIn('chat', {
 					...currentRuntime.chat,
 					conversation,
-					pendingAttachments: [],
+					pendingAttachments: retry ? currentRuntime.chat.pendingAttachments : [],
 					preparing: false,
 				});
 				await this.stores.conversations.select(conversationId);
@@ -154,16 +158,16 @@ export class ConversationRunner {
 			if (!abortController.signal.aborted && this.requests.get(conversationId) === request) {
 				const usage = await agentStream.usage;
 				if (!abortController.signal.aborted && this.requests.get(conversationId) === request) {
-					await this.completeTurn(conversationId, turnId, usage);
+					await this.setMessageStatus(conversationId, request.messageId, 'completed', undefined, usage);
 				}
 			}
 		} catch (error) {
 			if (this.requests.get(conversationId) !== request) return;
 			if (abortController.signal.aborted) {
-				await this.finishTurn(conversationId, turnId, 'aborted');
+				await this.setMessageStatus(conversationId, request.messageId, 'aborted');
 			} else {
 				const message = error instanceof Error ? error.message : 'Unknown error.';
-				await this.finishTurn(conversationId, turnId, 'failed', message);
+				await this.setMessageStatus(conversationId, request.messageId, 'failed', message);
 			}
 		} finally {
 			if (this.requests.get(conversationId) === request) this.requests.delete(conversationId);
@@ -185,7 +189,7 @@ export class ConversationRunner {
 		if (!request) return;
 		this.requests.delete(conversationId);
 		request.controller.abort();
-		await this.finishTurn(conversationId, request.turnId, 'aborted');
+		await this.setMessageStatus(conversationId, request.messageId, 'aborted');
 	}
 
 	isRequestActive(conversationId: string | undefined): boolean {
@@ -218,32 +222,17 @@ export class ConversationRunner {
 		await this.publishState();
 	}
 
-	private async completeTurn(conversationId: string, turnId: string, usage: LanguageModelUsage): Promise<void> {
-		await this.setTurnStatus(conversationId, turnId, 'completed', undefined, usage);
-	}
-
-	private async finishTurn(
+	private async setMessageStatus(
 		conversationId: string,
-		turnId: string,
-		status: 'aborted' | 'failed',
-		error?: string,
-	): Promise<void> {
-		await this.setTurnStatus(conversationId, turnId, status, error);
-	}
-
-	private async setTurnStatus(
-		conversationId: string,
-		turnId: string,
+		messageId: string,
 		status: 'completed' | 'aborted' | 'failed',
 		error?: string,
 		usage?: LanguageModelUsage,
 	): Promise<void> {
 		const conversation = await this.stores.conversations.get(conversationId);
-		if (!conversation) return;
+		if (!conversation?.messages.some((message) => message.id === messageId)) return;
 		const messages = conversation.messages.map((message) =>
-			message.role === 'assistant' && message.metadata.turnId === turnId
-				? withMessageStatus(message, status, error)
-				: message,
+			message.id === messageId ? withMessageStatus(message, status, error) : message,
 		);
 		const updatedAt = Date.now();
 		const nextUsage = usage === undefined ? undefined : addUsage(conversation.usage, usage);

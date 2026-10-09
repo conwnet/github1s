@@ -20,6 +20,11 @@ export class ChatController extends Controller {
 		await this.runner.send({ text: event.text });
 	}
 
+	@Controller.handler('chat.retry')
+	async handleRetry(event: ViewEvent<'chat.retry'>): Promise<void> {
+		await this.runner.send({ retryMessageId: event.id });
+	}
+
 	@Controller.handler('chat.cancel')
 	async handleCancel(_event: ViewEvent<'chat.cancel'>): Promise<void> {
 		await this.runner.cancelCurrent();

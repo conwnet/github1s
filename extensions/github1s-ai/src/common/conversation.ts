@@ -34,6 +34,22 @@ export interface Conversation extends ConversationSummary {
 	messages: ConversationMessage[];
 }
 
+export const isInterruptedMessage = (message: ConversationMessage): boolean =>
+	message.metadata.status === 'failed' ||
+	message.metadata.status === 'aborted' ||
+	message.metadata.status === 'unknown';
+
+export const getRetryableMessage = (messages: readonly ConversationMessage[]): ConversationMessage | undefined => {
+	const assistant = messages.at(-1);
+	const user = messages.at(-2);
+	return assistant?.role === 'assistant' &&
+		isInterruptedMessage(assistant) &&
+		user?.role === 'user' &&
+		user.metadata.turnId === assistant.metadata.turnId
+		? assistant
+		: undefined;
+};
+
 export const createUserMessage = (
 	turnId: string,
 	text: string,

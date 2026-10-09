@@ -6,6 +6,7 @@ import type { ViewEvent } from '@/common/protocol';
 import { messageStatusLabel } from '../helpers/presentation';
 import { AssistantActivity, isAssistantActivityPart, type AssistantActivityPart } from './AssistantActivity';
 import { AttachmentChips } from './AttachmentChips';
+import { Icon } from './Icon';
 import { Markdown } from './Markdown';
 import { RecentFilesTooltip } from './RecentFiles';
 
@@ -15,10 +16,11 @@ type AssistantSegment =
 
 interface MessageViewProps {
 	message: ConversationMessage;
+	canRetry?: boolean;
 	post: (event: ViewEvent) => void;
 }
 
-export const MessageView = ({ message, post }: MessageViewProps) => {
+export const MessageView = ({ message, canRetry, post }: MessageViewProps) => {
 	if (message.role !== 'user' && message.role !== 'assistant') return null;
 	const segments = message.role === 'assistant' ? assistantSegments(message) : [];
 	const activityRunning = segments.some(
@@ -44,6 +46,16 @@ export const MessageView = ({ message, post }: MessageViewProps) => {
 				</div>`}
 		${status ? html`<${MessageStatus} label=${status} generating=${message.metadata.status === 'streaming'} />` : null}
 		${message.metadata.error ? html`<p class="turn-error" role="alert">${message.metadata.error}</p>` : null}
+		${canRetry
+			? html`<button
+					class="ghost-button message-retry"
+					type="button"
+					onClick=${() => post({ type: 'chat.retry', id: message.id })}
+				>
+					<${Icon} name="refresh" />
+					<span>Retry</span>
+				</button>`
+			: null}
 	</article>`;
 };
 
