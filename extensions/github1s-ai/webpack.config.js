@@ -4,6 +4,7 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const katexRoot = path.dirname(require.resolve('katex/package.json'));
 const vscodeWebRoot = path.dirname(require.resolve('@github1s/vscode-web/package.json'));
 
 const extensionConfig = {
@@ -60,6 +61,14 @@ const extensionConfig = {
 				{
 					from: path.join(vscodeWebRoot, 'extensions', 'theme-seti', 'icons', 'seti.woff'),
 					to: 'assets/seti.woff',
+				},
+				{
+					from: path.join(katexRoot, 'dist', 'katex.min.css'),
+					to: 'assets/katex.min.css',
+				},
+				{
+					from: path.join(katexRoot, 'dist', 'fonts'),
+					to: 'assets/fonts',
 				},
 			],
 		}),
