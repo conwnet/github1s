@@ -8,6 +8,7 @@ import { computeSyntaxHighlighting, onDidChangeSyntaxHighlighting } from '@/help
 interface ChatHtmlOptions {
 	cspSource: string;
 	nonce: string;
+	katexStyleUri: string;
 	setiFontUri: string;
 	scriptUri: string;
 	styleUri: string;
@@ -26,7 +27,8 @@ const createChatHtml = (options: ChatHtmlOptions): string => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'nonce-${options.nonce}'; font-src ${options.cspSource} data:; img-src ${options.cspSource} data:; script-src 'nonce-${options.nonce}';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'nonce-${options.nonce}'; style-src-attr 'unsafe-inline'; font-src ${options.cspSource} data:; img-src ${options.cspSource} data:; script-src 'nonce-${options.nonce}';">
+  <link rel="stylesheet" href="${options.katexStyleUri}">
   <link rel="stylesheet" href="${options.styleUri}">
   <style nonce="${options.nonce}">@font-face { font-family: "github1s-seti"; font-style: normal; font-weight: normal; font-display: block; src: url("${options.setiFontUri}") format("woff"); }</style>
   <style id="syntax-highlighting-theme" nonce="${options.nonce}"></style>
@@ -63,6 +65,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider, vscode.Disp
 		view.webview.html = createChatHtml({
 			cspSource: view.webview.cspSource,
 			nonce: createNonce(),
+			katexStyleUri: view.webview.asWebviewUri(vscode.Uri.joinPath(assetsRoot, 'katex.min.css')).toString(),
 			setiFontUri: view.webview.asWebviewUri(vscode.Uri.joinPath(assetsRoot, 'seti.woff')).toString(),
 			scriptUri: view.webview.asWebviewUri(vscode.Uri.joinPath(assetsRoot, 'chat.js')).toString(),
 			styleUri: view.webview.asWebviewUri(vscode.Uri.joinPath(assetsRoot, 'chat.css')).toString(),

@@ -117,9 +117,11 @@
     "@ai-sdk/mcp": "2.0.41",
     "@ai-sdk/openai": "4.0.53",
     "@ai-sdk/openai-compatible": "3.0.41",
+    "@vscode/markdown-it-katex": "1.1.2",
     "ai": "7.0.87",
     "dompurify": "3.4.16",
     "htm": "3.1.1",
+    "katex": "0.16.47",
     "lodash-es": "4.18.1",
     "markdown-it": "15.0.1",
     "preact": "10.29.8"

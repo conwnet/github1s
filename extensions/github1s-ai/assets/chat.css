@@ -855,6 +855,13 @@ summary:focus-visible,
 	max-width: 100%;
 }
 
+.markdown .katex-display {
+	margin: 0;
+	padding: 0.2em 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
 .code-block {
 	margin: 0.8em 0;
 	overflow: hidden;

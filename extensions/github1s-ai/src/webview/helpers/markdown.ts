@@ -1,3 +1,4 @@
+import markdownItKatex from '@vscode/markdown-it-katex';
 import DOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
 
@@ -82,6 +83,7 @@ markdown.renderer.rules.link_open = (tokens, index, options, _environment, self)
 
 markdown.renderer.rules.fence = (tokens, index) => renderCodeBlock(tokens[index].content, tokens[index].info);
 markdown.renderer.rules.code_block = (tokens, index) => renderCodeBlock(tokens[index].content);
+markdown.use(markdownItKatex, { throwOnError: false, enableFencedBlocks: true });
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 	if (!(node instanceof HTMLAnchorElement)) return;
@@ -98,7 +100,7 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 
 export const renderMarkdown = (source: string): string =>
 	DOMPurify.sanitize(markdown.render(source), {
-		USE_PROFILES: { html: true },
+		USE_PROFILES: { html: true, svg: true, mathMl: true },
 		FORBID_TAGS: ['style', 'form', 'input'],
 	});
 
