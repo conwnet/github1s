@@ -43,6 +43,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 	json: 'JSON',
 	markdown: 'Markdown',
 	md: 'Markdown',
+	mermaid: 'Mermaid',
 	python: 'Python',
 	py: 'Python',
 	plaintext: 'Code',

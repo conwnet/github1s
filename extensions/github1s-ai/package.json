@@ -124,6 +124,7 @@
     "katex": "0.16.47",
     "lodash-es": "4.18.1",
     "markdown-it": "15.0.1",
+    "mermaid": "12.2.0",
     "preact": "10.29.8"
   },
   "devDependencies": {
