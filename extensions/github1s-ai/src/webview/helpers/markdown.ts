@@ -1,7 +1,8 @@
 import markdownItKatex from '@vscode/markdown-it-katex';
-import DOMPurify from 'dompurify';
+import createDOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
 
+const DOMPurify = createDOMPurify(window);
 const markdown = new MarkdownIt({ html: false, linkify: true, typographer: false });
 
 const LANGUAGE_ALIASES: Record<string, string> = {
