@@ -102,9 +102,12 @@ const setupMermaidBlocks = (root: HTMLElement): (() => void) | undefined => {
 					updateZoom(1);
 				}
 				setDiagramVisible(true);
-			} catch {
+			} catch (error) {
 				// Keep the source visible while a diagram is incomplete or invalid.
-				if (sequence === renderSequence) setDiagramVisible(false);
+				if (sequence !== renderSequence) return;
+				setDiagramVisible(false);
+				toggle.title = `Cannot render diagram: ${error instanceof Error ? error.message : String(error)}`;
+				console.warn('Mermaid render failed', error);
 			} finally {
 				if (sequence === renderSequence) toggle.disabled = false;
 			}
