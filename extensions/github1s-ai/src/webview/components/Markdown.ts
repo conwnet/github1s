@@ -84,7 +84,8 @@ const setupMermaidBlocks = (root: HTMLElement): (() => void) | undefined => {
 		let renderSequence = 0;
 		const render = async () => {
 			const sequence = ++renderSequence;
-			const theme = document.body.matches('.vscode-dark, .vscode-high-contrast') ? 'dark' : 'default';
+			const isDark = document.body.matches('.vscode-dark, .vscode-high-contrast:not(.vscode-high-contrast-light)');
+			const theme = isDark ? 'dark' : 'default';
 			toggle.disabled = true;
 			try {
 				if (theme !== renderedTheme) {
