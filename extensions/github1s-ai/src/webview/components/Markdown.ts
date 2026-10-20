@@ -93,8 +93,9 @@ const setupMermaidBlocks = (root: HTMLElement, diagramBlocks: MermaidBlock[]): (
 			pre.hidden = visible;
 			diagram.hidden = !visible;
 			for (const button of zoomButtons) button.hidden = !visible;
-			toggle.textContent = block.selected ? 'Source' : 'Diagram';
-			toggle.title = block.selected ? request?.error || 'Show source' : 'Show diagram';
+			toggle.textContent = visible ? 'Source' : 'Diagram';
+			toggle.title = request?.error || (visible ? 'Show source' : 'Show diagram');
+			toggle.disabled = block.selected && !visible;
 			if (visible) diagram.scrollTo(scrollPosition);
 		};
 		let zoom = 1;
@@ -135,6 +136,7 @@ const setupMermaidBlocks = (root: HTMLElement, diagramBlocks: MermaidBlock[]): (
 				// Keep the source visible while a diagram is incomplete or invalid.
 				if (!code.isConnected || request !== currentRequest) return;
 				diagram.replaceChildren();
+				block.selected = false;
 				currentRequest.error = `Cannot render diagram: ${error instanceof Error ? error.message : String(error)}`;
 				console.warn('Mermaid render failed', error);
 			}
@@ -148,7 +150,11 @@ const setupMermaidBlocks = (root: HTMLElement, diagramBlocks: MermaidBlock[]): (
 				block.update();
 			} else updateZoom(Number(target.value));
 		};
-		block.update();
+		if (block.selected) {
+			// The source changed while the diagram was open (streaming). Let it settle before rendering again.
+			updateDiagramVisibility();
+			window.setTimeout(block.update, 150);
+		} else block.update();
 	}
 	const observer = new MutationObserver(() => {
 		diagramBlocks.forEach((block) => block.update());
