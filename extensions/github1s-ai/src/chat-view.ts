@@ -22,16 +22,17 @@ const COMMAND_EVENTS = [
 ] as const;
 
 const createChatHtml = (options: ChatHtmlOptions): string => {
+	// Mermaid injects styles without nonces, so style-src needs 'unsafe-inline' without a nonce source.
 	return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'nonce-${options.nonce}'; style-src-attr 'unsafe-inline'; font-src ${options.cspSource} data:; img-src ${options.cspSource} data:; script-src 'nonce-${options.nonce}';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'unsafe-inline'; font-src ${options.cspSource} data:; img-src ${options.cspSource} data:; script-src 'nonce-${options.nonce}';">
   <link rel="stylesheet" href="${options.katexStyleUri}">
   <link rel="stylesheet" href="${options.styleUri}">
-  <style nonce="${options.nonce}">@font-face { font-family: "github1s-seti"; font-style: normal; font-weight: normal; font-display: block; src: url("${options.setiFontUri}") format("woff"); }</style>
-  <style id="syntax-highlighting-theme" nonce="${options.nonce}"></style>
+  <style>@font-face { font-family: "github1s-seti"; font-style: normal; font-weight: normal; font-display: block; src: url("${options.setiFontUri}") format("woff"); }</style>
+  <style id="syntax-highlighting-theme"></style>
   <title>GitHub1s AI Chat</title>
 </head>
 <body>

@@ -1,7 +1,8 @@
 import markdownItKatex from '@vscode/markdown-it-katex';
-import DOMPurify from 'dompurify';
+import createDOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
 
+const DOMPurify = createDOMPurify(window);
 const markdown = new MarkdownIt({ html: false, linkify: true, typographer: false });
 
 const LANGUAGE_ALIASES: Record<string, string> = {
@@ -43,6 +44,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 	json: 'JSON',
 	markdown: 'Markdown',
 	md: 'Markdown',
+	mermaid: 'Mermaid',
 	python: 'Python',
 	py: 'Python',
 	plaintext: 'Code',

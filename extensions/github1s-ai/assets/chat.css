@@ -875,7 +875,7 @@ summary:focus-visible,
 	min-height: 27px;
 	align-items: center;
 	justify-content: space-between;
-	gap: 8px;
+	gap: 2px;
 	padding: 0 5px 0 9px;
 	color: var(--vscode-descriptionForeground);
 	background: var(--vscode-editorGroupHeader-tabsBackground, transparent);
@@ -889,8 +889,8 @@ summary:focus-visible,
 	white-space: nowrap;
 }
 
-.code-copy {
-	min-width: 42px;
+.code-block-header button {
+	min-width: 24px;
 	padding: 2px 5px;
 	color: inherit;
 	background: transparent;
@@ -899,16 +899,33 @@ summary:focus-visible,
 	font-size: inherit;
 }
 
-.code-copy:hover {
+.code-block-header button:hover {
 	color: var(--vscode-foreground);
 	background: var(--vscode-toolbar-hoverBackground, var(--vscode-list-hoverBackground));
 }
 
-.code-block pre {
+.code-block pre,
+.mermaid-diagram {
 	max-height: 480px;
 	margin: 0;
 	overflow: auto;
 	padding: 10px 11px;
+}
+
+.mermaid-diagram {
+	box-sizing: border-box;
+}
+
+.mermaid-diagram > svg {
+	display: block;
+	height: auto;
+	margin: 0 auto;
+}
+
+.mermaid-controls {
+	display: flex;
+	gap: inherit;
+	margin-left: auto;
 }
 
 .code-block code {

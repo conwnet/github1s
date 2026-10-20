@@ -5,6 +5,10 @@ import type { ViewEvent, ViewMessage } from '@/common/protocol';
 import { App } from './App';
 import { setiFileIconPresentation } from './helpers/attachments';
 
+declare let __webpack_nonce__: string;
+// eslint-disable-next-line prefer-const -- Webpack replaces this assignment with its runtime nonce.
+__webpack_nonce__ = document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce ?? '';
+
 const vscode = acquireVsCodeApi();
 const root = document.getElementById('app');
 
