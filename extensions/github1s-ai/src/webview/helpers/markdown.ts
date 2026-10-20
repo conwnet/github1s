@@ -1,6 +1,8 @@
-import DOMPurify from 'dompurify';
+import markdownItKatex from '@vscode/markdown-it-katex';
+import createDOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
 
+const DOMPurify = createDOMPurify(window);
 const markdown = new MarkdownIt({ html: false, linkify: true, typographer: false });
 
 const LANGUAGE_ALIASES: Record<string, string> = {
@@ -42,6 +44,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 	json: 'JSON',
 	markdown: 'Markdown',
 	md: 'Markdown',
+	mermaid: 'Mermaid',
 	python: 'Python',
 	py: 'Python',
 	plaintext: 'Code',
@@ -82,6 +85,7 @@ markdown.renderer.rules.link_open = (tokens, index, options, _environment, self)
 
 markdown.renderer.rules.fence = (tokens, index) => renderCodeBlock(tokens[index].content, tokens[index].info);
 markdown.renderer.rules.code_block = (tokens, index) => renderCodeBlock(tokens[index].content);
+markdown.use(markdownItKatex, { throwOnError: false, enableFencedBlocks: true });
 
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 	if (!(node instanceof HTMLAnchorElement)) return;
@@ -98,7 +102,7 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 
 export const renderMarkdown = (source: string): string =>
 	DOMPurify.sanitize(markdown.render(source), {
-		USE_PROFILES: { html: true },
+		USE_PROFILES: { html: true, svg: true, mathMl: true },
 		FORBID_TAGS: ['style', 'form', 'input'],
 	});
 
