@@ -104,7 +104,7 @@ const response = () =>
 test('retry replaces the failed reply using the original context and current settings', async (t) => {
 	const { stores, user, runner, getConversation } = await setup();
 	const fetch = t.mock.method(globalThis, 'fetch', async () => response());
-	await runner.send({ retryMessageId: 'old-assistant' });
+	await runner.retry('old-assistant');
 	assert.equal(fetch.mock.callCount(), 1);
 	const request = JSON.parse(fetch.mock.calls[0].arguments[1]?.body as string);
 	assert.equal(request.model, 'current-model');

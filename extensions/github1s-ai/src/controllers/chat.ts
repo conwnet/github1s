@@ -1,4 +1,5 @@
 import type { ContextAttachmentDescriptor } from '@/common/context';
+import { resolvePrompts } from '@/common/prompts-config';
 import type { ViewEvent } from '@/common/protocol';
 import { getQuickAction } from '@/common/quick-actions';
 import type { Stores } from '@/stores';
@@ -17,12 +18,38 @@ export class ChatController extends Controller {
 
 	@Controller.handler('chat.send')
 	async handleSend(event: ViewEvent<'chat.send'>): Promise<void> {
-		await this.runner.send({ text: event.text });
+		const { chat } = await this.stores.runtime.get();
+		if (chat.editing) await this.runner.edit(event.text);
+		else await this.runner.send(event.text);
+	}
+
+	@Controller.handler('chat.setEditingMessageId')
+	async handleSetEditingMessageId(event: ViewEvent<'chat.setEditingMessageId'>): Promise<void> {
+		const { chat } = await this.stores.runtime.get();
+		if (chat.preparing || this.runner.isRequestActive(chat.conversation?.id)) return;
+		if (event.id === undefined) {
+			await this.stores.runtime.setIn('chat', { ...chat, editing: undefined, notice: undefined });
+			return;
+		}
+		if (chat.editing?.messageId === event.id) return;
+		const message = chat.conversation?.messages.find((candidate) => candidate.id === event.id);
+		if (message?.role !== 'user') return;
+		await this.stores.runtime.setIn('chat', {
+			...chat,
+			editing: {
+				messageId: message.id,
+				pendingAttachments: message.parts.flatMap((part) =>
+					part.type === 'data-attachments' ? part.data.map(({ content, ...descriptor }) => descriptor) : [],
+				),
+				includeRecentFiles: true,
+			},
+			notice: undefined,
+		});
 	}
 
 	@Controller.handler('chat.retry')
 	async handleRetry(event: ViewEvent<'chat.retry'>): Promise<void> {
-		await this.runner.send({ retryMessageId: event.id });
+		await this.runner.retry(event.id);
 	}
 
 	@Controller.handler('chat.cancel')
@@ -32,14 +59,18 @@ export class ChatController extends Controller {
 
 	@Controller.handler('chat.setIncludeRecentFiles')
 	async handleSetIncludeRecentFiles(event: ViewEvent<'chat.setIncludeRecentFiles'>): Promise<void> {
-		await this.stores.runtime.setIn('chat.includeRecentFiles', event.enabled);
+		const { chat } = await this.stores.runtime.get();
+		await this.stores.runtime.setIn(
+			chat.editing ? 'chat.editing.includeRecentFiles' : 'chat.includeRecentFiles',
+			event.enabled,
+		);
 	}
 
 	@Controller.handler('chat.runQuickAction')
 	async handleRunQuickAction(event: ViewEvent<'chat.runQuickAction'>): Promise<void> {
-		const runtime = await this.stores.runtime.get();
+		const { chat } = await this.stores.runtime.get();
 		const action = getQuickAction(event.action);
-		const attachment = action.attachment ? runtime.chat[action.attachment] : undefined;
+		const attachment = action.attachment ? chat[action.attachment] : undefined;
 		if (action.attachment && !attachment) {
 			const message =
 				action.attachment === 'currentFile'
@@ -48,29 +79,19 @@ export class ChatController extends Controller {
 			await this.stores.runtime.setIn('chat.notice', { severity: 'error', message });
 			return;
 		}
-		if (attachment) await this.add([attachment]);
-		await this.runner.send({ action: event.action });
+		if (attachment) await this.add(attachment);
+		const prompts = resolvePrompts(await this.stores.promptsConfig.get());
+		await this.runner.send(prompts.quickActions[event.action]);
 	}
 
 	@Controller.handler('chat.addContextAttachment')
 	async handleAddContextAttachment(event: ViewEvent<'chat.addContextAttachment'>): Promise<void> {
-		const runtime = await this.stores.runtime.get();
+		const { chat } = await this.stores.runtime.get();
 		let descriptor: ContextAttachmentDescriptor | undefined;
 		try {
-			switch (event.action) {
-				case 'selectFile':
-					descriptor = await selectFile();
-					break;
-				case 'currentFile':
-					descriptor = runtime.chat.currentFile;
-					break;
-				case 'currentSelection':
-					descriptor = runtime.chat.currentSelection;
-					break;
-				case 'descriptor':
-					descriptor = event.descriptor;
-					break;
-			}
+			if (event.action === 'selectFile') descriptor = await selectFile();
+			else if (event.action === 'descriptor') descriptor = event.descriptor;
+			else descriptor = chat[event.action];
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.stores.runtime.setIn('chat.notice', {
@@ -79,39 +100,35 @@ export class ChatController extends Controller {
 			});
 			return;
 		}
-		if (descriptor) await this.add([descriptor]);
+		if ((await this.stores.runtime.get()).chat.editing?.messageId !== chat.editing?.messageId) return;
+		if (descriptor) await this.add(descriptor);
 	}
 
 	@Controller.handler('chat.removeContextAttachment')
 	async handleRemoveContextAttachment(event: ViewEvent<'chat.removeContextAttachment'>): Promise<void> {
 		const runtime = await this.stores.runtime.get();
+		const context = runtime.chat.editing ?? runtime.chat;
+		const pendingAttachments = (context.pendingAttachments ?? []).filter(({ id }) => id !== event.id);
 		await this.stores.runtime.setIn('chat', {
 			...runtime.chat,
-			pendingAttachments: (runtime.chat.pendingAttachments ?? []).filter(({ id }) => id !== event.id),
+			...(runtime.chat.editing ? { editing: { ...runtime.chat.editing, pendingAttachments } } : { pendingAttachments }),
 			notice: undefined,
 		});
 	}
 
-	private async add(descriptors: readonly ContextAttachmentDescriptor[]): Promise<void> {
-		const runtime = await this.stores.runtime.get();
+	private async add(descriptor: ContextAttachmentDescriptor): Promise<void> {
+		const { chat } = await this.stores.runtime.get();
+		const pendingAttachments = [...(chat.editing?.pendingAttachments ?? chat.pendingAttachments ?? [])];
+		const index = pendingAttachments.findIndex((existing) => isSameContextAttachment(existing, descriptor));
+		const next = chat.editing
+			? { ...descriptor, id: globalThis.crypto.randomUUID() }
+			: preserveContextAttachmentId(descriptor, pendingAttachments[index]);
+		if (index >= 0) pendingAttachments.splice(index, 1);
+		pendingAttachments.push(next);
 		await this.stores.runtime.setIn('chat', {
-			...runtime.chat,
-			pendingAttachments: mergeAttachmentDescriptors(runtime.chat.pendingAttachments ?? [], descriptors),
+			...chat,
+			...(chat.editing ? { editing: { ...chat.editing, pendingAttachments } } : { pendingAttachments }),
 			notice: undefined,
 		});
 	}
 }
-
-const mergeAttachmentDescriptors = (
-	current: readonly ContextAttachmentDescriptor[],
-	incoming: readonly ContextAttachmentDescriptor[],
-): ContextAttachmentDescriptor[] => {
-	const merged = current.map((descriptor) => ({ ...descriptor }));
-	for (const descriptor of incoming) {
-		const index = merged.findIndex((existing) => isSameContextAttachment(existing, descriptor));
-		const next = preserveContextAttachmentId(descriptor, index >= 0 ? merged[index] : undefined);
-		if (index >= 0) merged.splice(index, 1);
-		merged.push(next);
-	}
-	return merged;
-};

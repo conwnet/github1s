@@ -41,6 +41,7 @@ type AllViewEvents =
 	| { type: 'app.openSettings' }
 	| { type: 'app.openFile'; source: string }
 	| { type: 'chat.send'; text: string }
+	| { type: 'chat.setEditingMessageId'; id?: string }
 	| { type: 'chat.retry'; id: string }
 	| { type: 'chat.runQuickAction'; action: ChatQuickAction }
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
@@ -91,6 +92,10 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 			return hasExactKeys(event, ['type', 'text']) && typeof event.text === 'string'
 				? { type: event.type, text: event.text }
 				: undefined;
+
+		case 'chat.setEditingMessageId':
+			if (hasExactKeys(event, ['type'])) return { type: event.type };
+			return exactString(event, 'id') ? { type: event.type, id: event.id as string } : undefined;
 
 		case 'chat.setIncludeRecentFiles':
 			return hasExactKeys(event, ['type', 'enabled']) && typeof event.enabled === 'boolean'

@@ -17,10 +17,12 @@ type AssistantSegment =
 interface MessageViewProps {
 	message: ConversationMessage;
 	canRetry?: boolean;
+	canEdit?: boolean;
+	inactive?: boolean;
 	post: (event: ViewEvent) => void;
 }
 
-export const MessageView = ({ message, canRetry, post }: MessageViewProps) => {
+export const MessageView = ({ message, canRetry, canEdit, inactive, post }: MessageViewProps) => {
 	if (message.role !== 'user' && message.role !== 'assistant') return null;
 	const segments = message.role === 'assistant' ? assistantSegments(message) : [];
 	const activityRunning = segments.some(
@@ -28,9 +30,9 @@ export const MessageView = ({ message, canRetry, post }: MessageViewProps) => {
 	);
 	const status = activityRunning ? undefined : messageStatusLabel(message.metadata);
 
-	return html`<article class=${`message message-${message.role}`}>
+	return html`<article class=${`message message-${message.role}`} inert=${inactive ? true : undefined}>
 		${message.role === 'user'
-			? html`<${UserRequest} message=${message} post=${post} />`
+			? html`<${UserRequest} message=${message} canEdit=${canEdit} post=${post} />`
 			: html`<div class="assistant-response">
 					${segments.map((segment) =>
 						segment.type === 'text'
@@ -98,12 +100,33 @@ const assistantSegments = (message: ConversationMessage): AssistantSegment[] => 
 	return segments;
 };
 
-const UserRequest = ({ message, post }: MessageViewProps) => {
+const UserRequest = ({ message, canEdit, post }: MessageViewProps) => {
 	const text = message.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('');
 	const attachments = message.parts.flatMap((part) => (part.type === 'data-attachments' ? part.data : []));
 	const recentFiles = message.parts.flatMap((part) => (part.type === 'data-recentFiles' ? part.data : []));
-	const request = html`<div class="user-request" tabindex=${recentFiles.length > 0 ? 0 : undefined}>
-		<div class="user-content">${text}</div>
+	const edit = (event: MouseEvent | KeyboardEvent) => {
+		if (!canEdit || (event.target instanceof Element && event.target.closest('button, a'))) return;
+		if (event instanceof MouseEvent && window.getSelection()?.toString()) return;
+		if (event instanceof KeyboardEvent) {
+			if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return;
+			event.preventDefault();
+		}
+		post({ type: 'chat.setEditingMessageId', id: message.id });
+	};
+	const request = html`<div
+		class=${`user-request${canEdit ? ' user-request-editable' : ''}`}
+		tabindex=${!canEdit && recentFiles.length > 0 ? 0 : undefined}
+		onClick=${edit}
+	>
+		<div
+			class="user-content"
+			role=${canEdit ? 'button' : undefined}
+			aria-label=${canEdit ? `Edit message: ${text}` : undefined}
+			tabindex=${canEdit ? 0 : undefined}
+			onKeyDown=${edit}
+		>
+			${text}
+		</div>
 		<${AttachmentChips}
 			attachments=${attachments}
 			onOpen=${(source: string) => post({ type: 'app.openFile', source })}

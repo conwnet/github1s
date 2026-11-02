@@ -1,6 +1,7 @@
 import { html } from 'htm/preact';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 
+import type { ConversationMessage } from '@/common/conversation';
 import type { ViewEvent, ViewState } from '@/common/protocol';
 
 import { resizeComposer, shouldSubmitComposer } from '../helpers/composer';
@@ -35,15 +36,21 @@ interface ComposerProps {
 	busy: boolean;
 	active: boolean;
 	post: (event: ViewEvent) => void;
+	message?: ConversationMessage;
 }
 
-export const Composer = ({ state, busy, active, post }: ComposerProps) => {
-	const [draft, setDraft] = useState('');
+export const Composer = ({ state, busy, active, post, message: editedMessage }: ComposerProps) => {
+	const [draft, setDraft] = useState(() =>
+		editedMessage ? editedMessage.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('') : '',
+	);
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const chat = state.runtime.chat;
+	const context = editedMessage ? (chat.editing ?? chat) : chat;
 	const preparing = chat.preparing === true;
-	const recentFiles = chat.recentFiles ?? [];
-	const includeRecentFiles = chat.includeRecentFiles !== false;
+	const recentFiles = editedMessage
+		? editedMessage.parts.flatMap((part) => (part.type === 'data-recentFiles' ? part.data : []))
+		: (chat.recentFiles ?? []);
+	const includeRecentFiles = context.includeRecentFiles !== false;
 	const selectedModelConfig = state.modelConfigs.configs.find(({ id }) => id === state.modelConfigs.selectedId);
 	const selectedModelConfigId = selectedModelConfig?.id;
 	const conversationUsage = chat.conversation?.usage;
@@ -55,6 +62,28 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 		if (textarea.current) resizeComposer(textarea.current);
 	}, [draft]);
 
+	useLayoutEffect(() => {
+		if (!active || !editedMessage || busy) return;
+		textarea.current?.focus({ preventScroll: true });
+		textarea.current?.closest('.composer-wrap')?.scrollIntoView({ block: 'nearest' });
+		const cancel = (event: KeyboardEvent) => {
+			if (event.key !== 'Escape' || event.isComposing || event.defaultPrevented) return;
+			event.preventDefault();
+			post({ type: 'chat.setEditingMessageId' });
+		};
+		const cancelOnClick = ({ target }: MouseEvent) => {
+			if (target instanceof Element && !target.closest('.message-editing, .tooltip')) {
+				post({ type: 'chat.setEditingMessageId' });
+			}
+		};
+		window.addEventListener('keydown', cancel);
+		window.addEventListener('click', cancelOnClick, true);
+		return () => {
+			window.removeEventListener('keydown', cancel);
+			window.removeEventListener('click', cancelOnClick, true);
+		};
+	}, [active, editedMessage?.id, busy, post]);
+
 	useEffect(() => {
 		if (active && wasBusy.current && !busy) textarea.current?.focus();
 		wasBusy.current = busy;
@@ -63,7 +92,7 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 	const submit = () => {
 		if (!message || busy || !selectedModelConfigId) return;
 		post({ type: 'chat.send', text: message });
-		setDraft('');
+		if (!editedMessage) setDraft('');
 	};
 
 	const onInput = (event: InputEvent) => {
@@ -76,10 +105,15 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 		submit();
 	};
 
-	return html`<section class="composer-wrap" aria-label="Chat composer">
+	return html`<section
+		class="composer-wrap"
+		aria-label=${editedMessage ? 'Edit message' : 'Chat composer'}
+		inert=${!editedMessage && chat.editing ? true : undefined}
+	>
+		${editedMessage && chat.notice ? html`<p class="notice" role="alert">${chat.notice.message}</p>` : null}
 		<div class="composer-surface">
 			<${AttachmentChips}
-				attachments=${chat.pendingAttachments ?? []}
+				attachments=${context.pendingAttachments ?? []}
 				disabled=${preparing}
 				onOpen=${(source: string) => post({ type: 'app.openFile', source })}
 				onRemove=${(id: string) => post({ type: 'chat.removeContextAttachment', id })}
@@ -131,7 +165,7 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 					<//>
 				</div>
 				<div class="composer-controls">
-					${usage
+					${!editedMessage && usage
 						? html`<${Tooltip}
 								content=${html`<div class="tooltip-content">
 									<strong>Tokens usage:</strong>
@@ -165,6 +199,16 @@ export const Composer = ({ state, busy, active, post }: ComposerProps) => {
 						<//>
 						<span class="model-config-chevron"><${Icon} name="chevron-right" /></span>
 					</div>
+					${editedMessage
+						? html`<${TooltipButton}
+								class="ghost-button"
+								label="Cancel editing"
+								disabled=${preparing}
+								onClick=${() => post({ type: 'chat.setEditingMessageId' })}
+							>
+								<${Icon} name="close" />
+							<//>`
+						: null}
 					<${TooltipButton}
 						class="submit-button"
 						label=${busy ? 'Stop generating' : 'Send message'}
