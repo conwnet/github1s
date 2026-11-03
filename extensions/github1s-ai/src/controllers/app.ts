@@ -71,7 +71,7 @@ export class AppController extends Controller {
 			chat: {
 				...runtime.chat,
 				...(resetConversation ? { conversation: undefined, pendingAttachments: [] } : {}),
-				...(resetConversation || page !== 'chat' ? { notice: undefined } : {}),
+				...(resetConversation || page !== 'chat' ? { editing: undefined, notice: undefined } : {}),
 			},
 			history: { ...runtime.history, notice: undefined },
 			settings: { ...runtime.settings, feedback: undefined },

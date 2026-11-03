@@ -36,6 +36,7 @@ export class HistoryController extends Controller {
 			chat: {
 				...runtime.chat,
 				conversation,
+				editing: undefined,
 				...(runtime.chat.conversation?.id !== event.id ? { pendingAttachments: [] } : {}),
 				notice: loadError ? { severity: 'error' as const, message: loadError } : undefined,
 			},
@@ -64,7 +65,9 @@ export class HistoryController extends Controller {
 			page: 'history' as const,
 			chat: {
 				...runtime.chat,
-				...(runtime.chat.conversation?.id === event.id ? { conversation: undefined, pendingAttachments: [] } : {}),
+				...(runtime.chat.conversation?.id === event.id
+					? { conversation: undefined, pendingAttachments: [], editing: undefined }
+					: {}),
 			},
 			history: { ...runtime.history, notice: undefined },
 		});

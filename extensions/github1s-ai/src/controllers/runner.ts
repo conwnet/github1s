@@ -10,7 +10,7 @@ import {
 	type ConversationMessage,
 } from '@/common/conversation';
 import { resolvePrompts } from '@/common/prompts-config';
-import type { ChatQuickAction } from '@/common/quick-actions';
+import type { RuntimeState } from '@/common/state';
 import { buildModelMessages } from '@/llm/helpers';
 import { connectMcpTools } from '@/llm/mcp';
 import { streamLLMAgent } from '@/llm/transport';
@@ -23,6 +23,12 @@ type ActiveRequest = {
 	messageId: string;
 };
 
+type MessagePreparation = {
+	history: ConversationMessage[];
+	createMessage: () => Promise<ConversationMessage>;
+	clearPendingAttachments: boolean;
+};
+
 export class ConversationRunner {
 	private readonly requests = new Map<string, ActiveRequest>();
 	private preparation: symbol | undefined;
@@ -32,16 +38,75 @@ export class ConversationRunner {
 		private readonly publishState: () => Promise<void>,
 	) {}
 
-	async send(input: { text: string } | { action: ChatQuickAction } | { retryMessageId: string }): Promise<void> {
-		if (('text' in input && !input.text.trim()) || this.preparation) return;
+	async send(text: string): Promise<void> {
+		if (!text.trim()) return;
+		return this.run((chat) => ({
+			history: chat.conversation?.messages ?? [],
+			clearPendingAttachments: true,
+			createMessage: async () =>
+				createUserMessage(
+					globalThis.crypto.randomUUID(),
+					text,
+					await resolveContextAttachments(chat.pendingAttachments ?? []),
+					chat.includeRecentFiles === false ? [] : chat.recentFiles,
+				),
+		}));
+	}
+
+	async retry(messageId: string): Promise<void> {
+		return this.run((chat) => {
+			const messages = chat.conversation?.messages ?? [];
+			if (getRetryableMessage(messages)?.id !== messageId) return;
+			return {
+				history: messages.slice(0, -2),
+				createMessage: async () => messages[messages.length - 2],
+				clearPendingAttachments: false,
+			};
+		});
+	}
+
+	async edit(text: string): Promise<void> {
+		if (!text.trim()) return;
+		return this.run((chat) => {
+			const editing = chat.editing;
+			if (!editing) return;
+			const messages = chat.conversation?.messages ?? [];
+			const messageIndex = messages.findIndex((message) => message.id === editing.messageId && message.role === 'user');
+			if (messageIndex < 0) return;
+			const originalMessage = messages[messageIndex];
+			const descriptors = editing.pendingAttachments.map((descriptor) => ({ ...descriptor }));
+			return {
+				history: messages.slice(0, messageIndex),
+				clearPendingAttachments: false,
+				createMessage: async () => {
+					const originalAttachments = originalMessage.parts.flatMap((part) =>
+						part.type === 'data-attachments' ? part.data : [],
+					);
+					const attachments = await Promise.all(
+						descriptors.map(
+							async (descriptor) =>
+								originalAttachments.find((attachment) => attachment.id === descriptor.id) ??
+								(await resolveContextAttachments([descriptor]))[0],
+						),
+					);
+					const recentFiles =
+						editing.includeRecentFiles === false
+							? []
+							: originalMessage.parts.flatMap((part) => (part.type === 'data-recentFiles' ? part.data : []));
+					return createUserMessage(originalMessage.metadata.turnId, text, attachments, recentFiles);
+				},
+			};
+		});
+	}
+
+	private async run(prepare: (chat: RuntimeState['chat']) => MessagePreparation | undefined): Promise<void> {
+		if (this.preparation) return;
 
 		const [promptsConfig, config] = await Promise.all([
 			this.stores.promptsConfig.get(),
 			this.stores.modelConfigs.getSelected(),
 		]);
 		const prompts = resolvePrompts(promptsConfig);
-		const text = 'text' in input ? input.text : 'action' in input ? prompts.quickActions[input.action] : '';
-		const retry = 'retryMessageId' in input;
 
 		if (!config) {
 			await this.stores.runtime.setIn('chat.notice', {
@@ -53,10 +118,10 @@ export class ConversationRunner {
 		const runtime = await this.stores.runtime.get();
 		if (this.preparation) return;
 		const previous = runtime.chat.conversation;
-		if (retry && (!previous || getRetryableMessage(previous.messages)?.id !== input.retryMessageId)) return;
+		const prepared = prepare(runtime.chat);
+		if (!prepared) return;
 		const conversationId = previous?.id ?? globalThis.crypto.randomUUID();
 		if (this.requests.has(conversationId)) return;
-		const descriptors = (runtime.chat.pendingAttachments ?? []).map((descriptor) => ({ ...descriptor }));
 		const preparation = Symbol('conversation-preparation');
 		this.preparation = preparation;
 		await this.stores.runtime.setIn('chat', { ...runtime.chat, preparing: true, notice: undefined });
@@ -64,13 +129,7 @@ export class ConversationRunner {
 		let userMessage: ConversationMessage;
 		try {
 			await this.publishState();
-			if (retry) {
-				userMessage = previous!.messages.at(-2)!;
-			} else {
-				const attachments = await resolveContextAttachments(descriptors);
-				const recentFiles = runtime.chat.includeRecentFiles === false ? [] : runtime.chat.recentFiles;
-				userMessage = createUserMessage(globalThis.crypto.randomUUID(), text, attachments, recentFiles);
-			}
+			userMessage = await prepared.createMessage();
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.finishPreparation(preparation, `Unable to read the selected context attachment. ${detail}`);
@@ -80,7 +139,7 @@ export class ConversationRunner {
 
 		const startedAt = Date.now();
 		const turnId = userMessage.metadata.turnId;
-		const history = retry ? previous!.messages.slice(0, -2) : (previous?.messages ?? []);
+		const history = prepared.history;
 		let providerMessages;
 		try {
 			providerMessages = await buildModelMessages(history, [userMessage]);
@@ -100,7 +159,7 @@ export class ConversationRunner {
 				}
 			: {
 					id: conversationId,
-					title: createConversationTitle(text, descriptors),
+					title: createConversationTitle(userMessage),
 					messages: [userMessage, assistantMessage],
 					createdAt: startedAt,
 					updatedAt: startedAt,
@@ -138,7 +197,8 @@ export class ConversationRunner {
 				await this.stores.runtime.setIn('chat', {
 					...currentRuntime.chat,
 					conversation,
-					pendingAttachments: retry ? currentRuntime.chat.pendingAttachments : [],
+					pendingAttachments: prepared.clearPendingAttachments ? [] : currentRuntime.chat.pendingAttachments,
+					editing: undefined,
 					preparing: false,
 				});
 				await this.stores.conversations.select(conversationId);
@@ -272,7 +332,9 @@ const addUsage = (
 	return addLanguageModelUsage(current ?? createNullLanguageModelUsage(), next);
 };
 
-const createConversationTitle = (prompt: string, attachments: readonly { label: string }[]): string => {
+const createConversationTitle = (message: ConversationMessage): string => {
+	const prompt = message.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('');
+	const attachments = message.parts.flatMap((part) => (part.type === 'data-attachments' ? part.data : []));
 	const text = prompt.replace(/\s+/g, ' ').trim();
 	const primary = attachments[0]?.label;
 	const additional = attachments.length > 1 ? ` +${attachments.length - 1}` : '';

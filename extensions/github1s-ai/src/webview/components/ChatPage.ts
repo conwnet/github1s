@@ -28,12 +28,19 @@ export const ChatPage = ({ state, active, post }: ChatPageProps) => {
 	const busy =
 		state.runtime.chat.preparing === true || messages.some(({ metadata }) => metadata.status === 'streaming');
 	const notice = state.runtime.chat.notice?.message;
+	const editingId = state.runtime.chat.editing?.messageId;
 
 	return html`
-		${notice ? html`<p class="notice" role="status" aria-live="polite">${notice}</p>` : null}
-		<${Transcript} state=${state} messages=${messages} busy=${busy} post=${post} />
+		${notice && !editingId ? html`<p class="notice" role="status" aria-live="polite">${notice}</p>` : null}
+		<${Transcript} state=${state} messages=${messages} busy=${busy} active=${active} post=${post} />
 		${state.modelConfigs.configs.length > 0
-			? html`<${Composer} key=${conversationId ?? 'new'} state=${state} busy=${busy} active=${active} post=${post} />`
+			? html`<${Composer}
+					key=${conversationId ?? 'new'}
+					state=${state}
+					busy=${busy}
+					active=${active && !editingId}
+					post=${post}
+				/>`
 			: null}
 	`;
 };
@@ -44,20 +51,33 @@ interface ChatContentProps extends ChatContextProps {
 
 interface TranscriptProps extends ChatContentProps {
 	messages: readonly ConversationMessage[];
+	active: boolean;
 }
 
-const Transcript = ({ state, messages, busy, post }: TranscriptProps) => {
+const Transcript = ({ state, messages, busy, active, post }: TranscriptProps) => {
 	const retryableMessage = busy ? undefined : getRetryableMessage(messages);
+	const editingId = state.runtime.chat.editing?.messageId;
+	const lastMessageBeforeEditing = useRef<string>();
 	const transcript = useRef<HTMLElement>(null);
 	const content = useRef<HTMLDivElement>(null);
 	const followOutput = useRef(true);
 
 	useLayoutEffect(() => {
+		const lastMessageId = messages.at(-1)?.id;
+		if (editingId) {
+			lastMessageBeforeEditing.current = lastMessageId;
+			return;
+		}
+		if (lastMessageBeforeEditing.current && lastMessageBeforeEditing.current !== lastMessageId) {
+			followOutput.current = true;
+		}
+		lastMessageBeforeEditing.current = undefined;
 		const element = transcript.current;
 		if (element && followOutput.current) scrollToBottom(element);
-	}, [messages]);
+	}, [messages, editingId]);
 
 	useLayoutEffect(() => {
+		if (editingId) return;
 		const element = transcript.current;
 		const contentElement = content.current;
 		if (!element || !contentElement || typeof ResizeObserver === 'undefined') return;
@@ -66,7 +86,7 @@ const Transcript = ({ state, messages, busy, post }: TranscriptProps) => {
 		});
 		observer.observe(contentElement);
 		return () => observer.disconnect();
-	}, []);
+	}, [editingId]);
 
 	const onScroll = () => {
 		const element = transcript.current;
@@ -79,14 +99,19 @@ const Transcript = ({ state, messages, busy, post }: TranscriptProps) => {
 		<div ref=${content} class="transcript-content">
 			${messages.length === 0
 				? html`<${EmptyChat} state=${state} busy=${busy} post=${post} />`
-				: messages.map(
-						(message) =>
-							html`<${MessageView}
-								key=${message.id}
-								message=${message}
-								canRetry=${message === retryableMessage}
-								post=${post}
-							/>`,
+				: messages.map((message) =>
+						message.id === editingId
+							? html`<article key=${message.id} class="message message-editing">
+									<${Composer} state=${state} busy=${busy} active=${active} post=${post} message=${message} />
+								</article>`
+							: html`<${MessageView}
+									key=${message.id}
+									message=${message}
+									canRetry=${message === retryableMessage}
+									canEdit=${!busy && !editingId && state.modelConfigs.configs.length > 0}
+									inactive=${Boolean(editingId)}
+									post=${post}
+								/>`,
 					)}
 		</div>
 	</section>`;

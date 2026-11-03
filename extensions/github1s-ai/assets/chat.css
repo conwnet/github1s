@@ -724,6 +724,24 @@ summary:focus-visible,
 	line-height: 1.55;
 }
 
+.user-request-editable {
+	cursor: text;
+}
+
+.user-request-editable:hover {
+	border-color: var(--vscode-focusBorder);
+}
+
+.message[inert],
+.composer-wrap[inert] {
+	opacity: 0.5;
+}
+
+.message-editing .composer-wrap {
+	padding: 0;
+	background: transparent;
+}
+
 .assistant-response > .markdown + .markdown {
 	margin-top: 0.75em;
 }
