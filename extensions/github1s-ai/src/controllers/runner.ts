@@ -4,12 +4,12 @@ import { addLanguageModelUsage, createNullLanguageModelUsage } from 'ai/internal
 import {
 	createAssistantMessage,
 	createUserMessage,
-	getRetryableMessage,
 	withMessageStatus,
 	type Conversation,
 	type ConversationMessage,
 } from '@/common/conversation';
 import { resolvePrompts } from '@/common/prompts-config';
+import type { ChatPhase } from '@/common/protocol';
 import type { RuntimeState } from '@/common/state';
 import { buildModelMessages } from '@/llm/helpers';
 import { connectMcpTools } from '@/llm/mcp';
@@ -31,7 +31,7 @@ type MessagePreparation = {
 
 export class ConversationRunner {
 	private readonly requests = new Map<string, ActiveRequest>();
-	private preparation: symbol | undefined;
+	private preparation: AbortController | undefined;
 
 	constructor(
 		private readonly stores: Stores,
@@ -56,12 +56,52 @@ export class ConversationRunner {
 	async retry(messageId: string): Promise<void> {
 		return this.run((chat) => {
 			const messages = chat.conversation?.messages ?? [];
-			if (getRetryableMessage(messages)?.id !== messageId) return;
+			const index = messages.findIndex((message) => message.id === messageId && message.role === 'assistant');
+			const assistant = messages[index];
+			const user = messages[index - 1];
+			if (
+				!assistant ||
+				assistant.metadata.status === 'streaming' ||
+				user?.role !== 'user' ||
+				user.metadata.turnId !== assistant.metadata.turnId
+			)
+				return;
 			return {
-				history: messages.slice(0, -2),
-				createMessage: async () => messages[messages.length - 2],
+				history: messages.slice(0, index - 1),
+				createMessage: async () => user,
 				clearPendingAttachments: false,
 			};
+		});
+	}
+
+	async fork(messageId: string): Promise<void> {
+		return this.withPreparation('Unable to fork the conversation.', async (chat, { signal }) => {
+			const previous = chat.conversation;
+			if (!previous || chat.editing) return;
+			const index = previous.messages.findIndex((message) => message.id === messageId && message.role === 'assistant');
+			if (index < 0 || previous.messages[index].metadata.status === 'streaming') return;
+			const now = Date.now();
+			const conversation: Conversation = {
+				id: globalThis.crypto.randomUUID(),
+				title: `Fork: ${previous.title}`,
+				createdAt: now,
+				updatedAt: now,
+				messages: structuredClone(previous.messages.slice(0, index + 1)),
+			};
+			await this.stores.conversations.append(conversation);
+			signal.throwIfAborted();
+			await this.stores.conversations.select(conversation.id);
+			const runtime = await this.stores.runtime.get();
+			if (signal.aborted || runtime.page !== 'chat' || runtime.chat.conversation?.id !== previous.id) {
+				await this.stores.conversations.select(runtime.chat.conversation?.id, conversation.id);
+				return;
+			}
+			await this.stores.runtime.setIn('chat', {
+				...runtime.chat,
+				conversation,
+				pendingAttachments: [],
+				notice: { severity: 'success', message: "You're now in a forked conversation." },
+			});
 		});
 	}
 
@@ -100,71 +140,48 @@ export class ConversationRunner {
 	}
 
 	private async run(prepare: (chat: RuntimeState['chat']) => MessagePreparation | undefined): Promise<void> {
-		if (this.preparation) return;
-
-		const [promptsConfig, config] = await Promise.all([
-			this.stores.promptsConfig.get(),
-			this.stores.modelConfigs.getSelected(),
-		]);
-		const prompts = resolvePrompts(promptsConfig);
-
-		if (!config) {
-			await this.stores.runtime.setIn('chat.notice', {
-				severity: 'error',
-				message: 'Select a model before sending a message.',
+		return this.withPreparation('Unable to prepare the conversation.', async (chat, controller) => {
+			const { signal } = controller;
+			const previous = chat.conversation;
+			const prepared = prepare(chat);
+			if (!prepared) return;
+			const [promptsConfig, config] = await Promise.all([
+				this.stores.promptsConfig.get(),
+				this.stores.modelConfigs.getSelected(),
+			]);
+			signal.throwIfAborted();
+			if (!config) {
+				await this.stores.runtime.setIn('chat.notice', {
+					severity: 'error',
+					message: 'Select a model before sending a message.',
+				});
+				return;
+			}
+			const prompts = resolvePrompts(promptsConfig);
+			const conversationId = previous?.id ?? globalThis.crypto.randomUUID();
+			const userMessage = await prepared.createMessage();
+			signal.throwIfAborted();
+			const startedAt = Date.now();
+			const providerMessages = await buildModelMessages(prepared.history, [userMessage]);
+			signal.throwIfAborted();
+			const assistantMessage = createAssistantMessage(globalThis.crypto.randomUUID(), {
+				turnId: userMessage.metadata.turnId,
+				modelId: config.modelId,
+				createdAt: startedAt,
 			});
-			return;
-		}
-		const runtime = await this.stores.runtime.get();
-		if (this.preparation) return;
-		const previous = runtime.chat.conversation;
-		const prepared = prepare(runtime.chat);
-		if (!prepared) return;
-		const conversationId = previous?.id ?? globalThis.crypto.randomUUID();
-		if (this.requests.has(conversationId)) return;
-		const preparation = Symbol('conversation-preparation');
-		this.preparation = preparation;
-		await this.stores.runtime.setIn('chat', { ...runtime.chat, preparing: true, notice: undefined });
-
-		let userMessage: ConversationMessage;
-		try {
-			await this.publishState();
-			userMessage = await prepared.createMessage();
-		} catch (error) {
-			const detail = error instanceof Error ? error.message : 'Unknown error.';
-			await this.finishPreparation(preparation, `Unable to read the selected context attachment. ${detail}`);
-			return;
-		}
-		if (this.preparation !== preparation) return;
-
-		const startedAt = Date.now();
-		const turnId = userMessage.metadata.turnId;
-		const history = prepared.history;
-		let providerMessages;
-		try {
-			providerMessages = await buildModelMessages(history, [userMessage]);
-		} catch (error) {
-			const detail = error instanceof Error ? error.message : 'Unknown error.';
-			await this.finishPreparation(preparation, `Unable to prepare the conversation. ${detail}`);
-			return;
-		}
-		if (this.preparation !== preparation) return;
-
-		const assistantMessage = createAssistantMessage(globalThis.crypto.randomUUID(), turnId);
-		const conversation: Conversation = previous
-			? {
-					...previous,
-					messages: [...history, userMessage, assistantMessage],
-					updatedAt: startedAt,
-				}
-			: {
-					id: conversationId,
-					title: createConversationTitle(userMessage),
-					messages: [userMessage, assistantMessage],
-					createdAt: startedAt,
-					updatedAt: startedAt,
-				};
-		try {
+			const conversation: Conversation = previous
+				? {
+						...previous,
+						messages: [...prepared.history, userMessage, assistantMessage],
+						updatedAt: startedAt,
+					}
+				: {
+						id: conversationId,
+						title: createConversationTitle(userMessage),
+						messages: [userMessage, assistantMessage],
+						createdAt: startedAt,
+						updatedAt: startedAt,
+					};
 			if (previous) {
 				await this.stores.conversations.update(conversationId, {
 					messages: conversation.messages,
@@ -173,66 +190,54 @@ export class ConversationRunner {
 			} else {
 				await this.stores.conversations.append(conversation);
 			}
-		} catch (error) {
-			const detail = error instanceof Error ? error.message : 'Unknown error.';
-			await this.finishPreparation(preparation, `Unable to save the conversation. ${detail}`);
-			return;
-		}
-		if (this.preparation !== preparation) {
-			await this.setMessageStatus(conversationId, assistantMessage.id, 'aborted');
-			return;
-		}
-
-		this.preparation = undefined;
-		const abortController = new AbortController();
-		const request: ActiveRequest = {
-			controller: abortController,
-			messageId: assistantMessage.id,
-		};
-		this.requests.set(conversationId, request);
-		let mcp: Awaited<ReturnType<typeof connectMcpTools>> | undefined;
-		try {
-			const currentRuntime = await this.stores.runtime.get();
-			if (currentRuntime.chat.conversation?.id === previous?.id) {
-				await this.stores.runtime.setIn('chat', {
-					...currentRuntime.chat,
-					conversation,
-					pendingAttachments: prepared.clearPendingAttachments ? [] : currentRuntime.chat.pendingAttachments,
-					editing: undefined,
-					preparing: false,
-				});
-				await this.stores.conversations.select(conversationId);
-				await this.publishState();
+			if (signal.aborted) {
+				await this.setMessageStatus(conversationId, assistantMessage.id, 'aborted');
+				return;
 			}
-			mcp = await connectMcpTools(await this.stores.mcpConfig.get(), abortController.signal);
-			abortController.signal.throwIfAborted();
-			const agentStream = streamLLMAgent({ ...config }, providerMessages, abortController.signal, {
-				instructions: prompts.instructions,
-				responseMessage: assistantMessage,
-				tools: mcp.tools,
-			});
-			for await (const message of agentStream.stream) {
-				if (abortController.signal.aborted || this.requests.get(conversationId) !== request) break;
-				await this.persistAssistantMessage(conversationId, request, withMessageStatus(message, 'streaming'));
-			}
-			if (!abortController.signal.aborted && this.requests.get(conversationId) === request) {
-				const usage = await agentStream.usage;
-				if (!abortController.signal.aborted && this.requests.get(conversationId) === request) {
-					await this.setMessageStatus(conversationId, request.messageId, 'completed', undefined, usage);
+			const request: ActiveRequest = { controller, messageId: assistantMessage.id };
+			this.requests.set(conversationId, request);
+			this.preparation = undefined;
+			let mcp: Awaited<ReturnType<typeof connectMcpTools>> | undefined;
+			try {
+				const currentRuntime = await this.stores.runtime.get();
+				signal.throwIfAborted();
+				if (currentRuntime.chat.conversation?.id === previous?.id) {
+					await this.stores.runtime.setIn('chat', {
+						...currentRuntime.chat,
+						conversation,
+						pendingAttachments: prepared.clearPendingAttachments ? [] : currentRuntime.chat.pendingAttachments,
+						editing: undefined,
+					});
+					await this.stores.conversations.select(conversationId);
+					await this.publishState();
 				}
+				mcp = await connectMcpTools(await this.stores.mcpConfig.get(), signal);
+				signal.throwIfAborted();
+				const agentStream = streamLLMAgent({ ...config }, providerMessages, signal, {
+					instructions: prompts.instructions,
+					responseMessage: assistantMessage,
+					tools: mcp.tools,
+				});
+				for await (const message of agentStream.stream) {
+					if (signal.aborted) break;
+					await this.persistAssistantMessage(conversationId, request, withMessageStatus(message, 'streaming'));
+				}
+				if (!signal.aborted) {
+					const usage = await agentStream.usage;
+					if (!signal.aborted) {
+						await this.setMessageStatus(conversationId, request.messageId, 'completed', undefined, usage);
+					}
+				}
+			} catch (error) {
+				if (!signal.aborted) {
+					const message = error instanceof Error ? error.message : 'Unknown error.';
+					await this.setMessageStatus(conversationId, request.messageId, 'failed', message);
+				}
+			} finally {
+				if (this.requests.get(conversationId) === request) this.requests.delete(conversationId);
+				await Promise.all([this.publishState(), mcp?.close()]);
 			}
-		} catch (error) {
-			if (this.requests.get(conversationId) !== request) return;
-			if (abortController.signal.aborted) {
-				await this.setMessageStatus(conversationId, request.messageId, 'aborted');
-			} else {
-				const message = error instanceof Error ? error.message : 'Unknown error.';
-				await this.setMessageStatus(conversationId, request.messageId, 'failed', message);
-			}
-		} finally {
-			if (this.requests.get(conversationId) === request) this.requests.delete(conversationId);
-			await mcp?.close();
-		}
+		});
 	}
 
 	async cancelCurrent(): Promise<void> {
@@ -256,8 +261,16 @@ export class ConversationRunner {
 		return conversationId !== undefined && this.requests.has(conversationId);
 	}
 
+	getPhase(conversationId: string | undefined): ChatPhase {
+		if (this.preparation) return 'preparing';
+		return this.isRequestActive(conversationId) ? 'generating' : 'idle';
+	}
+
 	async cancelPreparation(): Promise<void> {
-		if (this.preparation) await this.finishPreparation(this.preparation);
+		if (!this.preparation) return;
+		this.preparation.abort();
+		this.preparation = undefined;
+		await this.publishState();
 	}
 
 	async cancelAll(): Promise<void> {
@@ -272,13 +285,13 @@ export class ConversationRunner {
 		request: ActiveRequest,
 		message: ConversationMessage,
 	): Promise<void> {
-		if (this.requests.get(conversationId) !== request) return;
+		if (request.controller.signal.aborted) return;
 		const conversation = await this.stores.conversations.get(conversationId);
-		if (!conversation || this.requests.get(conversationId) !== request) return;
+		if (!conversation || request.controller.signal.aborted) return;
 		const messages = conversation.messages.map((candidate) => (candidate.id === message.id ? message : candidate));
 		await this.stores.conversations.update(conversationId, { messages });
 		const updated = { ...conversation, messages };
-		await this.setCurrentConversation(updated);
+		await this.setCurrentConversation(updated, request.controller.signal);
 		await this.publishState();
 	}
 
@@ -305,21 +318,34 @@ export class ConversationRunner {
 		await this.publishState();
 	}
 
-	private async setCurrentConversation(conversation: Conversation): Promise<void> {
+	private async setCurrentConversation(conversation: Conversation, signal?: AbortSignal): Promise<void> {
 		const runtime = await this.stores.runtime.get();
-		if (runtime.chat.conversation?.id !== conversation.id) return;
+		if (runtime.chat.conversation?.id !== conversation.id || signal?.aborted) return;
 		await this.stores.runtime.setIn('chat.conversation', conversation);
 	}
 
-	private async finishPreparation(preparation: symbol, message?: string): Promise<void> {
-		if (this.preparation !== preparation) return;
-		this.preparation = undefined;
-		const runtime = await this.stores.runtime.get();
-		await this.stores.runtime.setIn('chat', {
-			...runtime.chat,
-			preparing: false,
-			...(message ? { notice: { severity: 'error', message } } : {}),
-		});
+	private async withPreparation(
+		failureMessage: string,
+		operation: (chat: RuntimeState['chat'], controller: AbortController) => Promise<void>,
+	): Promise<void> {
+		const { chat } = await this.stores.runtime.get();
+		if (this.getPhase(chat.conversation?.id) !== 'idle') return;
+		const controller = new AbortController();
+		this.preparation = controller;
+		try {
+			await this.stores.runtime.setIn('chat.notice', undefined);
+			await this.publishState();
+			controller.signal.throwIfAborted();
+			await operation(chat, controller);
+		} catch (error) {
+			if (!controller.signal.aborted) {
+				const detail = error instanceof Error ? error.message : 'Unknown error.';
+				await this.stores.runtime.setIn('chat.notice', { severity: 'error', message: `${failureMessage} ${detail}` });
+			}
+		} finally {
+			if (this.preparation === controller) this.preparation = undefined;
+			await this.publishState();
+		}
 	}
 }
 

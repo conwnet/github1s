@@ -16,6 +16,8 @@ export type ConversationMessageStatus = 'streaming' | 'completed' | 'failed' | '
 export interface ConversationMessageMetadata {
 	turnId: string;
 	status: ConversationMessageStatus;
+	modelId?: string;
+	createdAt?: number;
 	error?: string;
 }
 
@@ -39,17 +41,6 @@ export const isInterruptedMessage = (message: ConversationMessage): boolean =>
 	message.metadata.status === 'aborted' ||
 	message.metadata.status === 'unknown';
 
-export const getRetryableMessage = (messages: readonly ConversationMessage[]): ConversationMessage | undefined => {
-	const assistant = messages.at(-1);
-	const user = messages.at(-2);
-	return assistant?.role === 'assistant' &&
-		isInterruptedMessage(assistant) &&
-		user?.role === 'user' &&
-		user.metadata.turnId === assistant.metadata.turnId
-		? assistant
-		: undefined;
-};
-
 export const createUserMessage = (
 	turnId: string,
 	text: string,
@@ -67,10 +58,13 @@ export const createUserMessage = (
 	return { id: turnId, role: 'user', metadata: { turnId, status: 'completed' }, parts };
 };
 
-export const createAssistantMessage = (id: string, turnId: string): ConversationMessage => ({
+export const createAssistantMessage = (
+	id: string,
+	metadata: Omit<ConversationMessageMetadata, 'status' | 'error'>,
+): ConversationMessage => ({
 	id,
 	role: 'assistant',
-	metadata: { turnId, status: 'streaming' },
+	metadata: { ...metadata, status: 'streaming' },
 	parts: [],
 });
 
@@ -78,14 +72,10 @@ export const withMessageStatus = (
 	message: ConversationMessage,
 	status: ConversationMessageStatus,
 	error?: string,
-): ConversationMessage => ({
-	...message,
-	metadata: {
-		turnId: message.metadata.turnId,
-		status,
-		...(error ? { error } : {}),
-	},
-});
+): ConversationMessage => {
+	const { error: _previousError, ...metadata } = message.metadata;
+	return { ...message, metadata: { ...metadata, status, ...(error ? { error } : {}) } };
+};
 
 export const markStreamingMessagesUnknown = (conversation: Conversation): Conversation => {
 	const messages = conversation.messages.map((message) =>
@@ -104,6 +94,8 @@ const metadataSchema = jsonSchema<ConversationMessageMetadata>(
 		properties: {
 			turnId: { type: 'string', minLength: 1 },
 			status: { enum: ['streaming', 'completed', 'failed', 'aborted', 'unknown'] },
+			modelId: { type: 'string' },
+			createdAt: { type: 'number' },
 			error: { type: 'string' },
 		},
 	},
@@ -169,7 +161,7 @@ const isConversationMessageMetadata = (value: unknown): value is ConversationMes
 	if (!isPlainObject(value)) return false;
 	const metadata = value as Record<string, unknown>;
 	return (
-		Object.keys(metadata).every((key) => key === 'turnId' || key === 'status' || key === 'error') &&
+		Object.keys(metadata).every((key) => ['turnId', 'status', 'modelId', 'createdAt', 'error'].includes(key)) &&
 		typeof metadata.turnId === 'string' &&
 		metadata.turnId.length > 0 &&
 		(metadata.status === 'streaming' ||
@@ -177,6 +169,9 @@ const isConversationMessageMetadata = (value: unknown): value is ConversationMes
 			metadata.status === 'failed' ||
 			metadata.status === 'aborted' ||
 			metadata.status === 'unknown') &&
+		(metadata.modelId === undefined || typeof metadata.modelId === 'string') &&
+		(metadata.createdAt === undefined ||
+			(typeof metadata.createdAt === 'number' && Number.isFinite(metadata.createdAt))) &&
 		(metadata.error === undefined || typeof metadata.error === 'string')
 	);
 };

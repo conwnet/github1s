@@ -22,8 +22,11 @@ export type { Notice } from './state';
 
 export const MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH = 100_000;
 
+export type ChatPhase = 'idle' | 'preparing' | 'generating';
+
 export interface ViewState {
 	runtime: RuntimeState;
+	chatPhase: ChatPhase;
 	promptsConfig: PromptsConfig;
 	modelConfigs: {
 		selectedId?: string;
@@ -43,6 +46,7 @@ type AllViewEvents =
 	| { type: 'chat.send'; text: string }
 	| { type: 'chat.setEditingMessageId'; id?: string }
 	| { type: 'chat.retry'; id: string }
+	| { type: 'chat.fork'; id: string }
 	| { type: 'chat.runQuickAction'; action: ChatQuickAction }
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
 	| { type: 'chat.addContextAttachment'; action: 'descriptor'; descriptor: ContextAttachmentDescriptor }
@@ -103,6 +107,7 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 				: undefined;
 
 		case 'chat.retry':
+		case 'chat.fork':
 		case 'chat.removeContextAttachment':
 		case 'history.selectConversation':
 		case 'history.deleteConversation':

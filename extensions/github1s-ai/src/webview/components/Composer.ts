@@ -5,7 +5,7 @@ import type { ConversationMessage } from '@/common/conversation';
 import type { ViewEvent, ViewState } from '@/common/protocol';
 
 import { resizeComposer, shouldSubmitComposer } from '../helpers/composer';
-import { presentConversationUsage } from '../helpers/presentation';
+import { getMessageText, presentConversationUsage } from '../helpers/presentation';
 import { AttachmentChips } from './AttachmentChips';
 import { Icon } from './Icon';
 import { RecentFilesTooltip } from './RecentFiles';
@@ -33,20 +33,18 @@ const ATTACHMENT_ACTIONS = [
 
 interface ComposerProps {
 	state: ViewState;
-	busy: boolean;
 	active: boolean;
 	post: (event: ViewEvent) => void;
 	message?: ConversationMessage;
 }
 
-export const Composer = ({ state, busy, active, post, message: editedMessage }: ComposerProps) => {
-	const [draft, setDraft] = useState(() =>
-		editedMessage ? editedMessage.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('') : '',
-	);
+export const Composer = ({ state, active, post, message: editedMessage }: ComposerProps) => {
+	const [draft, setDraft] = useState(() => (editedMessage ? getMessageText(editedMessage) : ''));
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const chat = state.runtime.chat;
 	const context = editedMessage ? (chat.editing ?? chat) : chat;
-	const preparing = chat.preparing === true;
+	const preparing = state.chatPhase === 'preparing';
+	const busy = state.chatPhase !== 'idle';
 	const recentFiles = editedMessage
 		? editedMessage.parts.flatMap((part) => (part.type === 'data-recentFiles' ? part.data : []))
 		: (chat.recentFiles ?? []);

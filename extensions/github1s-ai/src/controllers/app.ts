@@ -30,6 +30,7 @@ export class AppController extends Controller {
 
 	@Controller.handler('app.newChat')
 	async handleNewChat(_event: ViewEvent<'app.newChat'>): Promise<void> {
+		await this.runner.cancelPreparation();
 		await this.stores.conversations.select(undefined);
 		await this.openPage('chat', true);
 	}

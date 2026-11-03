@@ -55,9 +55,10 @@ export class ConversationsStore {
 		return selectedId === undefined ? undefined : this.get(selectedId);
 	}
 
-	async select(id: string | undefined): Promise<void> {
+	async select(id: string | undefined, expectedId?: string): Promise<void> {
 		return this.enqueue(async () => {
 			const index = await this.readIndex();
+			if (expectedId !== undefined && index.selectedId !== expectedId) return;
 			if (id !== undefined && !index.summaries.some((conversation) => conversation.id === id)) {
 				throw new Error(`Conversation with id ${id} not found.`);
 			}

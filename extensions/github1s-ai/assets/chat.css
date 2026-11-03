@@ -693,7 +693,7 @@ summary:focus-visible,
 }
 
 .message {
-	padding: 10px 0;
+	padding: 8px 0;
 }
 
 .message-user {
@@ -744,6 +744,67 @@ summary:focus-visible,
 
 .assistant-response > .markdown + .markdown {
 	margin-top: 0.75em;
+}
+
+.message-footer {
+	display: flex;
+	min-height: 20px;
+	align-items: center;
+	gap: 12px;
+	margin-top: 8px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.message-meta {
+	display: flex;
+	min-width: 0;
+	flex: 1;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 2px 8px;
+	color: var(--vscode-descriptionForeground);
+	font-size: 0.8em;
+	line-height: 1.4;
+	text-align: right;
+}
+
+.message-model,
+.message-meta time {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.message-actions {
+	display: flex;
+	flex: none;
+	gap: 2px;
+}
+
+.message-actions .icon-button {
+	width: 20px;
+	height: 20px;
+	border-radius: 3px;
+}
+
+.message-actions .icon {
+	width: 13px;
+	height: 13px;
+}
+
+.message-assistant:hover .message-footer,
+.message-assistant:focus-within .message-footer {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+@media (hover: none) {
+	.message-footer {
+		opacity: 1;
+		pointer-events: auto;
+	}
 }
 
 /* Markdown */
@@ -1186,16 +1247,6 @@ summary:focus-visible,
 	font: inherit;
 }
 
-.message-retry {
-	gap: 4px;
-	margin-top: 6px;
-}
-
-.message-retry .icon {
-	width: 12px;
-	height: 12px;
-}
-
 .message-status {
 	margin: 5px 0 0;
 	color: var(--vscode-descriptionForeground);
@@ -1247,6 +1298,22 @@ summary:focus-visible,
 	margin: 0;
 	font-size: 12px;
 	line-height: 1.4;
+}
+
+.notice-success {
+	display: flex;
+	flex: none;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 8px 0;
+	color: var(--vscode-testing-iconPassed, var(--vscode-foreground));
+}
+
+.notice-success .icon {
+	width: 14px;
+	height: 14px;
+	flex: none;
+	margin-top: 1px;
 }
 
 .composer-surface {
