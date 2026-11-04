@@ -48,13 +48,14 @@ it('should load successfully', async () => {
 	expect(tab).toBe('[Preview] README.md');
 	// Title updated based on the repo
 	expect(await page.title()).toMatch(/\[Preview\] README\.md . conwnet\/github1s . GitHub1s/);
-	await page.waitForTimeout(5000);
 
-	// README file will be rendered in an iframe
-	await page.$eval(
-		'iframe.webview.ready[sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"][src]',
-		(el: HTMLElement) => el.innerHTML,
-	);
+	// Wait for the README content and its assets inside the nested webview frames.
+	const preview = page.frameLocator('iframe.webview.ready').frameLocator('iframe[title="[Preview] README.md"]');
+	await preview.getByRole('heading', { name: 'GitHub1s', exact: true }).waitFor();
+	await preview.locator('body').evaluate(async () => {
+		await document.fonts.ready;
+		await Promise.all(Array.from(document.images, (image) => image.decode()));
+	});
 
 	const image = await page.screenshot();
 	expect(image).toMatchImageSnapshot(matchImageSnapshotOptions);

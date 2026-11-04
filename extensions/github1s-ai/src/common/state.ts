@@ -20,7 +20,6 @@ export interface RuntimeState {
 			pendingAttachments: ContextAttachmentDescriptor[];
 			includeRecentFiles: boolean;
 		};
-		preparing?: boolean;
 		notice?: Notice;
 	};
 	history: {

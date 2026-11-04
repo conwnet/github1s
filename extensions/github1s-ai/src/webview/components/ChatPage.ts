@@ -1,7 +1,7 @@
 import { html } from 'htm/preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 
-import { getRetryableMessage, type ConversationMessage } from '@/common/conversation';
+import type { ConversationMessage } from '@/common/conversation';
 import type { ViewEvent, ViewState } from '@/common/protocol';
 import { QUICK_ACTIONS } from '@/common/quick-actions';
 
@@ -25,37 +25,28 @@ export const ChatPage = ({ state, active, post }: ChatPageProps) => {
 	const conversation = state.runtime.chat.conversation;
 	const conversationId = conversation?.id;
 	const messages = conversation?.messages ?? EMPTY_MESSAGES;
-	const busy =
-		state.runtime.chat.preparing === true || messages.some(({ metadata }) => metadata.status === 'streaming');
-	const notice = state.runtime.chat.notice?.message;
+	const notice = state.runtime.chat.notice;
 	const editingId = state.runtime.chat.editing?.messageId;
 
 	return html`
-		${notice && !editingId ? html`<p class="notice" role="status" aria-live="polite">${notice}</p>` : null}
-		<${Transcript} state=${state} messages=${messages} busy=${busy} active=${active} post=${post} />
+		${notice && !editingId
+			? html`<p class=${`notice notice-${notice.severity}`} role="status" aria-live="polite">
+					${notice.severity === 'success' ? html`<${Icon} name="check" />` : null} ${notice.message}
+				</p>`
+			: null}
+		<${Transcript} state=${state} messages=${messages} active=${active} post=${post} />
 		${state.modelConfigs.configs.length > 0
-			? html`<${Composer}
-					key=${conversationId ?? 'new'}
-					state=${state}
-					busy=${busy}
-					active=${active && !editingId}
-					post=${post}
-				/>`
+			? html`<${Composer} key=${conversationId ?? 'new'} state=${state} active=${active && !editingId} post=${post} />`
 			: null}
 	`;
 };
 
-interface ChatContentProps extends ChatContextProps {
-	busy: boolean;
-}
-
-interface TranscriptProps extends ChatContentProps {
+interface TranscriptProps extends ChatContextProps {
 	messages: readonly ConversationMessage[];
 	active: boolean;
 }
 
-const Transcript = ({ state, messages, busy, active, post }: TranscriptProps) => {
-	const retryableMessage = busy ? undefined : getRetryableMessage(messages);
+const Transcript = ({ state, messages, active, post }: TranscriptProps) => {
 	const editingId = state.runtime.chat.editing?.messageId;
 	const lastMessageBeforeEditing = useRef<string>();
 	const transcript = useRef<HTMLElement>(null);
@@ -98,17 +89,17 @@ const Transcript = ({ state, messages, busy, active, post }: TranscriptProps) =>
 	return html`<section ref=${transcript} class="transcript" aria-label="Conversation" onScroll=${onScroll}>
 		<div ref=${content} class="transcript-content">
 			${messages.length === 0
-				? html`<${EmptyChat} state=${state} busy=${busy} post=${post} />`
+				? html`<${EmptyChat} state=${state} post=${post} />`
 				: messages.map((message) =>
 						message.id === editingId
 							? html`<article key=${message.id} class="message message-editing">
-									<${Composer} state=${state} busy=${busy} active=${active} post=${post} message=${message} />
+									<${Composer} state=${state} active=${active} post=${post} message=${message} />
 								</article>`
 							: html`<${MessageView}
 									key=${message.id}
 									message=${message}
-									canRetry=${message === retryableMessage}
-									canEdit=${!busy && !editingId && state.modelConfigs.configs.length > 0}
+									busy=${state.chatPhase !== 'idle'}
+									hasModel=${state.modelConfigs.configs.length > 0}
 									inactive=${Boolean(editingId)}
 									post=${post}
 								/>`,
@@ -121,7 +112,7 @@ const scrollToBottom = (element: HTMLElement): void => {
 	element.scrollTop = element.scrollHeight;
 };
 
-const EmptyChat = ({ state, busy, post }: ChatContentProps) => {
+const EmptyChat = ({ state, post }: ChatContextProps) => {
 	if (state.modelConfigs.configs.length === 0) {
 		return html`<div class="empty-state">
 			<h2>Set up GitHub1s AI</h2>
@@ -133,11 +124,11 @@ const EmptyChat = ({ state, busy, post }: ChatContentProps) => {
 	return html`<div class="empty-state">
 		<h2>Ask about this repository</h2>
 		<p>Choose a quick action or ask a question below.</p>
-		<${QuickActions} state=${state} busy=${busy} post=${post} />
+		<${QuickActions} state=${state} post=${post} />
 	</div>`;
 };
 
-const QuickActions = ({ state, busy, post }: ChatContentProps) => {
+const QuickActions = ({ state, post }: ChatContextProps) => {
 	const chat = state.runtime.chat;
 	return html`<div class="quick-actions" role="group" aria-label="Quick Actions">
 		${QUICK_ACTIONS.map((item) => {
@@ -146,7 +137,7 @@ const QuickActions = ({ state, busy, post }: ChatContentProps) => {
 				key=${item.action}
 				class="quick-action"
 				type="button"
-				disabled=${busy || !available}
+				disabled=${state.chatPhase !== 'idle' || !available}
 				onClick=${() => post({ type: 'chat.runQuickAction', action: item.action })}
 			>
 				<${Icon} name=${item.icon} />

@@ -8,6 +8,7 @@ test('view events accept chat commands and context descriptors', () => {
 		{ type: 'chat.send', text: 'Explain this repository.' },
 		{ type: 'chat.cancel' },
 		{ type: 'chat.retry', id: 'assistant-1' },
+		{ type: 'chat.fork', id: 'assistant-1' },
 		{ type: 'chat.setIncludeRecentFiles', enabled: false },
 		{ type: 'chat.setIncludeRecentFiles', enabled: true },
 		{ type: 'chat.runQuickAction', action: 'repositoryOverview' },

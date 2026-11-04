@@ -26,7 +26,7 @@ export class ChatController extends Controller {
 	@Controller.handler('chat.setEditingMessageId')
 	async handleSetEditingMessageId(event: ViewEvent<'chat.setEditingMessageId'>): Promise<void> {
 		const { chat } = await this.stores.runtime.get();
-		if (chat.preparing || this.runner.isRequestActive(chat.conversation?.id)) return;
+		if (this.runner.getPhase(chat.conversation?.id) !== 'idle') return;
 		if (event.id === undefined) {
 			await this.stores.runtime.setIn('chat', { ...chat, editing: undefined, notice: undefined });
 			return;
@@ -50,6 +50,11 @@ export class ChatController extends Controller {
 	@Controller.handler('chat.retry')
 	async handleRetry(event: ViewEvent<'chat.retry'>): Promise<void> {
 		await this.runner.retry(event.id);
+	}
+
+	@Controller.handler('chat.fork')
+	async handleFork(event: ViewEvent<'chat.fork'>): Promise<void> {
+		await this.runner.fork(event.id);
 	}
 
 	@Controller.handler('chat.cancel')
