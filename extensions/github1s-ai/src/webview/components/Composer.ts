@@ -98,6 +98,14 @@ export const Composer = ({ state, active, post, message: editedMessage }: Compos
 	};
 
 	const onKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Enter' && event.altKey && !event.isComposing) {
+			event.preventDefault();
+			const input = event.currentTarget as HTMLTextAreaElement;
+			// Use a native editing command to preserve undo history.
+			document.execCommand('insertText', false, '\n');
+			setDraft(input.value);
+			return;
+		}
 		if (!shouldSubmitComposer(event)) return;
 		event.preventDefault();
 		submit();

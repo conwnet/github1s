@@ -321,7 +321,7 @@ export class ConversationRunner {
 	private async setCurrentConversation(conversation: Conversation, signal?: AbortSignal): Promise<void> {
 		const runtime = await this.stores.runtime.get();
 		if (runtime.chat.conversation?.id !== conversation.id || signal?.aborted) return;
-		await this.stores.runtime.setIn('chat.conversation', conversation);
+		await this.stores.runtime.setIn('chat.conversation', { ...conversation, title: runtime.chat.conversation.title });
 	}
 
 	private async withPreparation(

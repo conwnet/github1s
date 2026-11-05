@@ -178,6 +178,8 @@ summary:focus-visible,
 .settings-card-actions,
 .settings-meta,
 .history-row,
+.history-actions,
+.history-title-editor,
 .history-confirm {
 	display: flex;
 	align-items: center;
@@ -235,7 +237,7 @@ summary:focus-visible,
 	box-sizing: border-box;
 	display: flex;
 	min-width: 0;
-	align-items: flex-start;
+	align-items: center;
 	gap: 6px;
 	padding: 8px;
 	border: 1px solid var(--vscode-widget-border, transparent);
@@ -475,7 +477,8 @@ summary:focus-visible,
 	margin: 0;
 }
 
-.settings-control {
+.settings-control,
+.history-title-input {
 	width: 100%;
 	min-width: 0;
 	padding: 6px 7px;
@@ -485,7 +488,8 @@ summary:focus-visible,
 	border-radius: 3px;
 }
 
-.settings-control:focus-visible {
+.settings-control:focus-visible,
+.history-title-input:focus-visible {
 	border-color: var(--vscode-focusBorder);
 	outline: none;
 }
@@ -554,9 +558,11 @@ summary:focus-visible,
 }
 
 .history-row {
+	box-sizing: border-box;
 	min-width: 0;
+	height: 46px;
 	gap: 4px;
-	padding: 6px 8px;
+	padding: 5px 8px;
 	border: 1px solid transparent;
 	border-radius: 4px;
 }
@@ -591,6 +597,17 @@ summary:focus-visible,
 	white-space: nowrap;
 }
 
+.history-title-editor {
+	min-width: 0;
+	flex: 1;
+	gap: 4px;
+}
+
+.history-title-input {
+	height: 24px;
+	padding: 2px 6px;
+}
+
 .history-empty {
 	margin: 12px 0;
 	color: var(--vscode-descriptionForeground);
@@ -617,14 +634,16 @@ summary:focus-visible,
 	text-overflow: ellipsis;
 }
 
-.history-delete {
-	opacity: 0;
+.history-actions {
+	display: none;
+	flex: none;
+	gap: 2px;
 }
 
-.history-row:hover .history-delete,
-.history-row:focus-within .history-delete,
-.history-row-active .history-delete {
-	opacity: 1;
+.history-row:hover .history-actions,
+.history-row:focus-within .history-actions,
+.history-row-active .history-actions {
+	display: flex;
 }
 
 .ghost-button.history-confirm-delete {

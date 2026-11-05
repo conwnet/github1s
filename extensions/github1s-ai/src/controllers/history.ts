@@ -44,6 +44,27 @@ export class HistoryController extends Controller {
 		});
 	}
 
+	@Controller.handler('history.renameConversation')
+	async handleRenameConversation(event: ViewEvent<'history.renameConversation'>): Promise<void> {
+		const title = event.title.trim();
+		if (!title) return;
+		try {
+			await this.stores.conversations.update(event.id, { title });
+		} catch (error) {
+			const detail = error instanceof Error ? error.message : 'Unknown error.';
+			await this.stores.runtime.setIn('history.notice', {
+				severity: 'error',
+				message: `Unable to rename the conversation. ${detail}`,
+			});
+			return;
+		}
+		const runtime = await this.stores.runtime.get();
+		if (runtime.chat.conversation?.id === event.id) {
+			await this.stores.runtime.setIn('chat.conversation.title', title);
+		}
+		await this.stores.runtime.setIn('history.notice', undefined);
+	}
+
 	@Controller.handler('history.deleteConversation')
 	async handleDeleteConversation(event: ViewEvent<'history.deleteConversation'>): Promise<void> {
 		const selected = (await this.stores.runtime.get()).chat.conversation?.id === event.id;

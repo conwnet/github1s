@@ -38,6 +38,22 @@ test('view events reject malformed payloads, unknown actions and unexpected fiel
 	}
 });
 
+test('conversation title updates require an ID and a nonblank title', () => {
+	const event = { type: 'history.renameConversation', id: 'conversation-1', title: '  A new title  ' };
+	assert.deepEqual(parseViewEvent(event), event);
+	for (const invalid of [
+		{ ...event, id: '' },
+		{ ...event, id: 123 },
+		{ ...event, title: '' },
+		{ ...event, title: ' \t\n ' },
+		{ ...event, title: 123 },
+		{ type: event.type, id: event.id },
+		{ ...event, extra: true },
+	]) {
+		assert.equal(parseViewEvent(invalid), undefined, JSON.stringify(invalid));
+	}
+});
+
 test('highlight requests enforce the source length limit and required fields', () => {
 	const request = {
 		type: 'markdown.highlight',
@@ -46,7 +62,15 @@ test('highlight requests enforce the source length limit and required fields', (
 		source: 'x'.repeat(MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH),
 	};
 	assert.deepEqual(parseViewEvent(request), request);
-	assert.equal(parseViewEvent({ ...request, source: `${request.source}x` }), undefined);
-	assert.equal(parseViewEvent({ ...request, requestId: '' }), undefined);
-	assert.equal(parseViewEvent({ ...request, extra: true }), undefined);
+	for (const invalid of [
+		{ ...request, source: `${request.source}x` },
+		{ ...request, source: 123 },
+		{ ...request, requestId: '' },
+		{ ...request, requestId: 123 },
+		{ ...request, languageId: '' },
+		{ ...request, languageId: 123 },
+		{ ...request, extra: true },
+	]) {
+		assert.equal(parseViewEvent(invalid), undefined);
+	}
 });

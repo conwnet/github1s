@@ -1,6 +1,6 @@
 import { isPlainObject } from 'lodash-es';
 
-import { exactString, hasExactKeys } from '@/helpers/validate';
+import { exactString, hasExactKeys, isNonBlankString, isNonEmptyString } from '@/helpers/validate';
 
 import {
 	isContextAttachmentAction,
@@ -54,6 +54,7 @@ type AllViewEvents =
 	| { type: 'chat.setIncludeRecentFiles'; enabled: boolean }
 	| { type: 'chat.cancel' }
 	| { type: 'history.selectConversation'; id: string }
+	| { type: 'history.renameConversation'; id: string; title: string }
 	| { type: 'history.deleteConversation'; id: string }
 	| { type: 'markdown.highlight'; requestId: string; languageId: string; source: string }
 	| { type: 'settings.selectModelConfig'; id: string }
@@ -90,20 +91,23 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 			return hasExactKeys(event, ['type']) ? { type: event.type } : undefined;
 
 		case 'app.openFile':
-			return exactString(event, 'source') ? { type: event.type, source: event.source as string } : undefined;
+			return exactString(event, 'source') ? { type: event.type, source: event.source } : undefined;
 
 		case 'chat.send':
-			return hasExactKeys(event, ['type', 'text']) && typeof event.text === 'string'
-				? { type: event.type, text: event.text }
-				: undefined;
+			return exactString(event, 'text') ? { type: event.type, text: event.text } : undefined;
 
 		case 'chat.setEditingMessageId':
 			if (hasExactKeys(event, ['type'])) return { type: event.type };
-			return exactString(event, 'id') ? { type: event.type, id: event.id as string } : undefined;
+			return exactString(event, 'id') ? { type: event.type, id: event.id } : undefined;
 
 		case 'chat.setIncludeRecentFiles':
 			return hasExactKeys(event, ['type', 'enabled']) && typeof event.enabled === 'boolean'
 				? { type: event.type, enabled: event.enabled }
+				: undefined;
+
+		case 'history.renameConversation':
+			return hasExactKeys(event, ['type', 'id', 'title']) && isNonEmptyString(event.id) && isNonBlankString(event.title)
+				? { type: event.type, id: event.id, title: event.title }
 				: undefined;
 
 		case 'chat.retry':
@@ -113,7 +117,7 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 		case 'history.deleteConversation':
 		case 'settings.selectModelConfig':
 		case 'settings.deleteModelConfig':
-			return exactString(event, 'id') ? { type: event.type, id: event.id as string } : undefined;
+			return exactString(event, 'id') ? { type: event.type, id: event.id } : undefined;
 
 		case 'chat.runQuickAction':
 			return exactString(event, 'action') && isQuickAction(event.action)
@@ -133,10 +137,8 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 		case 'markdown.highlight':
 			if (
 				!hasExactKeys(event, ['type', 'requestId', 'languageId', 'source']) ||
-				typeof event.requestId !== 'string' ||
-				event.requestId.length === 0 ||
-				typeof event.languageId !== 'string' ||
-				event.languageId.length === 0 ||
+				!isNonEmptyString(event.requestId) ||
+				!isNonEmptyString(event.languageId) ||
 				typeof event.source !== 'string' ||
 				event.source.length > MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH
 			) {
@@ -158,7 +160,7 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 				? { type: event.type, config: event.config }
 				: undefined;
 		case 'settings.saveMcpConfig':
-			return exactString(event, 'json') ? { type: event.type, json: event.json as string } : undefined;
+			return exactString(event, 'json') ? { type: event.type, json: event.json } : undefined;
 		default:
 			return undefined;
 	}
