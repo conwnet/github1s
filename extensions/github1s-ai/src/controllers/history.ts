@@ -71,7 +71,7 @@ export class HistoryController extends Controller {
 		if (selected) await this.runner.cancelPreparation();
 		await this.runner.cancelConversation(event.id);
 		try {
-			await this.stores.conversations.delete(event.id);
+			await this.stores.conversations.delete([event.id]);
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.stores.runtime.setIn('history.notice', {

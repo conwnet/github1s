@@ -261,6 +261,12 @@ export class ConversationRunner {
 		return conversationId !== undefined && this.requests.has(conversationId);
 	}
 
+	// True while preparing a request or generating a response in any conversation.
+	isBusy(): boolean {
+		return this.preparation !== undefined || this.requests.size > 0;
+	}
+
+	// Returns the given conversation's phase; preparation is shared across conversations.
 	getPhase(conversationId: string | undefined): ChatPhase {
 		if (this.preparation) return 'preparing';
 		return this.isRequestActive(conversationId) ? 'generating' : 'idle';

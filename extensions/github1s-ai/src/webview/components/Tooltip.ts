@@ -100,7 +100,7 @@ export const Tooltip = ({ content, children }: TooltipProps) => {
 					>
 						${content}
 					</div>`,
-					document.body,
+					anchor.current?.closest('dialog') ?? document.body,
 				)
 			: null}
 	</span>`;

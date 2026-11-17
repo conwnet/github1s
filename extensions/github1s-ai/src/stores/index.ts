@@ -18,7 +18,17 @@ export interface Stores {
 	readonly promptsConfig: Pick<PromptsConfigStore, 'get' | 'set' | 'clear'>;
 	readonly conversations: Pick<
 		ConversationsStore,
-		'list' | 'get' | 'getSelected' | 'select' | 'append' | 'update' | 'delete' | 'clearGlobal'
+		| 'list'
+		| 'get'
+		| 'getSelected'
+		| 'select'
+		| 'append'
+		| 'replace'
+		| 'update'
+		| 'delete'
+		| 'clearGlobal'
+		| 'forWorkspace'
+		| 'listWorkspaces'
 	>;
 }
 

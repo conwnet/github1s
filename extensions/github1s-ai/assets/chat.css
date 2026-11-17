@@ -547,6 +547,107 @@ summary:focus-visible,
 	border: 1px solid currentColor;
 }
 
+.history-import-dialog {
+	box-sizing: border-box;
+	width: calc(100% - 24px);
+	max-width: 300px;
+	max-height: calc(88vh - 12px);
+	margin: 12vh auto 12px;
+	padding: 16px;
+	color: var(--vscode-foreground);
+	background: var(--vscode-editorWidget-background, var(--vscode-sideBar-background));
+	border: 1px solid var(--vscode-widget-border, var(--vscode-input-border));
+	border-radius: 6px;
+	box-shadow: 0 2px 12px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.3));
+}
+
+.history-import-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.35);
+}
+
+.history-import-content {
+	display: grid;
+	min-width: 0;
+	gap: 16px;
+}
+
+.history-import-content h3 {
+	margin: 0;
+	font-size: 14px;
+}
+
+.history-import-summary {
+	min-width: 0;
+	color: var(--vscode-descriptionForeground);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.history-import-summary p {
+	margin: 0;
+}
+
+.history-import-filename {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.history-import-field {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.history-import-field legend {
+	margin-bottom: 6px;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.history-import-label,
+.history-import-options,
+.history-import-options label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.history-import-label .icon-button {
+	width: 20px;
+	height: 20px;
+	color: var(--vscode-descriptionForeground);
+}
+
+.history-import-options {
+	flex-wrap: wrap;
+	gap: 8px 20px;
+}
+
+.history-import-options input {
+	margin: 0;
+	accent-color: var(--vscode-focusBorder);
+	color-scheme: light;
+}
+
+.vscode-dark .history-import-options input,
+.vscode-high-contrast .history-import-options input {
+	color-scheme: dark;
+}
+
+.history-import-warning {
+	margin: 0;
+	color: var(--vscode-errorForeground);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.history-import-actions {
+	justify-content: flex-end;
+}
+
 /* History */
 
 .history-list {
