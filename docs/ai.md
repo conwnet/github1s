@@ -100,8 +100,9 @@ The model and MCP services receive the data sent to them under their own service
 ### Manage saved data
 
 - **Delete one conversation:** open **Show History**, use its delete action, and confirm **Delete**.
-- **Export conversations:** in AI Settings, open **General → Export history → Export**. The JSON contains conversation data for the current workspace, including stored message and tool content.
-- **Reset AI data:** in **General**, select **Clear all data** and confirm. This removes local AI conversations across all workspaces, model settings and API keys, MCP settings, and prompt settings.
+- **Export history:** in **AI Settings → General**, select **Export history** to download all workspaces as JSON, including messages, tool results, and attachments.
+- **Import history:** in **General**, select **Import history** and choose a JSON export. The default **Merge + Keep** preserves local conversations with matching IDs in the same workspace. **Overwrite** uses imported conversations; **Replace** replaces all workspace history with the file.
+- **Clear all data:** in **General**, select **Clear all data** to delete all workspace history, model settings and API keys, MCP settings, and prompts.
 
 ## Troubleshooting
 

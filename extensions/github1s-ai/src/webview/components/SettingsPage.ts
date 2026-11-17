@@ -1,10 +1,12 @@
 import { html } from 'htm/preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 
+import type { ConversationHistory, HistoryImportOptions } from '@/common/conversation';
 import type { PromptsConfig } from '@/common/prompts-config';
 import type { ModelConfigInput, Notice, ViewEvent, ViewState } from '@/common/protocol';
 
 import { Icon } from './Icon';
+import { HistoryImportDialog } from './HistoryImportDialog';
 import { McpSettings } from './McpSettings';
 import { ModelEditor, ModelSettings } from './ModelSettings';
 import { PageHeader } from './PageHeader';
@@ -80,6 +82,8 @@ export const SettingsPage = ({ state, post }: SettingsPageProps) => {
 							: html`<${GeneralSettings}
 									notice=${feedback}
 									onExport=${() => post({ type: 'settings.exportHistory' })}
+									onImport=${(content: string, options: HistoryImportOptions) =>
+										post({ type: 'settings.importHistory', content, options })}
 									onClear=${() => post({ type: 'settings.clearAllData' })}
 								/>`}`;
 
@@ -134,37 +138,91 @@ const SettingsTabs = ({ active, onChange }: SettingsTabsProps) => {
 interface GeneralSettingsProps {
 	notice?: Notice;
 	onExport: () => void;
+	onImport: (content: string, options: HistoryImportOptions) => void;
 	onClear: () => void;
 }
 
-const GeneralSettings = ({ notice, onExport, onClear }: GeneralSettingsProps) => html`
-	<div id="settings-general-panel" class="settings-overview" role="tabpanel" aria-labelledby="settings-general-tab">
-		<p class="settings-section-description">Manage conversation history and locally stored GitHub1s AI data.</p>
-		<${SettingsNotice} notice=${notice} />
-		<div class="settings-general-actions">
-			<div class="settings-general-action">
-				<div class="settings-general-action-copy">
-					<strong>Conversation history</strong>
-					<p>Download all conversations as JSON. Attached code and file contents may be included.</p>
+const GeneralSettings = ({ notice, onExport, onImport, onClear }: GeneralSettingsProps) => {
+	const fileInput = useRef<HTMLInputElement>(null);
+	const [importFile, setImportFile] = useState<{ filename: string; history: ConversationHistory }>();
+	const [reading, setReading] = useState(false);
+	const [fileError, setFileError] = useState<Notice>();
+	useEffect(() => setFileError(undefined), [notice]);
+
+	const readFile = async (event: Event) => {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = '';
+		if (!file) return;
+		setFileError(undefined);
+		setReading(true);
+		try {
+			const { parseConversationHistory } = await import('@/common/conversation');
+			const history = await parseConversationHistory(await file.text());
+			setImportFile({ filename: file.name, history });
+		} catch (error) {
+			setFileError({
+				severity: 'error',
+				message: error instanceof Error ? error.message : 'Unable to read this file.',
+			});
+		} finally {
+			setReading(false);
+		}
+	};
+
+	return html`
+		<div id="settings-general-panel" class="settings-overview" role="tabpanel" aria-labelledby="settings-general-tab">
+			<p class="settings-section-description">Manage saved history and settings.</p>
+			<${SettingsNotice} notice=${fileError ?? notice} />
+			<div class="settings-general-actions">
+				<div class="settings-general-action">
+					<div class="settings-general-action-copy">
+						<strong>Conversation history</strong>
+						<p>Import or export history for all workspaces as JSON.</p>
+					</div>
+					<div class="settings-form-actions">
+						<button class="ghost-button settings-general-button" type="button" onClick=${onExport}>
+							<${Icon} name="download" />
+							Export history
+						</button>
+						<button
+							class="ghost-button settings-general-button"
+							type="button"
+							disabled=${reading || !!importFile}
+							onClick=${() => fileInput.current?.click()}
+						>
+							<${Icon} name="upload" />
+							Import history
+						</button>
+						<input ref=${fileInput} type="file" accept=".json,application/json" hidden onChange=${readFile} />
+					</div>
+					<p class="settings-hint">Close other GitHub1s tabs and reload this page before import or export.</p>
 				</div>
-				<button class="ghost-button settings-general-button" type="button" onClick=${onExport}>
-					<${Icon} name="download" />
-					Export history
-				</button>
-			</div>
-			<div class="settings-general-action">
-				<div class="settings-general-action-copy">
-					<strong>All local data</strong>
-					<p>Permanently delete conversations across all workspaces, model settings, MCP settings, and prompts.</p>
+				<div class="settings-general-action">
+					<div class="settings-general-action-copy">
+						<strong>All local data</strong>
+						<p>Permanently delete conversations across all workspaces, model settings, MCP settings, and prompts.</p>
+					</div>
+					<button class="ghost-button settings-general-button settings-danger" type="button" onClick=${onClear}>
+						<${Icon} name="trash" />
+						Clear all data
+					</button>
 				</div>
-				<button class="ghost-button settings-general-button settings-danger" type="button" onClick=${onClear}>
-					<${Icon} name="trash" />
-					Clear all data
-				</button>
 			</div>
+			${importFile
+				? html`<${HistoryImportDialog}
+						filename=${importFile.filename}
+						history=${importFile.history}
+						onImport=${(options: HistoryImportOptions) => {
+							onImport(JSON.stringify(importFile.history), options);
+							setImportFile(undefined);
+						}}
+						onCancel=${() => setImportFile(undefined)}
+					/>`
+				: null}
 		</div>
-	</div>
-`;
+	`;
+};
 
 const SettingsNotice = ({ notice }: { notice?: Notice }) =>
 	notice

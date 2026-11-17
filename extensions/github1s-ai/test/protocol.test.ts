@@ -54,6 +54,27 @@ test('conversation title updates require an ID and a nonblank title', () => {
 	}
 });
 
+test('history import events require file contents and an explicit valid import strategy', () => {
+	for (const event of [
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'merge', conflicts: 'keep' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'merge', conflicts: 'overwrite' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'replace' } },
+	]) {
+		assert.deepEqual(parseViewEvent(event), event);
+	}
+	for (const event of [
+		{ type: 'settings.importHistory', options: { mode: 'replace' } },
+		{ type: 'settings.importHistory', content: {}, options: { mode: 'replace' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'merge' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'merge', conflicts: 'unknown' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'replace', conflicts: 'keep' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'unknown' } },
+		{ type: 'settings.importHistory', content: '{}', options: { mode: 'replace' }, extra: true },
+	]) {
+		assert.equal(parseViewEvent(event), undefined);
+	}
+});
+
 test('highlight requests enforce the source length limit and required fields', () => {
 	const request = {
 		type: 'markdown.highlight',

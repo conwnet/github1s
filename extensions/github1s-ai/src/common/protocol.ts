@@ -8,7 +8,7 @@ import {
 	type ContextAttachmentAction,
 	type ContextAttachmentDescriptor,
 } from './context';
-import type { ConversationSummary } from './conversation';
+import type { ConversationSummary, HistoryImportOptions } from './conversation';
 import type { SyntaxHighlightingData } from './highlighting';
 import type { McpConfig } from './mcp-config';
 import { isModelConfigInput, type ModelConfigInput, type ModelConfigSummary } from './model-config';
@@ -60,6 +60,7 @@ type AllViewEvents =
 	| { type: 'settings.selectModelConfig'; id: string }
 	| { type: 'settings.clearFeedback' }
 	| { type: 'settings.exportHistory' }
+	| { type: 'settings.importHistory'; content: string; options: HistoryImportOptions }
 	| { type: 'settings.clearAllData' }
 	| { type: 'settings.saveModelConfig'; config: ModelConfigInput }
 	| { type: 'settings.savePromptsConfig'; config: PromptsConfig }
@@ -161,6 +162,23 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 				: undefined;
 		case 'settings.saveMcpConfig':
 			return exactString(event, 'json') ? { type: event.type, json: event.json } : undefined;
+		case 'settings.importHistory': {
+			if (
+				!hasExactKeys(event, ['type', 'content', 'options']) ||
+				typeof event.content !== 'string' ||
+				!isPlainObject(event.options)
+			)
+				return undefined;
+			const options = event.options as Record<string, unknown>;
+			if (hasExactKeys(options, ['mode']) && options.mode === 'replace') {
+				return { type: event.type, content: event.content, options: { mode: 'replace' } };
+			}
+			return hasExactKeys(options, ['mode', 'conflicts']) &&
+				options.mode === 'merge' &&
+				(options.conflicts === 'keep' || options.conflicts === 'overwrite')
+				? { type: event.type, content: event.content, options: { mode: 'merge', conflicts: options.conflicts } }
+				: undefined;
+		}
 		default:
 			return undefined;
 	}
