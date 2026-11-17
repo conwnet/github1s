@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-14]
+        os: [macos-26]
         node-version: [24.x]
 
     runs-on: ${{ matrix.os }}
