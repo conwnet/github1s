@@ -1,6 +1,7 @@
 import { html } from 'htm/preact';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'preact/hooks';
 
+import { copyText, COPY_FEEDBACK_DURATION_MS } from '../helpers/clipboard';
 import { highlightCodeBlocks, type PostMarkdownHighlightRequest } from '../helpers/highlighting';
 import { renderMarkdown } from '../helpers/markdown';
 
@@ -17,7 +18,6 @@ interface MermaidBlock {
 	update: () => void;
 }
 
-const COPY_FEEDBACK_DURATION_MS = 1_600;
 let diagramSequence = 0;
 let mermaidTheme: string | undefined;
 
@@ -170,18 +170,13 @@ const copyCodeBlock = async (event: MouseEvent): Promise<void> => {
 	const button = target.closest<HTMLButtonElement>('button[data-copy-code]');
 	if (!button || !root.contains(button)) return;
 	const code = button.closest('.code-block')?.querySelector('code')?.textContent;
-	if (code === undefined || !navigator.clipboard) return;
+	if (code === undefined || !(await copyText(code || ''))) return;
 
-	try {
-		await navigator.clipboard.writeText(code || '');
-		button.textContent = 'Copied';
-		button.setAttribute('aria-label', 'Code copied');
-		window.setTimeout(() => {
-			if (!button.isConnected) return;
-			button.textContent = 'Copy';
-			button.setAttribute('aria-label', 'Copy code');
-		}, COPY_FEEDBACK_DURATION_MS);
-	} catch {
-		// Clipboard access can be disabled by the webview host. Keep the code selectable.
-	}
+	button.textContent = 'Copied';
+	button.setAttribute('aria-label', 'Code copied');
+	window.setTimeout(() => {
+		if (!button.isConnected) return;
+		button.textContent = 'Copy';
+		button.setAttribute('aria-label', 'Copy code');
+	}, COPY_FEEDBACK_DURATION_MS);
 };

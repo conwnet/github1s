@@ -15,7 +15,11 @@ export interface RuntimeState {
 		pendingAttachments?: ContextAttachmentDescriptor[];
 		recentFiles?: ContextReference[];
 		includeRecentFiles?: boolean;
-		preparing?: boolean;
+		editing?: {
+			messageId: string;
+			pendingAttachments: ContextAttachmentDescriptor[];
+			includeRecentFiles: boolean;
+		};
 		notice?: Notice;
 	};
 	history: {

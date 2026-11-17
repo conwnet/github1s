@@ -30,6 +30,7 @@ export class AppController extends Controller {
 
 	@Controller.handler('app.newChat')
 	async handleNewChat(_event: ViewEvent<'app.newChat'>): Promise<void> {
+		await this.runner.cancelPreparation();
 		await this.stores.conversations.select(undefined);
 		await this.openPage('chat', true);
 	}
@@ -71,7 +72,7 @@ export class AppController extends Controller {
 			chat: {
 				...runtime.chat,
 				...(resetConversation ? { conversation: undefined, pendingAttachments: [] } : {}),
-				...(resetConversation || page !== 'chat' ? { notice: undefined } : {}),
+				...(resetConversation || page !== 'chat' ? { editing: undefined, notice: undefined } : {}),
 			},
 			history: { ...runtime.history, notice: undefined },
 			settings: { ...runtime.settings, feedback: undefined },

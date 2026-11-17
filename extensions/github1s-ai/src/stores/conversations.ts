@@ -1,8 +1,8 @@
-import type { LanguageModelUsage } from 'ai';
 import { isPlainObject } from 'lodash-es';
 import * as vscode from 'vscode';
 
 import {
+	isConversationSummary,
 	validateConversationMessages,
 	type Conversation,
 	type ConversationMessage,
@@ -38,12 +38,32 @@ export class ConversationsStore {
 	private detailsTimerMap = new Map<string, { timer: ReturnType<typeof setTimeout>; deadline: number }>();
 	private readonly detailsWrites = new Set<Promise<void>>();
 
-	constructor(context: vscode.ExtensionContext, workspaceKey: string) {
+	constructor(
+		private readonly context: vscode.ExtensionContext,
+		private readonly workspaceKey: string,
+	) {
 		this.rootDirectoryUri = vscode.Uri.joinPath(context.globalStorageUri, 'conversations');
 		this.dataDirectoryUri = vscode.Uri.joinPath(this.rootDirectoryUri, workspaceKey);
 		this.indexPersist = new FilePersist<ConversationIndex>({
 			fileUri: vscode.Uri.joinPath(this.dataDirectoryUri, 'index.json'),
+			check: isConversationIndex,
 		});
+	}
+
+	forWorkspace(workspaceKey: string): ConversationsStore {
+		return workspaceKey === this.workspaceKey ? this : new ConversationsStore(this.context, workspaceKey);
+	}
+
+	async listWorkspaces(): Promise<string[]> {
+		const keys = new Set([this.workspaceKey]);
+		try {
+			for (const [key, type] of await vscode.workspace.fs.readDirectory(this.rootDirectoryUri)) {
+				if (type === vscode.FileType.Directory) keys.add(key);
+			}
+		} catch (error) {
+			if ((error as { code?: string })?.code !== 'FileNotFound') throw error;
+		}
+		return [...keys].sort();
 	}
 
 	async list(): Promise<ConversationSummary[]> {
@@ -55,9 +75,10 @@ export class ConversationsStore {
 		return selectedId === undefined ? undefined : this.get(selectedId);
 	}
 
-	async select(id: string | undefined): Promise<void> {
+	async select(id: string | undefined, expectedId?: string): Promise<void> {
 		return this.enqueue(async () => {
 			const index = await this.readIndex();
+			if (expectedId !== undefined && index.selectedId !== expectedId) return;
 			if (id !== undefined && !index.summaries.some((conversation) => conversation.id === id)) {
 				throw new Error(`Conversation with id ${id} not found.`);
 			}
@@ -108,10 +129,43 @@ export class ConversationsStore {
 				...(conversation.usage === undefined ? {} : { usage: conversation.usage }),
 			};
 			const summaries = [...conversations, summary];
-			await this.writeIndex({ ...state, summaries });
 			const detail = { id: conversation.id, messages };
-			await this.getDetailsPersist(conversation.id).write(detail);
+			const persist = this.getDetailsPersist(conversation.id);
+			await persist.write(detail);
+			try {
+				await this.writeIndex({ ...state, summaries });
+			} catch (error) {
+				await persist.delete().catch(() => undefined);
+				throw error;
+			}
 			this.detailsCacheMap.set(conversation.id, detail);
+		});
+	}
+
+	async replace(conversation: Conversation): Promise<void> {
+		return this.enqueue(async () => {
+			if (!isConversationSummary(conversation)) throw new Error('Invalid conversation object');
+			const { messages, ...summary } = conversation;
+			const detail = { id: summary.id, messages: await validateMessages(messages, 'Invalid conversation object') };
+			const state = await this.readIndex();
+			if (!state.summaries.some(({ id }) => id === summary.id)) {
+				throw new Error(`Conversation with id ${summary.id} not found.`);
+			}
+			const pending = this.detailsTimerMap.get(summary.id);
+			if (pending) {
+				clearTimeout(pending.timer);
+				this.detailsTimerMap.delete(summary.id);
+			}
+			await Promise.allSettled([...this.detailsWrites]);
+			const persist = this.getDetailsPersist(summary.id);
+			// Preserve pending local messages if writing the replacement fails.
+			if (pending) await persist.write(this.detailsCacheMap.get(summary.id)!);
+			await persist.write(detail);
+			this.detailsCacheMap.set(summary.id, detail);
+			await this.writeIndex({
+				...state,
+				summaries: state.summaries.map((item) => (item.id === summary.id ? summary : item)),
+			});
 		});
 	}
 
@@ -158,26 +212,38 @@ export class ConversationsStore {
 		});
 	}
 
-	async delete(id: string): Promise<void> {
+	async delete(ids: string[]): Promise<void> {
+		const requested = new Set(ids);
+		if (requested.size === 0) return;
 		return this.enqueue(async () => {
 			const state = await this.readIndex();
-			const conversations = state.summaries;
-			const index = conversations.findIndex((c) => c.id === id);
-			if (index === -1) {
-				throw new Error(`Conversation with id ${id} not found.`);
+			const existingIds = new Set(state.summaries.map(({ id }) => id));
+			for (const id of requested) {
+				if (!existingIds.has(id)) throw new Error(`Conversation with id ${id} not found.`);
 			}
-			if (this.detailsTimerMap.has(id)) {
-				clearTimeout(this.detailsTimerMap.get(id)!.timer);
-				this.detailsTimerMap.delete(id);
+			for (const id of requested) {
+				if (this.detailsTimerMap.has(id)) {
+					clearTimeout(this.detailsTimerMap.get(id)!.timer);
+					this.detailsTimerMap.delete(id);
+				}
 			}
 			await Promise.allSettled([...this.detailsWrites]);
-			await this.getDetailsPersist(id).delete();
-			this.detailsCacheMap.delete(id);
-			const summaries = conversations.filter((_, itemIndex) => itemIndex !== index);
-			await this.writeIndex({
-				selectedId: state.selectedId === id ? undefined : state.selectedId,
-				summaries,
-			});
+			const deleted = new Set<string>();
+			try {
+				for (const id of requested) {
+					await this.getDetailsPersist(id).delete();
+					this.detailsCacheMap.delete(id);
+					deleted.add(id);
+				}
+			} finally {
+				// Save completed deletions even if a later file cannot be removed.
+				if (deleted.size > 0) {
+					await this.writeIndex({
+						selectedId: state.selectedId !== undefined && deleted.has(state.selectedId) ? undefined : state.selectedId,
+						summaries: state.summaries.filter(({ id }) => !deleted.has(id)),
+					});
+				}
+			}
 		});
 	}
 
@@ -201,10 +267,7 @@ export class ConversationsStore {
 
 	private async readIndex(): Promise<ConversationIndex> {
 		if (this.indexCache === undefined) {
-			const stored = await this.indexPersist.read();
-			const summaries = sanitizeConversationSummaries(stored?.summaries);
-			const selectedId = summaries.some(({ id }) => id === stored?.selectedId) ? stored?.selectedId : undefined;
-			this.indexCache = { selectedId, summaries };
+			this.indexCache = (await this.indexPersist.read()) ?? { summaries: [] };
 		}
 		return this.indexCache;
 	}
@@ -228,69 +291,15 @@ export class ConversationsStore {
 	}
 }
 
-const isConversationSummary = (value: unknown): value is ConversationSummary => {
-	if (!hasConversationSummaryFields(value)) return false;
-	return value.usage === undefined || isLanguageModelUsage(value.usage);
-};
-
-const sanitizeConversationSummaries = (value: unknown): ConversationSummary[] => {
-	if (!Array.isArray(value)) return [];
-	const summaries: ConversationSummary[] = [];
-	const ids = new Set<string>();
-	for (const item of value) {
-		if (!hasConversationSummaryFields(item) || ids.has(item.id)) continue;
-		ids.add(item.id);
-		summaries.push({
-			id: item.id,
-			title: item.title,
-			createdAt: item.createdAt,
-			updatedAt: item.updatedAt,
-			...(isLanguageModelUsage(item.usage) ? { usage: item.usage } : {}),
-		});
-	}
-	return summaries;
-};
-
-const hasConversationSummaryFields = (
-	value: unknown,
-): value is Record<string, unknown> & Pick<ConversationSummary, 'id' | 'title' | 'createdAt' | 'updatedAt'> => {
+const isConversationIndex = (value: unknown): value is ConversationIndex => {
 	if (!isPlainObject(value)) return false;
-	const summary = value as Record<string, unknown>;
+	const index = value as Record<string, unknown>;
 	return (
-		typeof summary.id === 'string' &&
-		summary.id.length > 0 &&
-		typeof summary.title === 'string' &&
-		typeof summary.createdAt === 'number' &&
-		Number.isFinite(summary.createdAt) &&
-		summary.createdAt >= 0 &&
-		typeof summary.updatedAt === 'number' &&
-		Number.isFinite(summary.updatedAt) &&
-		summary.updatedAt >= summary.createdAt
+		Array.isArray(index.summaries) &&
+		index.summaries.every(isConversationSummary) &&
+		(index.selectedId === undefined || typeof index.selectedId === 'string')
 	);
 };
-
-const isLanguageModelUsage = (value: unknown): value is LanguageModelUsage => {
-	if (!isPlainObject(value)) return false;
-	const usage = value as Record<string, unknown>;
-	const inputTokenDetails = usage.inputTokenDetails;
-	const outputTokenDetails = usage.outputTokenDetails;
-	if (!isPlainObject(inputTokenDetails) || !isPlainObject(outputTokenDetails)) return false;
-	const input = inputTokenDetails as Record<string, unknown>;
-	const output = outputTokenDetails as Record<string, unknown>;
-	return (
-		isTokenCount(usage.inputTokens) &&
-		isTokenCount(input.noCacheTokens) &&
-		isTokenCount(input.cacheReadTokens) &&
-		isTokenCount(input.cacheWriteTokens) &&
-		isTokenCount(usage.outputTokens) &&
-		isTokenCount(output.textTokens) &&
-		isTokenCount(output.reasoningTokens) &&
-		isTokenCount(usage.totalTokens)
-	);
-};
-
-const isTokenCount = (value: unknown): value is number | undefined =>
-	value === undefined || (typeof value === 'number' && Number.isFinite(value) && value >= 0);
 
 const validateMessages = async (value: unknown, message: string): Promise<ConversationMessage[]> => {
 	try {

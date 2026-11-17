@@ -5,19 +5,11 @@ import type { ContextAttachment } from '@/common/context';
 import {
 	createAssistantMessage,
 	createUserMessage,
-	getRetryableMessage,
 	markStreamingMessagesUnknown,
 	validateConversationMessages,
 	withMessageStatus,
 	type Conversation,
 } from '@/common/conversation';
-
-test('the latest failed assistant can be retried until completed', () => {
-	const user = createUserMessage('turn-1', 'Hello', []);
-	const assistant = withMessageStatus(createAssistantMessage('assistant-1', 'turn-1'), 'failed');
-	assert.equal(getRetryableMessage([user, assistant]), assistant);
-	assert.equal(getRetryableMessage([user, withMessageStatus(assistant, 'completed')]), undefined);
-});
 
 test('user messages capture attachments and pass conversation validation', async () => {
 	const attachment: ContextAttachment = {
@@ -44,12 +36,13 @@ test('user messages capture attachments and pass conversation validation', async
 });
 
 test('message status updates preserve content and clear stale errors without mutation', () => {
-	const message = createAssistantMessage('assistant-1', 'turn-1');
+	const metadata = { turnId: 'turn-1', modelId: 'test-model', createdAt: 1234 };
+	const message = createAssistantMessage('assistant-1', metadata);
 	message.parts.push({ type: 'text', text: 'Partial answer' });
 	const failed = withMessageStatus(message, 'failed', 'Connection lost');
-	assert.deepEqual(failed.metadata, { turnId: 'turn-1', status: 'failed', error: 'Connection lost' });
+	assert.deepEqual(failed.metadata, { ...metadata, status: 'failed', error: 'Connection lost' });
 	const completed = withMessageStatus(failed, 'completed');
-	assert.deepEqual(completed.metadata, { turnId: 'turn-1', status: 'completed' });
+	assert.deepEqual(completed.metadata, { ...metadata, status: 'completed' });
 	assert.deepEqual(completed.parts, message.parts);
 	assert.equal(message.metadata.status, 'streaming');
 	assert.equal(failed.metadata.error, 'Connection lost');
@@ -61,7 +54,7 @@ test('restoring a conversation marks interrupted streams as unknown', () => {
 		title: 'Test conversation',
 		createdAt: 1,
 		updatedAt: 1,
-		messages: [createUserMessage('turn-1', 'Hello', []), createAssistantMessage('assistant-1', 'turn-1')],
+		messages: [createUserMessage('turn-1', 'Hello', []), createAssistantMessage('assistant-1', { turnId: 'turn-1' })],
 	};
 	const restored = markStreamingMessagesUnknown(conversation);
 	assert.deepEqual(

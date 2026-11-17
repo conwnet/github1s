@@ -69,7 +69,7 @@ test('model history excludes an entire turn while its assistant is streaming', a
 		[
 			...completedTurn('old', 'Previous question'),
 			createUserMessage('pending', 'Pending question', []),
-			createAssistantMessage('pending-assistant', 'pending'),
+			createAssistantMessage('pending-assistant', { turnId: 'pending' }),
 		],
 		[createUserMessage('new', 'New question', [])],
 	);
@@ -161,7 +161,7 @@ test('model history pairs a tool with an unknown result when execution was inter
 });
 
 test('an empty failed reply gets an interruption marker before the next question', async () => {
-	const assistant = withMessageStatus(createAssistantMessage('assistant-1', 'turn-1'), 'failed');
+	const assistant = withMessageStatus(createAssistantMessage('assistant-1', { turnId: 'turn-1' }), 'failed');
 	const messages = await buildModelMessages(
 		[createUserMessage('turn-1', 'Question', []), assistant],
 		[createUserMessage('turn-2', 'Next', [])],

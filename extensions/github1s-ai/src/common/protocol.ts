@@ -1,6 +1,6 @@
 import { isPlainObject } from 'lodash-es';
 
-import { exactString, hasExactKeys } from '@/helpers/validate';
+import { exactString, hasExactKeys, isNonBlankString, isNonEmptyString } from '@/helpers/validate';
 
 import {
 	isContextAttachmentAction,
@@ -8,7 +8,7 @@ import {
 	type ContextAttachmentAction,
 	type ContextAttachmentDescriptor,
 } from './context';
-import type { ConversationSummary } from './conversation';
+import type { ConversationSummary, HistoryImportOptions } from './conversation';
 import type { SyntaxHighlightingData } from './highlighting';
 import type { McpConfig } from './mcp-config';
 import { isModelConfigInput, type ModelConfigInput, type ModelConfigSummary } from './model-config';
@@ -22,8 +22,11 @@ export type { Notice } from './state';
 
 export const MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH = 100_000;
 
+export type ChatPhase = 'idle' | 'preparing' | 'generating';
+
 export interface ViewState {
 	runtime: RuntimeState;
+	chatPhase: ChatPhase;
 	promptsConfig: PromptsConfig;
 	modelConfigs: {
 		selectedId?: string;
@@ -41,7 +44,9 @@ type AllViewEvents =
 	| { type: 'app.openSettings' }
 	| { type: 'app.openFile'; source: string }
 	| { type: 'chat.send'; text: string }
+	| { type: 'chat.setEditingMessageId'; id?: string }
 	| { type: 'chat.retry'; id: string }
+	| { type: 'chat.fork'; id: string }
 	| { type: 'chat.runQuickAction'; action: ChatQuickAction }
 	| { type: 'chat.addContextAttachment'; action: ContextAttachmentAction }
 	| { type: 'chat.addContextAttachment'; action: 'descriptor'; descriptor: ContextAttachmentDescriptor }
@@ -49,11 +54,13 @@ type AllViewEvents =
 	| { type: 'chat.setIncludeRecentFiles'; enabled: boolean }
 	| { type: 'chat.cancel' }
 	| { type: 'history.selectConversation'; id: string }
+	| { type: 'history.renameConversation'; id: string; title: string }
 	| { type: 'history.deleteConversation'; id: string }
 	| { type: 'markdown.highlight'; requestId: string; languageId: string; source: string }
 	| { type: 'settings.selectModelConfig'; id: string }
 	| { type: 'settings.clearFeedback' }
 	| { type: 'settings.exportHistory' }
+	| { type: 'settings.importHistory'; content: string; options: HistoryImportOptions }
 	| { type: 'settings.clearAllData' }
 	| { type: 'settings.saveModelConfig'; config: ModelConfigInput }
 	| { type: 'settings.savePromptsConfig'; config: PromptsConfig }
@@ -85,25 +92,33 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 			return hasExactKeys(event, ['type']) ? { type: event.type } : undefined;
 
 		case 'app.openFile':
-			return exactString(event, 'source') ? { type: event.type, source: event.source as string } : undefined;
+			return exactString(event, 'source') ? { type: event.type, source: event.source } : undefined;
 
 		case 'chat.send':
-			return hasExactKeys(event, ['type', 'text']) && typeof event.text === 'string'
-				? { type: event.type, text: event.text }
-				: undefined;
+			return exactString(event, 'text') ? { type: event.type, text: event.text } : undefined;
+
+		case 'chat.setEditingMessageId':
+			if (hasExactKeys(event, ['type'])) return { type: event.type };
+			return exactString(event, 'id') ? { type: event.type, id: event.id } : undefined;
 
 		case 'chat.setIncludeRecentFiles':
 			return hasExactKeys(event, ['type', 'enabled']) && typeof event.enabled === 'boolean'
 				? { type: event.type, enabled: event.enabled }
 				: undefined;
 
+		case 'history.renameConversation':
+			return hasExactKeys(event, ['type', 'id', 'title']) && isNonEmptyString(event.id) && isNonBlankString(event.title)
+				? { type: event.type, id: event.id, title: event.title }
+				: undefined;
+
 		case 'chat.retry':
+		case 'chat.fork':
 		case 'chat.removeContextAttachment':
 		case 'history.selectConversation':
 		case 'history.deleteConversation':
 		case 'settings.selectModelConfig':
 		case 'settings.deleteModelConfig':
-			return exactString(event, 'id') ? { type: event.type, id: event.id as string } : undefined;
+			return exactString(event, 'id') ? { type: event.type, id: event.id } : undefined;
 
 		case 'chat.runQuickAction':
 			return exactString(event, 'action') && isQuickAction(event.action)
@@ -123,10 +138,8 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 		case 'markdown.highlight':
 			if (
 				!hasExactKeys(event, ['type', 'requestId', 'languageId', 'source']) ||
-				typeof event.requestId !== 'string' ||
-				event.requestId.length === 0 ||
-				typeof event.languageId !== 'string' ||
-				event.languageId.length === 0 ||
+				!isNonEmptyString(event.requestId) ||
+				!isNonEmptyString(event.languageId) ||
 				typeof event.source !== 'string' ||
 				event.source.length > MAX_SYNTAX_HIGHLIGHT_SOURCE_LENGTH
 			) {
@@ -148,7 +161,24 @@ export const parseViewEvent = (value: unknown): ViewEvent | undefined => {
 				? { type: event.type, config: event.config }
 				: undefined;
 		case 'settings.saveMcpConfig':
-			return exactString(event, 'json') ? { type: event.type, json: event.json as string } : undefined;
+			return exactString(event, 'json') ? { type: event.type, json: event.json } : undefined;
+		case 'settings.importHistory': {
+			if (
+				!hasExactKeys(event, ['type', 'content', 'options']) ||
+				typeof event.content !== 'string' ||
+				!isPlainObject(event.options)
+			)
+				return undefined;
+			const options = event.options as Record<string, unknown>;
+			if (hasExactKeys(options, ['mode']) && options.mode === 'replace') {
+				return { type: event.type, content: event.content, options: { mode: 'replace' } };
+			}
+			return hasExactKeys(options, ['mode', 'conflicts']) &&
+				options.mode === 'merge' &&
+				(options.conflicts === 'keep' || options.conflicts === 'overwrite')
+				? { type: event.type, content: event.content, options: { mode: 'merge', conflicts: options.conflicts } }
+				: undefined;
+		}
 		default:
 			return undefined;
 	}

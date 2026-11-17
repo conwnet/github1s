@@ -36,11 +36,33 @@ export class HistoryController extends Controller {
 			chat: {
 				...runtime.chat,
 				conversation,
+				editing: undefined,
 				...(runtime.chat.conversation?.id !== event.id ? { pendingAttachments: [] } : {}),
 				notice: loadError ? { severity: 'error' as const, message: loadError } : undefined,
 			},
 			history: { ...runtime.history, notice: undefined },
 		});
+	}
+
+	@Controller.handler('history.renameConversation')
+	async handleRenameConversation(event: ViewEvent<'history.renameConversation'>): Promise<void> {
+		const title = event.title.trim();
+		if (!title) return;
+		try {
+			await this.stores.conversations.update(event.id, { title });
+		} catch (error) {
+			const detail = error instanceof Error ? error.message : 'Unknown error.';
+			await this.stores.runtime.setIn('history.notice', {
+				severity: 'error',
+				message: `Unable to rename the conversation. ${detail}`,
+			});
+			return;
+		}
+		const runtime = await this.stores.runtime.get();
+		if (runtime.chat.conversation?.id === event.id) {
+			await this.stores.runtime.setIn('chat.conversation.title', title);
+		}
+		await this.stores.runtime.setIn('history.notice', undefined);
 	}
 
 	@Controller.handler('history.deleteConversation')
@@ -49,7 +71,7 @@ export class HistoryController extends Controller {
 		if (selected) await this.runner.cancelPreparation();
 		await this.runner.cancelConversation(event.id);
 		try {
-			await this.stores.conversations.delete(event.id);
+			await this.stores.conversations.delete([event.id]);
 		} catch (error) {
 			const detail = error instanceof Error ? error.message : 'Unknown error.';
 			await this.stores.runtime.setIn('history.notice', {
@@ -64,7 +86,9 @@ export class HistoryController extends Controller {
 			page: 'history' as const,
 			chat: {
 				...runtime.chat,
-				...(runtime.chat.conversation?.id === event.id ? { conversation: undefined, pendingAttachments: [] } : {}),
+				...(runtime.chat.conversation?.id === event.id
+					? { conversation: undefined, pendingAttachments: [], editing: undefined }
+					: {}),
 			},
 			history: { ...runtime.history, notice: undefined },
 		});

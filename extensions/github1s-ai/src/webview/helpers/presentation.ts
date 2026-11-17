@@ -1,6 +1,6 @@
 import type { LanguageModelUsage } from 'ai';
 
-import type { ConversationMessageMetadata } from '@/common/conversation';
+import type { ConversationMessage, ConversationMessageMetadata } from '@/common/conversation';
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -8,6 +8,9 @@ const DAY_MS = 24 * HOUR_MS;
 const MONTH_MS = 30 * DAY_MS;
 const YEAR_MS = 365 * DAY_MS;
 const UI_LOCALE = 'en-US';
+
+export const getMessageText = (message: ConversationMessage, separator = ''): string =>
+	message.parts.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join(separator);
 
 /**
  * Return the transient status text that belongs beside an assistant response.

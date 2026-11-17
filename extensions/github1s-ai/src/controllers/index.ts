@@ -78,6 +78,7 @@ export class Controllers {
 		const mcpConfig = runtime.page === 'settings' ? await this.stores.mcpConfig.get() : undefined;
 		return {
 			runtime,
+			chatPhase: this.runner.getPhase(runtime.chat.conversation?.id),
 			promptsConfig,
 			modelConfigs: { configs, selectedId: selectedModel?.id },
 			conversations,
